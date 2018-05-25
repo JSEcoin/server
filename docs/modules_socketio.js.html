@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: modules/socketio.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: modules/socketio.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module jseSocketIO
+ * @description Socket.io Server used for coms with mining clients and peers&lt;br>
+ * Server has four core functions:
+ * &lt;ul>
+ * &lt;li>Receive mining connections&lt;/li>
+ * &lt;li>p2p server for incomming connections&lt;/li>
+ * &lt;li>Blockchain explorer functions&lt;/li>
+ * &lt;li>Finally send out new preHashes and Blocks (to miners and p2p block subscribers)&lt;/li>
+ * &lt;/ul>
+ * &lt;h5>Exported&lt;/h5>
+ * &lt;ul>&lt;li>jseSocketIO&lt;/li>&lt;/ul>
+ */
+
+const JSE = global.JSE;
+const fs = require('fs'); // only required temporarily for testing
+const request = require('request');
+
+const jseLottery = require("./lottery.js");
+
+JSE.socketConnections = {}; // incoming connections to the server, includes miners and peers
+
+const jseSocketIO = {
+
+/**
+ * @method &lt;h2>startServer&lt;/h2>
+ * @description Start up the socket IO server, called from jsenode.js
+ * @param {object} server http server object
+ * @param {object} io socketio object
+ */
+	startServer(server,io) {
+		function onConnection(socket){
+			JSE.socketConnections[socket.id] = socket;
+			socket.on('disconnect', function() {
+				if (JSE.peerList[socket.id] !== 'undefined') {
+					if (JSE.jseTestNet) console.log('Removing peer from peerlist: '+socket.id); // getting a lot of these on the load servers despite there not being any p2p connections???
+					JSE.peerList[socket.id] = null; // free for garbage collection;
+					delete JSE.peerList[socket.id];
+				}
+				if (JSE.socketConnections[socket.id] !== 'undefined') {
+					JSE.socketConnections[socket.id] = null;
+					delete JSE.socketConnections[socket.id];
+				}
+				//console.log(JSON.stringify(peerList));
+			});
+			JSE.socketConnections[socket.id].realIP = socket.handshake.headers["x-real-ip"] || socket.handshake.headers["x-forwarded-for"] || socket.handshake.address || 'unknownIP';
+			if (JSE.socketConnections[socket.id].realIP.indexOf(',') > -1) { JSE.socketConnections[socket.id].realIP = JSE.socketConnections[socket.id].realIP.split(',')[0]; }
+			if (JSE.socketConnections[socket.id].realIP.indexOf(':') > -1) { JSE.socketConnections[socket.id].realIP = JSE.socketConnections[socket.id].realIP.split(':').slice(-1)[0]; }
+			if (JSE.jseTestNet) console.log('SOCKET CONNECTION made from '+socket.realIP);
+
+			/** P2P Connections */
+
+			// Respond to peer list with our current version of the peerList
+			socket.on('peerList', function(theirPeerList, theirVersion, theirHost, theirPort, callback) {
+				console.log('peerList Request From '+theirVersion+' on '+socket.realIP+' : '+theirPort);
+				callback(JSE.peerList,JSE.blockID,JSE.jseSettings);
+			});
+
+			// Respond to helloWorld, equivalent of version
+			socket.on('helloWorld', function(theirVersion, theirHost, theirPort, callback) {
+				if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+					JSE.socketConnections[socket.id].miningType = 0; // not a miner
+					JSE.socketConnections[socket.id].realPort = theirPort || 80; // set port number delivered from the client in server.js
+				}
+				const peerListEntry = {
+					server: socket.realIP, port: theirPort, sockID: socket.id, trust: 0,
+				};
+
+				let alreadyAdded = false;
+				if (JSE.peerList[socket.id]) {
+					Object.keys(JSE.peerList[socket.id]).forEach(function(key) {
+						if (JSE.peerList[socket.id][key].host === theirHost &amp;&amp; JSE.peerList[socket.id][key].port === theirPort) {
+							alreadyAdded = true;
+						}
+					});
+				}
+				if (alreadyAdded === false) {
+					JSE.peerList[socket.id] = peerListEntry;
+				}
+				console.log('helloWorld Connection From '+theirVersion+' on '+socket.realIP+' : '+socket.realPort+' added to peerList');
+				if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+					JSE.socketConnections[socket.id].clientVersion = theirVersion;
+				}
+				callback(JSE.jseVersion);
+			});
+
+			// Respond to chainUpdate request for the latest blockChain
+			socket.on('chainUpdate', function(theirBlockRefRaw, theirBlockIDRaw, callback) {
+				let theirBlockID = theirBlockIDRaw;
+				let theirBlockRef = theirBlockRefRaw;
+				if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+					console.log('chainUpdate Request From '+JSE.socketConnections[socket.id].clientVersion+' on '+JSE.socketConnections[socket.id].realIP+' : '+JSE.socketConnections[socket.id].realPort);
+				}
+				if (theirBlockID === null) theirBlockID = JSE.blockID; // needs updating?
+				if (theirBlockRef === null) theirBlockRef = JSE.jseDataIO.getBlockRef(theirBlockID);
+				if (JSE.authenticatedNode) {
+					JSE.jseDataIO.getVariable('blockChain/'+theirBlockRef,function(oneThousandBlocks) {
+						callback(oneThousandBlocks,theirBlockRef,theirBlockID);
+					});
+				} else {
+					console.log('chainUpdate returning null');
+					if (typeof JSE.currentChain[theirBlockRef] !== 'undefined') {
+						callback(JSE.currentChain[theirBlockRef],null,null);
+					}
+				}
+			});
+
+			socket.on('subscribeToNewBlocks', function(theirBlockID) {
+				if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+					console.log('subscribeToNewBlocks Request From '+JSE.socketConnections[socket.id].clientVersion+' on '+JSE.socketConnections[socket.id].realIP+' : '+JSE.socketConnections[socket.id].realPort);
+					JSE.socketConnections[socket.id].blockSubscribed = true;
+					JSE.socketConnections[socket.id].blocksSent = [];
+				}
+			});
+
+			/** Mining Connections */
+
+			/**
+			 * @function &lt;h2>buildOptInAuthKey&lt;/h2>
+			 * @description Create a unique key for each user to use as an authorization key
+			 * @param {object} jseTrack browser data object
+			 * @returns {string} SHA256 authorization key
+			 */
+			function buildOptInAuthKey(jseTrack) {
+				const jseFP = [];
+				jseFP.push(JSE.credentials.minerAuthKeySeed);
+				jseFP.push(jseTrack.language || 1);
+				jseFP.push(jseTrack.languages || 1);
+				jseFP.push(jseTrack.timeZoneOffset + 24 || 1);
+				jseFP.push(jseTrack.platform || 1);
+				if (jseTrack.userAgent &amp;&amp; jseTrack.userAgent.split) {
+					jseFP.push(jseTrack.userAgent.split(/[^a-zA-Z]/).join('') || 1);
+				} else {
+					jseFP.push(1);
+				}
+				jseFP.push(jseTrack.appName || 1);
+				jseFP.push(jseTrack.screen || 1);
+				jseFP.push(jseTrack.deviceMemory || 1);
+				jseFP.push(jseTrack.protoString || 1);
+				const jseFingerPrint = jseFP.join('').split(/[^a-zA-Z0-9]/).join('');
+				if (JSE.jseTestNet) console.log(jseFingerPrint);
+				const testAuthKey = JSE.jseFunctions.sha256(jseFingerPrint);
+				return testAuthKey;
+			}
+
+			socket.on('saveUnique', function(jseTrack) {
+				try {
+					const pubID = JSE.jseFunctions.cleanString(jseTrack.pubID) || 1; // jseTrack.pubID = uid
+					const siteID = JSE.jseFunctions.cleanString(jseTrack.siteID) || 1;
+					const subID = JSE.jseFunctions.cleanString(jseTrack.subID) || 1;
+					if (jseTrack.iFrame &amp;&amp; jseTrack.iFrame === true) { return false; }
+					// unique
+					const publisherIP = socket.realIP;
+					if (JSE.publisherIPs.indexOf(publisherIP) === -1  &amp;&amp; socket.goodIP &amp;&amp; socket.goodIP === true) {
+						JSE.publisherIPs.push(publisherIP);
+						jseLottery.credit(pubID,siteID,subID,'unique');
+					} else {
+						jseLottery.credit(pubID,siteID,subID,'nolotteryunique');
+					}
+				} catch (ex) {
+					console.log('SaveHit - Error Caught 158: '+ex);
+				}
+				return false;
+			});
+
+			socket.on('optInAuthKey', function(jseTrack,optInAuthKey,minerAuthKey,callback) {
+				const pubID = JSE.jseFunctions.cleanString(jseTrack.pubID) || 1; // jseTrack.pubID = uid
+				const siteID = JSE.jseFunctions.cleanString(jseTrack.siteID) || 1;
+				const subID = JSE.jseFunctions.cleanString(jseTrack.subID) || 1;
+				if (JSE.jseTestNet) console.log('Received request for miner auth key from '+pubID);
+				const testAuthKey = buildOptInAuthKey(jseTrack);
+				const ipCount = JSE.publisherIPs.reduce(function(n, val) { return n + (val === socket.realIP); }, 0); // count ips could be one from unique already
+				if (typeof JSE.socketConnections[socket.id] !== 'undefined' &amp;&amp; JSE.socketConnections[socket.id].goodIP &amp;&amp; JSE.socketConnections[socket.id].goodIP === true &amp;&amp; ipCount &lt;= 4 &amp;&amp; minerAuthKey === JSE.minerAuthKey) {
+					JSE.publisherIPs.push(socket.realIP);
+					if (ipCount &lt;= 2) {
+						jseLottery.credit(pubID,siteID,subID,'optin');
+					} else {
+						jseLottery.credit(pubID,siteID,subID,'optinlotteryonly');
+					}
+				}
+				// generate new key for new optin click
+				if (optInAuthKey === null) {
+					if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+						JSE.socketConnections[socket.id].optInAuthKey = testAuthKey;
+					}
+					callback(testAuthKey);
+					return false;
+				}
+				// already opted in
+				if (testAuthKey === optInAuthKey) {
+					if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+						JSE.socketConnections[socket.id].optInAuthKey = testAuthKey;
+					}
+					callback(true);
+				} else {
+					if (JSE.jseTestNet) console.log('optInAuthKey validation failed socketio.js 196 UID: '+pubID);
+					callback(testAuthKey); // set new optInAuthKey? optionally
+				}
+				return false;
+			});
+
+			socket.on('requestFirstPreHash', function(data) { // data 1 = publisher, 2 = self-mining
+				socket.emit('firstPreHash', JSE.preHash);
+			});
+
+			socket.on('startComs', function(minerType,callback) { // minerType 1 = publisher, 2 = self-mining
+				if (typeof callback === "function") {
+					if (minerType === 2) {
+						if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+							JSE.socketConnections[socket.id].miningType = 2;
+						}
+						const apiURL = 'http://v2.api.iphub.info/ip/'+socket.realIP;
+						const apiKey = 'MTU5NTo3QWNvejVaZmxleGd1dVJ3N055a1dqVmxsQkNlRVlSSA==';
+						request.get({
+								url: apiURL,
+								json: true,
+								headers: { 'X-Key': apiKey },
+						}, (err, res, result) => {
+							if (result &amp;&amp; result.block) {
+								if (JSE.jseTestNet) console.log('Result from iphub anonIP lookup: '+result.block);
+								if (result.block === 1) {
+									if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+										JSE.socketConnections[socket.id].goodIP = false;
+									}
+									callback('badIP');
+								} else {
+									if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+										JSE.socketConnections[socket.id].goodIP = true;
+									}
+									callback('goodIP');
+								}
+							} else {
+								// backup if run out of queries / regex is to check for valid IP
+								if (JSE.jseTestNet) console.log('Result from iphub failed using backup');
+								if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(socket.realIP) &amp;&amp; JSE.anonymousIPs.indexOf(socket.realIP) > -1) {
+									if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+										JSE.socketConnections[socket.id].goodIP = false;
+									}
+									callback('badIP');
+								} else {
+									if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+										JSE.socketConnections[socket.id].goodIP = true;
+									}
+									callback('goodIP');
+								}
+							}
+						});
+					} else if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+						JSE.socketConnections[socket.id].miningType = 1;
+						if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(socket.realIP) &amp;&amp; JSE.anonymousIPs.indexOf(socket.realIP) > -1) {
+							if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+								JSE.socketConnections[socket.id].goodIP = false;
+							}
+							callback('badIP');
+						} else {
+							if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+								JSE.socketConnections[socket.id].goodIP = true;
+							}
+							callback('goodIP');
+						}
+					} else {
+							callback('badIP'); // socket closed
+					}
+				} else if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+					JSE.socketConnections[socket.id].goodIP = false; // possibly using an old script or just not passing callback?
+				}
+			});
+
+			socket.on('blockPreHash',function(newPreHash) {
+				console.log('TTT123');
+				if (!JSE.authenticatedNode &amp;&amp; newPreHash !== JSE.preHash) { // only for new hashes and on unauthenticated nodes
+					JSE.preHash = newPreHash; // need to check who sent it in?
+					if (JSE.jseTestNet) console.log('Received and distributing new preHash');
+					io.emit('blockPreHash', JSE.preHash);
+				}
+			});
+
+			socket.on('submitHash', function(data) {
+				try {
+					const hashSplit = data.split(',');
+					const subPreHash = JSE.jseFunctions.cleanString(hashSplit[0]);
+					const subHash = JSE.jseFunctions.cleanString(hashSplit[1]);
+					const subNonce = parseFloat(hashSplit[2]);
+					const subUID = parseFloat(hashSplit[3]);
+					const subUnique = JSE.jseFunctions.cleanString(hashSplit[4]);
+					const subSiteID = JSE.jseFunctions.cleanString(hashSplit[5]);
+					const subSubID = JSE.jseFunctions.cleanString(hashSplit[6]);
+					const subIP = socket.realIP;
+					if (JSE.jseTestNet) console.log('Hash submitted: '+subHash+' from '+subIP);
+					if (subHash.substr(0, JSE.jseSettings.difficulty) === '0'.repeat(JSE.jseSettings.difficulty) &amp;&amp; subPreHash === JSE.preHash) {
+						JSE.jseDataIO.pushVariable('currentHashes',subPreHash+','+subHash+','+subNonce,function(pushRef) {});
+					} else if (JSE.jseTestNet) {
+						console.log("Error socketio.js 268 hash submitted not matched difficulty or preHash mismatch\n"+subPreHash+"\n"+JSE.preHash);
+					}
+					// need random checks to verify hashes are correct, miner could just send anything
+
+					if (subSiteID === 'Platform Mining') {
+						//if (subUID === 60186) console.log('# JTEST # subIP: '+subIP+' / '+JSE.platformIPs.indexOf(subIP)+' / subUID: ' + subUID+' / '+JSE.platformUIDs.indexOf(subUID)+' / SubUnique: '+subUnique+ ' / '+JSE.platformUniqueIDs.indexOf(subUnique)+' goodIP: '+socket.goodIP);
+						if (JSE.platformIPs.indexOf(subIP) === -1 &amp;&amp; JSE.platformUIDs.indexOf(subUID) === -1 &amp;&amp; JSE.platformUniqueIDs.indexOf(subUnique) === -1  &amp;&amp; socket.goodIP &amp;&amp; socket.goodIP === true) { // one
+							JSE.platformIPs.push(subIP);
+							JSE.platformUIDs.push(subUID);
+							JSE.platformUniqueIDs.push(subUnique);
+							jseLottery.credit(subUID,'Platform Mining',0,'hash');
+						} else {
+							jseLottery.credit(subUID,'Platform Mining',0,'nolotteryhash');
+						}
+					} else if (JSE.publisherIPs.indexOf(subIP) === -1 &amp;&amp; socket.goodIP &amp;&amp; socket.goodIP === true) {
+						JSE.publisherIPs.push(subIP);
+						jseLottery.credit(subUID,subSiteID,subSubID,'hash');
+					} else {
+						jseLottery.credit(subUID,subSiteID,subSubID,'nolotteryhash');
+					}
+				} catch (ex) {
+					console.log('Bad hash submitted socketio.js 114: '+ex);
+				}
+			});
+
+			/** Blockchain Explorer Functions */
+
+			socket.on('getPublicStats', function(callback) {
+				if (JSE.authenticatedNode) {
+					callback(JSON.stringify(JSE.publicStats));
+				} else {
+					request('https://load.jsecoin.com/stats/', function (error, response, body) {
+						if (error) console.log('getPublicStats download error. modules/socketio.js 482: '+error);
+						callback(body);
+					});
+				}
+			});
+
+			socket.on('getDailyStats', function(callback) {
+				if (JSE.authenticatedNode) {
+					callback(JSON.stringify(JSE.dailyPublicStats));
+				} else {
+					request('https://load.jsecoin.com/dailystats/', function (error, response, body) {
+						if (error) console.log('getPublicStats download error. modules/socketio.js 482: '+error);
+						callback(body);
+					});
+				}
+			});
+
+			socket.on('getBlockID', function(callback) {
+				callback(JSE.blockID);
+			});
+
+			socket.on('getLatestBlocks', function() {
+				let myBlockID = parseInt(JSE.blockID,10) - 6;
+				while (myBlockID &lt;= parseInt(JSE.blockID,10)) {
+					const myBlockRef = JSE.jseDataIO.getBlockRef(myBlockID);
+					if (JSE.currentChain[myBlockRef] &amp;&amp; JSE.currentChain[myBlockRef][myBlockID]) {
+						socket.emit('newBlock', myBlockRef, myBlockID, JSE.currentChain[myBlockRef][myBlockID]);
+					}
+					myBlockID +=1;
+				}
+			});
+
+			/**
+			 * @function &lt;h2>getTarget&lt;/h2>
+			 * @description Used to lookup a firebase key of the blockchain i.e. blockChain/123/123456
+			 * @param {string} key firebase style key
+			 * @returns {object} Returns the value at key
+			 */
+			function getTarget(key) {
+				const keySplit = (key.slice(-1) === '/') ? key.slice(0, -1).split('/') : key.split('/');
+				keySplit.shift();
+				if (keySplit.length === 1) {
+					if (JSE.currentChain[keySplit[0]]) {
+						return JSE.currentChain[keySplit[0]];
+					}
+				} else if (keySplit.length === 2) {
+					if (JSE.currentChain[keySplit[0]] &amp;&amp; JSE.currentChain[keySplit[0]][keySplit[1]]) { // double check the parents exist to avoid errors, throw a null back if any keys are undefined
+						return JSE.currentChain[keySplit[0]][keySplit[1]];
+					}
+				} else if (keySplit.length === 3) {
+					if (JSE.currentChain[keySplit[0]] &amp;&amp; JSE.currentChain[keySplit[0]][keySplit[1]] &amp;&amp; JSE.currentChain[keySplit[0]][keySplit[1]][keySplit[2]]) {
+						return JSE.currentChain[keySplit[0]][keySplit[1]][keySplit[2]];
+					}
+				} else if (keySplit.length === 4) {
+					if (JSE.currentChain[keySplit[0]] &amp;&amp; JSE.currentChain[keySplit[0]][keySplit[1]] &amp;&amp; JSE.currentChain[keySplit[0]][keySplit[1]][keySplit[2]] &amp;&amp; JSE.currentChain[keySplit[0]][keySplit[1]][keySplit[2]][keySplit[3]]) {
+						return JSE.currentChain[keySplit[0]][keySplit[1]][keySplit[2]][keySplit[3]];
+					}
+				} else if (keySplit.length === 5) {
+					if (JSE.currentChain[keySplit[0]] &amp;&amp; JSE.currentChain[keySplit[0]][keySplit[1]] &amp;&amp; JSE.currentChain[keySplit[0]][keySplit[1]][keySplit[2]] &amp;&amp; JSE.currentChain[keySplit[0]][keySplit[1]][keySplit[2]][keySplit[3]] &amp;&amp; JSE.currentChain[keySplit[0]][keySplit[1]][keySplit[2]][keySplit[3]][keySplit[4]]) {
+						return JSE.currentChain[keySplit[0]][keySplit[1]][keySplit[2]][keySplit[3]][keySplit[4]];
+					}
+				} else if (keySplit.length === 6) {
+					if (JSE.currentChain[keySplit[0]] &amp;&amp; JSE.currentChain[keySplit[0]][keySplit[1]] &amp;&amp; JSE.currentChain[keySplit[0]][keySplit[1]][keySplit[2]] &amp;&amp; JSE.currentChain[keySplit[0]][keySplit[1]][keySplit[2]][keySplit[3]] &amp;&amp; JSE.currentChain[keySplit[0]][keySplit[1]][keySplit[2]][keySplit[3]][keySplit[4]] &amp;&amp; JSE.currentChain[keySplit[0]][keySplit[1]][keySplit[2]][keySplit[3]][keySplit[4]][keySplit[5]]) {
+						return JSE.currentChain[keySplit[0]][keySplit[1]][keySplit[2]][keySplit[3]][keySplit[4]][keySplit[5]];
+					}
+				} else {
+					console.log('ERROR socketio.js 540: Maximum field length reached'); // should never hit this.
+				}
+				return null;
+			}
+
+			socket.on('getChainData', function(fireKey, callback) {
+				if (JSE.jseTestNet) console.log('getChainData Request: '+fireKey);
+				const chainData = getTarget(fireKey); // getTarget function below
+				callback(chainData);
+			});
+		}
+
+
+		let preHashTimer = 0;
+		let preHashTimerFirstResult = true;
+		/**
+		 * @function &lt;h2>sendOutPreHash&lt;/h2>
+		 * @description Send out preHash and new blocks to miners and peers
+		 */
+		function sendOutPreHash() {
+			preHashTimer += 500;
+			if (preHashTimer >= 29500 || preHashTimerFirstResult) {
+				JSE.jseDataIO.getVariable('previousBlockPreHash',function(newPreviousBlockPreHash){
+					if (newPreviousBlockPreHash !== JSE.preHash) {
+						if (JSE.preHash !== 0) preHashTimerFirstResult = false; // change for second result after initial 0 > first preHash
+						preHashTimer = 0;
+						JSE.preHash = newPreviousBlockPreHash;
+						JSE.lockedUIDs = []; // reset lockedUIDs on every block
+						if (JSE.jseTestNet) console.log('Connected clients: '+io.engine.clientsCount+' Sending blockPreHash '+JSE.preHash);
+						if (Math.random() > 0.9) { // every 5 minutes
+							let publisherMinersCount = 0;
+							let selfMinersCount = 0;
+							Object.keys(JSE.socketConnections).forEach(function(key) {
+								if (JSE.socketConnections[key].miningType) {
+									if (JSE.socketConnections[key].miningType === 1) publisherMinersCount +=1;
+									if (JSE.socketConnections[key].miningType === 2) selfMinersCount +=1;
+								}
+							});
+							JSE.jseDataIO.setVariable('publicStats/clients/'+JSE.serverNickName,{});
+							JSE.jseDataIO.setVariable('publicStats/clients/'+JSE.serverNickName+'/publisherMinersCount',publisherMinersCount);
+							JSE.jseDataIO.setVariable('publicStats/clients/'+JSE.serverNickName+'/selfMinersCount',selfMinersCount);
+						}
+						// send blockPreHash to everyone
+						io.emit('blockPreHash', JSE.preHash);
+					}
+				});
+			}
+			setTimeout(function() { sendOutPreHash(); }, 500);
+		}
+		if (JSE.authenticatedNode) sendOutPreHash();
+
+		let block0 = {};
+		let blockID0 = 0;
+		/**
+		 * @function &lt;h2>sendOutSolvedBlocks&lt;/h2>
+		 * @description Send last solved block to those subscribed
+		 */
+		function sendOutSolvedBlocks() {
+			JSE.jseDataIO.getVariable('blockID',function(newBlockID) {
+				JSE.blockID = parseInt(newBlockID,10);
+				if (blockID0 !== parseInt(newBlockID,10)) {
+					// Block changeover lets spread blocks bid-1 and bid-2
+					blockID0 = parseInt(newBlockID,10);
+					const targetBlockID = blockID0 - 1;
+					JSE.jseDataIO.getBlock(targetBlockID,function(targetBlockObj) {
+						const blockRef = JSE.jseDataIO.getBlockRef(targetBlockID);
+						if (typeof JSE.currentChain[blockRef] === 'undefined') JSE.currentChain[blockRef] = {};
+						JSE.currentChain[blockRef][targetBlockID] = targetBlockObj;
+						Object.keys(JSE.socketConnections).forEach(function(sockID) {
+							if (JSE.socketConnections[sockID].blockSubscribed) {
+								if (JSE.jseTestNet) console.log('Sending block-1 ('+blockRef+'/'+targetBlockID+') after block changeover to '+sockID);
+								JSE.socketConnections[sockID].emit('newBlock', blockRef, targetBlockID, targetBlockObj);
+							}
+						});
+					});
+					const targetBlockID2 = blockID0 - 2;
+					JSE.jseDataIO.getBlock(targetBlockID2,function(targetBlockObj2) {
+						const blockRef2 = JSE.jseDataIO.getBlockRef(targetBlockID2);
+						if (typeof JSE.currentChain[blockRef2] === 'undefined') JSE.currentChain[blockRef2] = {};
+						JSE.currentChain[blockRef2][targetBlockID2] = targetBlockObj2;
+						Object.keys(JSE.socketConnections).forEach(function(sockID) {
+							if (JSE.socketConnections[sockID].blockSubscribed) {
+								if (JSE.jseTestNet) console.log('Sending block-2 ('+blockRef2+'/'+targetBlockID2+') after block changeover to '+sockID);
+								JSE.socketConnections[sockID].emit('newBlock', blockRef2, targetBlockID2, targetBlockObj2);
+							}
+						});
+					});
+				}
+				JSE.jseDataIO.getBlock(newBlockID,function(newBlockObj) {
+					const blockRef3 = JSE.jseDataIO.getBlockRef(newBlockID);
+					if (typeof JSE.currentChain[blockRef3] === 'undefined') JSE.currentChain[blockRef3] = {};
+					JSE.currentChain[blockRef3][newBlockID] = newBlockObj;
+					if (JSE.jseTestNet) console.log('Got block0 from DB blockID: '+newBlockID);
+					if (newBlockObj !== block0) {
+						block0 = newBlockObj;
+						Object.keys(JSE.socketConnections).forEach(function(sockID) {
+							if (JSE.socketConnections[sockID].blockSubscribed) {
+								if (JSE.jseTestNet) console.log('Sending block0 after change ('+blockRef3+'/'+newBlockID+') to '+sockID);
+								JSE.socketConnections[sockID].emit('newBlock', blockRef3, newBlockID, newBlockObj);
+							}
+						});
+					}
+				});
+			});
+			setTimeout(function() { sendOutSolvedBlocks(); }, 10000); // 10 seconds
+		}
+		if (JSE.authenticatedNode) sendOutSolvedBlocks();
+		io.on('connection', onConnection);
+	},
+};
+
+module.exports = jseSocketIO;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-jseAPI.html">jseAPI</a></li><li><a href="module-jseASCII.html">jseASCII</a></li><li><a href="module-jseBackup.html">jseBackup</a></li><li><a href="module-jseBlockChain.html">jseBlockChain</a></li><li><a href="module-jseCommands.html">jseCommands</a></li><li><a href="module-jseDataIO.html">jseDataIO</a></li><li><a href="module-jseFunctions.html">jseFunctions</a></li><li><a href="module-jseLoader.html">jseLoader</a></li><li><a href="module-jseLottery.html">jseLottery</a></li><li><a href="module-jsePeerConnections.html">jsePeerConnections</a></li><li><a href="module-jseRouter.html">jseRouter</a></li><li><a href="module-jseSocketIO.html">jseSocketIO</a></li></ul><h3>Global</h3><ul><li><a href="global.html#fairReset">fairReset</a></li><li><a href="global.html#fairResetLong">fairResetLong</a></li><li><a href="global.html#genMinerAuthKey">genMinerAuthKey</a></li><li><a href="global.html#startP2P">startP2P</a></li><li><a href="global.html#startServers">startServers</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri May 25 2018 12:05:05 GMT+0100 (GMT Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

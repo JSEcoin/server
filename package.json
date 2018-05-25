@@ -1,0 +1,45 @@
+{
+  "name": "JSECoinServer",
+  "version": "1.4.0",
+  "description": "JSE Coin Server",
+  "main": "server.js",
+  "scripts": {
+    "test": "mocha --delay --timeout 9999999 test/tests.js",
+    "start": "node server.js",
+    "server": "forever start -c \"node --max-old-space-size=3000\" server.js -b -t remote -s server.jsecoin.com -m 0 &",
+    "load": "forever start -c \"node --max-old-space-size=3000\" server.js -b -t remote -s load.jsecoin.com -m 0 &",
+    "db": "forever start -c \"node --max-old-space-size=3000\" db.js &",
+    "controller": "forever start -c \"node --max-old-space-size=3000\" controller.js &",
+    "docs": "jsdoc -c .jsdocsconf.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "authenticator": "^1.1.2",
+    "body-parser": "^1.18.0",
+    "build-tools": "^7.2.3",
+    "commander": "^2.14.1",
+    "compression": "^1.7.0",
+    "cookie-parser": "^1.4.3",
+    "eccrypto": "^1.0.3",
+    "express": "^4.15.4",
+    "express-rate-limit": "^2.9.0",
+    "forever": "^0.15.2",
+    "jsdoc": "^3.5.5",
+    "maxmind": "^2.3.0",
+    "mocha": "^5.0.1",
+    "multer": "^1.3.0",
+    "request": "^2.81.0",
+    "secure-random": "^1.1.1",
+    "sendgrid": "^5.2.3",
+    "socket.io": "^2.0.4",
+    "socket.io-client": "^2.0.4",
+    "twilio": "^3.15.0",
+    "uglifyjs": "^2.4.11"
+  },
+  "devDependencies": {
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.8.0"
+  }
+}

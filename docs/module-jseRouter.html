@@ -1,0 +1,3716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Module: jseRouter</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Module: jseRouter</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Routes and end points based on express framework</div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_routes.js.html">routes/routes.js</a>, <a href="routes_routes.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+        <h3 class="subsection-title">Requires</h3>
+
+        <ul>
+            <li>module:express</li>
+        </ul>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="./*"><span class="type-signature">(static) </span>/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Node Home Page
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_index.js.html">routes/index.js</a>, <a href="routes_index.js.html#line13">line 13</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="tag-todo">To Do:</dt>
+    <dd class="tag-todo">
+        <ul>
+            <li>Could tidy this up and give it an enterprise quality facelift</li>
+        </ul>
+    </dd>
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./adminemail/*"><span class="type-signature">(static) </span>/adminemail/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Send an email to the administrator
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_index.js.html">routes/index.js</a>, <a href="routes_index.js.html#line285">line 285</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./api/balance/*"><span class="type-signature">(static) </span>/api/balance/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    API Balance Query
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_api.js.html">routes/api.js</a>, <a href="routes_api.js.html#line121">line 121</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>https://api.jsecoin.com/balance/:apiKey/:lookup/*</code></pre>
+
+
+
+        
+            
+<h4 class="name" id="./api/checkpublickey/*"><span class="type-signature">(static) </span>/api/checkpublickey/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Check user by public key and return uid, publicKey and balance
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_api.js.html">routes/api.js</a>, <a href="routes_api.js.html#line411">line 411</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>https://api.jsecoin.com/checkpublickey/:publicKey/:apiKey/*</code></pre>
+
+
+
+        
+            
+<h4 class="name" id="./api/checkuserid/*"><span class="type-signature">(static) </span>/api/checkuserid/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Check user ID and return uid, publicKey and balance
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_api.js.html">routes/api.js</a>, <a href="routes_api.js.html#line376">line 376</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>https://api.jsecoin.com/checkuserid/:uid/:apiKey/*</code></pre>
+
+
+
+        
+            
+<h4 class="name" id="./api/currentblockid/*"><span class="type-signature">(static) </span>/api/currentblockid/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Get the current working block ID
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_api.js.html">routes/api.js</a>, <a href="routes_api.js.html#line240">line 240</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>https://api.jsecoin.com/currentblockid/:apiKey/*</code></pre>
+
+
+
+        
+            
+<h4 class="name" id="./api/export/*"><span class="type-signature">(static) </span>/api/export/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    API Export Function
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_api.js.html">routes/api.js</a>, <a href="routes_api.js.html#line60">line 60</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>https://api.jsecoin.com/export/:apiKey/:exportAmount/*</code></pre>
+
+
+
+        
+            
+<h4 class="name" id="./api/getblock/*"><span class="type-signature">(static) </span>/api/getblock/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Get the block object at given block number
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_api.js.html">routes/api.js</a>, <a href="routes_api.js.html#line267">line 267</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>https://api.jsecoin.com/getblock/:blockNumber/:apiKey/*</code></pre>
+
+
+
+        
+            
+<h4 class="name" id="./api/history/*"><span class="type-signature">(static) </span>/api/history/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    API History Query
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_api.js.html">routes/api.js</a>, <a href="routes_api.js.html#line150">line 150</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>https://api.jsecoin.com/history/:apiKey/:pageBy?/:pageNo?/*</code></pre>
+
+
+
+        
+            
+<h4 class="name" id="./api/import/*"><span class="type-signature">(static) </span>/api/import/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    API Import Function
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_api.js.html">routes/api.js</a>, <a href="routes_api.js.html#line93">line 93</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>https://api.jsecoin.com/import/:apiKey/:coinCode/*</code></pre>
+
+
+
+        
+            
+<h4 class="name" id="./api/ledger/*"><span class="type-signature">(static) </span>/api/ledger/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Download public ledger data
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_api.js.html">routes/api.js</a>, <a href="routes_api.js.html#line296">line 296</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>https://api.jsecoin.com/ledger/:apiKey/:pageBy?/:pageNo?/:sortBy?/*</code></pre>
+
+
+
+        
+            
+<h4 class="name" id="./api/mining/*"><span class="type-signature">(static) </span>/api/mining/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    API Mining Query
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_api.js.html">routes/api.js</a>, <a href="routes_api.js.html#line195">line 195</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>https://api.jsecoin.com/mining/:apiKey/:pageBy?/:pageNo?/*</code></pre>
+
+
+
+        
+            
+<h4 class="name" id="./api/transfer/*"><span class="type-signature">(static) </span>/api/transfer/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    API Transfer Function
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_api.js.html">routes/api.js</a>, <a href="routes_api.js.html#line10">line 10</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>https://api.jsecoin.com/transfer/:apiKey/:toEmailOrPublicKey/:toAmount/:toReference/*</code></pre>
+
+
+
+        
+            
+<h4 class="name" id="./attachmentemail/*"><span class="type-signature">(static) </span>/attachmentemail/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Send an attachment email with zip file to the administrator
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_index.js.html">routes/index.js</a>, <a href="routes_index.js.html#line318">line 318</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./checkout/*"><span class="type-signature">(static) </span>/checkout/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Complete a checkout payment
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_checkout.js.html">routes/checkout.js</a>, <a href="routes_checkout.js.html#line85">line 85</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./checkout/cancel/*"><span class="type-signature">(static) </span>/checkout/cancel/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Cancel a incomplete checkout payment
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_checkout.js.html">routes/checkout.js</a>, <a href="routes_checkout.js.html#line41">line 41</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./checkout/process/*"><span class="type-signature">(static) </span>/checkout/process/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Process a merchantSale, sends out an update email to buyer
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_checkout.js.html">routes/checkout.js</a>, <a href="routes_checkout.js.html#line10">line 10</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./confirm/*"><span class="type-signature">(static) </span>/confirm/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Confirm the account via double opt-in link sent in welcome email
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_confirm.js.html">routes/confirm.js</a>, <a href="routes_confirm.js.html#line6">line 6</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>https://server.jsecoin.com/confirm/:uid/:confirmcode</code></pre>
+
+
+
+        
+            
+<h4 class="name" id="./dailystats/*"><span class="type-signature">(static) </span>/dailystats/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Display JSON string of JSE.dailyPublicStats
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_index.js.html">routes/index.js</a>, <a href="routes_index.js.html#line65">line 65</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./load/*"><span class="type-signature">(static) </span>/load/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Load the publisher miner javascript code
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_load.js.html">routes/load.js</a>, <a href="routes_load.js.html#line12">line 12</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>http://load.jsecoin.com/load/{uid}/{siteid}/{subid}/0/</code></pre>
+
+
+
+        
+            
+<h4 class="name" id="./login/*"><span class="type-signature">(static) </span>/login/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Login end point used for email/pass and user refresh on sessions
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_login.js.html">routes/login.js</a>, <a href="routes_login.js.html#line114">line 114</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./logout/*"><span class="type-signature">(static) </span>/logout/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Log out of the platform or app by overwriting the session key
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_index.js.html">routes/index.js</a>, <a href="routes_index.js.html#line451">line 451</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./myexports/*"><span class="type-signature">(static) </span>/myexports/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Return a list of exported coin objects
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_index.js.html">routes/index.js</a>, <a href="routes_index.js.html#line168">line 168</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./newsite/*"><span class="type-signature">(static) </span>/newsite/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Set up a new siteID for publishers
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_newsite.js.html">routes/newsite.js</a>, <a href="routes_newsite.js.html#line6">line 6</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./optclear/*"><span class="type-signature">(static) </span>/optclear/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Clear opt in preference to reset and test notification etc
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_index.js.html">routes/index.js</a>, <a href="routes_index.js.html#line124">line 124</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./optin/*"><span class="type-signature">(static) </span>/optin/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Opt in to mining network
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_index.js.html">routes/index.js</a>, <a href="routes_index.js.html#line106">line 106</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./optout/*"><span class="type-signature">(static) </span>/optout/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Network wide optout via the privacy page
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_index.js.html">routes/index.js</a>, <a href="routes_index.js.html#line95">line 95</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./password/change/*"><span class="type-signature">(static) </span>/password/change/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Change user password once reset code has been received
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_password.js.html">routes/password.js</a>, <a href="routes_password.js.html#line8">line 8</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./password/reset/*"><span class="type-signature">(static) </span>/password/reset/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Send user a password reset code
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_password.js.html">routes/password.js</a>, <a href="routes_password.js.html#line52">line 52</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./peerlist/*"><span class="type-signature">(static) </span>/peerlist/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Provides JSE.peerList
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_index.js.html">routes/index.js</a>, <a href="routes_index.js.html#line85">line 85</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./pubstats/*"><span class="type-signature">(static) </span>/pubstats/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Get Public Stats
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_index.js.html">routes/index.js</a>, <a href="routes_index.js.html#line427">line 427</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./push/data/*"><span class="type-signature">(static) </span>/push/data/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    SUbmit signed data for inclusion in to blockchain
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_push.js.html">routes/push.js</a>, <a href="routes_push.js.html#line63">line 63</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./push/import/*"><span class="type-signature">(static) </span>/push/import/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Request import of a coin code
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_push.js.html">routes/push.js</a>, <a href="routes_push.js.html#line87">line 87</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./push/requestexport/*"><span class="type-signature">(static) </span>/push/requestexport/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Request a export data object to be signed client-side
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_push.js.html">routes/push.js</a>, <a href="routes_push.js.html#line41">line 41</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./push/requesttransfer/*"><span class="type-signature">(static) </span>/push/requesttransfer/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Request a transfer data object to be signed client-side
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_push.js.html">routes/push.js</a>, <a href="routes_push.js.html#line7">line 7</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./register/*"><span class="type-signature">(static) </span>/register/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Register a new account, includes queries to recaptcha API and anonymous IP checks
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_register.js.html">routes/register.js</a>, <a href="routes_register.js.html#line12">line 12</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./removecoincode/*"><span class="type-signature">(static) </span>/removecoincode/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Set coinobject.removed = true which will prevent the user from retrieving the coincode in future. Can be an unused coincode for privacy.
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_index.js.html">routes/index.js</a>, <a href="routes_index.js.html#line192">line 192</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./request/*"><span class="type-signature">(static) </span>/request/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Provides JSE.currentBlockString
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_index.js.html">routes/index.js</a>, <a href="routes_index.js.html#line75">line 75</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./resendwelcome/*"><span class="type-signature">(static) </span>/resendwelcome/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Resend the welcome email, limited to onece per 30 minutes
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_index.js.html">routes/index.js</a>, <a href="routes_index.js.html#line134">line 134</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./stats/*"><span class="type-signature">(static) </span>/stats/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Display JSON string of JSE.publicStats
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_index.js.html">routes/index.js</a>, <a href="routes_index.js.html#line55">line 55</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./twofa/remove2fa/*"><span class="type-signature">(static) </span>/twofa/remove2fa/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Remove two factor authentication from users account
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_twofa.js.html">routes/twofa.js</a>, <a href="routes_twofa.js.html#line56">line 56</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./twofa/setup2fa/*"><span class="type-signature">(static) </span>/twofa/setup2fa/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Setup two factor authentication on a user account
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_twofa.js.html">routes/twofa.js</a>, <a href="routes_twofa.js.html#line7">line 7</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./twofa/test2fa/*"><span class="type-signature">(static) </span>/twofa/test2fa/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Test two factor authentication to ensure it's setup correctly
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_twofa.js.html">routes/twofa.js</a>, <a href="routes_twofa.js.html#line29">line 29</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./updateapilevel/*"><span class="type-signature">(static) </span>/updateapilevel/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Update the users API level to either 0 - Disabled, 1 - Read Access, 2 - Write Access
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_index.js.html">routes/index.js</a>, <a href="routes_index.js.html#line219">line 219</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./updatedetails/*"><span class="type-signature">(static) </span>/updatedetails/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Update the users account details, name and address
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_index.js.html">routes/index.js</a>, <a href="routes_index.js.html#line241">line 241</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="./whitelisting/*"><span class="type-signature">(static) </span>/whitelisting/*<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Apply for ICO whitelisting with photo ID attachment when amount is $10k+
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_index.js.html">routes/index.js</a>, <a href="routes_index.js.html#line358">line 358</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".%3Ch3%3EpassRecaptcha%3C/h3%3E"><span class="type-signature">(static) </span><h3>passRecaptcha</h3><span class="signature">(credentials, req, res)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Checks Google Recaptcha is valid via a serverside api call
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>credentials</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Credentials object</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>req</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Express Request object</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Express Result object</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_login.js.html">routes/login.js</a>, <a href="routes_login.js.html#line93">line 93</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".%3Ch3%3EsendUserData%3C/h3%3E"><span class="type-signature">(static) </span><h3>sendUserData</h3><span class="signature">(credentials, newSessionVar, req, res)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Gets the full user data and sends it back to user
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>credentials</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Credentials object
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>uid</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">User ID</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>newSessionVar</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">new session variable set on initial login or can be null</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>req</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Express Request object</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Express Result object</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_login.js.html">routes/login.js</a>, <a href="routes_login.js.html#line8">line 8</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".%3Ch3%3EstartLogin%3C/h3%3E"><span class="type-signature">(static) </span><h3>startLogin</h3><span class="signature">(credentials, req, res)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Sets up a new session and logs last login time and last login IP address for initial logins
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>credentials</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Credentials object</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>req</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Express Request object</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Express Result object</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routes_login.js.html">routes/login.js</a>, <a href="routes_login.js.html#line44">line 44</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-jseAPI.html">jseAPI</a></li><li><a href="module-jseASCII.html">jseASCII</a></li><li><a href="module-jseBackup.html">jseBackup</a></li><li><a href="module-jseBlockChain.html">jseBlockChain</a></li><li><a href="module-jseCommands.html">jseCommands</a></li><li><a href="module-jseDataIO.html">jseDataIO</a></li><li><a href="module-jseFunctions.html">jseFunctions</a></li><li><a href="module-jseLoader.html">jseLoader</a></li><li><a href="module-jseLottery.html">jseLottery</a></li><li><a href="module-jsePeerConnections.html">jsePeerConnections</a></li><li><a href="module-jseRouter.html">jseRouter</a></li><li><a href="module-jseSocketIO.html">jseSocketIO</a></li></ul><h3>Global</h3><ul><li><a href="global.html#fairReset">fairReset</a></li><li><a href="global.html#fairResetLong">fairResetLong</a></li><li><a href="global.html#genMinerAuthKey">genMinerAuthKey</a></li><li><a href="global.html#startP2P">startP2P</a></li><li><a href="global.html#startServers">startServers</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri May 25 2018 12:05:06 GMT+0100 (GMT Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

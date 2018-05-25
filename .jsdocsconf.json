@@ -1,0 +1,33 @@
+{
+  "opts": {
+    "encoding": "utf8",
+    "destination": "./docs/",
+    "recurse": true,
+    "sort": false
+  },
+  "tags": {
+    "allowUnknownTags": true
+  },
+  "source": {
+    "includePattern": ".+\\.js(doc|x)?$",
+    "excludePattern": "(^|\\/|\\\\)_",
+    "include": [
+      "./"  
+    ],
+    "exclude": [
+      "node_modules",
+      "data.*.json",
+      "logs",
+      "credentials.json",
+      ".testcredentials.json"
+    ]
+  },
+  "plugins": [],
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false,
+    "default": {
+      "outputSourceFiles": true
+    }
+  }
+}

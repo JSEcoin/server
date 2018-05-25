@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: controller.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: controller.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file controller.js
+ * @name JSE Controller (controller.js)
+ * @example forever start -c "node --max-old-space-size=3000" controller.js &amp;
+ * @version 1.7.2
+ * @description The controller carries out maintenance tasks for the JSE platform and blockchain.
+ */
+
+const JSE = {};
+global.JSE = JSE;
+
+// For testnet, set to 'local' or 'remote' (@string) to run on http://localhost:81 or https://testnet.jsecoin.com, false for production
+JSE.jseTestNet = false; //'remote';
+
+if (JSE.jseTestNet !== false) console.log('WARNING: RUNNING IN TESTNET MODE - '+JSE.jseTestNet); // idiot check
+
+JSE.jseVersion = 'JSEcoin Controller';
+
+const fs = require('fs');
+const request = require('request');
+const express = require('express');
+const bodyParser = require('body-parser');
+const crypto = require('crypto');
+const eccrypto = require('eccrypto');
+const sr = require('secure-random');
+const exec = require('child_process');
+const authenticator = require('authenticator');
+
+// JSE Variables
+JSE.jseSettings = {}; // set the first time in jseBlockChain.createGenesisBlock();
+JSE.blockID = 0;
+JSE.currentBlockString = '';
+JSE.dbServer = 'http://10.128.0.12:80'; // use local ip address to avoid network fees
+if (JSE.jseTestNet === 'local') {
+	JSE.dbServer = 'http://localhost:80';
+}
+JSE.host = 'jsecoin.com'; // only used for logging in controller.js
+JSE.port = '443'; // only used for logging in controller.js
+JSE.logDirectory = 'logs/';
+JSE.dataDirectory = 'data/'; // public access for ledger.json and blockchain.json
+JSE.vLedgerError = '';
+JSE.publicStats = {};
+JSE.publicStats.ts = new Date().getTime();
+
+if (fs.existsSync('./credentials.json')) { // relative to server.js
+	JSE.credentials = require('./credentials.json'); // relative to datastore.js, extra ..
+	JSE.authenticatedNode = true;
+} else {
+	JSE.credentials = false; // node with no authentication
+	JSE.authenticatedNode = false;
+}
+
+JSE.jseFunctions = require('./modules/functions.js'); // round robin bug means has to be JSE
+const jseBlockChain = require('./modules/blockchain.js');
+const jseBackup = require('./modules/backup.js');
+JSE.jseDataIO = require('./modules/dataio.js'); // can't call initialiseApp twice from modules
+
+setInterval(function() {
+	JSE.jseDataIO.getVariable('jseSettings',function(result) { JSE.jseSettings = result; });
+},  300000); // every 5 mins
+
+if (process.argv[2] &amp;&amp; process.argv[2] === 'genesis')  jseBlockChain.createGenesisBlock();
+
+setTimeout(function() {
+	// old JSE listeners
+	JSE.jseDataIO.getVariable('jseSettings',function(result) { JSE.jseSettings = result; });
+	JSE.jseDataIO.getVariable('blockID',function(result) { JSE.blockID = result; });
+}, 5000); // wait for db authentication
+
+
+setTimeout(function() {
+	jseBlockChain.newBlock();
+}, 10000); // give time for firebase to return initial queries
+
+setInterval(function() {
+	JSE.jseDataIO.updatePublicStats();
+}, 600000); // every 10 mins
+
+
+setInterval(function() {
+	jseBlockChain.verifyLedger();
+}, 3600000); // every 60 mins
+
+if (JSE.jseTestNet === false) {
+	jseBlockChain.verifyLedger();
+}
+
+jseBackup.runAtMidnight(); // reset stats
+jseBackup.runAtMidday(); // do merchant subsriptions
+
+// Production use to prevent and log any crashes
+if (JSE.jseTestNet === false) {
+	process.on('uncaughtException', function(err) {
+	  console.log('UnCaught Exception 83: ' + err);
+	  console.error(err.stack);
+	  fs.appendFile(JSE.logDirectory+'critical.txt', err+' / '+err.stack, function(){ });
+	});
+}
+console.log(JSE.jseVersion);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-jseAPI.html">jseAPI</a></li><li><a href="module-jseASCII.html">jseASCII</a></li><li><a href="module-jseBackup.html">jseBackup</a></li><li><a href="module-jseBlockChain.html">jseBlockChain</a></li><li><a href="module-jseCommands.html">jseCommands</a></li><li><a href="module-jseDataIO.html">jseDataIO</a></li><li><a href="module-jseFunctions.html">jseFunctions</a></li><li><a href="module-jseLoader.html">jseLoader</a></li><li><a href="module-jseLottery.html">jseLottery</a></li><li><a href="module-jsePeerConnections.html">jsePeerConnections</a></li><li><a href="module-jseRouter.html">jseRouter</a></li><li><a href="module-jseSocketIO.html">jseSocketIO</a></li></ul><h3>Global</h3><ul><li><a href="global.html#fairReset">fairReset</a></li><li><a href="global.html#fairResetLong">fairResetLong</a></li><li><a href="global.html#genMinerAuthKey">genMinerAuthKey</a></li><li><a href="global.html#startP2P">startP2P</a></li><li><a href="global.html#startServers">startServers</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri May 25 2018 12:05:05 GMT+0100 (GMT Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

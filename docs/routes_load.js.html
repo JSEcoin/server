@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: routes/load.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: routes/load.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const JSE = global.JSE;
+const express = require('express');
+const jseLottery = require("./../modules/lottery.js");
+
+const router = express.Router();
+
+router.get('/', (req, res) => {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.send(JSE.jseSettings.loader);
+});
+
+/**
+ * @name /load/*
+ * @description Load the publisher miner javascript code
+ * @example http://load.jsecoin.com/load/{uid}/{siteid}/{subid}/0/
+ * @memberof module:jseRouter
+ */
+router.get('/:uid/:siteid/:subid/:spare/*', function(req, res) {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header('Cache-Control', 'no-cache');
+	const uid = req.params.uid.split(/[^0-9]/).join('');
+	let siteid = JSE.jseFunctions.cleanString(req.params.siteid);
+	const subid = JSE.jseFunctions.cleanString(req.params.subid);
+	if (siteid === 'http:' || siteid === 'https:') {
+		const siteidSplit = req.originalUrl.split('/');
+		siteid = siteidSplit[siteidSplit.length -2];
+	}
+	try {
+		const loaderWithId = JSE.jseSettings.loader.split('unknownpubid').join(uid).split('unknownsiteid').join(siteid).split('unknownsubid').join(subid); //.split('unknownuserip').join(userip).split('unknowngeo').join(geo.country);
+		res.setHeader('content-type', 'text/javascript');
+		if (req.cookies &amp;&amp; req.cookies.optout &amp;&amp; req.cookies.optout === "1") {
+			res.send('console.log("JSEcoin Opted Out");');
+		} else if (req.cookies &amp;&amp; req.cookies.optin &amp;&amp; req.cookies.optin !== 1) { // if 1 then show privacy notice again to get authKey
+			const optedInLoader = loaderWithId.split('unknownOptInAuthKey').join(req.cookies.optin).split('unknownMinerAuthKey').join(JSE.minerAuthKey);
+			res.send(optedInLoader);
+		} else {
+			const loaderWithMinerKey = loaderWithId.split('unknownMinerAuthKey').join(JSE.minerAuthKey);
+			res.send(loaderWithMinerKey);
+		}
+		jseLottery.credit(uid,siteid,subid,'hit');
+	} catch (ex) {
+		console.log('Load error routes/load.js 33 '+ex);
+	}
+	return false;
+});
+
+// V1 Fallback with out subid http://jsecoin.com/load/{uid}/{siteid}/
+router.get('/:uid/:siteid/*', function(req, res) {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header('Cache-Control', 'no-cache');
+	const uid = req.params.uid.split(/[^0-9]/).join('');
+	let siteid = req.params.siteid; // security?
+	if (siteid === 'http:' || siteid === 'https:') {
+		// hacky little fix for bad formatted urls
+		const siteidSplit = req.originalUrl.split('/');
+		siteid = siteidSplit[siteidSplit.length -2];
+	}
+	try {
+		const loaderWithId = JSE.jseSettings.loader.split('unknownpubid').join(uid).split('unknownsiteid').join(siteid); //.split('unknownuserip').join(userip).split('unknowngeo').join(geo.country);
+		res.setHeader('content-type', 'text/javascript');
+		if (req.cookies &amp;&amp; req.cookies.optout &amp;&amp; req.cookies.optout === "1") {
+			res.send('console.log("JSEcoin Opted Out");');
+		} else if (req.cookies &amp;&amp; req.cookies.optin &amp;&amp; req.cookies.optin !== 1) {
+			const optedInLoader = loaderWithId.split('unknownOptInAuthKey').join(req.cookies.optin).split('unknownMinerAuthKey').join(JSE.minerAuthKey);
+			res.send(optedInLoader);
+		} else {
+			const loaderWithMinerKey = loaderWithId.split('unknownMinerAuthKey').join(JSE.minerAuthKey);
+			res.send(loaderWithMinerKey);
+		}
+		jseLottery.credit(uid,siteid,'0','hit');
+	} catch (ex) {
+		console.log('Load error routes/load.js 52 '+ex);
+	}
+	return false;
+});
+
+// backup incase uid/siteid is missing
+router.get('/*', function(req, res) {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header('Cache-Control', 'no-cache');
+	try {
+		res.setHeader('content-type', 'text/javascript');
+		const loaderWithId = JSE.jseSettings.loader;
+		if (req.cookies &amp;&amp; req.cookies.optout &amp;&amp; req.cookies.optout === "1") {
+			res.send('console.log("JSEcoin Opted Out");');
+		} else if (req.cookies &amp;&amp; req.cookies.optin &amp;&amp; req.cookies.optin !== 1) {
+			const optedInLoader = loaderWithId.split('unknownOptInAuthKey').join(req.cookies.optin).split('unknownMinerAuthKey').join(JSE.minerAuthKey);
+			res.send(optedInLoader);
+		} else {
+			const loaderWithMinerKey = loaderWithId.split('unknownMinerAuthKey').join(JSE.minerAuthKey);
+			res.send(loaderWithMinerKey);
+		}
+	} catch (ex) {
+		console.log('Load error routes/load.js 77 '+ex);
+	}
+	return false;
+});
+
+module.exports = router;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-jseAPI.html">jseAPI</a></li><li><a href="module-jseASCII.html">jseASCII</a></li><li><a href="module-jseBackup.html">jseBackup</a></li><li><a href="module-jseBlockChain.html">jseBlockChain</a></li><li><a href="module-jseCommands.html">jseCommands</a></li><li><a href="module-jseDataIO.html">jseDataIO</a></li><li><a href="module-jseFunctions.html">jseFunctions</a></li><li><a href="module-jseLoader.html">jseLoader</a></li><li><a href="module-jseLottery.html">jseLottery</a></li><li><a href="module-jsePeerConnections.html">jsePeerConnections</a></li><li><a href="module-jseRouter.html">jseRouter</a></li><li><a href="module-jseSocketIO.html">jseSocketIO</a></li></ul><h3>Global</h3><ul><li><a href="global.html#fairReset">fairReset</a></li><li><a href="global.html#fairResetLong">fairResetLong</a></li><li><a href="global.html#genMinerAuthKey">genMinerAuthKey</a></li><li><a href="global.html#startP2P">startP2P</a></li><li><a href="global.html#startServers">startServers</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri May 25 2018 12:05:05 GMT+0100 (GMT Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

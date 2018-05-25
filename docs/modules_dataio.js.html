@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: modules/dataio.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: modules/dataio.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module jseDataIO
+ * @description JSE Data IO connects via socket.io with a key &amp;gt; value storage facility such as firebase/reddis/datastore.js
+ * &lt;h5>Exported&lt;/h5>
+ * &lt;ul>
+ * &lt;li>setVariable&lt;/li>
+ * &lt;li>getVariable&lt;/li>
+ * &lt;li>setVariableThen&lt;/li>
+ * &lt;li>pushVariable&lt;/li>
+ * &lt;li>deleteVariable&lt;/li>
+ * &lt;li>plusX&lt;/li>
+ * &lt;li>backup&lt;/li>
+ * &lt;li>closeConnection&lt;/li>
+ * &lt;li>genSafeKey&lt;/li>
+ * &lt;li>checkExists&lt;/li>
+ * &lt;li>countValues&lt;/li>
+ * &lt;li>plusOne&lt;/li>
+ * &lt;li>minusX&lt;/li>
+ * &lt;li>buildLedger&lt;/li>
+ * &lt;li>newBlockID&lt;/li>
+ * &lt;li>saveNewBlock&lt;/li>
+ * &lt;li>pushBlockData&lt;/li>
+ * &lt;li>getBlock&lt;/li>
+ * &lt;li>solvedBlock&lt;/li>
+ * &lt;li>getBlockRef&lt;/li>
+ * &lt;li>checkUniqueEmail&lt;/li>
+ * &lt;li>reserveUID&lt;/li>
+ * &lt;li>addUser&lt;/li>
+ * &lt;li>checkDuplicate&lt;/li>
+ * &lt;li>getEmail&lt;/li>
+ * &lt;li>getCredentialsByPassword&lt;/li>
+ * &lt;li>getCredentialsBySession&lt;/li>
+ * &lt;li>getCredentialsByAPIKey&lt;/li>
+ * &lt;li>getCredentialsByUID&lt;/li>
+ * &lt;li>getUserData&lt;/li>
+ * &lt;li>getUserByEmail&lt;/li>
+ * &lt;li>lookupEmail&lt;/li>
+ * &lt;li>lookupSession&lt;/li>
+ * &lt;li>lookupPublicKey&lt;/li>
+ * &lt;li>lookupAPIKey&lt;/li>
+ * &lt;li>setupNewTransaction&lt;/li>
+ * &lt;li>checkUserByPublicKey&lt;/li>
+ * &lt;li>getUserByPublicKey&lt;/li>
+ * &lt;li>getUserByUID&lt;/li>
+ * &lt;li>addBalance&lt;/li>
+ * &lt;li>minusBalance&lt;/li>
+ * &lt;li>getTransactionReference&lt;/li>
+ * &lt;li>checkCredentialsByAPIKey&lt;/li>
+ * &lt;li>updatePublicStats&lt;/li>
+ * &lt;li>getMyExportedCoins&lt;/li>
+ * &lt;li>getMyExportedCoins&lt;/li>
+ * &lt;li>getAdminAccounts&lt;/li>
+ * &lt;li>resetDailyStats&lt;/li>
+ * &lt;li>getPubStats&lt;/li>
+ * &lt;li>miningMaintenance&lt;/li>
+ * &lt;li>countSubValues&lt;/li>
+ * &lt;/ul>
+*/
+
+const JSE = global.JSE;
+const fs = require('fs'); // only required temporarily for testing
+const io = require('socket.io-client');
+
+const socket = io.connect(JSE.dbServer, {
+	reconnect: true, transports: ["websocket"], heartbeatTimeout: 1800000, maxHttpBufferSize: 1000000000,
+});
+
+socket.on('connect', function(){
+	if (JSE.authenticatedNode) {
+		console.log('Connected to DB Server, sending authorization key');
+		socket.emit('authorize',JSE.credentials.dbKey);
+	}
+});
+
+socket.on('authorized', function(authLevel){
+	console.log('Authorized Level: '+authLevel);
+	socket.authorized = authLevel;
+	JSE.dbAuthenticated = true;
+});
+
+socket.on('disconnect', function(){
+	//socket.off('closelistenersbyname');
+});
+
+const jseDB = {
+
+/** Primary Database Commands Being Sent Via Socket.io */
+
+	/**
+	 * @method &lt;h2>setVariable&lt;/h2>
+	 * @description Set or update a standard variable
+	 * @param {string} key firebase style key
+	 * @param {string/object/number/boolean} value can be a string, object, boolean, number anything that can be handled by JS &amp; JSON.
+	 */
+	setVariable (key,value) {
+		if (socket.authorized > 8) {
+			//fs.appendFileSync('redislog.txt', 'setVariable '+key+"\n");
+			if (JSE.jseTestNet) console.log('Setting Variable: '+key);
+			socket.emit('setVariable', key, value);
+		}
+	},
+
+	/**
+	 * @method &lt;h2>getVariable&lt;/h2>
+	 * @description Creates a snapshot of the object at key and fires a callback with the object as it's argument
+	 * @param {string} key firebase style key
+	 * @param {function} callback calls back null if not found, otherwise object at key is passed to callback
+	 */
+	getVariable (key,callback) {
+		if (socket.authorized > 5) {
+			//fs.appendFileSync('redislog.txt', 'getVariable '+key+"\n");
+			if (JSE.jseTestNet) console.log('getting keyPath: '+key);
+			socket.emit('getVariable', key, function(reply){
+				if (callback &amp;&amp; typeof callback === 'function') {
+					callback(reply);
+				}
+			});
+		}
+	},
+
+	/**
+	 * @method &lt;h2>setVariableThen&lt;/h2>
+	 * @description Set or update a standard variable then fire a blank callback
+	 * @param {string} key firebase style key
+	 * @param {string/object/number/boolean} value can be a string, object, boolean, number anything that can be handled by JS &amp; JSON.
+	 * @param {function} callback fires after successful setting or updating of key
+	 */
+	setVariableThen (key,value,callback) {
+		if (socket.authorized > 8) {
+			//fs.appendFileSync('redislog.txt', 'setThenVariable '+key+"\n");
+			if (JSE.jseTestNet) console.log('SetVariableThening : '+key);
+			socket.emit('setVariableThen', key, value, function(){
+				if (callback &amp;&amp; typeof callback === 'function') {
+					callback();
+				}
+			});
+		}
+	},
+
+	/**
+	 * @method &lt;h2>pushVariable&lt;/h2>
+	 * @description Create a push reference and then use the pushRef as a key to set variable. Push references are timestamps followed by a random number creating a unique chronologically ordered list
+	 * @param {string} keyRaw firebase style key
+	 * @param {string/object/number/boolean} value can be a string, object, boolean, number anything that can be handled by JS &amp; JSON.
+	 * @param {function} callback fires after successful pushing of the variable using the pushRef as an argument
+	 */
+	pushVariable (keyRaw,value,callback) {
+		let key = keyRaw;
+		if (socket.authorized > 8) {
+			//fs.appendFileSync('redislog.txt', 'pushVariable '+key+"\n");
+			const newDate = new Date().getTime();
+			const random = Math.floor((Math.random() * 999999) + 1); // setting up a firebase style push variable, timestamp+random
+			const pushRef = String(newDate) +''+ String(random);
+			if (key.slice(-1) === '/') { key = key.slice(0, -1); }
+			key += '/'+pushRef;
+			if (JSE.jseTestNet) console.log('Pushing Variable: '+key);
+			socket.emit('setVariableThen', key, value, function(){
+				if (callback &amp;&amp; typeof callback === 'function') {
+					callback(pushRef);
+				}
+			});
+		}
+	},
+
+	/**
+	 * @method &lt;h2>deleteVariable&lt;/h2>
+	 * @description Delete variable at key. This is not a hard delete and will leave the key in place as key = {};
+	 * @param {string} key firebase style key
+	 */
+	deleteVariable (key) {
+		if (socket.authorized > 8) {
+			//fs.appendFileSync('redislog.txt', 'deleteVariable '+key+"\n");
+			if (JSE.jseTestNet) console.log('Deleting : '+key);
+			socket.emit('deleteVariable', key);
+		}
+	},
+
+	/**
+	 * @method &lt;h2>hardDeleteVariable&lt;/h2>
+	 * @description Delete variable at key. This is a hard delete that will remove the key and value
+	 * @param {string} key firebase style key
+	 */
+	hardDeleteVariable (key) {
+		if (socket.authorized > 8) {
+			//fs.appendFileSync('redislog.txt', 'deleteVariable '+key+"\n");
+			if (JSE.jseTestNet) console.log('Deleting : '+key);
+			socket.emit('hardDeleteVariable', key);
+		}
+	},
+
+	/**
+	 * @method &lt;h2>plusX&lt;/h2>
+	 * @description Add value x to the value stored in key
+	 * @param {string} key firebase style key
+	 * @param {number} x amount to increase the value of key by
+	 */
+	plusX(key,x) {
+		if (socket.authorized > 8) {
+			//fs.appendFileSync('redislog.txt', 'plusX '+key+' '+x+"\n");
+			if (JSE.jseTestNet) console.log('Plus Xing : '+key+' : '+x);
+			socket.emit('plusX', key, x);
+		}
+	},
+
+	/**
+	 * @method &lt;h2>backup&lt;/h2>
+	 * @description Backup command, in place but not used
+	 */
+	backup() {
+		if (socket.authorized > 8) {
+			if (JSE.jseTestNet) console.log('Sending Backup Command');
+			socket.emit('backup');
+		}
+	},
+
+	/**
+	 * @method &lt;h2>closeConnection&lt;/h2>
+	 * @description Close the socket connection to the data store, not used
+	 */
+	closeConnection() {
+		if (socket.authorized > 8) {
+			if (JSE.jseTestNet) console.log('Closing Datastore Connection');
+			socket.close();
+		}
+	},
+
+	/** Secondary commands and functions, not core to the database */
+
+	/**
+	 * @method &lt;h2>genSafeKey&lt;/h2>
+	 * @description Cleans a string to make sure it is safe to use as a firebase key
+	 * @param {string} unsafeString string that can contain bad characters
+	 * @returns {string} safeKey returns a safe key which is just a-zA-Z0-9
+	 */
+	genSafeKey(unsafeString) {
+		const safeKey = String(unsafeString).split(/[^a-zA-Z0-9]/).join('').slice(0,100);
+		return safeKey;
+	},
+
+	/**
+	 * @method &lt;h2>checkExists&lt;/h2>
+	 * @description Checks to see if there is a value at key, returns true/false
+	 * @param {string} key firebase style key
+	 * @returns {boolean} if value is null or undefined returns false, otherwise returns true
+	 */
+	checkExists (key,callback) {
+		JSE.jseDataIO.getVariable(key,function(reply) {
+			//console.log('### '+typeof reply+' / '+reply);
+			if (typeof reply === 'undefined' || reply === null) {
+				callback(false);
+			} else {
+				callback(true);
+			}
+		});
+	},
+
+	/**
+	 * @method &lt;h2>countValues&lt;/h2>
+	 * @description Count number of pushed keys that match the value at key
+	 * @param {string} key firebase style key
+	 * @param {string/object/number/boolean} value can be a string, object, boolean, number anything that can be handled by JS &amp; JSON.
+	 * @param {function} callback callsback 0 or the number of values that match
+	 */
+	countValues (key,value,callback) {
+		JSE.jseDataIO.getVariable(key,function(returnObj) {
+			let valueCount = 0;
+			if (typeof returnObj !== 'undefined') {
+				Object.keys(returnObj).forEach(function(key2) {
+				//for (let key in returnObj) {
+					//if (!returnObj.hasOwnProperty(key)) continue;
+					if (returnObj[key2] === value) valueCount +=1;
+				});
+				callback(valueCount);
+			} else {
+				callback(0);
+			}
+		});
+	},
+
+	/**
+	 * @method &lt;h2>plusOne&lt;/h2>
+	 * @description Plus one to key
+	 * @param {string} key firebase style key, used for quick additions for stats etc
+	 */
+	plusOne(key) {
+		JSE.jseDataIO.plusX(key,1);
+	},
+
+	/**
+	 * @method &lt;h2>minusX&lt;/h2>
+	 * @description Removes value x from the value at key, even if a possitive figure is passed to x it is turned negative
+	 * @param {string} key firebase style key, used for quick additions for stats etc
+	 * @param {number} xRaw number is multiplied by -1 to ensure negative and then added to value at key
+	 */
+	minusX(key,xRaw) {
+		let x = xRaw;
+		if (x > 0) { x *= -1; } // turn negative
+		JSE.jseDataIO.plusX(key,x);
+	},
+
+	/**
+	 * @method &lt;h2>buildLedger&lt;/h2>
+	 * @description Build an accounts ledger just by calling getVariable('ledger');
+	 * @param {function} callback callback with the ledger object
+	 */
+	buildLedger(callback) {
+		JSE.jseDataIO.getVariable('ledger',function(reply) {
+			callback(reply);
+		});
+	},
+
+	/**
+	 * @method &lt;h2>newBlockID&lt;/h2>
+	 * @description +1 to the current block ID
+	 * @param {function} callback callback with the next blockID
+	 */
+	newBlockID(callback) {
+		JSE.jseDataIO.getVariable('blockID',function(bID) {
+			const bID2 = (bID || 0) + 1;
+			JSE.jseDataIO.setVariableThen('blockID',bID2,function() {
+				callback(bID2);
+			});
+		});
+	},
+
+	/**
+	 * @method &lt;h2>saveNewBlock&lt;/h2>
+	 * @description Saves a block object to the next blockID
+	 * @param {object} newBlock block object built in jseBlockChain
+	 * @param {function} callback fires a blank callback once the block has been saved
+	 */
+	saveNewBlock(newBlock,callback) {
+		const nextBlock = JSE.blockID + 1; // relies on blockID being global and updated
+		const blockRef = JSE.jseDataIO.getBlockRef(nextBlock);
+		if (JSE.blockID >= 0) {
+			JSE.jseDataIO.setVariableThen('blockChain/'+blockRef+'/'+nextBlock,newBlock,function() {
+				callback();
+			});
+		}
+	},
+
+	/**
+	 * @method &lt;h2>pushBlockData&lt;/h2>
+	 * @description Push BlockData to the current block. Contains a check to see if it's open for writing.
+	 * @param {object} blockData transaction data to push into blockchain
+	 * @param {function} callback callback with the blockData
+	 */
+	pushBlockData(blockData,callback) {
+		JSE.jseDataIO.getVariable('blockID',function(result){
+			JSE.blockID = result; // update JSE.blockID as we have the data
+			const targetBlockID = result;
+			const blockRef = JSE.jseDataIO.getBlockRef(targetBlockID);
+			JSE.jseDataIO.getVariable('blockChain/'+blockRef+'/'+targetBlockID+'/open',function(trueFalse) {
+				if (trueFalse === true) {
+					JSE.jseDataIO.pushVariable('blockChain/'+blockRef+'/'+targetBlockID+'/input',blockData,function(pushRef) {
+						callback(blockData);
+					});
+				} else {
+					console.log('Warning 346 changing block ('+targetBlockID+') command: '+blockData.command);
+					setTimeout(function() { JSE.jseDataIO.pushBlockData(blockData,callback); }, 2000); // Might be changing block, try again in a couple of seconds
+				}
+			});
+		});
+	},
+
+	/**
+	 * @method &lt;h2>getBlock&lt;/h2>
+	 * @description Get the block object at blockNumber
+	 * @param {number} blockNumberRaw blockID to lookup
+	 * @param {function} callback callback with the blockData
+	 */
+	getBlock(blockNumberRaw,callback) {
+		let blockNumber = blockNumberRaw;
+		if (blockNumber &lt; 1) { blockNumber = 1; }
+		const blockRef = JSE.jseDataIO.getBlockRef(blockNumber);
+		JSE.jseDataIO.getVariable('blockChain/'+blockRef+'/'+blockNumber,function(blockObject) {
+			callback(blockObject);
+		});
+	},
+
+	/**
+	 * @method &lt;h2>solvedBlock&lt;/h2>
+	 * @description Set the solved nonce and hash for a block
+	 * @param {number} blockIDMinusTwoRaw blockID to set solved hash for is two behind current block ID
+	 * @param {string} nonce random number found by miners to solve the block
+	 * @param {string} hash hash with leading zeros finalizes the block
+	 */
+	solvedBlock(blockIDMinusTwoRaw,nonce,hash) {
+		let blockIDMinusTwo = blockIDMinusTwoRaw;
+		if (blockIDMinusTwo &lt; 1) { blockIDMinusTwo = 1; }
+		const blockRef = JSE.jseDataIO.getBlockRef(blockIDMinusTwo);
+		JSE.jseDataIO.setVariable('blockChain/'+blockRef+'/'+blockIDMinusTwo+'/nonce',nonce);
+		JSE.jseDataIO.setVariable('blockChain/'+blockRef+'/'+blockIDMinusTwo+'/hash',hash);
+		if (JSE.blockID > 0) {
+			const blockIDMinusOne = blockIDMinusTwo + 1;
+			const blockRef2 = JSE.jseDataIO.getBlockRef(blockIDMinusOne);
+			JSE.jseDataIO.setVariable('blockChain/'+blockRef2+'/'+blockIDMinusOne+'/previousHash',hash);
+		}
+	},
+
+	/**
+	 * @method &lt;h2>getBlockRef&lt;/h2>
+	 * @description Get the blockReference for a block id i.e. blockID 123456 = blockRef 123
+	 * @param {number} blockNumber blockID to lookup
+	 * @returns {number} blockRef basically a rounded down / 1000 which acts as a key for blockChain
+	 */
+	getBlockRef(blockNumber) {
+		let blockRef = Math.round((blockNumber - (JSE.jseSettings.maxBlockFileSize/2)) / (JSE.jseSettings.maxBlockFileSize));
+		if (blockRef &lt; 0) { blockRef = 0; }
+		return blockRef;
+	},
+
+	/** Platform Data Commands */
+
+	/**
+	 * @method &lt;h2>checkUniqueEmail&lt;/h2>
+	 * @description Check to see if email exists in DB
+	 * @param {object} userObject user object, only user.email is required though
+	 * @param {function} callback callsback the user object if successful and email is not in data
+	 * @param {function} failcallback callsback fail JSON if email already exists
+	 */
+	checkUniqueEmail(userObject,callback,failCallback) {
+		JSE.jseDataIO.checkExists('lookupEmail/'+userObject.email,function(trueFalse) {
+			if (trueFalse === false) {
+				callback(userObject);
+			} else {
+				failCallback('{"fail":1,"notification":"Email already exists in database"}');
+			}
+		});
+	},
+
+	/**
+	 * @method &lt;h2>reserveUID&lt;/h2>
+	 * @description Reserve a uid, an icremental user id, test we have exclusive access in addUser
+	 * @param {object} userObjectRaw user object
+	 * @param {function} callback callsback the user object with an added userObject.uid field
+	 */
+	reserveUID(userObjectRaw,callback) {
+		const userObject = userObjectRaw;
+		JSE.jseDataIO.getVariable('nextUserID',function(nextUID) {
+			const nextUID2 = nextUID + 1;
+			JSE.jseDataIO.setVariableThen('nextUserID',nextUID2,function() {
+				userObject.uid = nextUID;
+				JSE.jseDataIO.checkExists('credentials/'+userObject.uid+'/email',function(trueFalse) { // check it's empty
+					if (trueFalse === false) {
+						JSE.jseDataIO.setVariable('credentials/'+userObject.uid+'/uid',userObject.uid);
+						JSE.jseDataIO.setVariableThen('credentials/'+userObject.uid+'/email',userObject.email,function() {
+							callback(userObject);
+						});
+					} else {
+						JSE.jseDataIO.reserveUID(userObject,callback);
+					}
+				});
+			});
+		});
+	},
+
+	/**
+	 * @method &lt;h2>addUser&lt;/h2>
+	 * @description Add a new user to platform datastore
+	 * @param {object} userObjectRaw user object
+	 * @param {function} callback callsback the user object on successful user account setup
+	 * @param {function} failcallback callsback fail JSON if email already exists
+	 */
+	addUser(userObjectRaw,callback,failCallback) {
+		const userObject = userObjectRaw;
+		// check users/uid/email hasn't been overwritten by duplicate entry
+		JSE.jseDataIO.getVariable('credentials/'+userObject.uid+'/email',function(testEmail) {
+			if (testEmail === userObject.email) {
+				// start building out user data
+				JSE.jseDataIO.setVariable('ledger/'+userObject.uid,0); // No money, no honey
+				const credentials = {};
+				credentials.uid = userObject.uid;
+				credentials.email = userObject.email;
+				credentials.passwordHashed = userObject.passwordHashed;
+				credentials.apiKey = userObject.apiKey;
+				credentials.apiLevel = userObject.apiLevel;
+				credentials.privateKey = userObject.privateKey;
+				credentials.publicKey = userObject.publicKey;
+				//JSE.jseDataIO.setVariable('users/'+userObject.uid+'/k',userObject.publicKey);
+				credentials.confirmCode = userObject.confirmCode;
+				credentials.authKey = userObject.authKey;
+				credentials.twoFactorAuth = userObject.twoFactorAuth;
+				credentials.session = userObject.session;
+				JSE.jseDataIO.setVariable('credentials/'+userObject.uid,credentials);
+
+				const account = {};
+				account.uid = userObject.uid;
+				account.email = userObject.email;
+				account.publicKey = userObject.publicKey;
+				account.name = userObject.name;
+				account.address = userObject.address;
+				account.invested = 0;
+				//JSE.jseDataIO.setVariable('investors/'+userObject.uid,0);
+				account.country = userObject.country;
+				account.source = userObject.source;
+				account.campaign = userObject.campaign;
+				account.content = userObject.content;
+				account.jseUnique = userObject.jseUnique;
+				account.regip = userObject.regip;
+				account.lastip = userObject.lastip;
+				account.localcurrency = userObject.localcurrency;
+				account.registrationDate = userObject.registrationDate;
+				account.lastLogin = userObject.registrationDate;
+				account.confirmed = userObject.confirmed;
+				//account.lastLogin = userObject.lastLogin;
+				account.geo = userObject.geo;
+				account.language = userObject.language;
+				account.timeOffset = userObject.timeOffset;
+				// account.affQuality and account.affPayout will go here only for users that need it.
+
+				JSE.jseDataIO.setVariable('account/'+userObject.uid,account);
+
+				userObject.statsTotal = {}; // Going to be a lot of this data so shortened keys
+				userObject.statsTotal.h = 0; // hit
+				userObject.statsTotal.u = 0; // unique
+				userObject.statsTotal.o = 0; // optin
+				userObject.statsTotal.a = 0; // hash
+				userObject.statsTotal.c = 0; // coin
+				JSE.jseDataIO.setVariable('statsTotal/'+userObject.uid,userObject.statsTotal);
+
+				userObject.statsToday = {};
+				userObject.statsToday.h = 0;
+				userObject.statsToday.u = 0;
+				userObject.statsToday.o = 0;
+				userObject.statsToday.a = 0;
+				userObject.statsToday.c = 0;
+				JSE.jseDataIO.setVariable('statsToday/'+userObject.uid,userObject.statsToday);
+
+				// For quick registration and duplicate checks
+				const tmpObj = {}; tmpObj.i = userObject.regip;
+				JSE.jseDataIO.pushVariable('registeredIPs',tmpObj,function(pushRef){});
+				const tmpObj2 = {}; tmpObj2.i = userObject.jseUnique;
+				JSE.jseDataIO.pushVariable('registeredUniques',tmpObj2,function(pushRef){});
+
+				//const tmpObj3 = {}; tmpObj3.i = userObject.email;
+				//JSE.jseDataIO.pushVariable('registeredEmails',tmpObj,function(pushRef){});
+				JSE.jseDataIO.setVariable('lookupExports/'+credentials.uid,{});
+				JSE.jseDataIO.setVariable('lookupEmail/'+userObject.email,userObject.uid);
+				JSE.jseDataIO.setVariable('lookupSession/'+userObject.session,userObject.uid);
+				JSE.jseDataIO.setVariable('lookupPublicKey/'+userObject.publicKey,userObject.uid);
+				JSE.jseDataIO.setVariable('lookupAPIKey/'+userObject.apiKey,userObject.uid);
+				JSE.jseDataIO.setVariable('history/'+credentials.uid,{});
+				JSE.jseDataIO.setVariable('mining/'+credentials.uid,{});
+				JSE.jseDataIO.setVariable('statsTotal/'+credentials.uid,{});
+				JSE.jseDataIO.setVariable('siteIDs/'+credentials.uid,{});
+				JSE.jseDataIO.setVariable('subIDs/'+credentials.uid,{});
+				callback(userObject);
+			} else {
+				failCallback('{"fail":1,"notification":"Server could not assign a unique identifier, please try again"}');
+			}
+		});
+	},
+
+	/**
+	 * @method &lt;h2>checkDuplicate&lt;/h2>
+	 * @description Check if user IP or jseUnique const is in database already
+	 * @param {object} userObject user object, only userObject.regip and userObject.jseUniuqe are used
+	 * @param {function} callback callsback the user object if the ip and uniq haven't been seen before
+	 * @param {function} failcallback blank callback if it's a duplicate account
+	 */
+	checkDuplicate(userObject,callback,failCallback) {
+		JSE.jseDataIO.countSubValues('registeredIPs',userObject.regip, function(ipCount) {
+			if (ipCount &lt;= 1) { // just the user that's already been added to db
+				JSE.jseDataIO.countSubValues('registeredUniques',userObject.jseUnique, function(uniqueCount) {
+					if (uniqueCount &lt;= 1) {
+						callback(userObject);
+					} else {
+						failCallback();
+					}
+				});
+			} else {
+				failCallback();
+			}
+		});
+	},
+
+	/**
+	 * @method &lt;h2>getEmail&lt;/h2>
+	 * @description Lookup email address from UID
+	 * @param {number} uid User ID
+	 * @param {function} callback callsback with the users email
+	 */
+	getEmail(uid,callback) {
+		JSE.jseDataIO.getVariable('account/'+uid+'/email',function(email) {
+			callback(email);
+		});
+	},
+
+	/** Login Functions */
+
+	/**
+	 * @method &lt;h2>getCredentialsByPassword&lt;/h2>
+	 * @description  Return full credentials object including uid with an email password
+	 * @param {string} email Users email address, should be already converted to lowercase and cleaned
+	 * @param {string} passwordHashed Users password, should already be hashed
+	 * @param {function} callback callsback with the users credentials object
+	 * @param {function} failcallback blank callback if it's not a valid user:pass
+	 */
+	getCredentialsByPassword(email,passwordHashed,callback,failCallback) {
+		JSE.jseDataIO.lookupEmail(email,function(uid){
+			if (uid == null) { failCallback(); return false; }
+			JSE.jseDataIO.getVariable('credentials/'+uid,function(credentials) {
+				if (credentials.email === email &amp;&amp; credentials.passwordHashed === passwordHashed) {
+					callback(credentials);
+				} else {
+					failCallback(); // password doesn't match
+				}
+				return false;
+			});
+			return false;
+		});
+	},
+
+	/**
+	 * @method &lt;h2>getCredentialsBySession&lt;/h2>
+	 * @description  Return full credentials object including uid with a session key.&lt;br>
+	 * 							 We now have 3 different session keys for platform, desktop app and mobile app.&lt;br>
+	 *							 Each can be used simultaneously to login at the same time.
+	 * @param {string} session Users session key
+	 * @param {function} callback callsback with the users credentials object
+	 * @param {function} failcallback blank callback if it's not a valid session key
+	 */
+	getCredentialsBySession(session,callback,failCallback) {
+		JSE.jseDataIO.lookupSession(session,function(uid){
+			if (uid == null) { failCallback(); return false; }
+			JSE.jseDataIO.getVariable('credentials/'+uid,function(credentials) {
+				if (credentials == null) { failCallback(); return false; }
+				if (credentials.session !== session &amp;&amp; credentials.mobileSession !== session &amp;&amp; credentials.desktopSession !== session) { failCallback(); return false; }
+				callback(credentials);
+				return false;
+			});
+			return false;
+		});
+	},
+
+	/**
+	 * @method &lt;h2>getCredentialsByAPIKey&lt;/h2>
+	 * @description  Return full credentials object with an API key.
+	 * @param {string} apiKey Users api key
+	 * @param {function} callback callsback with the users credentials object
+	 * @param {function} failcallback blank callback if it's not a valid api key
+	 */
+	getCredentialsByAPIKey(apiKey,callback,failCallback) {
+		JSE.jseDataIO.lookupAPIKey(apiKey,function(uid){
+			if (uid == null) { failCallback(); return false; }
+			JSE.jseDataIO.getVariable('credentials/'+uid,function(credentials) {
+				if (credentials == null) { failCallback(); return false; }
+				if (credentials.apiKey !== apiKey) { failCallback(); return false; }
+				callback(credentials);
+				return false;
+			});
+			return false;
+		});
+	},
+
+	/**
+	 * @method &lt;h2>getCredentialsByUID&lt;/h2>
+	 * @description Return full credentials object with uid variable - no checks, internal use only
+	 * @param {number} uid User ID
+	 * @param {function} callback callsback with the users credentials object
+	 * @todo Could there be a more elegant way to do this with better security? Pass a credentials key perhaps.
+	 */
+	getCredentialsByUID(uid,callback) {
+		JSE.jseDataIO.getVariable('credentials/'+uid,function(credentials) {
+			callback(credentials);
+		});
+	},
+
+	/**
+	 * @method &lt;h2>getUserData&lt;/h2>
+	 * @description Return full credentials object with session variable
+	 * @param {object} credentials Users credentials object, including credentials.uid which is used for lookups
+	 * @param {function} callback callsback with the full user object including:&lt;br>
+	 * account, credentials, statsTotal, statsToday, ledger, history, mining, merchantSales, merchantPurchases
+	 */
+	getUserData(credentials,callback) {
+		JSE.jseDataIO.getVariable('account/'+credentials.uid,function(accountRaw) {
+			const account = accountRaw;
+			account.uid = credentials.uid;
+			account.session = credentials.session;
+			account.desktopSession = credentials.desktopSession || null;
+			account.mobileSession = credentials.mobileSession || null;
+			account.apiKey = credentials.apiKey;
+			account.apiLevel = credentials.apiLevel;
+			account.privateKey = credentials.privateKey;
+			account.twoFactorAuth = credentials.twoFactorAuth;
+			JSE.jseDataIO.getVariable('statsTotal/'+credentials.uid,function(statsTotal) {
+				account.statsTotal = statsTotal;
+				JSE.jseDataIO.getVariable('statsToday/'+credentials.uid,function(statsToday) {
+					account.statsToday = statsToday;
+					JSE.jseDataIO.getVariable('ledger/'+credentials.uid,function(balance) {
+						account.balance = balance;
+						JSE.jseDataIO.getVariable('history/'+credentials.uid,function(history) {
+							account.history = history;
+							JSE.jseDataIO.getVariable('mining/'+credentials.uid,function(mining) {
+								account.mining = mining;
+								if (typeof account.merchant === 'undefined') {
+									callback(account);
+								} else {
+									JSE.jseDataIO.getVariable('merchantSales/'+credentials.uid,function(merchantSales) {
+										account.merchantSales = merchantSales;
+										JSE.jseDataIO.getVariable('merchantPurchases/'+credentials.uid,function(merchantPurchases) {
+											account.merchantPurchases = merchantPurchases;
+											callback(account);
+										}); // merchantPurchases
+									}); // merchantSales
+								}
+							}); // mining
+						}); // history
+					}); // ledger/balance
+				}); // statsToday
+			}); // statsTotal
+		}); //account
+	},
+
+	/**
+	 * @method &lt;h2>getUserByEmail&lt;/h2>
+	 * @description Return a mini user object with email,uid,publicKey from the users email
+	 * @param {string} email Email to lookup
+	 * @param {function} callback callback with mini user object
+	 * @param {function} failCallback blank callback if email doesn't exist
+	 */
+	getUserByEmail(email,callback,failCallback) {
+		JSE.jseDataIO.lookupEmail(email,function(uid) {
+			if (uid == null) { failCallback(); return false; }
+			JSE.jseDataIO.getVariable('credentials/'+uid, function(returnObj) {
+				if (returnObj === null) {
+					failCallback();
+					return false;
+				}
+				const userObj = {};
+				userObj.email = returnObj.email;
+				userObj.uid = returnObj.uid;
+				userObj.publicKey = returnObj.publicKey;
+				callback(userObj);
+				return false;
+			});
+			return false;
+		});
+	},
+
+	/**
+	 * @method &lt;h2>lookupEmail&lt;/h2>
+	 * @description Give an email address get a userID or null if it doesn't exist
+	 * @param {string} email Email to lookup
+	 * @param {function} callback callback with uid or null
+	 */
+	lookupEmail(email,callback) {
+		JSE.jseDataIO.getVariable('lookupEmail/'+email,function(uid) {
+			callback(uid);
+		});
+	},
+
+	/**
+	 * @method &lt;h2>lookupSession&lt;/h2>
+	 * @description Give a session key get a userID or null if it doesn't exist
+	 * @param {string} session Session key to lookup
+	 * @param {function} callback callback with uid or null
+	 */
+	lookupSession(session,callback) {
+		JSE.jseDataIO.getVariable('lookupSession/'+session,function(uid) {
+			callback(uid);
+		});
+	},
+
+	/**
+	 * @method &lt;h2>lookupPublicKey&lt;/h2>
+	 * @description Give a public key get a userID or null if it doesn't exist
+	 * @param {string} publicKey Public key to lookup
+	 * @param {function} callback callback with uid or null
+	 */
+	lookupPublicKey(publicKey,callback) {
+		JSE.jseDataIO.getVariable('lookupPublicKey/'+publicKey,function(uid) {
+			callback(uid);
+		});
+	},
+
+	/**
+	 * @method &lt;h2>lookupAPIKey&lt;/h2>
+	 * @description Give an API key get a userID or null if it doesn't exist
+	 * @param {string} apiKey API key to lookup
+	 * @param {function} callback callback with uid or null
+	 */
+	lookupAPIKey(apiKey,callback) {
+		JSE.jseDataIO.getVariable('lookupAPIKey/'+apiKey,function(uid) {
+			callback(uid);
+		});
+	},
+
+	/**
+	 * @method &lt;h2>setupNewTransaction&lt;/h2>
+	 * @description Set a transaction reference and create a unique transaction id
+	 * @param {string} reference is a transfer reference that the user wants to store privately offchain
+	 * @param {function} callback callback with pushRef for the transaction refererence
+	 */
+	setupNewTransaction(reference,callback) {
+		JSE.jseDataIO.pushVariable('transactions',reference,function(pushRef) {
+			callback(pushRef);
+		});
+	},
+
+	/**
+	 * @method &lt;h2>checkUserByPublicKey&lt;/h2>
+	 * @description Lookup uid,balance,locked,suspended,email by publicKey
+	 * @param {string} publicKey users public key
+	 * @param {function} callback callback with userObject filled from getUserByUID, plus checks for ledger,locked and suspended
+	 * @param {function} failCallback blank callback if publicKey isn't recognized
+	 */
+	checkUserByPublicKey(publicKey,callback,failCallback) {
+		JSE.jseDataIO.lookupPublicKey(publicKey,function(uid) {
+			if (typeof uid === 'undefined' || uid === null) {
+				failCallback();
+			} else {
+				JSE.jseDataIO.getUserByUID(uid,function(userObjRaw) {
+					const userObj = userObjRaw;
+					JSE.jseDataIO.getVariable('ledger/'+userObj.uid,function(balance) {
+						userObj.balance = JSE.jseFunctions.round(balance);
+						JSE.jseDataIO.getVariable('locked/'+userObj.uid,function(locked) {
+							if (locked == null) { userObj.locked = false; } else { userObj.locked = true; }
+							JSE.jseDataIO.getVariable('credentials/'+userObj.uid+'/suspended',function(suspended) {
+								if (suspended == null || suspended === 0) { userObj.suspended = false; } else { userObj.suspended = true; }
+								callback(userObj);
+							});
+						});
+					});
+				});
+			}
+		});
+	},
+
+	/**
+	 * @method &lt;h2>getUserByPublicKey&lt;/h2>
+	 * @description Lookup user object by public key, userObject filled from getUserByUID
+	 * @param {string} publicKey users public key
+	 * @param {function} callback callback with userObject
+	 * @param {function} failCallback blank callback if publicKey isn't recognized
+	 */
+	getUserByPublicKey(publicKey,callback,failCallback) {
+		JSE.jseDataIO.lookupPublicKey(publicKey,function(uid) {
+			if (uid === null)  { failCallback(); return false; }
+			JSE.jseDataIO.getUserByUID(uid,function(userObj) {
+				callback(userObj);
+			});
+			return false;
+		});
+	},
+
+	/**
+	 * @method &lt;h2>getUserByUID&lt;/h2>
+	 * @description Lookup mini user object uid,email,publicKey
+	 * @param {number} uid users ID
+	 * @param {function} callback callback with mini userObject
+	 * @param {function} failCallback blank callback if publicKey isn't recognized
+	 */
+	getUserByUID(uid,callback,failCallback) { // 6th March 2018 no failcallback function executed???
+		JSE.jseDataIO.getVariable('credentials/'+uid,function(returnObj) {
+			if (returnObj === null) {
+				failCallback();
+				return false;
+			}
+			const userObj = {};
+			userObj.uid = returnObj.uid;
+			userObj.email = returnObj.email;
+			userObj.publicKey = returnObj.publicKey;
+			callback(userObj);
+			return false;
+		});
+	},
+
+	/**
+	 * @method &lt;h2>addBalance&lt;/h2>
+	 * @description Add to a users JSE balance, only affects ledger, blockchain must have data pushed separately
+	 * @param {number} uid users ID
+	 * @param {number} x amount to increase by
+	 */
+	addBalance(uid,x) {
+		JSE.jseDataIO.plusX('ledger/'+uid,x);
+	},
+
+	/**
+	 * @method &lt;h2>minusBalance&lt;/h2>
+	 * @description Reduce a users JSE balance, only affects ledger, blockchain must have data pushed separately
+	 * @param {number} uid users ID
+	 * @param {number} x amount to decrease by
+	 */
+	minusBalance(uid,x) {
+		JSE.jseDataIO.minusX('ledger/'+uid,x);
+	},
+
+	/**
+	 * @method &lt;h2>getTransactionReference&lt;/h2>
+	 * @description Lookup the transaction reference for a particular tid, tid = timstampRandom thing
+	 * @param {number} tid Transaction ID (pushRef)
+	 * @param {function} callback callsback with the private transaction reference string
+	 */
+	getTransactionReference(tid,callback) {
+		JSE.jseDataIO.getVariable('transactions/'+tid, function(transactionReference) {
+			callback(transactionReference);
+		});
+	},
+
+	/**
+	 * @method &lt;h2>checkCredentialsByAPIKey&lt;/h2>
+	 * @description Check Credentials including locked, suspended accounts with an API key
+	 * @param {string} apiKey API Key
+	 * @param {function} callback callsback the user object
+	 * @param {function} failCallback callsback blank if API key is not valid
+	 */
+	checkCredentialsByAPIKey(apiKey,callback,failCallback) {
+		JSE.jseDataIO.lookupAPIKey(apiKey, function(uid) {
+			if (uid === null || typeof uid === 'undefined') {
+				failCallback();
+			} else {
+				const userObj = {};
+				userObj.uid = uid;
+				JSE.jseDataIO.getVariable('ledger/'+userObj.uid,function(balance) {
+					userObj.balance = JSE.jseFunctions.round(balance);
+					JSE.jseDataIO.getVariable('locked/'+userObj.uid,function(locked) {
+						if (locked == null) { userObj.locked = false; } else { userObj.locked = true; }
+						JSE.jseDataIO.getVariable('credentials/'+userObj.uid+'/suspended',function(suspended) {
+							if (suspended == null || suspended === 0) { userObj.suspended = false; } else { userObj.suspended = true; }
+							callback(userObj);
+						});
+					});
+				});
+			}
+		});
+	},
+
+	/** Misc Datastore and Maintenance Functions */
+
+	/**
+	 * @method &lt;h2>updatePublicStats&lt;/h2>
+	 * @description Update the JSE.publicStats variable, this is run from the controller every 10 minutes
+	 * @todo random cleaning of client data could be improved as this causes the number of logged in miners to drop off every so often
+	 */
+	updatePublicStats() {
+		JSE.publicStats.ts = new Date().getTime();
+		JSE.jseDataIO.buildLedger(function(ledger) {
+			JSE.publicStats.distributionAccount = ledger[0];
+			JSE.publicStats.charityAccount = ledger[2895];
+			JSE.jseDataIO.setVariable('publicStats/distributionAccount',JSE.publicStats.distributionAccount);
+			JSE.jseDataIO.setVariable('publicStats/charityAccount',JSE.publicStats.charityAccount);
+			let users = 0;
+			let coins = 0; // total circulation
+			Object.keys(ledger).forEach(function(key) {
+			//for(const key in ledger) {
+				//if (!ledger.hasOwnProperty(key)) continue;
+				users +=1;
+				coins += ledger[key];
+			});
+			coins = Math.round(coins);
+			//publicStats.coins = JSE.jseFunctions.round(publicStats.coins);
+			JSE.publicStats.users = users;
+			JSE.publicStats.coins = coins;
+			JSE.jseDataIO.setVariable('publicStats/users',JSE.publicStats.users);
+			JSE.jseDataIO.setVariable('publicStats/coins',JSE.publicStats.coins);
+		});
+		JSE.jseDataIO.getVariable('statsToday',function(statsDaily) {
+			let unique = 0;
+			let hit = 0;
+			let optin = 0;
+			let selfMiners = 0;
+			Object.keys(statsDaily).forEach(function(key) {
+				if (statsDaily[key].h &amp;&amp; statsDaily[key].h > 0) {
+					hit += statsDaily[key].h;
+				}
+				if (statsDaily[key].u &amp;&amp; statsDaily[key].u > 0) {
+					unique += statsDaily[key].u;
+				}
+				if (statsDaily[key].o &amp;&amp; statsDaily[key].o > 0) {
+					optin += statsDaily[key].o;
+				}
+				if (statsDaily[key].a &amp;&amp; statsDaily[key].a > 0) {
+					if (!statsDaily[key].u || statsDaily[key].u === 0) {
+						selfMiners +=1;
+					}
+				}
+			});
+			JSE.publicStats.hit = hit;
+			JSE.publicStats.unique = unique;
+			JSE.publicStats.optin = optin;
+			JSE.publicStats.selfMiners = selfMiners;
+
+			JSE.jseDataIO.setVariable('publicStats/hit',JSE.publicStats.hit);
+			JSE.jseDataIO.setVariable('publicStats/unique',JSE.publicStats.unique);
+			JSE.jseDataIO.setVariable('publicStats/optin',JSE.publicStats.optin);
+			JSE.jseDataIO.setVariable('publicStats/selfMiners',JSE.publicStats.selfMiners);
+		});
+
+		if (Math.random() > 0.99 || typeof JSE.publicStats.pubs === 'undefined') { // 1000 mins approx
+			JSE.jseDataIO.setVariable('publicStats/clients',{}); // reset connected clients
+		}
+
+		if (Math.random() > 0.66 || typeof JSE.publicStats.pubs === 'undefined') { // 30 mins approx
+			JSE.jseDataIO.getVariable('siteIDs',function(siteIDs) {
+				let pubs = 0;
+				//for (let i in siteIDs) {
+				Object.keys(siteIDs).forEach(function(i) {
+					let maxSiteCount = 0;
+					//if (!siteIDs.hasOwnProperty(i)) continue;
+					if (siteIDs[i]) {
+						Object.keys(siteIDs[i]).forEach(function(key) {
+						//for(const key in siteIDs[i]) {
+							maxSiteCount +=1;
+							if (maxSiteCount &lt; 100 &amp;&amp; siteIDs[i][key].s !== 'Platform Mining' &amp;&amp; siteIDs[i][key].s !== 'undefined') { // no more than 100 sites per user
+								pubs +=1;
+							}
+						});
+					}
+				});
+				JSE.publicStats.pubs = pubs;
+				JSE.jseDataIO.setVariable('publicStats/pubs',JSE.publicStats.pubs);
+			});
+		}
+		const tmpDate = new Date();
+		const oneDay = 24*60*60*1000; // hours*minutes*seconds*milliseconds
+		const firstDate = new Date(1502788255000);
+		const diffDays = Math.round(Math.abs((firstDate.getTime() - tmpDate.getTime())/(oneDay)));
+		JSE.publicStats.days = diffDays; // days since launch
+		JSE.jseDataIO.setVariable('publicStats/ts',JSE.publicStats.ts);
+		JSE.jseDataIO.setVariable('publicStats/days',JSE.publicStats.days);
+	},
+
+	/**
+	 * @method &lt;h2>getMyExportedCoins&lt;/h2>
+	 * @description Update the JSE.publicStats variable, this is run from the controller every 10 minutes
+	 * @param {number} uid User ID
+	 * @param {function} callback callback with an array of exported coin objects
+	 */
+	getMyExportedCoins(uid,callback) {
+		JSE.jseDataIO.getVariable('lookupExports/'+uid,function(exported) { // optimise this, loading entire exported coins db
+			const myCoinCodeKeys = [];
+			const myExports = [];
+			//for (let key in exported) {
+			Object.keys(exported).forEach(function(key) {
+				//if (!exported.hasOwnProperty(key)) continue;
+				myCoinCodeKeys.push('exported/'+exported[key]);
+			});
+			if (myCoinCodeKeys.length > 0) {
+				let removedCoinCodes = 0;
+				for (let i = 0; i &lt; myCoinCodeKeys.length; i+=1) {
+					JSE.jseDataIO.getVariable(myCoinCodeKeys[i],function(eCoin) { // eslint-disable-line
+						if (typeof eCoin.removed === 'undefined') { // user can remove from being sent back to make it secret
+							myExports.push(eCoin);
+						} else {
+							removedCoinCodes += 1;
+						}
+						if (myExports.length === (myCoinCodeKeys.length - removedCoinCodes)) { callback(myExports); }
+					});
+				}
+			} else {
+				callback(myExports);
+			}
+		});
+	},
+
+	/**
+	 * @method &lt;h2>getAdminAccounts&lt;/h2>
+	 * @description Download all the accounts for the admin panel
+	 * @param {number} startID User ID to start at
+	 * @param {number} endID User ID to end at
+	 * @param {function} callback callback with a large object of user accounds, does not include credential data
+	 * @todo security improvement would be to include the admin key in the lookup
+	 */
+	getAdminAccounts(startID,endID,callback) {
+		const adminAccounts = {};
+		for (let i = startID; i &lt;= endID; i+=1) { // need to be &lt;= ??
+			JSE.jseDataIO.getVariable('account/'+i,function(returnObj) {
+				adminAccounts[i] = returnObj;
+				if (i === endID) {
+					callback(adminAccounts);
+				}
+			});
+		}
+	},
+
+	/**
+	 * @method &lt;h2>resetDailyStats&lt;/h2>
+	 * @description move statsToday across to statsDaily so users keep an array of previous days stats.
+	 */
+	resetDailyStats() {
+		JSE.jseDataIO.getVariable('statsToday', function(statsToday) {
+			//for (let uid in statsToday) {
+			Object.keys(statsToday).forEach(function(uid) {
+				JSE.jseDataIO.pushVariable('statsDaily/'+uid,statsToday[uid],function(pushRef){});
+			});
+			JSE.jseDataIO.deleteVariable('statsToday');
+		});
+	},
+
+	/**
+	 * @method &lt;h2>getPubStats&lt;/h2>
+	 * @description Get statsDaily, siteIDs and subIDs stats
+	 * @param {number} uid User ID
+	 * @param {function} callback callback with stats object
+	 */
+	getPubStats(uid,callback) {
+		const stats = {};
+		JSE.jseDataIO.getVariable('statsDaily/'+uid, function(statsDaily) {
+			stats.statsDaily = statsDaily || {};
+			JSE.jseDataIO.getVariable('siteIDs/'+uid, function(siteIDs) {
+				stats.siteIDs = siteIDs || {};
+				JSE.jseDataIO.getVariable('subIDs/'+uid, function(subIDs) {
+					stats.subIDs = subIDs || {};
+					callback(stats);
+				});
+			});
+		});
+	},
+
+	/**
+	 * @method &lt;h2>miningMaintenance&lt;/h2>
+	 * @description Limit the number of mining transactions to 25 on this account to save data bloat
+	 * @param {number} uid User ID
+	 * @todo deleteVariable needs to be a hard delete as it's currently leaving the push keys in
+	 */
+	miningMaintenance(uid) {
+		if (uid > 0) {
+			JSE.jseDataIO.getVariable('mining/'+uid,function(mining) {
+				const pushRefArray = [];
+				if (typeof mining === 'undefined' || mining === null) {
+					console.log('Mining maintenance null error 819 for uid: '+uid);
+				} else {
+					Object.keys(mining).forEach(function(pushRef) {
+						pushRefArray.push(pushRef);
+					});
+					if (pushRefArray.length > 25) {
+						for (let i = 0; i &lt; (pushRefArray.length-25); i+=1) {
+							JSE.jseDataIO.hardDeleteVariable('mining/'+uid+'/'+pushRefArray[i]);
+						}
+					}
+				}
+			});
+		} else if (JSE.jseTestNet) {
+			console.log('mining maintenance error modules/firebase.js 852');
+		}
+	},
+
+	/**
+	 * @method &lt;h2>countSubValues&lt;/h2>
+	 * @description Count the number of pushed variables at key that match the value given
+	 * @param {string} key firebase style key
+	 * @param {string/object/number/boolean} value can be a string, object, boolean, number anything that can be handled by JS &amp; JSON.
+	 * @param {function} callback callback with the count as a number
+	 */
+	countSubValues (key,value,callback) {
+		JSE.jseDataIO.getVariable(key,function(returnObj) {
+			let valueCount = 0;
+			if (typeof returnObj !== 'undefined') {
+				Object.keys(returnObj).forEach(function(key2) {
+				//for (let key in returnObj) {
+					//if (!returnObj.hasOwnProperty(key)) continue;
+					if (returnObj[key2].i === value) valueCount +=1;
+				});
+				callback(valueCount);
+			} else {
+				callback(0);
+			}
+		});
+	},
+};
+
+module.exports = jseDB;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-jseAPI.html">jseAPI</a></li><li><a href="module-jseASCII.html">jseASCII</a></li><li><a href="module-jseBackup.html">jseBackup</a></li><li><a href="module-jseBlockChain.html">jseBlockChain</a></li><li><a href="module-jseCommands.html">jseCommands</a></li><li><a href="module-jseDataIO.html">jseDataIO</a></li><li><a href="module-jseFunctions.html">jseFunctions</a></li><li><a href="module-jseLoader.html">jseLoader</a></li><li><a href="module-jseLottery.html">jseLottery</a></li><li><a href="module-jsePeerConnections.html">jsePeerConnections</a></li><li><a href="module-jseRouter.html">jseRouter</a></li><li><a href="module-jseSocketIO.html">jseSocketIO</a></li></ul><h3>Global</h3><ul><li><a href="global.html#fairReset">fairReset</a></li><li><a href="global.html#fairResetLong">fairResetLong</a></li><li><a href="global.html#genMinerAuthKey">genMinerAuthKey</a></li><li><a href="global.html#startP2P">startP2P</a></li><li><a href="global.html#startServers">startServers</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri May 25 2018 12:05:05 GMT+0100 (GMT Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
