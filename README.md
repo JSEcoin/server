@@ -1,10 +1,47 @@
-# server
-JSEcoin Node
+<h1>JSEcoin Node</h1>
 
-<h1>JSEcoin</h1>
+The JSEcoin node (jsenode.js) runs as part of the JSEcoin peer to peer network.
+<br><br>
+Bug bounty is available for responsible disclosure of security vulnerabilities: <a href="https://jsecoin.com/en/oddJobs/bugBounty/">https://jsecoin.com/en/oddJobs/bugBounty/</a>
+<br><br>
 
-<h3>Installation</h3>
+Developers please get in touch if you would like to contribute to the JSEcoin core codebase.
 
+<h3>Local Installation</h3>
+npm install<br>
+npm i -g node-gyp<br>
+npm i -g forever<br>
+git init<br>
+git remote add jsecoin https://github.com/JSEcoin/server.git<br>
+git fetch jsecoin<br>
+git pull jsecoin master<br>
+cd server<br>
+npm install<br>
+mkdir logs/ mkdir data/<br><br>
+
+node jsenode.js -s localhost -n jsetestnet<br><br>
+
+<hr>
+
+<h3>Testnet Installation</h3>
+npm install<br>
+npm i -g node-gyp<br>
+npm i -g forever<br>
+git init<br>
+git remote add jsecoin https://github.com/JSEcoin/server.git<br>
+git fetch jsecoin<br>
+git pull jsecoin master<br>
+cd server<br>
+npm install<br>
+mkdir logs/ mkdir data/<br><br>
+
+node datastore.js<br>
+node controller.js<br>
+node jsenode.js -s localhost -n jsetestnet -t local<br><br>
+
+<hr>
+
+<h3>Production Installation</h3>
 Before you npm install the server directory you need to add node-gyp
 <br><br>
 apt update<br>
