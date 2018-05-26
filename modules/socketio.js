@@ -113,6 +113,20 @@ const jseSocketIO = {
 				}
 			});
 
+			/** Platform Login Connections */
+
+			socket.on('registerSession', function(uid,session,callback) {
+				if (typeof callback === "function") {
+					JSE.socketConnections[socket.id].uid = uid;
+					JSE.socketConnections[socket.id].session = session;
+					// these aren't verified so need to check they match if any critical data is being sent
+					if (JSE.jseTestNet) console.log('registerSession from '+uid)
+					callback(true);
+				} else {
+					callback(false);
+				}
+			});
+
 			/** Mining Connections */
 
 			/**
@@ -468,10 +482,24 @@ const jseSocketIO = {
 						const blockRef2 = JSE.jseDataIO.getBlockRef(targetBlockID2);
 						if (typeof JSE.currentChain[blockRef2] === 'undefined') JSE.currentChain[blockRef2] = {};
 						JSE.currentChain[blockRef2][targetBlockID2] = targetBlockObj2;
+						const blockUsersMentioned = [];
+						Object.keys(targetBlockObj2.input).forEach(function(inputPushRef) {
+							if (targetBlockObj2.input[inputPushRef] && targetBlockObj2.input[inputPushRef].user1 && blockUsersMentioned.indexOf(targetBlockObj2.input[inputPushRef].user1) === -1) {
+								blockUsersMentioned.push(targetBlockObj2.input[inputPushRef].user1);
+							}
+							if (targetBlockObj2.input[inputPushRef] && targetBlockObj2.input[inputPushRef].user2 && blockUsersMentioned.indexOf(targetBlockObj2.input[inputPushRef].user2) === -1) {
+								blockUsersMentioned.push(targetBlockObj2.input[inputPushRef].user2);
+							}
+						});
 						Object.keys(JSE.socketConnections).forEach(function(sockID) {
 							if (JSE.socketConnections[sockID].blockSubscribed) {
 								if (JSE.jseTestNet) console.log('Sending block-2 ('+blockRef2+'/'+targetBlockID2+') after block changeover to '+sockID);
 								JSE.socketConnections[sockID].emit('newBlock', blockRef2, targetBlockID2, targetBlockObj2);
+							}
+							if (JSE.socketConnections[sockID].uid) {
+								if (blockUsersMentioned.indexOf(JSE.socketConnections[sockID].uid) > -1) {
+									JSE.socketConnections[sockID].emit('userUpdate', 'blockUpdate', null);
+								}
 							}
 						});
 					});
@@ -480,7 +508,7 @@ const jseSocketIO = {
 					const blockRef3 = JSE.jseDataIO.getBlockRef(newBlockID);
 					if (typeof JSE.currentChain[blockRef3] === 'undefined') JSE.currentChain[blockRef3] = {};
 					JSE.currentChain[blockRef3][newBlockID] = newBlockObj;
-					if (JSE.jseTestNet) console.log('Got block0 from DB blockID: '+newBlockID);
+					if (JSE.jseTestNet) console.log('Got block0 from DataIO blockID: '+newBlockID);
 					if (newBlockObj !== block0) {
 						block0 = newBlockObj;
 						Object.keys(JSE.socketConnections).forEach(function(sockID) {

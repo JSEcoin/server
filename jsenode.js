@@ -2,7 +2,8 @@
  * @file jsenode.js
  * @name JSE Node (jsenode.js)
  * @example forever start -c "node --max-old-space-size=3000" jsenode.js -s load.jsecoin.com -n load4 -m 0 &
- * @version 1.7.2
+ * @example node jsenode.js -t local -s localhost -p 81 -n jimv18 -d http://localhost:82 -m 0
+ * @version 1.8.0
  * @description JSE nodes run the JSEcoin network. Each node can be used as a load server or as part of the p2p chain.<br><br>
 		Command Line Options:<br>
 		-f, --fullnode, Run fullnode rather than litenode<br>
@@ -180,14 +181,14 @@ app.use(function(err, req, res, next) {
  	if (JSE.jseTestNet !== false) console.log('Express Request Error: '+err.stack); //err.stack
 });
 
-
 /** Store capped serverLog in global variable to pull to admin panel */
 console.log = function(d) {
 	process.stdout.write(d+"\n");
 	JSE.serverLog.push(d);
 	if (JSE.serverLog.length >= 50) {
-		JSE.jseDataIO.setVariable('serverLog',JSE.serverLog.join("\n"));
-		setTimeout(function() { JSE.serverLog = []; }, 1000);
+		const serverLogText = JSE.serverLog.join("\n");
+		JSE.serverLog = [];
+		JSE.jseDataIO.setVariable('serverLog',serverLogText);
 	}
 };
 

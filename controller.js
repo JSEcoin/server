@@ -2,7 +2,7 @@
  * @file controller.js
  * @name JSE Controller (controller.js)
  * @example forever start -c "node --max-old-space-size=3000" controller.js &
- * @version 1.7.2
+ * @version 1.8.0
  * @description The controller carries out maintenance tasks for the JSE platform and blockchain.
  */
 
@@ -10,7 +10,7 @@ const JSE = {};
 global.JSE = JSE;
 
 // For testnet, set to 'local' or 'remote' (@string) to run on http://localhost:81 or https://testnet.jsecoin.com, false for production
-JSE.jseTestNet = false; //'remote';
+JSE.jseTestNet = 'local'; //'remote';
 
 if (JSE.jseTestNet !== false) console.log('WARNING: RUNNING IN TESTNET MODE - '+JSE.jseTestNet); // idiot check
 
@@ -32,7 +32,7 @@ JSE.blockID = 0;
 JSE.currentBlockString = '';
 JSE.dbServer = 'http://10.128.0.12:80'; // use local ip address to avoid network fees
 if (JSE.jseTestNet === 'local') {
-	JSE.dbServer = 'http://localhost:80';
+	JSE.dbServer = 'http://localhost:82';
 }
 JSE.host = 'jsecoin.com'; // only used for logging in controller.js
 JSE.port = '443'; // only used for logging in controller.js
