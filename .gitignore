@@ -1,0 +1,6 @@
+logs/*
+data/*
+tools/localbackup/
+credentials\.json
+\.testcredentials\.json
+node_modules/*
