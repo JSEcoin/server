@@ -2,12 +2,6 @@
 
 The JSEcoin node (jsenode.js) runs as part of the JSEcoin peer to peer network.
 
-Bug bounty is available for responsible disclosure of security vulnerabilities: 
-[https://jsecoin.com/en/oddJobs/bugBounty/](https://jsecoin.com/en/oddJobs/bugBounty/)
-
-
-Developers please get in touch if you would like to contribute to the JSEcoin core codebase.
-
 ## Local Installation
 
 ```bash
