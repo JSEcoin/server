@@ -6,6 +6,7 @@ JSE.jseTestNet = false; //'remote';
 
 const fs = require('fs');
 const request = require('request');
+const { exec } = require('child_process');
 
 JSE.logDirectory = './../logs/';
 
@@ -86,12 +87,17 @@ function sendOnceSMS(phoneNo,txtMsg) {
 	date.utc = date.toUTCString();
 	if (okToSend === true) {
 		JSE.jseFunctions.sendSMS(phoneNo,txtMsg);
+		setTimeout(function() { resetController(); },60000);
 		okToSend = false;
 		setTimeout(function() { okToSend = true; }, 60 * 60 * 1000); // one sms per hour
 		console.log(date.utc+' - SMS Sent! - '+errorMsg);
 	} else {
 		console.log(date.utc+' - '+errorMsg);
 	}
+}
+
+function resetController() {
+	exec('forever restartall', (err, stdout, stderr) => { });
 }
 
 setInterval(function() {
