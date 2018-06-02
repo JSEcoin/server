@@ -483,14 +483,16 @@ const jseSocketIO = {
 						if (typeof JSE.currentChain[blockRef2] === 'undefined') JSE.currentChain[blockRef2] = {};
 						JSE.currentChain[blockRef2][targetBlockID2] = targetBlockObj2;
 						const blockUsersMentioned = [];
-						Object.keys(targetBlockObj2.input).forEach(function(inputPushRef) {
-							if (targetBlockObj2.input[inputPushRef] && targetBlockObj2.input[inputPushRef].user1 && blockUsersMentioned.indexOf(targetBlockObj2.input[inputPushRef].user1) === -1) {
-								blockUsersMentioned.push(targetBlockObj2.input[inputPushRef].user1);
-							}
-							if (targetBlockObj2.input[inputPushRef] && targetBlockObj2.input[inputPushRef].user2 && blockUsersMentioned.indexOf(targetBlockObj2.input[inputPushRef].user2) === -1) {
-								blockUsersMentioned.push(targetBlockObj2.input[inputPushRef].user2);
-							}
-						});
+						if (targetBlockObj2 && targetBlockObj2.input) {
+							Object.keys(targetBlockObj2.input).forEach(function(inputPushRef) {
+								if (targetBlockObj2.input[inputPushRef] && targetBlockObj2.input[inputPushRef].user1 && blockUsersMentioned.indexOf(targetBlockObj2.input[inputPushRef].user1) === -1) {
+									blockUsersMentioned.push(targetBlockObj2.input[inputPushRef].user1);
+								}
+								if (targetBlockObj2.input[inputPushRef] && targetBlockObj2.input[inputPushRef].user2 && blockUsersMentioned.indexOf(targetBlockObj2.input[inputPushRef].user2) === -1) {
+									blockUsersMentioned.push(targetBlockObj2.input[inputPushRef].user2);
+								}
+							});
+						}
 						Object.keys(JSE.socketConnections).forEach(function(sockID) {
 							if (JSE.socketConnections[sockID].blockSubscribed) {
 								if (JSE.jseTestNet) console.log('Sending block-2 ('+blockRef2+'/'+targetBlockID2+') after block changeover to '+sockID);
