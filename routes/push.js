@@ -62,7 +62,7 @@ router.post('/requestexport/*', function (req, res) {
 
 /**
  * @name /push/data/*
- * @description SUbmit signed data for inclusion in to blockchain
+ * @description Submit signed data for inclusion in to blockchain
  * @memberof module:jseRouter
  */
 router.post('/data/*', function (req, res) {
@@ -70,16 +70,31 @@ router.post('/data/*', function (req, res) {
 		res.status(400).send('{"fail":1,"notification":"Transfer Failed: Missing Data"}');
 		return false;
 	}
-	const signed = {};
-	signed.data = req.body.data;
-	signed.publicKey = req.body.publicKey;
-	signed.signature = req.body.signature;
-	jseCommands.dataPush(signed, function(dataPushResult) {
-		if (dataPushResult.substr(0,9) === '{"fail":1') {
-			res.status(400).send(dataPushResult); //fail
-		} else {
-			res.send(dataPushResult); // success
+	const session = JSE.jseFunctions.cleanString(req.body.session);
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		const pin = String(req.body.pin).split(/[^0-9]/).join('');
+		let pinAttempts = 0;
+		JSE.pinAttempts.forEach((el) => { if (el === goodCredentials.uid) pinAttempts +=1; });
+		if (goodCredentials.pin !== pin || pin === null || typeof pin === 'undefined' || pinAttempts > 3) {
+			JSE.pinAttempts.push(goodCredentials.uid);
+			res.status(400).send('{"fail":1,"notification":"Error 252. Pin number incorrect or blocked, attempt '+(pinAttempts+1)+'/3"}');
+			return false;
 		}
+		const signed = {};
+		signed.data = req.body.data;
+		signed.publicKey = req.body.publicKey;
+		signed.signature = req.body.signature;
+		jseCommands.dataPush(signed, function(dataPushResult) {
+			if (dataPushResult.substr(0,9) === '{"fail":1') {
+				res.status(400).send(dataPushResult); //fail
+			} else {
+				res.send(dataPushResult); // success
+			}
+		});
+		return false;
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error index.js 142. Session Variable not recognized"}');
+		return false;
 	});
 	return false;
 });

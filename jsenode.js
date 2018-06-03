@@ -124,6 +124,7 @@ JSE.platformIPs = []; // store these locally as non critical
 JSE.platformUIDs = [];
 JSE.platformUniqueIDs = [];
 JSE.publisherIPs = [];
+JSE.pinAttempts = [];
 JSE.publisherAuthKeys = [];
 JSE.creditQuickLookup = {}; // dont db query on each hit,hash,unique
 JSE.recentSiteIDs = [];
@@ -247,6 +248,7 @@ fairReset();
 function fairResetLong() {
 	JSE.publisherIPs = [];
 	JSE.publisherAuthKeys = [];
+	JSE.pinAttempts = [];
 	setTimeout(function() {
 		fairResetLong();
 	}, 21600000); // 6 hours

@@ -225,6 +225,14 @@ router.post('/updateapilevel/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error indedx.js 72. No Session Variable"}'); return false; }
 	const session = req.body.session;
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		const pin = String(req.body.pin).split(/[^0-9]/).join('');
+		let pinAttempts = 0;
+		JSE.pinAttempts.forEach((el) => { if (el === goodCredentials.uid) pinAttempts +=1; });
+		if (goodCredentials.pin !== pin || pin === null || typeof pin === 'undefined' || pinAttempts > 3) {
+			JSE.pinAttempts.push(goodCredentials.uid);
+			res.status(400).send('{"fail":1,"notification":"Error 252. Pin number incorrect or blocked, attempt '+(pinAttempts+1)+'/3"}');
+			return false;
+		}
 		if (goodCredentials !== null) {
 			JSE.jseDataIO.setVariable('credentials/'+goodCredentials.uid+'/apiLevel',parseFloat(req.body.newAPILevel));
 			res.send('1');
@@ -247,6 +255,14 @@ router.post('/updatedetails/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 717. No Session Variable"}'); return false; }
 	const session = req.body.session;
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		const pin = String(req.body.pin).split(/[^0-9]/).join('');
+		let pinAttempts = 0;
+		JSE.pinAttempts.forEach((el) => { if (el === goodCredentials.uid) pinAttempts +=1; });
+		if (goodCredentials.pin !== pin || pin === null || typeof pin === 'undefined' || pinAttempts > 3) {
+			JSE.pinAttempts.push(goodCredentials.uid);
+			res.status(400).send('{"fail":1,"notification":"Error 252. Pin number incorrect or blocked, attempt '+(pinAttempts+1)+'/3"}');
+			return false;
+		}
 		if (goodCredentials !== null) {
 			JSE.jseDataIO.setVariable('account/'+goodCredentials.uid+'/name',JSE.jseFunctions.cleanString(req.body.newName));
 			JSE.jseDataIO.setVariable('account/'+goodCredentials.uid+'/address',JSE.jseFunctions.cleanString(req.body.newAddress));
@@ -508,6 +524,37 @@ router.post('/bountysubmission/*', function (req, res) {
   	res.status(400).send('{"fail":1,"notification":"Error index.js 496. Session Variable not recognized"}'); return false;
   });
   return false;
+});
+
+/**
+ * @name /setpin/*
+ * @description Set a pin number in credentials
+ * @memberof module:jseRouter
+ */
+router.post('/setpin/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 519. No Session Variable"}'); return false; }
+	const session = req.body.session;
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials !== null) {
+			if (goodCredentials.pin) {
+				res.status(400).send('{"fail":1,"notification":"Error index.js 524. Pin number has already been set"}');
+			} else {
+				const pin = String(req.body.pin).split(/[^0-9]/).join('');
+				if (pin.length >= 4 && pin.length <= 12 && pin !== '1234' && pin !== '0000') {
+					JSE.jseDataIO.setVariable('credentials/'+goodCredentials.uid+'/pin',pin);
+					res.send('{"success":1,"notification":"Pin number has been successfully set.<br><br>Thank you for helping secure your JSEcoin account."}');
+				} else {
+					res.status(400).send('{"fail":1,"notification":"Error index.js 531. Pin number not secure, must be 4-12 digits"}');
+				}
+			}
+	 	} else {
+	 		res.status(401).send('{"fail":1,"notification":"Error index.js 526. Session Variable not recognized"}');
+	 	}
+	 	return false;
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error index.js 530. Session Variable not recognized"}');
+	});
+	return false;
 });
 
 module.exports = router;

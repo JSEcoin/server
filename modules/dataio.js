@@ -685,6 +685,9 @@ const jseDB = {
 			account.apiLevel = credentials.apiLevel;
 			account.privateKey = credentials.privateKey;
 			account.twoFactorAuth = credentials.twoFactorAuth;
+			if (!credentials.pin) {
+				account.requirePin = true;
+			}
 			JSE.jseDataIO.getVariable('statsTotal/'+credentials.uid,function(statsTotal) {
 				account.statsTotal = statsTotal;
 				JSE.jseDataIO.getVariable('statsToday/'+credentials.uid,function(statsToday) {

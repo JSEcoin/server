@@ -120,7 +120,7 @@ const jseSocketIO = {
 					JSE.socketConnections[socket.id].uid = uid;
 					JSE.socketConnections[socket.id].session = session;
 					// these aren't verified so need to check they match if any critical data is being sent
-					if (JSE.jseTestNet) console.log('registerSession from '+uid)
+					if (JSE.jseTestNet) console.log('registerSession from '+uid);
 					callback(true);
 				} else {
 					callback(false);
