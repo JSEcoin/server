@@ -6,6 +6,8 @@
  */
 
 const JSE = global.JSE;
+const jseAPI = require("./../modules/apifunctions.js");
+
 const express = require('express');
 
 const router = express.Router();
@@ -414,5 +416,77 @@ router.get('/platformIPs/:adminpass', function(req, res) {
 	res.send(JSON.stringify(JSE.platformIPs));
 	return false;
 });
+
+router.get('/bounty/:adminpass', function(req, res) {
+	let adminPass;
+	if (typeof req.get('Authorization') !== 'undefined') {
+		adminPass = JSE.jseFunctions.cleanString(req.get('Authorization'));
+	} else {
+		adminPass = JSE.jseFunctions.cleanString(req.params.adminpass);
+	}
+	if (adminPass !== JSE.credentials.jseAdminKey) { return false; }
+	JSE.jseDataIO.getVariable('bounty/',function(bounty) {
+		res.send(JSON.stringify(bounty));
+	});
+	return false;
+});
+
+router.post('/bountyUpdate/:adminpass', function(req, res) {
+	let adminPass;
+	if (typeof req.get('Authorization') !== 'undefined') {
+		adminPass = JSE.jseFunctions.cleanString(req.get('Authorization'));
+	} else {
+		adminPass = JSE.jseFunctions.cleanString(req.params.adminpass);
+	}
+	if (adminPass !== JSE.credentials.jseAdminKey) { return false; }
+	const pushRef = JSE.jseFunctions.cleanString(req.body.pushRef);
+	const value = JSE.jseFunctions.cleanString(req.body.value);
+	const bountyType = JSE.jseFunctions.cleanString(req.body.bountyType);
+	const strippedUID = req.body.uid.split(/[^0-9]/).join('');
+	if (req.body.update = 'approved') {
+		JSE.jseDataIO.setVariable('bounty/'+pushRef+'/status',3);
+		JSE.jseDataIO.getVariable('account/'+strippedUID,function(affiliate) {
+			const pHTML = `Your ${bountyType} bounty submission ref. ${pushRef} has been approved and your account has been credited.<br><br>Thank you for supporting the JSEcoin project`;
+			JSE.jseFunctions.sendStandardEmail(affiliate.email,'JSEcoin Bounty Approved',pHTML);
+			const reference = 'Bounty payment '+bountyType+': '+pusRef;
+			JSE.jseDataIO.getCredentialsByUID(0,function(distributionCredentials) {
+				jseAPI.apiTransfer(distributionCredentials,affiliate,value,reference,false,function(jsonResult) {
+					res.send('{"success":1}');
+				});
+			});
+		});
+	} else if (req.body.update = 'declined') {
+		JSE.jseDataIO.setVariable('bounty/'+pushRef+'/status',2);
+		JSE.jseDataIO.getVariable('account/'+strippedUID,function(affiliate) {
+			const reason = JSE.jseFunctions.cleanString(req.body.reason);
+			const pHTML = `Your ${bountyType} bounty submission ref. ${pushRef} has been declined.<br><br>${reason}`;
+			JSE.jseFunctions.sendStandardEmail(affiliate.email,'JSEcoin Bounty Declined',pHTML);
+		});
+	} else if (req.body.update = 'declinedNoEmail') {
+		JSE.jseDataIO.setVariable('bounty/'+pushRef+'/status',2);
+	} else if (req.body.update = 'airdropConfirmation') {
+		JSE.jseDataIO.setVariable('bounty/'+pushRef+'/status',3);
+		JSE.jseDataIO.getVariable('account/'+strippedUID,function(affiliate) {
+			JSE.jseDataIO.setVariable('account/'+strippedUID+'/airDrop',true);
+			const pHTML = `Your airdrop submission ref. ${pushRef} has been approved and your account will be credited on 2018-07-04.<br><br>Thank you for supporting the JSEcoin project`;
+			JSE.jseFunctions.sendStandardEmail(affiliate.email,'JSEcoin Airdrop Approved',pHTML);
+		});
+	} else if (req.body.update = 'ambassadorPayment') {
+		JSE.jseDataIO.setVariable('bounty/'+pushRef+'/status',3);
+		JSE.jseDataIO.setVariable('bounty/'+pushRef+'/value',value);		
+		JSE.jseDataIO.getVariable('account/'+strippedUID,function(affiliate) {
+			const pHTML = `You have been sent a JSEcoin Ambassador reward.<br><br>Thank you for supporting the JSEcoin project`;
+			JSE.jseFunctions.sendStandardEmail(affiliate.email,'JSEcoin Ambassador Reward',pHTML);
+			const reference = 'Ambassador Reward: '+pusRef;
+			JSE.jseDataIO.getCredentialsByUID(0,function(distributionCredentials) {
+				jseAPI.apiTransfer(distributionCredentials,affiliate,value,reference,false,function(jsonResult) {
+					res.send('{"success":1}');
+				});
+			});
+		});
+	}
+	return false;
+});
+
 
 module.exports = router;

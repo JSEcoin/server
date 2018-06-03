@@ -482,4 +482,32 @@ router.post('/logout/*', function (req, res) {
   return false;
 });
 
+/**
+ * @name /bountysubmission/*
+ * @description Submit Bounty Data
+ * @memberof module:jseRouter
+ */
+router.post('/bountysubmission/*', function (req, res) {
+  if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"No session provided"}'); return false; }
+	const session = JSE.jseFunctions.cleanString(req.body.session);
+  JSE.jseDataIO.getCredentialsBySession(session,function(credentials) {
+		const bountySubmission = {};
+		bountySubmission.uid = credentials.uid;
+		bountySubmission.email = credentials.email;
+		bountySubmission.ts = new Date().getTime();
+		bountySubmission.status = 1; // 1 pending, 2 = denied, 3 = approved
+		bountySubmission.bountyType = JSE.jseFunctions.cleanString(req.body.bountyType);
+		bountySubmission.bountyData = {};
+		Object.keys(req.body.bountyData).forEach(function(key) {
+			bountySubmission.bountyData[key] = JSE.jseFunctions.cleanString(req.body.bountyData[key]);
+		});
+  	JSE.jseDataIO.pushVariable('bounty/', bountySubmission, function(pushRef) {
+			res.send('{"success":1,"notification":"Bounty submission successful","pushRef":"'+pushRef+'"}');
+		});
+  },function() {
+  	res.status(400).send('{"fail":1,"notification":"Error index.js 496. Session Variable not recognized"}'); return false;
+  });
+  return false;
+});
+
 module.exports = router;
