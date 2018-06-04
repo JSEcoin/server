@@ -2,6 +2,7 @@
  * @file controller.js
  * @name JSE Controller (controller.js)
  * @example forever start -c "node --max-old-space-size=3000" controller.js &
+ * @example "node controller.js -t local -d http://localhost:82 -e http://localhost:83
  * @version 1.8.0
  * @description The controller carries out maintenance tasks for the JSE platform and blockchain.
  */
@@ -9,8 +10,16 @@
 const JSE = {};
 global.JSE = JSE;
 
-// For testnet, set to 'local' or 'remote' (@string) to run on http://localhost:81 or https://testnet.jsecoin.com, false for production
-JSE.jseTestNet = 'local'; //'remote';
+const commandLine = require('commander');
+
+commandLine
+  .option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
+	.option('-d, --datastore [value]', 'Authenticated datastore','http://10.128.0.12')
+	.option('-e, --blockstore [value]', 'Authenticated blockstore','http://10.128.0.13')
+  .option('-t, --testnet [value]', 'Launch the testnet as remote, local or log', false)
+  .parse(process.argv);
+
+JSE.jseTestNet = commandLine.testnet;
 
 if (JSE.jseTestNet !== false) console.log('WARNING: RUNNING IN TESTNET MODE - '+JSE.jseTestNet); // idiot check
 
@@ -30,10 +39,8 @@ const authenticator = require('authenticator');
 JSE.jseSettings = {}; // set the first time in jseBlockChain.createGenesisBlock();
 JSE.blockID = 0;
 JSE.currentBlockString = '';
-JSE.dbServer = 'http://10.128.0.12:80'; // use local ip address to avoid network fees
-if (JSE.jseTestNet === 'local') {
-	JSE.dbServer = 'http://localhost:82';
-}
+JSE.dataStore1 = commandLine.datastore;
+JSE.blockStore1 = commandLine.blockstore;
 JSE.host = 'jsecoin.com'; // only used for logging in controller.js
 JSE.port = '443'; // only used for logging in controller.js
 JSE.logDirectory = 'logs/';
@@ -42,11 +49,11 @@ JSE.vLedgerError = '';
 JSE.publicStats = {};
 JSE.publicStats.ts = new Date().getTime();
 
-if (fs.existsSync('./credentials.json')) { // relative to server.js
-	JSE.credentials = require('./credentials.json'); // relative to datastore.js, extra ..
+if (fs.existsSync(commandLine.credentials)) {
+	JSE.credentials = require(commandLine.credentials); // eslint-disable-line
 	JSE.authenticatedNode = true;
 } else {
-	JSE.credentials = false; // node with no authentication
+	JSE.credentials = false;
 	JSE.authenticatedNode = false;
 }
 

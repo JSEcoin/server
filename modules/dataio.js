@@ -61,26 +61,39 @@ const JSE = global.JSE;
 const fs = require('fs'); // only required temporarily for testing
 const io = require('socket.io-client');
 
-const socket = io.connect(JSE.dbServer, {
+const dataStore1 = io.connect(JSE.dataStore1, {
 	reconnect: true, transports: ["websocket"], heartbeatTimeout: 1800000, maxHttpBufferSize: 1000000000,
 });
 
-socket.on('connect', function(){
+const blockStore1 = io.connect(JSE.blockStore1, {
+	reconnect: true, transports: ["websocket"], heartbeatTimeout: 1800000, maxHttpBufferSize: 1000000000,
+});
+
+// Connection and authorization
+dataStore1.on('connect', function(){
 	if (JSE.authenticatedNode) {
-		console.log('Connected to DB Server, sending authorization key');
-		socket.emit('authorize',JSE.credentials.dbKey);
+		console.log('Connected to dataStore1, sending authorization key');
+		dataStore1.emit('authorize',JSE.credentials.dbKey);
+	}
+});
+blockStore1.on('connect', function(){
+	if (JSE.authenticatedNode) {
+		console.log('Connected to blockStore1, sending authorization key');
+		blockStore1.emit('authorize',JSE.credentials.dbKey);
 	}
 });
 
-socket.on('authorized', function(authLevel){
+dataStore1.on('authorized', function(authLevel){
 	console.log('Authorized Level: '+authLevel);
-	socket.authorized = authLevel;
+	dataStore1.authorized = authLevel;
 	JSE.dbAuthenticated = true;
 });
-
-socket.on('disconnect', function(){
-	//socket.off('closelistenersbyname');
+blockStore1.on('authorized', function(authLevel){
+	console.log('Authorized Level: '+authLevel);
+	blockStore1.authorized = authLevel;
+	JSE.dbAuthenticated = true;
 });
+// dataStore1.on('disconnect', function(){ });
 
 const jseDB = {
 
@@ -93,10 +106,14 @@ const jseDB = {
 	 * @param {string/object/number/boolean} value can be a string, object, boolean, number anything that can be handled by JS & JSON.
 	 */
 	setVariable (key,value) {
-		if (socket.authorized > 8) {
+		if (dataStore1.authorized > 8) {
 			//fs.appendFileSync('redislog.txt', 'setVariable '+key+"\n");
 			if (JSE.jseTestNet) console.log('Setting Variable: '+key);
-			socket.emit('setVariable', key, value);
+			if (key.substring(0,10) === 'blockChain') {
+				blockStore1.emit('setVariable', key, value);
+			} else {
+				dataStore1.emit('setVariable', key, value);
+			}
 		}
 	},
 
@@ -107,14 +124,22 @@ const jseDB = {
 	 * @param {function} callback calls back null if not found, otherwise object at key is passed to callback
 	 */
 	getVariable (key,callback) {
-		if (socket.authorized > 5) {
+		if (dataStore1.authorized > 5) {
 			//fs.appendFileSync('redislog.txt', 'getVariable '+key+"\n");
 			if (JSE.jseTestNet) console.log('getting keyPath: '+key);
-			socket.emit('getVariable', key, function(reply){
-				if (callback && typeof callback === 'function') {
-					callback(reply);
-				}
-			});
+			if (key.substring(0,10) === 'blockChain') {
+				blockStore1.emit('getVariable', key, function(reply){
+					if (callback && typeof callback === 'function') {
+						callback(reply);
+					}
+				});
+			} else {
+				dataStore1.emit('getVariable', key, function(reply){
+					if (callback && typeof callback === 'function') {
+						callback(reply);
+					}
+				});
+			}
 		}
 	},
 
@@ -126,14 +151,22 @@ const jseDB = {
 	 * @param {function} callback fires after successful setting or updating of key
 	 */
 	setVariableThen (key,value,callback) {
-		if (socket.authorized > 8) {
+		if (dataStore1.authorized > 8) {
 			//fs.appendFileSync('redislog.txt', 'setThenVariable '+key+"\n");
 			if (JSE.jseTestNet) console.log('SetVariableThening : '+key);
-			socket.emit('setVariableThen', key, value, function(){
-				if (callback && typeof callback === 'function') {
-					callback();
-				}
-			});
+			if (key.substring(0,10) === 'blockChain') {
+				blockStore1.emit('setVariableThen', key, value, function(){
+					if (callback && typeof callback === 'function') {
+						callback();
+					}
+				});
+			} else {
+				dataStore1.emit('setVariableThen', key, value, function(){
+					if (callback && typeof callback === 'function') {
+						callback();
+					}
+				});
+			}
 		}
 	},
 
@@ -146,7 +179,7 @@ const jseDB = {
 	 */
 	pushVariable (keyRaw,value,callback) {
 		let key = keyRaw;
-		if (socket.authorized > 8) {
+		if (dataStore1.authorized > 8) {
 			//fs.appendFileSync('redislog.txt', 'pushVariable '+key+"\n");
 			const newDate = new Date().getTime();
 			const random = Math.floor((Math.random() * 999999) + 1); // setting up a firebase style push variable, timestamp+random
@@ -154,11 +187,19 @@ const jseDB = {
 			if (key.slice(-1) === '/') { key = key.slice(0, -1); }
 			key += '/'+pushRef;
 			if (JSE.jseTestNet) console.log('Pushing Variable: '+key);
-			socket.emit('setVariableThen', key, value, function(){
-				if (callback && typeof callback === 'function') {
-					callback(pushRef);
-				}
-			});
+			if (key.substring(0,10) === 'blockChain') {
+				blockStore1.emit('setVariableThen', key, value, function(){
+					if (callback && typeof callback === 'function') {
+						callback(pushRef);
+					}
+				});
+			} else {
+				dataStore1.emit('setVariableThen', key, value, function(){
+					if (callback && typeof callback === 'function') {
+						callback(pushRef);
+					}
+				});
+			}
 		}
 	},
 
@@ -168,10 +209,14 @@ const jseDB = {
 	 * @param {string} key firebase style key
 	 */
 	deleteVariable (key) {
-		if (socket.authorized > 8) {
+		if (dataStore1.authorized > 8) {
 			//fs.appendFileSync('redislog.txt', 'deleteVariable '+key+"\n");
 			if (JSE.jseTestNet) console.log('Deleting : '+key);
-			socket.emit('deleteVariable', key);
+			if (key.substring(0,10) === 'blockChain') {
+				blockStore1.emit('deleteVariable', key);
+			} else {
+				dataStore1.emit('deleteVariable', key);
+			}
 		}
 	},
 
@@ -181,10 +226,14 @@ const jseDB = {
 	 * @param {string} key firebase style key
 	 */
 	hardDeleteVariable (key) {
-		if (socket.authorized > 8) {
+		if (dataStore1.authorized > 8) {
 			//fs.appendFileSync('redislog.txt', 'deleteVariable '+key+"\n");
 			if (JSE.jseTestNet) console.log('Deleting : '+key);
-			socket.emit('hardDeleteVariable', key);
+			if (key.substring(0,10) === 'blockChain') {
+				blockStore1.emit('hardDeleteVariable', key);
+			} else {
+				dataStore1.emit('hardDeleteVariable', key);
+			}
 		}
 	},
 
@@ -195,10 +244,14 @@ const jseDB = {
 	 * @param {number} x amount to increase the value of key by
 	 */
 	plusX(key,x) {
-		if (socket.authorized > 8) {
+		if (dataStore1.authorized > 8) {
 			//fs.appendFileSync('redislog.txt', 'plusX '+key+' '+x+"\n");
 			if (JSE.jseTestNet) console.log('Plus Xing : '+key+' : '+x);
-			socket.emit('plusX', key, x);
+			if (key.substring(0,10) === 'blockChain') {
+				blockStore1.emit('plusX', key, x);
+			} else {
+				dataStore1.emit('plusX', key, x);
+			}
 		}
 	},
 
@@ -207,9 +260,10 @@ const jseDB = {
 	 * @description Backup command, in place but not used
 	 */
 	backup() {
-		if (socket.authorized > 8) {
+		if (dataStore1.authorized > 8) {
 			if (JSE.jseTestNet) console.log('Sending Backup Command');
-			socket.emit('backup');
+			blockStore1.emit('backup');
+			dataStore1.emit('backup');
 		}
 	},
 
@@ -218,9 +272,10 @@ const jseDB = {
 	 * @description Close the socket connection to the data store, not used
 	 */
 	closeConnection() {
-		if (socket.authorized > 8) {
+		if (dataStore1.authorized > 8) {
 			if (JSE.jseTestNet) console.log('Closing Datastore Connection');
-			socket.close();
+			blockStore1.close();
+			dataStore1.close();
 		}
 	},
 

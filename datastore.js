@@ -2,14 +2,22 @@
  * @file datastore.js
  * @name JSE Datastore (datastore.js)
  * @example forever start -c "node --max-old-space-size=11500" datastore.js &
+ * @example node --max-old-space-size=3000 datastore.js -p 82 -t local
  * @version 1.8.0
  * @description The JSE datastore is a custom key value storage system design to efficiently handle Javascript objects via socket.io
  */
 
 const JSE = {};
 global.JSE = JSE;
+const commandLine = require('commander');
 
-JSE.jseTestNet = 'local'; // 'remote', 'local' or false for production
+commandLine
+	.option('-p, --port [value]', 'Port',  80)
+	.option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
+  .option('-t, --testnet [value]', 'Launch the testnet as remote, local or log', false)
+  .parse(process.argv);
+
+JSE.jseTestNet = commandLine.testnet;
 
 if (JSE.jseTestNet !== false) console.log('WARNING: RUNNING IN TESTNET MODE - '+JSE.jseTestNet); // idiot check
 
@@ -20,8 +28,8 @@ const bkupDir = './logs/'; // as above
 
 const fs = require('fs');
 
-if (fs.existsSync('./credentials.json')) { // relative to server.js
-	JSE.credentials = require('./credentials.json'); // relative to datastore.js, extra ..
+if (fs.existsSync(commandLine.credentials)) {
+	JSE.credentials = require(commandLine.credentials);  // eslint-disable-line
 	JSE.authenticatedNode = true;
 } else {
 	JSE.credentials = false; // node with no authentication
@@ -33,10 +41,7 @@ const jseFunctions = require('./modules/functions.js');
 const express = require('express');
 const { exec } = require('child_process');
 
-let port = 80;
-if (JSE.jseTestNet === 'local') {
-	port = '82'; // run on port 82 when testing locally to avoid web server collision
-}
+const port = commandLine.port;
 
 // Setup express and socket.io for coms
 const app = express();
