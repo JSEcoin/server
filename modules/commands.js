@@ -161,7 +161,6 @@ const jseCommands = {
 						}
 						JSE.jseDataIO.getTransactionReference(dataObject.tid,function(transactionReference) {
 							dataObject2.reference = transactionReference;
-
 							JSE.jseDataIO.pushVariable('history/'+toUser.uid,dataObject2,function(pushRef) {});
 							const dataObject3 = JSON.parse(JSON.stringify(dataObject2)); // clone don't reference
 							dataObject3.value = value / -1; // turn negative
