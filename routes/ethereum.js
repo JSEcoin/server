@@ -20,6 +20,7 @@ router.post('/getdepositaddress/*', function (req, res) {
 			// no eth address present, lets set one up
 			const ethKeyPair = web3.eth.accounts.create();
 			JSE.jseDataIO.setVariable('credentials/'+goodCredentials.uid+'/ethPrivateKey',ethKeyPair.privateKey);
+			JSE.jseDataIO.setVariable('lookupETH/'+ethKeyPair.address,goodCredentials.uid);
 			JSE.jseDataIO.setVariableThen('credentials/'+goodCredentials.uid+'/ethAddress',ethKeyPair.address,function() {
 				res.send('{"success":1,"notification":"Your ethereum deposit address is '+ethKeyPair.address+'","ethAddress":"'+ethKeyPair.address+'"}');
 			});
