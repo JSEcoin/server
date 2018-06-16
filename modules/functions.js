@@ -335,9 +335,9 @@ function banEmail(banUID) {
  * @param {string} utmCampaign utmCampaign should be "referral"
  * @param {string} utmContent utmContent should be aff12345
  */
-function referral(utmCampaign,utmContent) {
+function referral(utmCampaign,utmContent,affPayout) {
+	let value = affPayout;
 	const strippedUID = utmCampaign.split(/[^0-9]/).join('');
-	let value = 200; // 200 JSE per confirmed new user
 	if (utmContent.indexOf('Declined') > -1) {
 		value = 1;
 		console.log('Declined Referral: '+utmContent);
