@@ -440,11 +440,12 @@ router.post('/bountyUpdate/:adminpass', function(req, res) {
 	}
 	if (adminPass !== JSE.credentials.jseAdminKey) { return false; }
 	const pushRef = JSE.jseFunctions.cleanString(req.body.pushRef);
-	const value = JSE.jseFunctions.cleanString(req.body.value);
+	const value = parseFloat(req.body.value);
 	const bountyType = JSE.jseFunctions.cleanString(req.body.bountyType);
-	const strippedUID = req.body.uid.split(/[^0-9]/).join('');
+	const strippedUID = String(req.body.uid).split(/[^0-9]/).join('');
 	if (req.body.update === 'approved') {
 		JSE.jseDataIO.setVariable('bounty/'+pushRef+'/status',3);
+		JSE.jseDataIO.setVariable('bounty/'+pushRef+'/value',value);
 		JSE.jseDataIO.getVariable('account/'+strippedUID,function(affiliate) {
 			const pHTML = `Your ${bountyType} bounty submission ref. ${pushRef} has been approved and your account has been credited.<br><br>Thank you for supporting the JSEcoin project`;
 			JSE.jseFunctions.sendStandardEmail(affiliate.email,'JSEcoin Bounty Approved',pHTML);
