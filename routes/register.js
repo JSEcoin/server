@@ -118,6 +118,7 @@ router.post('/*', function (req, res) {
 						});
 						// send back safeUser
 						const safeUser = JSE.jseFunctions.genSafeUser(newUserR3);
+						safeUser.requirePin = true; // require pin setup on registration
 						res.send(JSON.stringify(safeUser));
 						console.log('New user: '+newUserR3.email+', From: '+newUserR3.campaign);
 						return false;
