@@ -59,7 +59,7 @@ const jseCommands = {
 						if (timeTillConfirmation > 30000) timeTillConfirmation = 30000;
 						if (timeTillConfirmation < 0) timeTillConfirmation = 29999;
 						callback('{"success":1, "notification": "Transfer Successful","timeTillConfirmation":'+timeTillConfirmation+'}');
-						JSE.jseFunctions.transferNotificationEmail(dataObject.user1,dataObject.value);
+						JSE.jseFunctions.transferNotificationEmails(dataObject.user1,dataObject.user2,dataObject.value);
 					}
 				});
 			} else if (dataObject.command === 'export') {

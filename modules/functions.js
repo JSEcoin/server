@@ -18,7 +18,7 @@
  * <li>sendWelcomeEmail</li>
  * <li>sendStandardEmail</li>
  * <li>exportNotificationEmail</li>
- * <li>transferNotificationEmail</li>
+ * <li>transferNotificationEmails</li>
  * <li>referral</li>
  * <li>genSafeUser</li>
  * </ul>
@@ -281,44 +281,67 @@ function sendStandardEmail(toEmailRaw,subject,htmlContent) {
 /**
  * @method <h2>exportNotificationEmail</h2>
  * @description Send a notification when a user exports tokens
- * @param {number} toUID User ID to send email to
+ * @param {number} fromUID User ID to send email to
  * @param {number} transactionValue Value of the transaction
  */
-function exportNotificationEmail(toUID,transactionValue) {
-	JSE.jseDataIO.getEmail(toUID,function(emailAddress) {
-		const welcomeEmail = '<img src="https://jsecoin.com/img/logosmall.png" style="float: right;" alt="JSEcoin" /><br>This is to confirm a coincode has been exported from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Thank you for using JSEcoin. If you did not make this transaction please contact us by replying to this email as soon as possible.<br><br>Kind regards,<br><br>JSE Administration<br><hr style="border-top: 1px solid #000000;"><div style="margin-bottom: 10px;"><a href="https://jsecoin.com/"><img src="https://jsecoin.com/img/logosmall.png" alt="JSEcoin" /></a><div style="margin:10px; float: right;"><a href="https://www.facebook.com/officialjsecoin"><img src="https://jsecoin.com/img/facebookemail.png" alt="Facebook" /></a></div><div style="margin:10px; float: right;"><a href="https://twitter.com/jsecoin"><img src="https://jsecoin.com/img/twitteremail.png" alt="Twitter" /></a></div></div>';
-		const toEmail = new helper.Email(emailAddress);
-		const fromEmail = new helper.Email('admin@jsecoin.com');
-		const subject = 'JSEcoin Export Confirmation';
-		const content = new helper.Content('text/html', welcomeEmail);
-		const mail = new helper.Mail(fromEmail, subject, toEmail, content);
-		const request = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
-		sg.API(request, function (error, response) {
-		  if (error) { console.log('Sendgrid Error response received, export notification email '+emailAddress); }
+function exportNotificationEmail(fromUID,transactionValue) {
+	JSE.jseDataIO.getEmail(fromUID,function(emailAddress) {
+		JSE.jseDataIO.getVariable('account/'+fromUID+'/noEmailTransaction', function(noEmailTransaction) {
+			if (noEmailTransaction === null && fromUID > 0) {
+				const welcomeEmail = '<img src="https://jsecoin.com/img/logosmall.png" style="float: right;" alt="JSEcoin" /><br>This is to confirm a coincode has been exported from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Thank you for using JSEcoin. If you did not make this transaction please contact us by replying to this email as soon as possible.<br><br>Kind regards,<br><br>JSE Administration<br><hr style="border-top: 1px solid #000000;"><div style="margin-bottom: 10px;"><a href="https://jsecoin.com/"><img src="https://jsecoin.com/img/logosmall.png" alt="JSEcoin" /></a><div style="margin:10px; float: right;"><a href="https://www.facebook.com/officialjsecoin"><img src="https://jsecoin.com/img/facebookemail.png" alt="Facebook" /></a></div><div style="margin:10px; float: right;"><a href="https://twitter.com/jsecoin"><img src="https://jsecoin.com/img/twitteremail.png" alt="Twitter" /></a></div></div>';
+				const toEmail = new helper.Email(emailAddress);
+				const fromEmail = new helper.Email('admin@jsecoin.com');
+				const subject = 'JSEcoin Export Confirmation';
+				const content = new helper.Content('text/html', welcomeEmail);
+				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
+				const request = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
+				sg.API(request, function (error, response) {
+					if (error) { console.log('Sendgrid Error response received, export notification email '+emailAddress); }
+				});
+			}
 		});
 	});
 }
 
 /**
- * @method <h2>transferNotificationEmail</h2>
- * @description Send a notification when a user transfers tokens
- * @param {number} toUID User ID to send email to
+ * @method <h2>transferNotificationEmails</h2>
+ * @description Send a notification email when a transfer takes place to the sender and receiver
+ * @param {number} fromUID User ID who sent the transaction
+ * @param {number} toUID User ID who received the transfer
  * @param {number} transactionValue Value of the transaction
  */
-function transferNotificationEmail(toUID,transactionValue) {
-	JSE.jseDataIO.getEmail(toUID,function(emailAddress) {
-		if (toUID > 0) { // don't want distribution emails
-			const welcomeEmail = '<img src="https://jsecoin.com/img/logosmall.png" style="float: right;" alt="JSEcoin" /><br>This is to confirm a transfer has been made from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Thank you for using JSEcoin. If you did not make this transaction please contact us by replying to this email as soon as possible.<br><br>Kind regards,<br><br>JSE Administration<br><hr style="border-top: 1px solid #000000;"><div style="margin-bottom: 10px;"><a href="https://jsecoin.com/"><img src="https://jsecoin.com/img/logosmall.png" alt="JSEcoin" /></a><div style="margin:10px; float: right;"><a href="https://www.facebook.com/officialjsecoin"><img src="https://jsecoin.com/img/facebookemail.png" alt="Facebook" /></a></div><div style="margin:10px; float: right;"><a href="https://twitter.com/jsecoin"><img src="https://jsecoin.com/img/twitteremail.png" alt="Twitter" /></a></div></div>';
-			const toEmail = new helper.Email(emailAddress);
-			const fromEmail = new helper.Email('admin@jsecoin.com');
-			const subject = 'JSEcoin Transfer Confirmation';
-			const content = new helper.Content('text/html', welcomeEmail);
-			const mail = new helper.Mail(fromEmail, subject, toEmail, content);
-			const request = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
-			sg.API(request, function (error, response) {
-			  if (error) { console.log('Sendgrid Error response received, transfer notification email '+emailAddress); }
-			});
-		}
+function transferNotificationEmails(fromUID,toUID,transactionValue) {
+	JSE.jseDataIO.getEmail(fromUID,function(emailAddress) {
+		JSE.jseDataIO.getVariable('account/'+fromUID+'/noEmailTransaction', function(noEmailTransaction) {
+			if (noEmailTransaction === null && fromUID > 0) {
+				const htmlEmail = '<img src="https://jsecoin.com/img/logosmall.png" style="float: right;" alt="JSEcoin" /><br>This is to confirm a transfer has been made from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Thank you for using JSEcoin. If you did not make this transaction please contact us by replying to this email as soon as possible.<br><br>Kind regards,<br><br>JSE Administration<br><hr style="border-top: 1px solid #000000;"><div style="margin-bottom: 10px;"><a href="https://jsecoin.com/"><img src="https://jsecoin.com/img/logosmall.png" alt="JSEcoin" /></a><div style="margin:10px; float: right;"><a href="https://www.facebook.com/officialjsecoin"><img src="https://jsecoin.com/img/facebookemail.png" alt="Facebook" /></a></div><div style="margin:10px; float: right;"><a href="https://twitter.com/jsecoin"><img src="https://jsecoin.com/img/twitteremail.png" alt="Twitter" /></a></div></div>';
+				const toEmail = new helper.Email(emailAddress);
+				const fromEmail = new helper.Email('admin@jsecoin.com');
+				const subject = 'JSEcoin Transfer Confirmation';
+				const content = new helper.Content('text/html', htmlEmail);
+				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
+				const request = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
+				sg.API(request, function (error, response) {
+					if (error) { console.log('Sendgrid Error response received, transfer notification email '+emailAddress); }
+				});
+			}
+		});
+	});
+	JSE.jseDataIO.getEmail(toUID,function(emailAddress2) {
+		JSE.jseDataIO.getVariable('account/'+toUID+'/noEmailTransaction', function(noEmailTransaction2) {
+			if (noEmailTransaction2 === null && toUID > 0) {
+				const htmlEmail = '<img src="https://jsecoin.com/img/logosmall.png" style="float: right;" alt="JSEcoin" /><br>This is to confirm you have received a transfer to your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Thank you for using JSEcoin.<br><br>Kind regards,<br><br>JSE Administration<br><hr style="border-top: 1px solid #000000;"><div style="margin-bottom: 10px;"><a href="https://jsecoin.com/"><img src="https://jsecoin.com/img/logosmall.png" alt="JSEcoin" /></a><div style="margin:10px; float: right;"><a href="https://www.facebook.com/officialjsecoin"><img src="https://jsecoin.com/img/facebookemail.png" alt="Facebook" /></a></div><div style="margin:10px; float: right;"><a href="https://twitter.com/jsecoin"><img src="https://jsecoin.com/img/twitteremail.png" alt="Twitter" /></a></div></div>';
+				const toEmail = new helper.Email(emailAddress2);
+				const fromEmail = new helper.Email('admin@jsecoin.com');
+				const subject = 'JSEcoin Funds Received';
+				const content = new helper.Content('text/html', htmlEmail);
+				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
+				const request = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
+				sg.API(request, function (error, response) {
+					if (error) { console.log('Sendgrid Error response received, transfer notification email '+emailAddress2); }
+				});
+			}
+		});
 	});
 }
 
@@ -412,5 +435,5 @@ function sendSMS(toPhoneNo,txtMsg) {
 }
 
 module.exports = {
- shuffle, randString, round, cleanString, sha256, buf2hex, hex2buf, createKeyPair, signData, verifyData, signHash, verifyHash, sendWelcomeEmail, sendStandardEmail, exportNotificationEmail, transferNotificationEmail, referral, genSafeUser, sendSMS,
+ shuffle, randString, round, cleanString, sha256, buf2hex, hex2buf, createKeyPair, signData, verifyData, signHash, verifyHash, sendWelcomeEmail, sendStandardEmail, exportNotificationEmail, transferNotificationEmails, referral, genSafeUser, sendSMS,
 };
