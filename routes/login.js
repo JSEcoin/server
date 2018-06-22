@@ -127,7 +127,7 @@ router.post('/*', function (req, res) {
 	} else {
 		// Log in with email variable
 		const email = JSE.jseFunctions.cleanString(String(req.body.email)).toLowerCase();
-		const password = JSE.jseFunctions.cleanString(String(req.body.password));
+		const password = JSE.jseFunctions.limitString(String(req.body.password));
 		const passwordHashed = JSE.jseFunctions.sha256(password);
 		if (req.body['g-recaptcha-response'] === undefined || req.body['g-recaptcha-response'] === '' || req.body['g-recaptcha-response'] === null) {
 			res.status(400).send('{"fail":1,"notification":"Recaptcha Error login.js 88, Please Try Again"}');

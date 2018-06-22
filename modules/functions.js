@@ -92,6 +92,19 @@ function cleanString(stringRaw) {
 }
 
 /**
+ * @method <h2>limitString</h2>
+ * @description User input restricted to 256 chars
+ * @param {string} stringRaw string to be cleaned
+ * @returns {string} cleaned string
+ */
+function limitString(stringRaw) {
+	let stringClean = stringRaw;
+	stringClean = String(stringClean);
+	stringClean = stringClean.substr(0, 255);
+	return stringClean;
+}
+
+/**
  * @method <h2>sha256</h2>
  * @description Standard SHA256 function, returns a Sha256 hash of the provided data string
  * @param {string} data data to be hashed
