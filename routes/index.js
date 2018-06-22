@@ -557,4 +557,46 @@ router.post('/setpin/*', function (req, res) {
 	return false;
 });
 
+/**
+ * @name /togglemail/*
+ * @description Turn on/off email transaction notifications and/or newsletter
+ * @memberof module:jseRouter
+ */
+router.post('/toggleemail/:type/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 519. No Session Variable"}'); return false; }
+	const session = req.body.session;
+	const mailType = JSE.jseFunctions.cleanString(req.params.type);
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials !== null) {
+			if (mailType === 'newsletter') {
+				JSE.jseDataIO.getVariable('account/'+goodCredentials.uid+'/noNewsletter',function(noNewsletter) {
+					if (noNewsletter) {
+						JSE.jseDataIO.hardDeleteVariable('account/'+goodCredentials.uid+'/noNewsletter');
+						res.send('{"success":1,"notification":"You will now receive the newletter","turnedOn":true}');
+					} else {
+						JSE.jseDataIO.setVariable('account/'+goodCredentials.uid+'/noNewsletter',true);
+						res.send('{"success":1,"notification":"You will not receive the newletter","turnedOff":true}');
+					}
+				});
+			} else if (mailType === 'transaction') {
+				JSE.jseDataIO.getVariable('account/'+goodCredentials.uid+'/noEmailTransaction',function(noEmailTransaction) {
+					if (noEmailTransaction) {
+						JSE.jseDataIO.hardDeleteVariable('account/'+goodCredentials.uid+'/noEmailTransaction');
+						res.send('{"success":1,"notification":"You will now receive transaction notifications via email","turnedOn":true}');
+					} else {
+						JSE.jseDataIO.setVariable('account/'+goodCredentials.uid+'/noEmailTransaction',true);
+						res.send('{"success":1,"notification":"You will not receive transaction notifications","turnedOff":true}');
+					}
+				});
+			}
+	 	} else {
+	 		res.status(401).send('{"fail":1,"notification":"Error index.js 573. Session Variable not recognized"}');
+	 	}
+	 	return false;
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error index.js 577. Session Variable not recognized"}');
+	});
+	return false;
+});
+
 module.exports = router;
