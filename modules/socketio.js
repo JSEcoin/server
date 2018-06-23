@@ -440,9 +440,11 @@ const jseSocketIO = {
 									if (JSE.socketConnections[key].miningType === 2) selfMinersCount +=1;
 								}
 							});
-							JSE.jseDataIO.setVariable('publicStats/clients/'+JSE.serverNickName,{});
-							JSE.jseDataIO.setVariable('publicStats/clients/'+JSE.serverNickName+'/publisherMinersCount',publisherMinersCount);
-							JSE.jseDataIO.setVariable('publicStats/clients/'+JSE.serverNickName+'/selfMinersCount',selfMinersCount);
+							const clientStats = {};
+							clientStats.publisherMinersCount = publisherMinersCount;
+							clientStats.selfMinersCount = selfMinersCount;
+							clientStats.updated = new Date().getTime();
+							JSE.jseDataIO.setVariable('publicStats/clients/'+JSE.serverNickName,clientStats);
 						}
 						// send blockPreHash to everyone
 						io.emit('blockPreHash', JSE.preHash);

@@ -991,7 +991,6 @@ const jseDB = {
 	/**
 	 * @method <h2>updatePublicStats</h2>
 	 * @description Update the JSE.publicStats variable, this is run from the controller every 10 minutes
-	 * @todo random cleaning of client data could be improved as this causes the number of logged in miners to drop off every so often
 	 */
 	updatePublicStats() {
 		JSE.publicStats.ts = new Date().getTime();
@@ -1048,7 +1047,15 @@ const jseDB = {
 		});
 
 		if (Math.random() > 0.99 || typeof JSE.publicStats.pubs === 'undefined') { // 1000 mins approx
-			JSE.jseDataIO.setVariable('publicStats/clients',{}); // reset connected clients
+			JSE.jseDataIO.getVariable('publicStats/clients',function(clientStats) {
+				const now = new Date().getTime();
+				const cutOffTime = now - 3600000; // 1 hour
+				Object.keys(clientStats).forEach(function(client) {
+					if (client.updated < cutOffTime) {
+						JSE.jseDataIO.hardDeleteVariable('publicStats/clients/'+client); // remove client from stats if no recent update
+					}
+				});
+			});
 		}
 
 		if (Math.random() > 0.66 || typeof JSE.publicStats.pubs === 'undefined') { // 30 mins approx
