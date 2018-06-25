@@ -22,12 +22,11 @@ router.get('/', function (req, res) {
 		<br><br><pre>${ascii}</pre><br>
 		<a href="https://JSEcoin.com" target="_blank">https://JSEcoin.com</a><br><br>
 		${JSE.jseVersion}<br><br>
-		<b>LOCAL SERVICES</b>
-		<br><a href="/blockchain" target="_blank">Blockchain Explorer</a><br>
+		<br><a href="https://blockchain.jsecoin.com" target="_blank">Blockchain Explorer</a><br>
 		<a href="/stats/" target="_blank">Stats</a><br>
 		<a href="/api/" target="_blank">API</a>
 		<br><a href="/peerlist/" target="_blank">Peer List</a><br>
-		<a href="/platform/" target="_blank">Platform Login</a>
+		<a href="https://platform.jsecoin.com" target="_blank">Platform Login</a>
 		<div id="tw" style="margin-top: 25px; font-weight: bold;"></div>
 		<script>
 		var t = 'THE FUTURE OF BLOCKCHAIN, ECOMMERCE AND DIGITAL ADVERTISING';
