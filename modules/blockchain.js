@@ -51,8 +51,8 @@ const jseBlockChain = {
 		JSE.jseSettings.systemMessage = ''; //'<span style="color:red">System is currently undergoing planned maintenance</span>'
 		JSE.jseSettings.loader = fs.readFileSync('./embed/loader.min.js').toString();
 		JSE.jseSettings.maxBlockFileSize = 1000; // how many blocks can fit in a blockchain before we restart
-		JSE.jseSettings.publisherPayout = 0.01;
-		JSE.jseSettings.platformPayout = 0.005;
+		JSE.jseSettings.publisherPayout = 2;
+		JSE.jseSettings.platformPayout = 1;
 		JSE.jseSettings.publisherWinners = 50;
 		JSE.jseSettings.platformWinners = 50;
 		JSE.jseSettings.fairResetTime = 60000;
