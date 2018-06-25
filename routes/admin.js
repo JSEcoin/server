@@ -360,7 +360,7 @@ router.get('/getexports/:uid/:adminpass', function(req, res) {
 	}
 	if (adminPass !== JSE.credentials.jseAdminKey) { return false; }
 	const uid = parseFloat(req.params.uid);
-	JSE.jseDataIO.getMyExportedCoins(uid,function(returnObject) {
+	JSE.jseDataIO.getAdminExportedCoins(uid,function(returnObject) {
 		res.send(JSON.stringify(returnObject));
 	});
 	return false;

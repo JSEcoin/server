@@ -1090,7 +1090,7 @@ const jseDB = {
 
 	/**
 	 * @method <h2>getMyExportedCoins</h2>
-	 * @description Update the JSE.publicStats variable, this is run from the controller every 10 minutes
+	 * @description Get a list of a users exported coincodes
 	 * @param {number} uid User ID
 	 * @param {function} callback callback with an array of exported coin objects
 	 */
@@ -1113,6 +1113,32 @@ const jseDB = {
 							removedCoinCodes += 1;
 						}
 						if (myExports.length === (myCoinCodeKeys.length - removedCoinCodes)) { callback(myExports); }
+					});
+				}
+			} else {
+				callback(myExports);
+			}
+		});
+	},
+
+		/**
+	 * @method <h2>getAdminExportedCoins</h2>
+	 * @description Used only by admin to check coincodes including removals
+	 * @param {number} uid User ID
+	 * @param {function} callback callback with an array of exported coin objects
+	 */
+	getAdminExportedCoins(uid,callback) {
+		JSE.jseDataIO.getVariable('lookupExports/'+uid,function(exported) { // optimise this, loading entire exported coins db
+			const myCoinCodeKeys = [];
+			const myExports = [];
+			Object.keys(exported).forEach(function(key) {
+				myCoinCodeKeys.push('exported/'+exported[key]);
+			});
+			if (myCoinCodeKeys.length > 0) {
+				for (let i = 0; i < myCoinCodeKeys.length; i+=1) {
+					JSE.jseDataIO.getVariable(myCoinCodeKeys[i],function(eCoin) { // eslint-disable-line
+						myExports.push(eCoin);
+						if (myExports.length === myCoinCodeKeys.length) { callback(myExports); }
 					});
 				}
 			} else {

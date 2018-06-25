@@ -17,6 +17,7 @@ commandLine
 	.option('-d, --datastore [value]', 'Authenticated datastore','http://10.128.0.12')
 	.option('-e, --blockstore [value]', 'Authenticated blockstore','http://10.128.0.13')
   .option('-t, --testnet [value]', 'Launch the testnet as remote, local or log', false)
+  .option('-g, --genesis', 'Create a new genesis block', true)
   .parse(process.argv);
 
 JSE.jseTestNet = commandLine.testnet;
@@ -66,14 +67,12 @@ setInterval(function() {
 	JSE.jseDataIO.getVariable('jseSettings',function(result) { JSE.jseSettings = result; });
 },  300000); // every 5 mins
 
-if (process.argv[2] && process.argv[2] === 'genesis')  jseBlockChain.createGenesisBlock();
-
 setTimeout(function() {
 	// old JSE listeners
 	JSE.jseDataIO.getVariable('jseSettings',function(result) { JSE.jseSettings = result; });
 	JSE.jseDataIO.getVariable('blockID',function(result) { JSE.blockID = result; });
+	if (commandLine.genesis) jseBlockChain.createGenesisBlock();
 }, 5000); // wait for db authentication
-
 
 setTimeout(function() {
 	jseBlockChain.newBlock();
