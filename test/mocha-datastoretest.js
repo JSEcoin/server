@@ -294,9 +294,10 @@ describe('jseDB Datastore Unit Test', function() {
 		JSE.jseDataIO.buildLedger(function(ledger){
 			Object.keys(ledger).forEach(function(key) {
 				if (typeof ledger[key] !== 'number') {
-					console.log('Potentially corrupted user data at: ledger/'+key);
+					console.log('Potentially corrupted user data at: ledger/'+key+' = '+ledger[key]);
+				} else {
+					assert(typeof ledger[key] === 'number');
 				}
-				assert(typeof ledger[key] === 'number');
 			});
 			done();
 		});

@@ -33,7 +33,13 @@ describe('jseFunctions Unit Test', function() {
 
 	it('jseFunctions.cleanString', function() {
 		const clean = JSE.jseFunctions.cleanString('jsecoinc!"£$%^&*){}#<>?/.,:@~#Continuând,sunteți{}][❤☂☢本網站由Продолжая');
-		assert(clean === 'jsecoinc$*?/.,:@Continund,suntei');
+		assert(clean === 'jsecoinc$&*?/.,:@Continund,suntei');
+		assert(typeof clean === 'string');
+	});
+
+	it('jseFunctions.limitString', function() {
+		const clean = JSE.jseFunctions.limitString('abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ!"£$%^&*()abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ!"£$%^&*()abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ!"£$%^&*()abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ!"£$%^&*()');
+		assert(clean === 'abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ!"£$%^&*()abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ!"£$%^&*()abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ!"£$%^&*()abcdefghijklmnopqrstuvwxyz1234567890ABC');
 		assert(typeof clean === 'string');
 	});
 
