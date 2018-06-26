@@ -21,7 +21,7 @@ JSE.jseTestNet = commandLine.testnet;
 
 if (JSE.jseTestNet !== false) console.log('WARNING: RUNNING IN TESTNET MODE - '+JSE.jseTestNet); // idiot check
 
-JSE.jseVersion = 'JSEcoin Datastore Server v1.7.2';
+JSE.jseVersion = 'JSEcoin Datastore Server v1.8.0';
 
 const dataDir = './data/'; // start with ./ relative to this files location ane end in slash i.e. ./data/
 const bkupDir = './logs/'; // as above

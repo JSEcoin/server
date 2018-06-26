@@ -24,7 +24,7 @@ JSE.jseTestNet = commandLine.testnet;
 
 if (JSE.jseTestNet !== false) console.log('WARNING: RUNNING IN TESTNET MODE - '+JSE.jseTestNet); // idiot check
 
-JSE.jseVersion = 'JSEcoin Controller';
+JSE.jseVersion = 'JSEcoin Controller v1.8.0';
 
 const fs = require('fs');
 const request = require('request');
