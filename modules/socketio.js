@@ -20,6 +20,8 @@ const jseLottery = require("./lottery.js");
 
 JSE.socketConnections = {}; // incoming connections to the server, includes miners and peers
 
+JSE.knownGoodIPs = {}; // quick search for goodIP badIP
+
 const jseSocketIO = {
 
 /**
@@ -120,6 +122,9 @@ const jseSocketIO = {
 					JSE.socketConnections[socket.id].uid = uid;
 					JSE.socketConnections[socket.id].session = session;
 					// these aren't verified so need to check they match if any critical data is being sent
+					if (JSE.knownGoodIPs[socket.realIP] && JSE.knownGoodIPs[socket.realIP] === true) {
+						JSE.socketConnections[socket.id].goodIP = true;
+					}
 					if (JSE.jseTestNet) console.log('registerSession from '+uid);
 					callback(true);
 				} else {
@@ -235,11 +240,13 @@ const jseSocketIO = {
 								if (result.block === 1) {
 									if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
 										JSE.socketConnections[socket.id].goodIP = false;
+										JSE.knownGoodIPs[socket.realIP] = false;
 									}
 									callback('badIP');
 								} else {
 									if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
 										JSE.socketConnections[socket.id].goodIP = true;
+										JSE.knownGoodIPs[socket.realIP] = true;
 									}
 									callback('goodIP');
 								}
@@ -249,11 +256,13 @@ const jseSocketIO = {
 								if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(socket.realIP) && JSE.anonymousIPs.indexOf(socket.realIP) > -1) {
 									if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
 										JSE.socketConnections[socket.id].goodIP = false;
+										JSE.knownGoodIPs[socket.realIP] = false;
 									}
 									callback('badIP');
 								} else {
 									if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
 										JSE.socketConnections[socket.id].goodIP = true;
+										JSE.knownGoodIPs[socket.realIP] = true;
 									}
 									callback('goodIP');
 								}
@@ -264,11 +273,13 @@ const jseSocketIO = {
 						if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(socket.realIP) && JSE.anonymousIPs.indexOf(socket.realIP) > -1) {
 							if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
 								JSE.socketConnections[socket.id].goodIP = false;
+								JSE.knownGoodIPs[socket.realIP] = false;
 							}
 							callback('badIP');
 						} else {
 							if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
 								JSE.socketConnections[socket.id].goodIP = true;
+								JSE.knownGoodIPs[socket.realIP] = true;
 							}
 							callback('goodIP');
 						}
@@ -277,11 +288,11 @@ const jseSocketIO = {
 					}
 				} else if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
 					JSE.socketConnections[socket.id].goodIP = false; // possibly using an old script or just not passing callback?
+					JSE.knownGoodIPs[socket.realIP] = false;
 				}
 			});
 
 			socket.on('blockPreHash',function(newPreHash) {
-				console.log('TTT123');
 				if (!JSE.authenticatedNode && newPreHash !== JSE.preHash) { // only for new hashes and on unauthenticated nodes
 					JSE.preHash = newPreHash; // need to check who sent it in?
 					if (JSE.jseTestNet) console.log('Received and distributing new preHash');
