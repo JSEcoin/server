@@ -264,7 +264,7 @@ function transferBackupFile() {
 
 			// send file to controller for 2nd backup
 			if (JSE.jseTestNet) console.log('Sending backup file to controller via scp');
-			exec('scp -o StrictHostKeyChecking=no -i ./.p '+bkupDir+yymmddhhmm+'.tar.gz ubuntu@10.128.0.13:/var/www/server/logs/datastore'+yymmddhhmm+'.tar.gz', (err3, stdout3, stderr3) => { // store together as .tar.gz
+			exec('scp -o StrictHostKeyChecking=no -i ./.p '+bkupDir+yymmddhhmm+'.tar.gz root@10.128.0.11:/root/logs/datastore'+yymmddhhmm+'.tar.gz', (err3, stdout3, stderr3) => { // store together as .tar.gz
 				if (err3) { console.log('ERROR URGENT db.js 214: Error gzipping backup file'); }
 				if (stderr3) console.log(`stderr: ${stderr3}`);
 			});
