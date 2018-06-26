@@ -21,7 +21,7 @@ function sendUserData(credentials,newSessionVar,req,res) {
 		if (typeof JSE.jseSettings.systemMessage !== 'undefined') {
 			userObject.systemMessage = JSE.jseSettings.systemMessage;
 		}
-		userObject.appReleaseSupport = 45;
+		userObject.appReleaseSupport = 48;
 		if (newSessionVar) {
 			userObject.session = newSessionVar; // set new session key on initial login
 		} else if (req.body.app) {
