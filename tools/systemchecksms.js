@@ -10,7 +10,9 @@ const { exec } = require('child_process');
 
 JSE.logDirectory = './../logs/';
 
-JSE.dbServer = 'http://10.128.0.12:80';
+JSE.dataStore1 ='http://10.128.0.5:80';
+JSE.blockStore1 = 'http://10.128.0.6:80';
+
 JSE.credentials = require('./../credentials.json');
 
 JSE.authenticatedNode = true;

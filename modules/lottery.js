@@ -295,7 +295,7 @@ function runLottery() {
 						JSE.jseDataIO.pushBlockData(stNewData,function(blockData) {});
 						const newData2 = JSON.parse(JSON.stringify(stNewData));
 						newData2.siteid = 'Platform Mining';
-						newData2.ts = blockTime;
+						newData2.ts = stBlockTime;
 						JSE.jseDataIO.pushVariable('mining/'+stUID,newData2,function(pushRef) {});
 					}, 4000 + (winCount*100),shuffledLottery[i].uid,shuffledLottery[i].siteid,newData,blockTime);
 					winCount += 1;
