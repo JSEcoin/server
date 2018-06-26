@@ -12,9 +12,9 @@ git init
 git remote add jsecoin https://github.com/JSEcoin/server.git
 git fetch jsecoin
 git pull jsecoin master
-cd server
 npm install
-mkdir logs/ mkdir data/
+mkdir logs/
+mkdir data/
 
 node jsenode.js -s localhost -n jsetestnet
 ```
@@ -30,9 +30,9 @@ git init
 git remote add jsecoin https://github.com/JSEcoin/server.git
 git fetch jsecoin
 git pull jsecoin master
-cd server
 npm install
-mkdir logs/ mkdir data/
+mkdir logs/
+mkdir data/
 
 node datastore.js
 node controller.js
@@ -46,19 +46,20 @@ Before you npm install the server directory you need to add node-gyp
 
 ```bash
 apt update
-apt upgrade
-apt install node.js
-apt install npm
+apt upgrade -y
+apt install node.js -y
+apt install npm -y
 npm i -g node-gyp
 npm i -g forever
 git init
 git remote add jsecoin https://github.com/JSEcoin/server.git
 git fetch jsecoin
 git pull jsecoin master
-cd server
 npm install
-mkdir logs/ mkdir data/
-chmod 777 logs & data
+mkdir logs/
+mkdir data/
+chmod 777 logs
+chmod 777 data
 ```
 
 ---
@@ -72,28 +73,28 @@ ES Lint Continuous:-
 
 **Load Servers**
 ```console
-@reboot cd /var/www/server && /usr/local/bin/forever -c "node --max-old-space-size=3000" start jsenode.js -s load.jsecoin.com -n load4 -m 0 &
+@reboot cd /root && /usr/local/bin/forever -c "node --max-old-space-size=3000" start jsenode.js -s load.jsecoin.com -n load4 -m 0 &
 35 16 * * * /usr/local/bin/forever restartall
 ```
 
 **Platform Servers**
 ```console
-@reboot cd /var/www/server && /usr/local/bin/forever -c "node --max-old-space-size=3000" start jsenode.js -s server.jsecoin.com -n server1 -m 0 &
+@reboot cd /root && /usr/local/bin/forever -c "node --max-old-space-size=3000" start jsenode.js -s server.jsecoin.com -n server1 -m 0 &
 5 17 * * * /usr/local/bin/forever restartall
 ```
 
 
 **Controller**
 ```console
-@reboot cd /var/www/server && /usr/local/bin/forever -c "node --max-old-space-size=3000" start controller.js &
-@reboot cd /var/www/server/tools && /usr/local/bin/forever start purgebkups.js &
-@reboot cd /var/www/server/tools && /usr/local/bin/forever start systemchecksms.js &
+@reboot cd /root && /usr/local/bin/forever -c "node --max-old-space-size=3000" start controller.js &
+@reboot cd /root/tools && /usr/local/bin/forever start purgebkups.js &
+@reboot cd /root/tools && /usr/local/bin/forever start systemchecksms.js &
 ```
 
 
 **Datastore**
 ```console
-@reboot cd /var/www/server && /usr/local/bin/forever -c "node --max-old-space-size=11500" start datastore.js &
+@reboot cd /root && /usr/local/bin/forever -c "node --max-old-space-size=10000" start datastore.js &
 ```
 
 
