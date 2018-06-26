@@ -56,7 +56,7 @@ const jseBlockChain = {
 		JSE.jseSettings.publisherWinners = 50;
 		JSE.jseSettings.platformWinners = 50;
 		JSE.jseSettings.fairResetTime = 60000;
-		JSE.jseDataIO.setVariable('JSE.jseSettings',JSE.jseSettings);
+		JSE.jseDataIO.setVariable('jseSettings',JSE.jseSettings);
 	},
 
 	/**

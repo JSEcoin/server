@@ -322,6 +322,15 @@ function nextRootKey(rootKeysCurrent, bkupFiles, bkupStartTime) {
 			}
 			const bkupFilesPlusOne = bkupFiles + 1;
 			nextRootKey(rootKeysCurrent, bkupFilesPlusOne, bkupStartTime);
+		} else if (typeof data[rootKey] === 'undefined') {
+			const bkupFilesPlusOne = bkupFiles + 1;
+			if (bkupFilesPlusOne >= rootKeysCurrent.length) { // run once after final file has completed backing up.
+				const bkupFinishTime = new Date().getTime();
+				console.log('Finished Writing BKUP File in: '+Math.round(((bkupFinishTime - bkupStartTime) / 1000),2)+' sec');
+				transferBackupFile();
+			} else {
+				nextRootKey(rootKeysCurrent, bkupFilesPlusOne, bkupStartTime);
+			}
 		} else {
 			fs.writeFile(dataDir+rootKey+'_tmp.json', JSON.stringify(data[rootKey]), 'utf8', function(err) { // eslint-disable-line
 				if (err) { console.log('ERROR URGENT db.js 251: Error writing backup file '+err.stack); }
