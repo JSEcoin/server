@@ -51,8 +51,8 @@ const jseBlockChain = {
 		JSE.jseSettings.systemMessage = ''; //'<span style="color:red">System is currently undergoing planned maintenance</span>'
 		JSE.jseSettings.loader = fs.readFileSync('./embed/loader.min.js').toString();
 		JSE.jseSettings.maxBlockFileSize = 1000; // how many blocks can fit in a blockchain before we restart
-		JSE.jseSettings.publisherPayout = 0.01;
-		JSE.jseSettings.platformPayout = 0.005;
+		JSE.jseSettings.publisherPayout = 2;
+		JSE.jseSettings.platformPayout = 1;
 		JSE.jseSettings.publisherWinners = 50;
 		JSE.jseSettings.platformWinners = 50;
 		JSE.jseSettings.fairResetTime = 60000;
@@ -330,9 +330,11 @@ const jseBlockChain = {
 	 * @returns {boolean} returns true if valid and false if there is an issue
 	 */
 	verifyBlockID (vBlockID) {
-		if (JSE.blockID <= 3) { return true; }
 		JSE.jseDataIO.getBlock(vBlockID,function(blockObjectRaw) {
-			if (blockObjectRaw === null) return false; // happens if controller dies
+			if (blockObjectRaw === null) { // happens if datastore dies
+				setTimeout(function() { jseBlockChain.newBlock(); }, 180000); // start next block in 3 mins
+				return false;
+			}
 			const blockObject = blockObjectRaw;
 			const vHash = blockObject.hash;
 			const vNonce = blockObject.nonce;
@@ -349,7 +351,7 @@ const jseBlockChain = {
 			if (blockPreHash !== vPreHash) { console.log('Prehash issues blockchain.js 274 ('+blockPreHash+'/'+vPreHash+')'); }
 			const targetText = blockPreHash+','+vNonce;
 			const vCheckHash = jseBlockChain.sha256(targetText);
-			if (vHash === vCheckHash) {
+			if (vHash === vCheckHash || JSE.blockID <= 3) {
 				console.log('Block ID: '+vBlockID+' Verified!');
 				setTimeout(function() { jseBlockChain.newBlock(); }, (JSE.jseSettings.frequency - 5500) || 24500); // start next block in x - 5.5 seconds
 				return true;

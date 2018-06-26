@@ -30,7 +30,7 @@ router.post('/*', function (req, res) {
   request(verificationUrl,function(error,response,bodyRaw) {
     const body = JSON.parse(bodyRaw);
     if (body.success && body.success === true) {
-			newUser.password = JSE.jseFunctions.cleanString(String(req.body.password)); //need bad chars removing?
+			newUser.password = JSE.jseFunctions.limitString(String(req.body.password));
 			newUser.passwordHashed = JSE.jseFunctions.sha256(newUser.password);
 			delete newUser.password; // remove password from database;
 			newUser.session = JSE.jseFunctions.randString(32);
@@ -118,6 +118,7 @@ router.post('/*', function (req, res) {
 						});
 						// send back safeUser
 						const safeUser = JSE.jseFunctions.genSafeUser(newUserR3);
+						safeUser.requirePin = true; // require pin setup on registration
 						res.send(JSON.stringify(safeUser));
 						console.log('New user: '+newUserR3.email+', From: '+newUserR3.campaign);
 						return false;

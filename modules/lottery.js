@@ -174,7 +174,7 @@ function credit(uid,siteid,subid,whatRaw){
 				//JSE.jseDataIO.pushVariable('lottery',lotteryInput); // no lottery entry for hits now.
 			//}
 		} else if (what === 'unique') {
-			if (Math.random() > 0.8) { // lower in due course
+			if (Math.random() > 0.9) { // lower in due course
 				JSE.jseDataIO.pushVariable('lottery',lotteryInput,function(pushRef) {});
 			}
 		} else if (what === 'optin') {
@@ -262,8 +262,12 @@ function runLottery() {
 		if (lottery !== null) {
 			const lotteryArray = [];
 			//for (const key in lottery) {
+			const singleUIDCheck = [];
 			Object.keys(lottery).forEach(function(key) {
-				lotteryArray.push(lottery[key]);
+				if (singleUIDCheck.indexOf(lottery[key].uid) === -1) {
+					singleUIDCheck.push(lottery[key].uid);
+					lotteryArray.push(lottery[key]);
+				}
 			});
 			const shuffledLottery = JSE.jseFunctions.shuffle(lotteryArray);
 			const uniquePublishers = [];

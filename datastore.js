@@ -2,14 +2,22 @@
  * @file datastore.js
  * @name JSE Datastore (datastore.js)
  * @example forever start -c "node --max-old-space-size=11500" datastore.js &
- * @version 1.7.2
+ * @example node --max-old-space-size=3000 datastore.js -p 82 -t local
+ * @version 1.8.0
  * @description The JSE datastore is a custom key value storage system design to efficiently handle Javascript objects via socket.io
  */
 
 const JSE = {};
 global.JSE = JSE;
+const commandLine = require('commander');
 
-JSE.jseTestNet = false; // 'remote', 'local' or false for production
+commandLine
+	.option('-p, --port [value]', 'Port',  80)
+	.option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
+  .option('-t, --testnet [value]', 'Launch the testnet as remote, local or log', false)
+  .parse(process.argv);
+
+JSE.jseTestNet = commandLine.testnet;
 
 if (JSE.jseTestNet !== false) console.log('WARNING: RUNNING IN TESTNET MODE - '+JSE.jseTestNet); // idiot check
 
@@ -20,8 +28,8 @@ const bkupDir = './logs/'; // as above
 
 const fs = require('fs');
 
-if (fs.existsSync('./credentials.json')) { // relative to server.js
-	JSE.credentials = require('./credentials.json'); // relative to datastore.js, extra ..
+if (fs.existsSync(commandLine.credentials)) {
+	JSE.credentials = require(commandLine.credentials);  // eslint-disable-line
 	JSE.authenticatedNode = true;
 } else {
 	JSE.credentials = false; // node with no authentication
@@ -33,10 +41,7 @@ const jseFunctions = require('./modules/functions.js');
 const express = require('express');
 const { exec } = require('child_process');
 
-let port = 80;
-if (JSE.jseTestNet === 'local') {
-	port = '82'; // run on port 82 when testing locally to avoid web server collision
-}
+const port = commandLine.port;
 
 // Setup express and socket.io for coms
 const app = express();
@@ -219,12 +224,21 @@ fs.readdir(dataDir, function(err, fileNames) {
 					const rootKey = fileName.split('.json')[0];
 					let jsonData = fs.readFileSync(dataDir+fileName, 'utf8');
 					if (rootKey.indexOf('-') > -1) {
-						const rkSplit = rootKey.split('-');
-						const rootKeyMain = rkSplit[0];
-						const rootKeySub = rkSplit[1];
-						if (typeof data[rootKeyMain] === 'undefined') data[rootKeyMain] = {};
-						console.log('Loading '+dataDir+fileName+' into '+rootKeyMain+'/'+rootKeySub+'/');
-						data[rootKeyMain][rootKeySub] = JSON.parse(jsonData);
+						if (rootKey.indexOf('blockChain') > -1) {
+							const rkSplit = rootKey.split('-');
+							const rootKeyMain = rkSplit[0];
+							const rootKeySub = rkSplit[1];
+							if (typeof data[rootKeyMain] === 'undefined') data[rootKeyMain] = {};
+							console.log('Loading '+dataDir+fileName+' into '+rootKeyMain+'/'+rootKeySub+'/');
+							data[rootKeyMain][rootKeySub] = JSON.parse(jsonData);
+						} else { // history
+							const rkSplit = rootKey.split('-');
+							const rootKeyMain = rkSplit[0];
+							const rootKeySub = rkSplit[1];
+							if (typeof data[rootKeyMain] === 'undefined') data[rootKeyMain] = {};
+							console.log('Loading '+dataDir+fileName+' into '+rootKeyMain+'/');
+							Object.assign(data[rootKeyMain], JSON.parse(jsonData));
+						}
 					} else {
 						console.log('Loading '+dataDir+fileName+' into '+rootKey+'/');
 						data[rootKey] = JSON.parse(jsonData);
@@ -288,6 +302,26 @@ function nextRootKey(rootKeysCurrent, bkupFiles, bkupStartTime) {
 			const subBkupFiles = 0;
 			const subKeysCurrent = Object.keys(data[rootKey]);
 			nextSubKey(subKeysCurrent, subBkupFiles, rootKeysCurrent, bkupFiles, bkupStartTime);
+		} else if (rootKey === 'history') {
+			const subBkupFiles = 0;
+			const keyCount = Object.keys(data[rootKey]).length;
+			const subKeyCount = Math.ceil(keyCount / 25000);
+			for (let i = 0; i < subKeyCount; i+=1) {
+				const tmpSubObject = {};
+				const splitFileNo = i;
+				for (let i2 = 0; i2 < 25000; i2+=1) {
+					const userIndex = (splitFileNo * 25000) + i2;
+					tmpSubObject[userIndex] = data[rootKey][userIndex];
+				}
+				fs.writeFile(dataDir+rootKey+'-'+splitFileNo+'_tmp.json', JSON.stringify(tmpSubObject), 'utf8', function(err) { // eslint-disable-line
+					if (err) { console.log('ERROR URGENT db.js 306: Error writing backup file '+err.stack); }
+					fs.rename(dataDir+rootKey+'-'+splitFileNo+'_tmp.json', dataDir+rootKey+'-'+splitFileNo+'.json', function (err2) {
+						if (err2) { console.log('ERROR URGENT db.js 309: Error moving backup file '+err2.stack); }
+					});
+				});
+			}
+			const bkupFilesPlusOne = bkupFiles + 1;
+			nextRootKey(rootKeysCurrent, bkupFilesPlusOne, bkupStartTime);
 		} else {
 			fs.writeFile(dataDir+rootKey+'_tmp.json', JSON.stringify(data[rootKey]), 'utf8', function(err) { // eslint-disable-line
 				if (err) { console.log('ERROR URGENT db.js 251: Error writing backup file '+err.stack); }

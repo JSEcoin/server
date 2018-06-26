@@ -1,16 +1,24 @@
 /* global describe it done run */
 const JSE = {};
 global.JSE = JSE;
+/*
 JSE.testServer = 'https://load.jsecoin.com';
 JSE.dbServer = 'http://35.188.209.171';
+*/
+JSE.testServer = 'http://localhost:81';
+JSE.dataStore1 = 'http://localhost:82';
+JSE.blockStore1 = 'http://localhost:83';
+
 console.log('Starting Test For: '+JSE.testServer);
 
 // Generate test credentials if necessary
 JSE.setup = require('./mocha-setup.js');
 
-
 // Load up test credentials
 JSE.testCredentials = require('./../.testcredentials.json');
+
+// Import datastore credentials
+JSE.credentials = require('./../credentials.json');
 
 // Unit Tests - Modules
 // Test modules/functions.js
@@ -18,9 +26,6 @@ const functionsTest = require('./mocha-functionstest.js');
 
 // Load functions now they've been tested.
 JSE.jseFunctions = require('./../modules/functions.js');
-
-// Import datastore credentials
-JSE.credentials = require('./../credentials.json');
 
 JSE.authenticatedNode = true;
 

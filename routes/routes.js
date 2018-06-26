@@ -21,6 +21,8 @@ const newsite = require('./newsite');
 const checkout = require('./checkout');
 const push = require('./push');
 const api = require('./api');
+const ethereum = require('./ethereum');
+
 
 jseRouter.use(function(req, res, next) {
   if (req.method === 'OPTIONS') {
@@ -53,5 +55,6 @@ jseRouter.use('(|/server)/checkout', checkout);
 jseRouter.use('(|/server)/push', push);
 jseRouter.use('(|/server)/v1.7', api);
 jseRouter.use('(|/server)/api', api);
+jseRouter.use('(|/server)/ethereum', ethereum);
 
 module.exports = jseRouter;

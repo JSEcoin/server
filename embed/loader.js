@@ -293,6 +293,7 @@ var JSE = (function () {
 	/** v1.7 opt in mining code */
 
 	var privacyTranslations = {
+		"hr":{"p1":"Ovu stranicu podržava JSEcoin","p2":"Nastavkom na stranicu pristajete donirati vaše suvišne resurse.","p3":"Ovo neće utjecati na vaše korisničko iskustvo.","p4":"Privatnost i;","p5":"Pročitaj više","p6":"Izuzetci","p7":"Nastavi"}, // croatian
 		"zh-TW":{"p1":"本網站由JSEcoin支持","p2":"繼續您同意捐贈剩餘資源。","p3":"這不會影響您的瀏覽體驗。","p4":"隱私","p5":"了解更多","p6":"選擇退出","p7":"繼續"}, // chinese traditional
 		"zh-CN":{"p1":"本网站由JSEcoin支持","p2":"继续您同意捐赠剩余资源。","p3":"这不会影响您的浏览体验。","p4":"隐私","p5":"了解更多","p6":"选择退出","p7":"继续"}, // chinese simplified
 		"th":{"p1":"เว็บไซต์นี้ได้รับการสนับสนุนโดย JSEcoin","p2":"เมื่อดำเนินการต่อคุณตกลงที่จะบริจาคทรัพยากรที่มากเกินไป","p3":"การดำเนินการนี้จะไม่ส่งผลต่อการเรียกดูของคุณ","p4":"ความเป็นส่วนตัว","p5":"เรียนรู้เพิ่มเติม","p6":"เลือกออก","p7":"ต่อ"}, // thai

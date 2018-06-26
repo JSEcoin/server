@@ -2,7 +2,8 @@
  * @file jsenode.js
  * @name JSE Node (jsenode.js)
  * @example forever start -c "node --max-old-space-size=3000" jsenode.js -s load.jsecoin.com -n load4 -m 0 &
- * @version 1.7.2
+ * @example node jsenode.js -t local -s localhost -p 81 -n jimv18 -d http://localhost:82 -e http://localhost:83 -m 0
+ * @version 1.8.0
  * @description JSE nodes run the JSEcoin network. Each node can be used as a load server or as part of the p2p chain.<br><br>
 		Command Line Options:<br>
 		-f, --fullnode, Run fullnode rather than litenode<br>
@@ -11,6 +12,7 @@
 		-i, --interface, Run JSE client interface rather than server<br>
 		-c, --credentials [value], Credentials file location<br>
 		-d, --datastore [value], Authenticated datastore<br>
+		-e, --blockstore [value], Authenticated blockstore<br>
 		-b, --backup, Backup blockchain to logs/currentChain.json<br>
 		-u, --unauth, Run as P2P node no authentication required<br>
 		-m, --maxpeers [value], Set maximum outgoing peer connections<br>
@@ -21,7 +23,7 @@
 
 const JSE = {};
 global.JSE = JSE;
-JSE.version = '1.7.2';
+JSE.version = '1.8.0';
 
 const fs = require('fs');
 const request = require('request');
@@ -47,9 +49,10 @@ commandLine
   .option('-s, --server [value]', 'Local Server Hostname','load.jsecoin.com')
   .option('-i, --interface', 'Run JSE client interface rather than server')
   .option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
-  .option('-d, --datastore [value]', 'Authenticated datastore','http://10.128.0.12')
+	.option('-d, --datastore [value]', 'Authenticated datastore','http://10.128.0.12')
+	.option('-e, --blockstore [value]', 'Authenticated blockstore','http://10.128.0.13')
   .option('-b, --backup', 'Backup blockchain to logs/currentChain.json')
-  .option('-u, --unauth', 'Run as P2P node no authentication or DB required')
+  .option('-u, --unauth', 'Run as P2P node no authentication or datastore required')
   .option('-m, --maxpeers [value]', 'Set maximum outgoing peer connections', 3)
   .option('-l, --peerlist [value]', 'Custom peer seed','https://load.jsecoin.com:80') // production = https://server.jsecoin.com
   .option('-p, --port [value]', 'Port',  80)
@@ -74,7 +77,9 @@ console.log('Sever name set to: '+JSE.serverNickName);
 JSE.host = commandLine.server; // set dynamically in app.listen
 JSE.port = commandLine.port; // 80 behind load balancer on 443
 
-JSE.dbServer = commandLine.datastore; // use local ip address to avoid network fees
+JSE.dataStore1 = commandLine.datastore; // use local ip address to avoid network fees
+JSE.blockStore1 = commandLine.blockstore;
+
 const seedPeerSplit = commandLine.peerlist.split('/')[2].split(':'); // requires http and : port
 JSE.peerList  =  {
  0:
@@ -99,7 +104,7 @@ if (commandLine.unauth) {
 	JSE.authenticatedNode = false;
 }
 
-if (JSE.authenticatedNode === true) console.log('Running as authenticated node via @ '+JSE.dbServer);
+if (JSE.authenticatedNode === true) console.log('Running as authenticated node via @ '+JSE.dataStore1+' & '+JSE.blockStore1);
 if (JSE.authenticatedNode === false) console.log('Running in P2P Node Mode');
 
 if (JSE.jseTestNet === 'local') {
@@ -123,6 +128,7 @@ JSE.platformIPs = []; // store these locally as non critical
 JSE.platformUIDs = [];
 JSE.platformUniqueIDs = [];
 JSE.publisherIPs = [];
+JSE.pinAttempts = [];
 JSE.publisherAuthKeys = [];
 JSE.creditQuickLookup = {}; // dont db query on each hit,hash,unique
 JSE.recentSiteIDs = [];
@@ -180,14 +186,14 @@ app.use(function(err, req, res, next) {
  	if (JSE.jseTestNet !== false) console.log('Express Request Error: '+err.stack); //err.stack
 });
 
-
 /** Store capped serverLog in global variable to pull to admin panel */
 console.log = function(d) {
 	process.stdout.write(d+"\n");
 	JSE.serverLog.push(d);
 	if (JSE.serverLog.length >= 50) {
-		JSE.jseDataIO.setVariable('serverLog',JSE.serverLog.join("\n"));
-		setTimeout(function() { JSE.serverLog = []; }, 1000);
+		const serverLogText = JSE.serverLog.join("\n");
+		JSE.serverLog = [];
+		JSE.jseDataIO.setVariable('serverLog',serverLogText);
 	}
 };
 
@@ -246,6 +252,7 @@ fairReset();
 function fairResetLong() {
 	JSE.publisherIPs = [];
 	JSE.publisherAuthKeys = [];
+	JSE.pinAttempts = [];
 	setTimeout(function() {
 		fairResetLong();
 	}, 21600000); // 6 hours

@@ -59,7 +59,7 @@ const jseCommands = {
 						if (timeTillConfirmation > 30000) timeTillConfirmation = 30000;
 						if (timeTillConfirmation < 0) timeTillConfirmation = 29999;
 						callback('{"success":1, "notification": "Transfer Successful","timeTillConfirmation":'+timeTillConfirmation+'}');
-						JSE.jseFunctions.transferNotificationEmail(dataObject.user1,dataObject.value);
+						JSE.jseFunctions.transferNotificationEmails(dataObject.user1,dataObject.user2,dataObject.value);
 					}
 				});
 			} else if (dataObject.command === 'export') {
@@ -161,7 +161,6 @@ const jseCommands = {
 						}
 						JSE.jseDataIO.getTransactionReference(dataObject.tid,function(transactionReference) {
 							dataObject2.reference = transactionReference;
-
 							JSE.jseDataIO.pushVariable('history/'+toUser.uid,dataObject2,function(pushRef) {});
 							const dataObject3 = JSON.parse(JSON.stringify(dataObject2)); // clone don't reference
 							dataObject3.value = value / -1; // turn negative

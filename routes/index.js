@@ -22,12 +22,11 @@ router.get('/', function (req, res) {
 		<br><br><pre>${ascii}</pre><br>
 		<a href="https://JSEcoin.com" target="_blank">https://JSEcoin.com</a><br><br>
 		${JSE.jseVersion}<br><br>
-		<b>LOCAL SERVICES</b>
-		<br><a href="/blockchain" target="_blank">Blockchain Explorer</a><br>
+		<br><a href="https://blockchain.jsecoin.com" target="_blank">Blockchain Explorer</a><br>
 		<a href="/stats/" target="_blank">Stats</a><br>
 		<a href="/api/" target="_blank">API</a>
 		<br><a href="/peerlist/" target="_blank">Peer List</a><br>
-		<a href="/platform/" target="_blank">Platform Login</a>
+		<a href="https://platform.jsecoin.com" target="_blank">Platform Login</a>
 		<div id="tw" style="margin-top: 25px; font-weight: bold;"></div>
 		<script>
 		var t = 'THE FUTURE OF BLOCKCHAIN, ECOMMERCE AND DIGITAL ADVERTISING';
@@ -225,6 +224,14 @@ router.post('/updateapilevel/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error indedx.js 72. No Session Variable"}'); return false; }
 	const session = req.body.session;
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		const pin = String(req.body.pin).split(/[^0-9]/).join('');
+		let pinAttempts = 0;
+		JSE.pinAttempts.forEach((el) => { if (el === goodCredentials.uid) pinAttempts +=1; });
+		if (goodCredentials.pin !== pin || pin === null || typeof pin === 'undefined' || pinAttempts > 3) {
+			JSE.pinAttempts.push(goodCredentials.uid);
+			res.status(400).send('{"fail":1,"notification":"Error 252. Pin number incorrect or blocked, attempt '+(pinAttempts+1)+'/3"}');
+			return false;
+		}
 		if (goodCredentials !== null) {
 			JSE.jseDataIO.setVariable('credentials/'+goodCredentials.uid+'/apiLevel',parseFloat(req.body.newAPILevel));
 			res.send('1');
@@ -247,6 +254,14 @@ router.post('/updatedetails/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 717. No Session Variable"}'); return false; }
 	const session = req.body.session;
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		const pin = String(req.body.pin).split(/[^0-9]/).join('');
+		let pinAttempts = 0;
+		JSE.pinAttempts.forEach((el) => { if (el === goodCredentials.uid) pinAttempts +=1; });
+		if (goodCredentials.pin !== pin || pin === null || typeof pin === 'undefined' || pinAttempts > 3) {
+			JSE.pinAttempts.push(goodCredentials.uid);
+			res.status(400).send('{"fail":1,"notification":"Error 252. Pin number incorrect or blocked, attempt '+(pinAttempts+1)+'/3"}');
+			return false;
+		}
 		if (goodCredentials !== null) {
 			JSE.jseDataIO.setVariable('account/'+goodCredentials.uid+'/name',JSE.jseFunctions.cleanString(req.body.newName));
 			JSE.jseDataIO.setVariable('account/'+goodCredentials.uid+'/address',JSE.jseFunctions.cleanString(req.body.newAddress));
@@ -480,6 +495,107 @@ router.post('/logout/*', function (req, res) {
   	res.send('1');
   });
   return false;
+});
+
+/**
+ * @name /bountysubmission/*
+ * @description Submit Bounty Data
+ * @memberof module:jseRouter
+ */
+router.post('/bountysubmission/*', function (req, res) {
+  if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"No session provided"}'); return false; }
+	const session = JSE.jseFunctions.cleanString(req.body.session);
+  JSE.jseDataIO.getCredentialsBySession(session,function(credentials) {
+		const bountySubmission = {};
+		bountySubmission.uid = credentials.uid;
+		bountySubmission.email = credentials.email;
+		bountySubmission.ts = new Date().getTime();
+		bountySubmission.status = 1; // 1 pending, 2 = denied, 3 = approved
+		bountySubmission.bountyType = JSE.jseFunctions.cleanString(req.body.bountyType);
+		bountySubmission.bountyData = {};
+		Object.keys(req.body.bountyData).forEach(function(key) {
+			bountySubmission.bountyData[key] = JSE.jseFunctions.cleanString(req.body.bountyData[key]);
+		});
+  	JSE.jseDataIO.pushVariable('bounty/', bountySubmission, function(pushRef) {
+			res.send('{"success":1,"notification":"Bounty submission successful","pushRef":"'+pushRef+'"}');
+		});
+  },function() {
+  	res.status(400).send('{"fail":1,"notification":"Error index.js 496. Session Variable not recognized"}'); return false;
+  });
+  return false;
+});
+
+/**
+ * @name /setpin/*
+ * @description Set a pin number in credentials
+ * @memberof module:jseRouter
+ */
+router.post('/setpin/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 519. No Session Variable"}'); return false; }
+	const session = req.body.session;
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials !== null) {
+			if (goodCredentials.pin) {
+				res.status(400).send('{"fail":1,"notification":"Error index.js 524. Pin number has already been set"}');
+			} else {
+				const pin = String(req.body.pin).split(/[^0-9]/).join('');
+				if (pin.length >= 4 && pin.length <= 12 && pin !== '1234' && pin !== '0000') {
+					JSE.jseDataIO.setVariable('credentials/'+goodCredentials.uid+'/pin',pin);
+					res.send('{"success":1,"notification":"Pin number has been successfully set.<br><br>Thank you for helping secure your JSEcoin account."}');
+				} else {
+					res.status(400).send('{"fail":1,"notification":"Error index.js 531. Pin number not secure, must be 4-12 digits"}');
+				}
+			}
+	 	} else {
+	 		res.status(401).send('{"fail":1,"notification":"Error index.js 526. Session Variable not recognized"}');
+	 	}
+	 	return false;
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error index.js 530. Session Variable not recognized"}');
+	});
+	return false;
+});
+
+/**
+ * @name /togglemail/*
+ * @description Turn on/off email transaction notifications and/or newsletter
+ * @memberof module:jseRouter
+ */
+router.post('/toggleemail/:type/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 519. No Session Variable"}'); return false; }
+	const session = req.body.session;
+	const mailType = JSE.jseFunctions.cleanString(req.params.type);
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials !== null) {
+			if (mailType === 'newsletter') {
+				JSE.jseDataIO.getVariable('account/'+goodCredentials.uid+'/noNewsletter',function(noNewsletter) {
+					if (noNewsletter) {
+						JSE.jseDataIO.hardDeleteVariable('account/'+goodCredentials.uid+'/noNewsletter');
+						res.send('{"success":1,"notification":"You will now receive the newletter","turnedOn":true}');
+					} else {
+						JSE.jseDataIO.setVariable('account/'+goodCredentials.uid+'/noNewsletter',true);
+						res.send('{"success":1,"notification":"You will not receive the newletter","turnedOff":true}');
+					}
+				});
+			} else if (mailType === 'transaction') {
+				JSE.jseDataIO.getVariable('account/'+goodCredentials.uid+'/noEmailTransaction',function(noEmailTransaction) {
+					if (noEmailTransaction) {
+						JSE.jseDataIO.hardDeleteVariable('account/'+goodCredentials.uid+'/noEmailTransaction');
+						res.send('{"success":1,"notification":"You will now receive transaction notifications via email","turnedOn":true}');
+					} else {
+						JSE.jseDataIO.setVariable('account/'+goodCredentials.uid+'/noEmailTransaction',true);
+						res.send('{"success":1,"notification":"You will not receive transaction notifications","turnedOff":true}');
+					}
+				});
+			}
+	 	} else {
+	 		res.status(401).send('{"fail":1,"notification":"Error index.js 573. Session Variable not recognized"}');
+	 	}
+	 	return false;
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error index.js 577. Session Variable not recognized"}');
+	});
+	return false;
 });
 
 module.exports = router;
