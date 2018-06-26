@@ -75,9 +75,12 @@ router.post('/data/*', function (req, res) {
 		const pin = String(req.body.pin).split(/[^0-9]/).join('');
 		let pinAttempts = 0;
 		JSE.pinAttempts.forEach((el) => { if (el === goodCredentials.uid) pinAttempts +=1; });
-		if (goodCredentials.pin !== pin || pin === null || typeof pin === 'undefined' || pinAttempts > 3) {
+		if (pinAttempts > 3) {
+			res.status(400).send('{"fail":1,"notification":"Error 79. Account locked three incorrect attempts at pin number, please check again in six hours"}');
+			return false;
+		} else if (goodCredentials.pin !== pin || pin === null || typeof pin === 'undefined') {
 			JSE.pinAttempts.push(goodCredentials.uid);
-			res.status(400).send('{"fail":1,"notification":"Error 252. Pin number incorrect or blocked, attempt '+(pinAttempts+1)+'/3"}');
+			res.status(400).send('{"fail":1,"notification":"Error 83. Pin number incorrect or blocked, attempt '+(pinAttempts+1)+'/3"}');
 			return false;
 		}
 		const signed = {};
