@@ -20,8 +20,6 @@ const jseLottery = require("./lottery.js");
 
 JSE.socketConnections = {}; // incoming connections to the server, includes miners and peers
 
-JSE.knownGoodIPs = {}; // quick search for goodIP badIP
-
 const jseSocketIO = {
 
 /**
@@ -121,8 +119,9 @@ const jseSocketIO = {
 				if (typeof callback === "function") {
 					JSE.socketConnections[socket.id].uid = uid;
 					JSE.socketConnections[socket.id].session = session;
+					JSE.socketConnections[socket.id].miningType = 2;
 					// these aren't verified so need to check they match if any critical data is being sent
-					if (JSE.knownGoodIPs[socket.realIP] && JSE.knownGoodIPs[socket.realIP] === true) {
+					if (JSE.vpnData[socket.realIP] && JSE.vpnData[socket.realIP] === true) {
 						JSE.socketConnections[socket.id].goodIP = true;
 					}
 					if (JSE.jseTestNet) console.log('registerSession from '+uid);
@@ -228,44 +227,17 @@ const jseSocketIO = {
 						if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
 							JSE.socketConnections[socket.id].miningType = 2;
 						}
-						const apiURL = 'http://v2.api.iphub.info/ip/'+socket.realIP;
-						const apiKey = 'MTU5NTo3QWNvejVaZmxleGd1dVJ3N055a1dqVmxsQkNlRVlSSA==';
-						request.get({
-								url: apiURL,
-								json: true,
-								headers: { 'X-Key': apiKey },
-						}, (err, res, result) => {
-							if (result && result.block) {
-								if (JSE.jseTestNet) console.log('Result from iphub anonIP lookup: '+result.block);
-								if (result.block === 1) {
-									if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
-										JSE.socketConnections[socket.id].goodIP = false;
-										JSE.knownGoodIPs[socket.realIP] = false;
-									}
-									callback('badIP');
-								} else {
-									if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
-										JSE.socketConnections[socket.id].goodIP = true;
-										JSE.knownGoodIPs[socket.realIP] = true;
-									}
-									callback('goodIP');
+						JSE.jseFunctions.realityCheck(socket.realIP, function(goodIPTrue) {
+							if (goodIPTrue === true) {
+								if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+									JSE.socketConnections[socket.id].goodIP = true;
 								}
+								callback('goodIP');
 							} else {
-								// backup if run out of queries / regex is to check for valid IP
-								if (JSE.jseTestNet) console.log('Result from iphub failed using backup');
-								if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(socket.realIP) && JSE.anonymousIPs.indexOf(socket.realIP) > -1) {
-									if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
-										JSE.socketConnections[socket.id].goodIP = false;
-										JSE.knownGoodIPs[socket.realIP] = false;
-									}
-									callback('badIP');
-								} else {
-									if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
-										JSE.socketConnections[socket.id].goodIP = true;
-										JSE.knownGoodIPs[socket.realIP] = true;
-									}
-									callback('goodIP');
+								if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+									JSE.socketConnections[socket.id].goodIP = false;
 								}
+								callback('badIP');
 							}
 						});
 					} else if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
@@ -273,13 +245,13 @@ const jseSocketIO = {
 						if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(socket.realIP) && JSE.anonymousIPs.indexOf(socket.realIP) > -1) {
 							if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
 								JSE.socketConnections[socket.id].goodIP = false;
-								JSE.knownGoodIPs[socket.realIP] = false;
+								JSE.vpnData[socket.realIP] = false;
 							}
 							callback('badIP');
 						} else {
 							if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
 								JSE.socketConnections[socket.id].goodIP = true;
-								JSE.knownGoodIPs[socket.realIP] = true;
+								JSE.vpnData[socket.realIP] = true;
 							}
 							callback('goodIP');
 						}
@@ -288,7 +260,7 @@ const jseSocketIO = {
 					}
 				} else if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
 					JSE.socketConnections[socket.id].goodIP = false; // possibly using an old script or just not passing callback?
-					JSE.knownGoodIPs[socket.realIP] = false;
+					//JSE.vpnData[socket.realIP] = false;
 				}
 			});
 

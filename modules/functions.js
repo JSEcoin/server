@@ -24,6 +24,7 @@
  * </ul>
 */
 const JSE = global.JSE;
+const request = require('request');
 const crypto = require('crypto');
 const eccrypto = require("eccrypto");
 const sr = require('secure-random');
@@ -254,8 +255,8 @@ function sendWelcomeEmail(newUser) {
 	const subject = 'Please confirm your JSEcoin account';
 	const content = new helper.Content('text/html', welcomeEmail);
 	const mail = new helper.Mail(fromEmail, subject, toEmail, content);
-	const request = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
-	sg.API(request, function (error, response) {
+	const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
+	sg.API(requestSG, function (error, response) {
 	  if (error) { console.log('Sendgrid Error response received, welcome email '+newUser.email); }
 	});
 }
@@ -272,8 +273,8 @@ function sendStandardEmail(toEmailRaw,subject,htmlContent) {
 	const toEmail = new helper.Email(toEmailRaw);
 	const content = new helper.Content('text/html', '<img src="https://jsecoin.com/img/logosmall.png" style="float: right;" alt="JSEcoin" /><br>'+htmlContent+'<br><br>Kind regards,<br><br>The JSE Team<br><hr style="border-top: 1px solid #000000;"><div style="margin-bottom: 10px;"><a href="https://jsecoin.com/"><img src="https://jsecoin.com/img/logosmall.png" alt="JSEcoin" /></a><div style="margin:10px; float: right;"><a href="https://www.facebook.com/officialjsecoin"><img src="https://jsecoin.com/img/facebookemail.png" alt="Facebook" /></a></div><div style="margin:10px; float: right;"><a href="https://twitter.com/jsecoin"><img src="https://jsecoin.com/img/twitteremail.png" alt="Twitter" /></a></div></div>');
 	const mail = new helper.Mail(fromEmail, subject, toEmail, content);
-	const request = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
-	sg.API(request, function (error, response) {
+	const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
+	sg.API(requestSG, function (error, response) {
 	  if (error) { console.log('Sendgrid Error response received, sendStandardEmail email '+toEmailRaw); }
 	});
 }
@@ -294,8 +295,8 @@ function exportNotificationEmail(fromUID,transactionValue) {
 				const subject = 'JSEcoin Export Confirmation';
 				const content = new helper.Content('text/html', welcomeEmail);
 				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
-				const request = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
-				sg.API(request, function (error, response) {
+				const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
+				sg.API(requestSG, function (error, response) {
 					if (error) { console.log('Sendgrid Error response received, export notification email '+emailAddress); }
 				});
 			}
@@ -320,8 +321,8 @@ function transferNotificationEmails(fromUID,toUID,transactionValue) {
 				const subject = 'JSEcoin Transfer Confirmation';
 				const content = new helper.Content('text/html', htmlEmail);
 				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
-				const request = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
-				sg.API(request, function (error, response) {
+				const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
+				sg.API(requestSG, function (error, response) {
 					if (error) { console.log('Sendgrid Error response received, transfer notification email '+emailAddress); }
 				});
 			}
@@ -336,8 +337,8 @@ function transferNotificationEmails(fromUID,toUID,transactionValue) {
 				const subject = 'JSEcoin Funds Received';
 				const content = new helper.Content('text/html', htmlEmail);
 				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
-				const request = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
-				sg.API(request, function (error, response) {
+				const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
+				sg.API(requestSG, function (error, response) {
 					if (error) { console.log('Sendgrid Error response received, transfer notification email '+emailAddress2); }
 				});
 			}
@@ -358,8 +359,8 @@ function banEmail(banUID) {
 		const subject = 'JSEcoin Account Suspension';
 		const content = new helper.Content('text/html', welcomeEmail);
 		const mail = new helper.Mail(fromEmail, subject, toEmail, content);
-		const request = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
-		sg.API(request, function (error, response) {
+		const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
+		sg.API(requestSG, function (error, response) {
 		  if (error) { console.log('Sendgrid Error response received, welcome email '+emailAddress); }
 		});
 	});
@@ -434,6 +435,40 @@ function sendSMS(toPhoneNo,txtMsg) {
 	);
 }
 
+
+function realityCheck(ip,callback) {
+  if (ip in JSE.vpnData) {
+    if (JSE.jseTestNet) console.log('Result found in JSE.vpnData: '+JSE.vpnData[ip]);
+    callback(JSE.vpnData[ip]);
+  } else {
+    const apiURL = 'http://v2.api.iphub.info/ip/'+ip;
+    request.get({
+        url: apiURL,
+        json: true,
+        headers: { 'X-Key': JSE.credentials.ipHub },
+    }, (err, res, result) => {
+      if (result && 'block' in result) {
+        if (JSE.jseTestNet) console.log('Result from iphub anonIP lookup: '+result.block);
+        if (result.block === 1) {
+          JSE.vpnData[ip] = false;
+          callback(false);
+        } else {
+          JSE.vpnData[ip] = true;
+          callback(true);
+        }
+      } else {
+        // backup if run out of queries / regex is to check for valid IP
+        if (JSE.jseTestNet) console.log('Result from iphub failed using backup');
+        if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip) && JSE.anonymousIPs.indexOf(ip) > -1) {
+          callback(false);
+        } else {
+          callback(true);
+        }
+      }
+    });
+  }
+}
+
 module.exports = {
- shuffle, randString, round, cleanString, limitString, sha256, buf2hex, hex2buf, createKeyPair, signData, verifyData, signHash, verifyHash, sendWelcomeEmail, sendStandardEmail, exportNotificationEmail, transferNotificationEmails, referral, genSafeUser, sendSMS,
+ shuffle, randString, round, cleanString, limitString, sha256, buf2hex, hex2buf, createKeyPair, signData, verifyData, signHash, verifyHash, sendWelcomeEmail, sendStandardEmail, exportNotificationEmail, transferNotificationEmails, referral, genSafeUser, sendSMS, realityCheck,
 };

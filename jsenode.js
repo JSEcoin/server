@@ -138,6 +138,7 @@ JSE.alreadySentWelcomes = []; // restrict resend welcome emails to 1 per 30 minu
 JSE.alreadySentGeneral = []; // restrict support emails to 1 per 30 minutes
 JSE.preHash = '0';
 JSE.minerAuthKey = '0';
+JSE.vpnData = {};
 
 setInterval(function() {
 	JSE.alreadySentReset = [];
