@@ -83,6 +83,7 @@ router.post('/data/*', function (req, res) {
 			res.status(400).send('{"fail":1,"notification":"Error 83. Pin number incorrect or blocked, attempt '+(pinAttempts+1)+'/3"}');
 			return false;
 		}
+		req.body.pin = null; // wipe value
 		const signed = {};
 		signed.data = req.body.data;
 		signed.publicKey = req.body.publicKey;

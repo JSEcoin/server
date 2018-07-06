@@ -90,6 +90,18 @@ router.post('/cancel/*', function (req, res) {
 router.post('/*', function (req, res) {
 	const session = JSE.jseFunctions.cleanString(req.body.session);
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		const pin = String(req.body.pin).split(/[^0-9]/).join('');
+		let pinAttempts = 0;
+		JSE.pinAttempts.forEach((el) => { if (el === goodCredentials.uid) pinAttempts +=1; });
+		if (pinAttempts > 3) {
+			res.status(400).send('{"fail":1,"notification":"Error 97. Account locked three incorrect attempts at pin number, please check again in six hours"}');
+			return false;
+		} else if (goodCredentials.pin !== pin || pin === null || typeof pin === 'undefined') {
+			JSE.pinAttempts.push(goodCredentials.uid);
+			res.status(400).send('{"fail":1,"notification":"Error 101. Pin number incorrect or blocked, attempt '+(pinAttempts+1)+'/3"}');
+			return false;
+		}
+		req.body.pin = null; // wipe value
 		const checkout = req.body;
 		if (goodCredentials.uid === checkout.buyer.uid) {
 			const merchantSale = {};
@@ -160,6 +172,7 @@ router.post('/*', function (req, res) {
 		} else {
 			res.status(400).send('{"fail":1,"notification":"Payment Failed: UserID does not match sessionID."}');
 		}
+		return false;
 	},function() {
 		res.status(401).send('{"fail":1,"notification":"Payment Failed: Session credentials could not be verified."}');
 	});
