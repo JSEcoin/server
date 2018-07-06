@@ -55,7 +55,6 @@ router.post('/*', function (req, res) {
 				return;
 			}
 			// check for anonymous IP address
-			if (JSE.jseTestNet) console.log('Result from iphub failed using backup');
 			if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(newUser.regip) && JSE.anonymousIPs.indexOf(newUser.regip) > -1) {
 				console.log('Bot registration detected via anonymousIP from '+newUser.regip);
 		    const failed = {};

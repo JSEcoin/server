@@ -23,8 +23,9 @@ router.get('/', function (req, res) {
 		<a href="https://JSEcoin.com" target="_blank">https://JSEcoin.com</a><br><br>
 		${JSE.jseVersion}<br><br>
 		<br><a href="https://blockchain.jsecoin.com" target="_blank">Blockchain Explorer</a><br>
-		<a href="/stats/" target="_blank">Stats</a><br>
-		<a href="/api/" target="_blank">API</a>
+		<a href="https://blockchain.jsecoin.com/stats/#/Stats" target="_blank">Stats</a><br>
+		<a href="/stats/" target="_blank">JSON</a><br>
+		<a href="https://api.jsecoin.com/api/" target="_blank">API</a>
 		<br><a href="/peerlist/" target="_blank">Peer List</a><br>
 		<a href="https://platform.jsecoin.com" target="_blank">Platform Login</a>
 		<div id="tw" style="margin-top: 25px; font-weight: bold;"></div>
