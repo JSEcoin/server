@@ -455,23 +455,27 @@ function realityCheck(rawIP,callback) {
 						json: true,
 						headers: { 'X-Key': JSE.credentials.ipHub },
 				}, (err, res, result) => {
-					if (result && 'block' in result) {
+					if (typeof result == 'object' && 'block' in result) {
 						if (JSE.jseTestNet) console.log('Result from iphub anonIP lookup: '+result.block);
 						if (result.block === 1) {
 							JSE.vpnData[ip] = false; // badIP :(
-							callback(false);
 							JSE.jseDataIO.setVariable('ipCheck/'+ip,false);
+							callback(false);
 						} else {
 							JSE.vpnData[ip] = true; // goodIP :)
-							callback(true);
 							JSE.jseDataIO.setVariable('ipCheck/'+ip,true);
+							callback(true);
 						}
 					} else {
 						// backup if run out of queries / regex is to check for valid IP
 						if (JSE.jseTestNet) console.log('Result from iphub failed using backup');
 						if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip) && JSE.anonymousIPs.indexOf(ip) > -1) {
 							callback(false); // badIP :(
+							JSE.vpnData[ip] = false; // badIP :(
+							JSE.jseDataIO.setVariable('ipCheck/'+ip,false);							
 						} else {
+							JSE.vpnData[ip] = true; // goodIP :)
+							// don't set it to goodIP in database because iphub is better data
 							callback(true); // goodIP :)
 						}
 					}
