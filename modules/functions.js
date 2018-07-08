@@ -435,37 +435,53 @@ function sendSMS(toPhoneNo,txtMsg) {
 	);
 }
 
-
-function realityCheck(ip,callback) {
+/**
+ * @method <h2>realityCheck</h2>
+ * @description Check if an IP address is residential or a known server/VPN/proxy/ToR etc.
+ * @param {string} rawIP IP address
+ * @param {function} callback callback function with true/false (true = goodIP, false = badIP)
+ */
+function realityCheck(rawIP,callback) {
+	const ip = cleanString(rawIP);
   if (ip in JSE.vpnData) {
     if (JSE.jseTestNet) console.log('Result found in JSE.vpnData: '+JSE.vpnData[ip]);
     callback(JSE.vpnData[ip]);
   } else {
-    const apiURL = 'http://v2.api.iphub.info/ip/'+ip;
-    request.get({
-        url: apiURL,
-        json: true,
-        headers: { 'X-Key': JSE.credentials.ipHub },
-    }, (err, res, result) => {
-      if (result && 'block' in result) {
-        if (JSE.jseTestNet) console.log('Result from iphub anonIP lookup: '+result.block);
-        if (result.block === 1) {
-          JSE.vpnData[ip] = false;
-          callback(false);
-        } else {
-          JSE.vpnData[ip] = true;
-          callback(true);
-        }
-      } else {
-        // backup if run out of queries / regex is to check for valid IP
-        if (JSE.jseTestNet) console.log('Result from iphub failed using backup');
-        if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip) && JSE.anonymousIPs.indexOf(ip) > -1) {
-          callback(false);
-        } else {
-          callback(true);
-        }
-      }
-    });
+		JSE.jseDataIO.getVariable('ipCheck/'+ip, function(ipCheck) {
+			if (ipCheck === null) { // not found in db, lets check now
+				const apiURL = 'http://v2.api.iphub.info/ip/'+ip;
+				request.get({
+						url: apiURL,
+						json: true,
+						headers: { 'X-Key': JSE.credentials.ipHub },
+				}, (err, res, result) => {
+					if (result && 'block' in result) {
+						if (JSE.jseTestNet) console.log('Result from iphub anonIP lookup: '+result.block);
+						if (result.block === 1) {
+							JSE.vpnData[ip] = false; // badIP :(
+							callback(false);
+							JSE.jseDataIO.setVariable('ipCheck/'+ip,false);
+						} else {
+							JSE.vpnData[ip] = true; // goodIP :)
+							callback(true);
+							JSE.jseDataIO.setVariable('ipCheck/'+ip,true);
+						}
+					} else {
+						// backup if run out of queries / regex is to check for valid IP
+						if (JSE.jseTestNet) console.log('Result from iphub failed using backup');
+						if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip) && JSE.anonymousIPs.indexOf(ip) > -1) {
+							callback(false); // badIP :(
+						} else {
+							callback(true); // goodIP :)
+						}
+					}
+				});
+			} else if (ipCheck === true) {
+				callback(true); // goodIP found in ipCheck :)
+			} else {
+				callback(false); // badIP found in ipCheck  :(
+			}
+		});
   }
 }
 

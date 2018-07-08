@@ -117,12 +117,24 @@ const jseSocketIO = {
 
 			socket.on('registerSession', function(uid,session,callback) {
 				if (typeof callback === "function") {
-					JSE.socketConnections[socket.id].uid = uid;
-					JSE.socketConnections[socket.id].session = session;
-					JSE.socketConnections[socket.id].miningType = 2;
-					// these aren't verified so need to check they match if any critical data is being sent
-					if (JSE.vpnData[socket.realIP] && JSE.vpnData[socket.realIP] === true) {
-						JSE.socketConnections[socket.id].goodIP = true;
+					if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+						JSE.socketConnections[socket.id].uid = uid;
+						JSE.socketConnections[socket.id].session = session;
+						JSE.socketConnections[socket.id].miningType = 2;
+						// these aren't verified so need to check they match if any critical data is being sent
+						if (JSE.vpnData[socket.realIP] && JSE.vpnData[socket.realIP] === true) {
+							JSE.socketConnections[socket.id].goodIP = true;
+						} else if (JSE.vpnData[socket.realIP] && JSE.vpnData[socket.realIP] === false) {
+							JSE.socketConnections[socket.id].goodIP = false;
+						} else {
+							JSE.jseFunctions.realityCheck(socket.realIP, function(goodIPTrue) {
+								if (goodIPTrue === true && typeof JSE.socketConnections[socket.id] !== 'undefined') {
+									JSE.socketConnections[socket.id].goodIP = true;
+								} else if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+									JSE.socketConnections[socket.id].goodIP = false;
+								}
+							});
+						}
 					}
 					if (JSE.jseTestNet) console.log('registerSession from '+uid);
 					callback(true);
