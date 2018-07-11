@@ -315,6 +315,13 @@ var JSE = (function () {
 		"ar":{"p1":"ويدعم هذا الموقع من قبل جسكوين","p2":"من خلال الاستمرار كنت توافق على التبرع الموارد الفائضة.","p3":"لن يؤثر ذلك في تجربة التصفح.","p4":"الإجمالية","p5":"أعرف أكثر","p6":"انسحب","p7":"استمر"}, // arabic
 		"en":{"p1":"This site is supported by JSEcoin","p2":"By continuing you agree to donate surplus resources.","p3":"This will not impact your browsing experience.","p4":"Privacy &amp;","p5":"Learn more","p6":"Opt-out","p7":"Continue"} // english
 	}
+
+	// ICO
+	privacyTranslations.en.p5 = 'ICO Investors';
+	privacyTranslations.fr.p5 = 'Investisseurs ICO';
+	privacyTranslations.es.p5 = 'Inversores ICO';
+	privacyTranslations.ru.p5 = 'ICO инвесторы';
+
 	var browserLanguage = window.navigator.userLanguage || window.navigator.language || 'en-US';
 	var setLang = privacyTranslations.en;
 	for (var langRef in privacyTranslations) {
@@ -369,14 +376,14 @@ var JSE = (function () {
 						<br />\
 						'+setLang.p3+'<br />\
 						<a href="https://jsecoin.com/en/legal/privacyPolicy?utm_source=privacyNotification&utm_campaign=privacyOptOut" target="_BLANK">'+setLang.p4+' '+setLang.p6+'</a>\
-						<a href="https://platform.jsecoin.com/?lander=2&utm_source=referral&utm_campaign=aff'+jseTrack.pubID+'&utm_content=privacyLearnMoreLink" target="_BLANK">'+setLang.p5+'</a>\
+						<a href="https://jsecoin.com/ico/?utm_source=privacyNotification&utm_campaign=privacyInvestors" target="_BLANK">'+setLang.p5+'</a>\
 					</span>\
 				</p>\
 				<div id="'+o.dID+'"></div>\
 				<div id="'+o.bcID+'">\
 					<button id="'+o.cID+'">'+setLang.p7+'</button>\
 					<a href="https://jsecoin.com/en/legal/privacyPolicy?utm_source=privacyNotification&utm_campaign=privacyOptOut" id="'+o.pID+'" target="_BLANK">'+setLang.p6+'</a>\
-					<a href="https://platform.jsecoin.com/?lander=2&utm_source=referral&utm_campaign=aff'+jseTrack.pubID+'&utm_content=privacyLearnMoreLink" id="'+o.lmID+'" target="_BLANK">'+setLang.p5+'</a>\
+					<a href="https://jsecoin.com/ico/?utm_source=privacyNotification&utm_campaign=privacyInvestors" id="'+o.lmID+'" target="_BLANK">'+setLang.p5+'</a>\
 				</div>\
 			</div>';
 	}
