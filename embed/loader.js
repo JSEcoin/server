@@ -277,17 +277,17 @@ var JSE = (function () {
 				});
 			}
 		}
-		setTimeout(function() {
+		setTimeout(function(y) {
 			// using the same CPU balancing from V1, could this be improved?
 			var hashingFinished = new Date().getTime();
-			var hashesCompleted = x - startNumber;
+			var hashesCompleted = y - startNumber;
 			var hashingSeconds = (hashingFinished - hashingStarted) / 1000;
 			hps = Math.floor(hashesCompleted / hashingSeconds);
 			hashRate = Math.floor(hps * 1.1);
 			if (hashRate < 25) { hashRate = 25; }
 			if (hashRate > 2000) { hashRate = 2000; }
 			jseMineV2(); // restart mining function with new hash rate based on previous seconds work total
-		}, 1000);
+		}, 1000,x);
 	}
 	
 	/** v1.7 opt in mining code */
