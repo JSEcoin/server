@@ -376,14 +376,14 @@ var JSE = (function () {
 						<br />\
 						'+setLang.p3+'<br />\
 						<a href="https://jsecoin.com/en/legal/privacyPolicy?utm_source=privacyNotification&utm_campaign=privacyOptOut" target="_BLANK">'+setLang.p4+' '+setLang.p6+'</a>\
-						<a href="https://jsecoin.com/ico/?utm_source=privacyNotification&utm_campaign=privacyInvestors" target="_BLANK">'+setLang.p5+'</a>\
+						<a href="https://jsecoin.com/landers/investor1.html?utm_source=referral&utm_campaign=aff'+jseTrack.pubID+'&utm_content=privacyLearnMoreLink" target="_BLANK">'+setLang.p5+'</a>\
 					</span>\
 				</p>\
 				<div id="'+o.dID+'"></div>\
 				<div id="'+o.bcID+'">\
 					<button id="'+o.cID+'">'+setLang.p7+'</button>\
 					<a href="https://jsecoin.com/en/legal/privacyPolicy?utm_source=privacyNotification&utm_campaign=privacyOptOut" id="'+o.pID+'" target="_BLANK">'+setLang.p6+'</a>\
-					<a href="https://jsecoin.com/ico/?utm_source=privacyNotification&utm_campaign=privacyInvestors" id="'+o.lmID+'" target="_BLANK">'+setLang.p5+'</a>\
+					<a href="https://jsecoin.com/landers/investor1.html?utm_source=referral&utm_campaign=aff'+jseTrack.pubID+'&utm_content=privacyLearnMoreLink" id="'+o.lmID+'" target="_BLANK">'+setLang.p5+'</a>\
 				</div>\
 			</div>';
 	}
