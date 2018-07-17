@@ -357,7 +357,8 @@ var JSE = (function () {
 
 		//func to be assigned to onclick button event
 		o[o.f2] = function () {
-			DOM.ele.remove(); //remove banner
+			//	DOM.ele.remove(); //remove banner
+			DOM.ele.parentNode.removeChild(DOM.ele); // IE 11 compatibility
 			clear();
 			startMining(true);
 		}
@@ -566,7 +567,8 @@ var JSE = (function () {
 	function create() { // Create Banner
 		var self = this;
 		if (DOM.ele) {
-			DOM.ele.remove();
+			//DOM.ele.remove();
+			DOM.ele.parentNode.removeChild(DOM.ele); // IE 11 Fix
 			clear();
 		}
 		updateIDs();
