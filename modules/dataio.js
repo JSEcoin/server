@@ -60,6 +60,9 @@
 const JSE = global.JSE;
 const fs = require('fs'); // only required temporarily for testing
 const io = require('socket.io-client');
+const Web3 = require('web3');
+
+const web3 = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/'+JSE.credentials.infuraAPIKey));
 
 const dataStore1 = io.connect(JSE.dataStore1, {
 	reconnect: true, transports: ["websocket"], heartbeatTimeout: 1800000, maxHttpBufferSize: 1000000000,
@@ -1000,19 +1003,24 @@ const jseDB = {
 			JSE.jseDataIO.setVariable('publicStats/distributionAccount',JSE.publicStats.distributionAccount);
 			JSE.jseDataIO.setVariable('publicStats/charityAccount',JSE.publicStats.charityAccount);
 			let users = 0;
-			let coins = 0; // total circulation
+			let platformCoins = 0; // total circulation
 			Object.keys(ledger).forEach(function(key) {
 			//for(const key in ledger) {
 				//if (!ledger.hasOwnProperty(key)) continue;
 				users +=1;
-				coins += ledger[key];
+				platformCoins += ledger[key];
 			});
-			coins = Math.round(coins);
-			//publicStats.coins = JSE.jseFunctions.round(publicStats.coins);
 			JSE.publicStats.users = users;
-			JSE.publicStats.coins = coins;
 			JSE.jseDataIO.setVariable('publicStats/users',JSE.publicStats.users);
-			JSE.jseDataIO.setVariable('publicStats/coins',JSE.publicStats.coins);
+			// add web3 tokens from ICO
+			const jseContractObj = require('./JSETokenSale.json');
+			const tokenSaleContract = new web3.eth.Contract(jseContractObj.abi, '0xcfc4fceb90787ef1fda15bb115630ef453f50f86');
+			tokenSaleContract.methods.totalTokensSold().call().then((t) => {
+				const jseSold = Math.floor(t/10e17);
+				const coinTotal = Math.round(platformCoins + jseSold);
+				JSE.publicStats.coins = coinTotal;
+				JSE.jseDataIO.setVariable('publicStats/coins',JSE.publicStats.coins);
+			});
 		});
 		JSE.jseDataIO.getVariable('statsToday',function(statsDaily) {
 			let unique = 0;
