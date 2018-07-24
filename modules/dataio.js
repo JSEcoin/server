@@ -1016,7 +1016,7 @@ const jseDB = {
 			const jseContractObj = require('./JSETokenSale.json');
 			const tokenSaleContract = new web3.eth.Contract(jseContractObj.abi, '0xcfc4fceb90787ef1fda15bb115630ef453f50f86');
 			tokenSaleContract.methods.totalTokensSold().call().then((t) => {
-				const jseSold = Math.floor(t/10e17);
+				const jseSold = Math.floor(t/1e18);
 				const coinTotal = Math.round(platformCoins + jseSold);
 				JSE.publicStats.coins = coinTotal;
 				JSE.jseDataIO.setVariable('publicStats/coins',JSE.publicStats.coins);

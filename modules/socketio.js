@@ -137,9 +137,13 @@ const jseSocketIO = {
 						}
 					}
 					if (JSE.jseTestNet) console.log('registerSession from '+uid);
-					callback(true);
-				} else {
-					callback(false);
+					if (JSE.socketConnections[socket.id].goodIP === true) {
+						callback(true);
+					} else {
+						callback(false);
+					}
+				} else if (JSE.jseTestNet) {
+					console.log('Error socketio.js 143: callback not a function '+uid);
 				}
 			});
 

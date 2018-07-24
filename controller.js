@@ -82,7 +82,6 @@ setInterval(function() {
 	JSE.jseDataIO.updatePublicStats();
 }, 600000); // every 10 mins
 
-
 setInterval(function() {
 	jseBlockChain.verifyLedger();
 }, 3600000); // every 60 mins
