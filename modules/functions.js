@@ -255,6 +255,7 @@ function sendWelcomeEmail(newUser) {
 	const subject = 'Please confirm your JSEcoin account';
 	const content = new helper.Content('text/html', welcomeEmail);
 	const mail = new helper.Mail(fromEmail, subject, toEmail, content);
+	mail.categories = ["nodeserver","welcomeemail"];
 	const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
 	sg.API(requestSG, function (error, response) {
 	  if (error) { console.log('Sendgrid Error response received, welcome email '+newUser.email); }
@@ -273,6 +274,7 @@ function sendStandardEmail(toEmailRaw,subject,htmlContent) {
 	const toEmail = new helper.Email(toEmailRaw);
 	const content = new helper.Content('text/html', '<img src="https://jsecoin.com/img/logosmall.png" style="float: right;" alt="JSEcoin" /><br>'+htmlContent+'<br><br>Kind regards,<br><br>The JSE Team<br><hr style="border-top: 1px solid #000000;"><div style="margin-bottom: 10px;"><a href="https://jsecoin.com/"><img src="https://jsecoin.com/img/logosmall.png" alt="JSEcoin" /></a><div style="margin:10px; float: right;"><a href="https://www.facebook.com/officialjsecoin"><img src="https://jsecoin.com/img/facebookemail.png" alt="Facebook" /></a></div><div style="margin:10px; float: right;"><a href="https://twitter.com/jsecoin"><img src="https://jsecoin.com/img/twitteremail.png" alt="Twitter" /></a></div></div>');
 	const mail = new helper.Mail(fromEmail, subject, toEmail, content);
+	mail.categories = ["nodeserver","standardemail"];
 	const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
 	sg.API(requestSG, function (error, response) {
 	  if (error) { console.log('Sendgrid Error response received, sendStandardEmail email '+toEmailRaw); }
@@ -295,6 +297,7 @@ function exportNotificationEmail(fromUID,transactionValue) {
 				const subject = 'JSEcoin Export Confirmation';
 				const content = new helper.Content('text/html', welcomeEmail);
 				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
+				mail.categories = ["nodeserver","exportnotification"];
 				const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
 				sg.API(requestSG, function (error, response) {
 					if (error) { console.log('Sendgrid Error response received, export notification email '+emailAddress); }
@@ -321,6 +324,7 @@ function transferNotificationEmails(fromUID,toUID,transactionValue) {
 				const subject = 'JSEcoin Transfer Confirmation';
 				const content = new helper.Content('text/html', htmlEmail);
 				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
+				mail.categories = ["nodeserver","transfernotification"];
 				const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
 				sg.API(requestSG, function (error, response) {
 					if (error) { console.log('Sendgrid Error response received, transfer notification email '+emailAddress); }
@@ -337,6 +341,7 @@ function transferNotificationEmails(fromUID,toUID,transactionValue) {
 				const subject = 'JSEcoin Funds Received';
 				const content = new helper.Content('text/html', htmlEmail);
 				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
+				mail.categories = ["nodeserver","transfernotification"];
 				const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
 				sg.API(requestSG, function (error, response) {
 					if (error) { console.log('Sendgrid Error response received, transfer notification email '+emailAddress2); }
@@ -359,6 +364,7 @@ function banEmail(banUID) {
 		const subject = 'JSEcoin Account Suspension';
 		const content = new helper.Content('text/html', welcomeEmail);
 		const mail = new helper.Mail(fromEmail, subject, toEmail, content);
+		mail.categories = ["nodeserver","banemail"];
 		const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
 		sg.API(requestSG, function (error, response) {
 		  if (error) { console.log('Sendgrid Error response received, welcome email '+emailAddress); }

@@ -309,14 +309,16 @@ const jseSocketIO = {
 
 					if (subSiteID === 'Platform Mining') {
 						//if (subUID === 60186) console.log('# JTEST # subIP: '+subIP+' / '+JSE.platformIPs.indexOf(subIP)+' / subUID: ' + subUID+' / '+JSE.platformUIDs.indexOf(subUID)+' / SubUnique: '+subUnique+ ' / '+JSE.platformUniqueIDs.indexOf(subUnique)+' goodIP: '+socket.goodIP);
-						if (JSE.platformIPs.indexOf(subIP) === -1 && JSE.platformUIDs.indexOf(subUID) === -1 && JSE.platformUniqueIDs.indexOf(subUnique) === -1  && socket.goodIP && socket.goodIP === true) { // one
-							JSE.platformIPs.push(subIP);
-							JSE.platformUIDs.push(subUID);
-							JSE.platformUniqueIDs.push(subUnique);
-							jseLottery.credit(subUID,'Platform Mining',0,'hash');
-						} else {
-							jseLottery.credit(subUID,'Platform Mining',0,'nolotteryhash');
-						}
+						JSE.jseDataIO.getVariable('account/'+subUID+'/jseUnique',function(uniqueCheck) {
+							if (uniqueCheck === subUnique && JSE.platformIPs.indexOf(subIP) === -1 && JSE.platformUIDs.indexOf(subUID) === -1 && JSE.platformUniqueIDs.indexOf(subUnique) === -1  && socket.goodIP && socket.goodIP === true) { // one
+								JSE.platformIPs.push(subIP);
+								JSE.platformUIDs.push(subUID);
+								JSE.platformUniqueIDs.push(subUnique);
+								jseLottery.credit(subUID,'Platform Mining',0,'hash');
+							} else {
+								jseLottery.credit(subUID,'Platform Mining',0,'nolotteryhash');
+							}
+						});
 					} else if (JSE.publisherIPs.indexOf(subIP) === -1 && socket.goodIP && socket.goodIP === true) {
 						JSE.publisherIPs.push(subIP);
 						jseLottery.credit(subUID,subSiteID,subSubID,'hash');

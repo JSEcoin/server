@@ -60,7 +60,7 @@ if (fs.existsSync(commandLine.credentials)) {
 
 JSE.jseFunctions = require('./modules/functions.js'); // round robin bug means has to be JSE
 const jseBlockChain = require('./modules/blockchain.js');
-const jseBackup = require('./modules/backup.js');
+const jseSchedule = require('./modules/schedule.js');
 JSE.jseDataIO = require('./modules/dataio.js'); // can't call initialiseApp twice from modules
 
 setInterval(function() {
@@ -90,8 +90,9 @@ if (JSE.jseTestNet === false) {
 	jseBlockChain.verifyLedger();
 }
 
-jseBackup.runAtMidnight(); // reset stats
-jseBackup.runAtMidday(); // do merchant subsriptions
+jseSchedule.runAtMidnight(); // reset stats
+jseSchedule.runAtMidday(); // do merchant subsriptions
+jseSchedule.runAt5pm(); // best time to send emails
 
 // Production use to prevent and log any crashes
 if (JSE.jseTestNet === false) {

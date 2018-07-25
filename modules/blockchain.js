@@ -19,7 +19,7 @@
 const JSE = global.JSE;
 const crypto = require('crypto');
 const fs = require('fs');
-const jseBackup = require("./backup.js");
+const jseSchedule = require("./schedule.js");
 const jseLottery = require("./lottery.js");
 
 const jseBlockChain = {
@@ -97,7 +97,7 @@ const jseBlockChain = {
 				console.log('Finalising and writing blockchain JSON');
 				JSE.jseDataIO.saveNewBlock(blockObject,function(){
 					jseBlockChain.blockChangeOver(function(){
-						jseBackup.resetBlockChainFile();
+						jseSchedule.resetBlockChainFile();
 					});
 				});
 			} else {
@@ -133,7 +133,7 @@ const jseBlockChain = {
 					});
 				}
 				jseBlockChain.setPreviousPreHash(newBlockID);
-				jseBackup.storeLogs();
+				jseSchedule.storeLogs();
 				callback();
 				setTimeout(function() { jseLottery.runLottery(); jseBlockChain.verifyBlockID(bidMinus2); }, 5000);
 			});
@@ -372,7 +372,7 @@ const jseBlockChain = {
 	 */
 	verifyLedger () {
 		JSE.jseDataIO.buildLedger(function(ledger) {
-			jseBackup.backupLedger(ledger);
+			jseSchedule.backupLedger(ledger);
 			const vLedger = JSON.parse(JSON.stringify(ledger));
 			const blockRef = JSE.jseDataIO.getBlockRef(JSE.blockID);
 			JSE.jseDataIO.getVariable('blockChain/'+blockRef+'/',function(currentBlockChain) {

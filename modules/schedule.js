@@ -60,6 +60,49 @@ function runAtMidday() {
 }
 
 /**
+ * @method <h2>runAt5pm</h2>
+ * @description Runs autoresponder series
+ */
+function runAt5pm() {
+	const now = new Date();
+	let peakTimeObject;
+	if (now.getHours() < 17) { // start it up later today if need be
+		peakTimeObject = new Date( now.getFullYear(), now.getMonth(), now.getDate(), 17, 10, 0 ); // eslint-disable-line
+	} else {
+		peakTimeObject = new Date( now.getFullYear(), now.getMonth(), now.getDate() + 1, 17, 10, 0 ); // eslint-disable-line
+	}
+	const msToMidday = peakTimeObject.getTime() - now.getTime();
+	console.log('runAtMidday set for '+(Math.floor(msToMidday / 60000))+' mins');
+	setTimeout(function() {
+		startAutoresponder();
+		runAt5pm(); // Then, reset again next midnight.
+	}, msToMidday);
+}
+
+/**
+ * @method <h2>startAutoresponder</h2>
+ * @description send out welcome email series
+ */
+function startAutoresponder() {
+	JSE.jseDataIO.getVariable('nextUserID',function(endID) {
+		const startID = endID - 30000; // only send to last 30k users, may need to increase if we get more than 30k users in a two week period
+		JSE.jseDataIO.getAdminAccounts(startID,endID,function(users){
+			Object.keys(users).forEach(function(i) {
+				if (typeof users[i] === 'undefined' || users[i] === null) return;
+				if (users[i].confirmed === true && !users[i].suspended) {
+					if (users[i].noNewsletter) return;
+					let aff = users[i].campaign.split(/[^0-9]/).join('');
+					aff = parseFloat(aff);
+					if (users[i].source !== 'referral' || (users[aff] && !users[aff].suspended)) { // check affiliate sending them wasn't suspended i.e. bots
+						//users[i]
+					}
+				}
+			});
+		});
+	});
+}
+
+/**
  * @method <h2>cleanNulls</h2>
  * @description moves all object data to an array and removes any null values
  * @param {object} firebaseObject this was from back when firebase was causing us formatting issues
@@ -263,5 +306,5 @@ function storeLogs() {
 
 
 module.exports = {
-	runAtMidnight, runAtMidday, cleanNulls, backupLedger, resetBlockChainFile, storeLogs,
+	runAtMidnight, runAtMidday, runAt5pm, cleanNulls, backupLedger, resetBlockChainFile, storeLogs,
 };
