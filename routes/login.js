@@ -31,11 +31,12 @@ function sendUserData(credentials,newSessionVar,req,res) {
 				userObject.session = userObject.mobileSession;
 			}
 		}
-		res.send(JSON.stringify(userObject)); // sends back full user object
 		if (req.body.jseUnique && req.body.jseUnique !== userObject.jseUnique) {
 			const jseUnique = JSE.jseFunctions.cleanString(req.body.jseUnique);
 			JSE.jseDataIO.setVariable('account/'+credentials.uid+'/jseUnique',jseUnique);
+			userObject.jseUnique = jseUnique;
 		}
+		res.send(JSON.stringify(userObject)); // sends back full user object
 	});
 }
 
