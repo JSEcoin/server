@@ -173,7 +173,10 @@ if (JSE.jseTestNet === false) {
 			const torIPsRaw = body.split("\n");
 			Object.keys(torIPsRaw).forEach(function(key) {
 				if (torIPsRaw[key].indexOf('ExitAddress ')) {
-					const torIP = torIPsRaw[key].split('ExitAddress ')[1].split(' ')[0];
+					let torIP = torIPsRaw[key].split('ExitAddress ')[1];
+					if (torIP.indexOf(' ')) {
+						torIP = torIP.split(' ')[0];
+					}
 					if (JSE.anonymousIPs.indexOf(torIP)) {
 						JSE.anonymousIPs.push(torIP);
 					}
