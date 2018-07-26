@@ -153,11 +153,41 @@ JSE.anonymousIPs = [];
 if (JSE.jseTestNet === false) {
 	// *info @ http://iplists.firehol.org/?ipset=firehol_anonymous    // regex ([0-9]|)([0-9]|)[0-9]/.* change to *
 	request('https://iplists.firehol.org/files/firehol_anonymous.netset', function (error, response, body) {
-		if (body) JSE.anonymousIPs = body.split("\n");
+		if (body) {
+			const fireholRaw = body.split("\n");
+			Object.keys(fireholRaw).forEach(function(key) {
+				let fireholIP = fireholRaw[key];
+				if (fireholIP.indexOf('/')) {
+					fireholIP = fireholIP.split('/')[0];
+				}
+				if (JSE.anonymousIPs.indexOf(fireholIP)) {
+					JSE.anonymousIPs.push(fireholIP);
+				}
+			});
+		}
 		if (error) console.log('Anonymous IP list download error. server.js 107: '+error);
 		if (JSE.jseTestNet) console.log('Loaded '+JSE.anonymousIPs.length+' anonymous IP addresses from firehol.org');
 	});
+	request('https://check.torproject.org/exit-addresses', function (error, response, body) {
+		if (body) {
+			const torIPsRaw = body.split("\n");
+			Object.keys(torIPsRaw).forEach(function(key) {
+				if (torIPsRaw[key].indexOf('ExitAddress ')) {
+					const torIP = torIPsRaw[key].split('ExitAddress ')[1].split(' ')[0];
+					if (JSE.anonymousIPs.indexOf(torIP)) {
+						JSE.anonymousIPs.push(torIP);
+					}
+				}
+			});
+		}
+		if (error) console.log('Anonymous IP list download error. server.js 107: '+error);
+		if (JSE.jseTestNet) console.log('Loaded '+JSE.anonymousIPs.length+' anonymous IP addresses from firehol.org');
+	});
+	setTimeout(() => {
+		console.log('Loaded '+JSE.anonymousIPs.length+' anonymous IPs');
+	}, 10000);
 }
+
 
 const routes = require('./routes/routes.js');
 
