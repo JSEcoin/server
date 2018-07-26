@@ -475,7 +475,7 @@ function realityCheck(rawIP,callback) {
 					} else {
 						// backup if run out of queries / regex is to check for valid IP
 						if (JSE.jseTestNet) console.log('Result from iphub failed using backup');
-						if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip) && JSE.anonymousIPs.indexOf(ip) > -1) {
+						if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip) && JSE.anonymousIPs[ip] === true) {
 							callback(false); // badIP :(
 							JSE.vpnData[ip] = false; // badIP :(
 							JSE.jseDataIO.setVariable('ipCheck/'+ip,false);

@@ -55,7 +55,7 @@ router.post('/*', function (req, res) {
 				return;
 			}
 			// check for anonymous IP address
-			if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(newUser.regip) && JSE.anonymousIPs.indexOf(newUser.regip) > -1) {
+			if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(newUser.regip) && JSE.anonymousIPs[newUser.regip] === true) {
 				console.log('Bot registration detected via anonymousIP from '+newUser.regip);
 		    const failed = {};
 				failed.fail = 1;

@@ -265,7 +265,7 @@ const jseSocketIO = {
 						});
 					} else if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
 						JSE.socketConnections[socket.id].miningType = 1;
-						if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(socket.realIP) && JSE.anonymousIPs.indexOf(socket.realIP) > -1) {
+						if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(socket.realIP) && JSE.anonymousIPs[socket.realIP] === true) {
 							if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
 								JSE.socketConnections[socket.id].goodIP = false;
 								JSE.vpnData[socket.realIP] = false;

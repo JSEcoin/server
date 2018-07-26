@@ -149,46 +149,42 @@ setInterval(function() {
 JSE.jseFunctions = require('./modules/functions.js'); // round robin bug means has to be JSE
 JSE.jseDataIO = require('./modules/dataio.js'); // can't call initialiseApp twice from modules
 
-JSE.anonymousIPs = [];
+JSE.anonymousIPs = {};
 if (JSE.jseTestNet === false) {
-	// *info @ http://iplists.firehol.org/?ipset=firehol_anonymous    // regex ([0-9]|)([0-9]|)[0-9]/.* change to *
+	setTimeout(function() {
+		console.log('Loaded '+Object.keys(JSE.anonymousIPs).length+' anonymous IPs');
+	}, 20000);
 	request('https://iplists.firehol.org/files/firehol_anonymous.netset', function (error, response, body) {
 		if (body) {
 			const fireholRaw = body.split("\n");
 			Object.keys(fireholRaw).forEach(function(key) {
 				let fireholIP = fireholRaw[key];
-				if (fireholIP && fireholIP.indexOf('/')) {
+				if (fireholIP && fireholIP.indexOf('/') > -1) {
 					fireholIP = fireholIP.split('/')[0];
 				}
-				if (JSE.anonymousIPs.indexOf(fireholIP)) {
-					JSE.anonymousIPs.push(fireholIP);
-				}
+				JSE.anonymousIPs[fireholIP] = true;
 			});
 		}
 		if (error) console.log('Anonymous IP list download error. server.js 107: '+error);
-		if (JSE.jseTestNet) console.log('Loaded '+JSE.anonymousIPs.length+' anonymous IP addresses from firehol.org');
+		//console.log('Loaded '+Object.keys(JSE.anonymousIPs).length+' anonymous IP addresses from firehol.org');
 	});
 	request('https://check.torproject.org/exit-addresses', function (error, response, body) {
 		if (body) {
 			const torIPsRaw = body.split("\n");
 			Object.keys(torIPsRaw).forEach(function(key) {
-				if (torIPsRaw[key].indexOf('ExitAddress ')) {
-					let torIP = torIPsRaw[key].split('ExitAddress ')[1];
-					if (torIP && torIP.indexOf(' ')) {
+				let torIP = torIPsRaw[key];
+				if (torIP.indexOf('ExitAddress ') > -1) {
+					torIP = torIP.split('ExitAddress ')[1];
+					if (torIP && torIP.indexOf(' ') > -1) {
 						torIP = torIP.split(' ')[0];
 					}
-					if (JSE.anonymousIPs.indexOf(torIP)) {
-						JSE.anonymousIPs.push(torIP);
-					}
+					JSE.anonymousIPs[torIP] = true;
 				}
 			});
 		}
-		if (error) console.log('Anonymous IP list download error. server.js 107: '+error);
-		if (JSE.jseTestNet) console.log('Loaded '+JSE.anonymousIPs.length+' anonymous IP addresses from firehol.org');
+		if (error) console.log('Anonymous IP list download error. server.js 186: '+error);
+		//console.log('Loaded '+Object.keys(JSE.anonymousIPs).length+' anonymous IP addresses from torproject.org');
 	});
-	setTimeout(() => {
-		console.log('Loaded '+JSE.anonymousIPs.length+' anonymous IPs');
-	}, 10000);
 }
 
 
