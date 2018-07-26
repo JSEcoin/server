@@ -38,10 +38,14 @@ function runTxt() {
 	JSE.jseDataIO.getVariable('publicStats',function(reply) {
 		console.log(reply);
 	});
+	
+	*/
 
-	var naughtyUsers = ['19522','19547','19590','19598','19606','19626'];
+	/*
+	const naughtyUsers = ['19522','19547','19590','19598','19606','19626'];
+	const banReason = 'referral fraud';
 	for (var i = 0; i < naughtyUsers.length; i+=1) {
-		banUser(naughtyUsers[i]);
+		banUser(naughtyUsers[i],banReason);
 	}
 	*/
 
@@ -427,9 +431,10 @@ function buildLookupTables() {
 
 //////////// work.js functions ///////////
 
-function banUser(uid) {
+function banUser(uid,banReason) {
 	JSE.jseDataIO.setVariable('credentials/'+uid+'/suspended',now);
 	JSE.jseDataIO.setVariable('account/'+uid+'/suspended',now);
+	JSE.jseDataIO.setVariable('account/'+uid+'/adminNotes',banReason);
 	console.log('banned '+uid);
 }
 
