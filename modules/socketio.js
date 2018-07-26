@@ -310,13 +310,16 @@ const jseSocketIO = {
 					if (subSiteID === 'Platform Mining') {
 						//if (subUID === 60186) console.log('# JTEST # subIP: '+subIP+' / '+JSE.platformIPs.indexOf(subIP)+' / subUID: ' + subUID+' / '+JSE.platformUIDs.indexOf(subUID)+' / SubUnique: '+subUnique+ ' / '+JSE.platformUniqueIDs.indexOf(subUnique)+' goodIP: '+socket.goodIP);
 						JSE.jseDataIO.getVariable('account/'+subUID+'/jseUnique',function(uniqueCheck) {
-							if (uniqueCheck === subUnique && JSE.platformIPs.indexOf(subIP) === -1 && JSE.platformUIDs.indexOf(subUID) === -1 && JSE.platformUniqueIDs.indexOf(subUnique) === -1  && socket.goodIP && socket.goodIP === true) { // one
+							if (subHash.substr(0, 4) === '0000' && subPreHash === JSE.preHash && uniqueCheck === subUnique && JSE.platformIPs.indexOf(subIP) === -1 && JSE.platformUIDs.indexOf(subUID) === -1 && JSE.platformUniqueIDs.indexOf(subUnique) === -1  && socket.goodIP && socket.goodIP === true) { // one
 								JSE.platformIPs.push(subIP);
 								JSE.platformUIDs.push(subUID);
 								JSE.platformUniqueIDs.push(subUnique);
 								jseLottery.credit(subUID,'Platform Mining',0,'hash');
 							} else {
 								jseLottery.credit(subUID,'Platform Mining',0,'nolotteryhash');
+								if (subHash.substr(0, 4) !== '0000') {
+									console.log('Bad hash from: '+subUID);
+								}
 							}
 						});
 					} else if (JSE.publisherIPs.indexOf(subIP) === -1 && socket.goodIP && socket.goodIP === true) {
