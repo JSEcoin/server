@@ -138,7 +138,14 @@ const jseSocketIO = {
 					}
 					if (JSE.jseTestNet) console.log('registerSession from '+uid);
 					if (JSE.socketConnections[socket.id].goodIP === true) {
-						callback(true);
+						// Check session is valid
+						JSE.jseDataIO.lookupSession(session,function(sUID) {
+							if (parseInt(sUID,10) === parseInt(uid,10)) {
+								callback(true);
+							} else {
+								callback(false);
+							}
+						});
 					} else {
 						callback(false);
 					}

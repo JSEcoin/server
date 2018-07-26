@@ -38,7 +38,6 @@ function runTxt() {
 	JSE.jseDataIO.getVariable('publicStats',function(reply) {
 		console.log(reply);
 	});
-	
 	*/
 
 	/*
