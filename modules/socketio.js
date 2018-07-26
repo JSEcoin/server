@@ -317,9 +317,6 @@ const jseSocketIO = {
 								jseLottery.credit(subUID,'Platform Mining',0,'hash');
 							} else {
 								jseLottery.credit(subUID,'Platform Mining',0,'nolotteryhash');
-								if (subHash.substr(0, 4) !== '0000') {
-									console.log('Bad hash from: '+subUID);
-								}
 							}
 						});
 					} else if (JSE.publisherIPs.indexOf(subIP) === -1 && socket.goodIP && socket.goodIP === true) {
