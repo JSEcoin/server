@@ -157,7 +157,7 @@ if (JSE.jseTestNet === false) {
 			const fireholRaw = body.split("\n");
 			Object.keys(fireholRaw).forEach(function(key) {
 				let fireholIP = fireholRaw[key];
-				if (fireholIP.indexOf('/')) {
+				if (fireholIP && fireholIP.indexOf('/')) {
 					fireholIP = fireholIP.split('/')[0];
 				}
 				if (JSE.anonymousIPs.indexOf(fireholIP)) {
@@ -174,7 +174,7 @@ if (JSE.jseTestNet === false) {
 			Object.keys(torIPsRaw).forEach(function(key) {
 				if (torIPsRaw[key].indexOf('ExitAddress ')) {
 					let torIP = torIPsRaw[key].split('ExitAddress ')[1];
-					if (torIP.indexOf(' ')) {
+					if (torIP && torIP.indexOf(' ')) {
 						torIP = torIP.split(' ')[0];
 					}
 					if (JSE.anonymousIPs.indexOf(torIP)) {
