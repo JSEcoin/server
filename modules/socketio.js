@@ -305,6 +305,7 @@ const jseSocketIO = {
 					const subUnique = JSE.jseFunctions.cleanString(hashSplit[4]);
 					const subSiteID = JSE.jseFunctions.cleanString(hashSplit[5]);
 					const subSubID = JSE.jseFunctions.cleanString(hashSplit[6]);
+					const subApp = JSE.jseFunctions.cleanString(hashSplit[7]) || null;
 					const subIP = socket.realIP;
 					if (JSE.jseTestNet) console.log('Hash submitted: '+subHash+' from '+subIP);
 					if (subHash.substr(0, JSE.jseSettings.difficulty) === '0'.repeat(JSE.jseSettings.difficulty) && subPreHash === JSE.preHash) {
@@ -321,7 +322,11 @@ const jseSocketIO = {
 								JSE.platformIPs.push(subIP);
 								JSE.platformUIDs.push(subUID);
 								JSE.platformUniqueIDs.push(subUnique);
-								jseLottery.credit(subUID,'Platform Mining',0,'hash');
+								if (JSE.jseFunctions.sha256(subApp) === '21401e6e9a50575136d40e9b0ca90e6a533401be84d683ae070e591700ed1ea9') {
+									jseLottery.credit(subUID,'Platform Mining',0,'hash');
+								} else {
+									console.log('Command line miner UID: '+subUID);
+								}
 							} else {
 								jseLottery.credit(subUID,'Platform Mining',0,'nolotteryhash');
 							}
