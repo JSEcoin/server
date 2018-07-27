@@ -313,7 +313,6 @@ const jseSocketIO = {
 					} else if (JSE.jseTestNet) {
 						console.log("Error socketio.js 268 hash submitted not matched difficulty or preHash mismatch\n"+subPreHash+"\n"+JSE.preHash);
 					}
-					// need random checks to verify hashes are correct, miner could just send anything
 
 					if (subSiteID === 'Platform Mining') {
 						//if (subUID === 60186) console.log('# JTEST # subIP: '+subIP+' / '+JSE.platformIPs.indexOf(subIP)+' / subUID: ' + subUID+' / '+JSE.platformUIDs.indexOf(subUID)+' / SubUnique: '+subUnique+ ' / '+JSE.platformUniqueIDs.indexOf(subUnique)+' goodIP: '+socket.goodIP);
@@ -322,10 +321,10 @@ const jseSocketIO = {
 								JSE.platformIPs.push(subIP);
 								JSE.platformUIDs.push(subUID);
 								JSE.platformUniqueIDs.push(subUnique);
-								if (JSE.jseFunctions.sha256(subAppID) === 'dbd9539993163ddcb8f3e9740f45a029be6d79220f5198d308e10ceb284dff41') {
+								if (subAppID === JSE.credentials.appID) {
 									jseLottery.credit(subUID,'Platform Mining',0,'hash');
 								} else {
-									console.log('Command line miner UID: '+subUID);
+									jseLottery.credit(subUID,'Platform Mining',0,'nolotteryhash');
 								}
 							} else {
 								jseLottery.credit(subUID,'Platform Mining',0,'nolotteryhash');

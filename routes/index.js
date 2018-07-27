@@ -605,4 +605,18 @@ router.post('/toggleemail/:type/*', function (req, res) {
 	return false;
 });
 
+/**
+ * @name /appid/*
+ * @description Used to provide a application id to deter command line miners
+ * @memberof module:jseRouter
+ */
+router.get('/appid/:clientid/*', function(req, res) {
+	if (JSE.jseFunctions.cleanString(req.params.type) === JSE.credentials.clientID) {
+		// could add additional checks on the request headers here or hash a seed+datestring to change daily if problem persists.
+		res.send(JSE.credentials.appID);
+	} else {
+		res.status(401).send('{"fail":1,"notification":"Error index.js 618. Client ID not recognized"}');
+	}
+});
+
 module.exports = router;
