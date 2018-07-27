@@ -611,7 +611,7 @@ router.post('/toggleemail/:type/*', function (req, res) {
  * @memberof module:jseRouter
  */
 router.get('/appid/:clientid/*', function(req, res) {
-	if (JSE.jseFunctions.cleanString(req.params.type) === JSE.credentials.clientID) {
+	if (JSE.jseFunctions.cleanString(req.params.clientid) === JSE.credentials.clientID) {
 		// could add additional checks on the request headers here or hash a seed+datestring to change daily if problem persists.
 		res.send(JSE.credentials.appID);
 	} else {
