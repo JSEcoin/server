@@ -174,7 +174,7 @@ function credit(uid,siteid,subid,whatRaw){
 				//JSE.jseDataIO.pushVariable('lottery',lotteryInput); // no lottery entry for hits now.
 			//}
 		} else if (what === 'unique') {
-			if (Math.random() > 0.9) { // lower in due course
+			if (Math.random() > 0.95) { // lower in due course
 				JSE.jseDataIO.pushVariable('lottery',lotteryInput,function(pushRef) {});
 			}
 		} else if (what === 'optin') {

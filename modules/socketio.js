@@ -215,8 +215,8 @@ const jseSocketIO = {
 					JSE.publisherIPs.push(socket.realIP);
 					if (ipCount <= 2) {
 						jseLottery.credit(pubID,siteID,subID,'optin');
-					} else {
-						jseLottery.credit(pubID,siteID,subID,'optinlotteryonly');
+					} else if (ipCount <= 5) {
+						jseLottery.credit(pubID,siteID,subID,'optinlotteryonly'); // could be removed when we have enough volume
 					}
 				}
 				// generate new key for new optin click
@@ -423,6 +423,13 @@ const jseSocketIO = {
 				if (JSE.jseTestNet) console.log('getChainData Request: '+fireKey);
 				const chainData = getTarget(fireKey); // getTarget function below
 				callback(chainData);
+			});
+
+			socket.on('getLedger', function(callback) {
+				if (JSE.jseTestNet) console.log('getLedger Request');
+				JSE.jseDataIO.getVariable('ledger/',function(currentLedger) {
+					callback(currentLedger);
+				});
 			});
 		}
 
