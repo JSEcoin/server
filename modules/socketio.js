@@ -442,7 +442,7 @@ const jseSocketIO = {
 		 */
 		function sendOutPreHash() {
 			preHashTimer += 500;
-			if (preHashTimer >= 29500 || preHashTimerFirstResult) {
+			if (preHashTimer >= 29000 || preHashTimerFirstResult) {
 				JSE.jseDataIO.getVariable('previousBlockPreHash',function(newPreviousBlockPreHash){
 					if (newPreviousBlockPreHash !== JSE.preHash) {
 						if (JSE.preHash !== 0) preHashTimerFirstResult = false; // change for second result after initial 0 > first preHash
