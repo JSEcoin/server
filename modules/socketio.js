@@ -441,8 +441,8 @@ const jseSocketIO = {
 		 * @description Send out preHash and new blocks to miners and peers
 		 */
 		function sendOutPreHash() {
-			preHashTimer += 250;
-			if (preHashTimer >= 29500 || preHashTimerFirstResult) {
+			preHashTimer += 500;
+			if (preHashTimer >= 29000 || preHashTimerFirstResult) {
 				JSE.jseDataIO.getVariable('previousBlockPreHash',function(newPreviousBlockPreHash){
 					if (newPreviousBlockPreHash !== JSE.preHash) {
 						if (JSE.preHash !== 0) preHashTimerFirstResult = false; // change for second result after initial 0 > first preHash
@@ -450,6 +450,8 @@ const jseSocketIO = {
 						JSE.preHash = newPreviousBlockPreHash;
 						JSE.lockedUIDs = []; // reset lockedUIDs on every block
 						if (JSE.jseTestNet) console.log('Connected clients: '+io.engine.clientsCount+' Sending blockPreHash '+JSE.preHash);
+						// send blockPreHash to everyone
+						io.emit('blockPreHash', JSE.preHash);
 						if (Math.random() > 0.9) { // every 5 minutes
 							let publisherMinersCount = 0;
 							let selfMinersCount = 0;
@@ -465,12 +467,10 @@ const jseSocketIO = {
 							clientStats.updated = new Date().getTime();
 							JSE.jseDataIO.setVariable('publicStats/clients/'+JSE.serverNickName,clientStats);
 						}
-						// send blockPreHash to everyone
-						io.emit('blockPreHash', JSE.preHash);
 					}
 				});
 			}
-			setTimeout(function() { sendOutPreHash(); }, 250);
+			setTimeout(function() { sendOutPreHash(); }, 500);
 		}
 		if (JSE.authenticatedNode) sendOutPreHash();
 
