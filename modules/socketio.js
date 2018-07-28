@@ -445,7 +445,7 @@ const jseSocketIO = {
 			if (preHashTimer >= 29000 || preHashTimerFirstResult) {
 				JSE.jseDataIO.getVariable('previousBlockPreHash',function(newPreviousBlockPreHash){
 					if (newPreviousBlockPreHash !== JSE.preHash) {
-						if (JSE.preHash !== 0) preHashTimerFirstResult = false; // change for second result after initial 0 > first preHash
+						if (JSE.preHash !== '0') preHashTimerFirstResult = false; // change for second result after initial 0 > first preHash
 						preHashTimer = 0;
 						JSE.preHash = newPreviousBlockPreHash;
 						JSE.lockedUIDs = []; // reset lockedUIDs on every block
