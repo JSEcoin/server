@@ -280,7 +280,7 @@ function connectToPeers() {
 								if (typeof timeoutTimer !== 'undefined') clearTimeout(timeoutTimer); // run once per 10 seconds
 									timeoutTimer = setTimeout(function() {
 									validatePossibleBlocks(); // loads it into JSE.currentChain
-								}, 5000); // allow 5 seconds, delays blockchain explorer etc. Could maybe be optimised
+								}, 1000); // allow 1 second, delays blockchain explorer etc. Could maybe be optimised, previously 5 seconds
 							}
 						}
 					}

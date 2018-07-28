@@ -353,12 +353,12 @@ const jseBlockChain = {
 			const vCheckHash = jseBlockChain.sha256(targetText);
 			if (vHash === vCheckHash || JSE.blockID <= 3) {
 				console.log('Block ID: '+vBlockID+' Verified!');
-				setTimeout(function() { jseBlockChain.newBlock(); }, (JSE.jseSettings.frequency - 5500) || 24500); // start next block in x - 5.5 seconds
+				setTimeout(function() { jseBlockChain.newBlock(); }, (JSE.jseSettings.frequency - 5250) || 24750); // start next block in x - 5.25 seconds, verifyBlockID called 5 secs later
 				return true;
 			}
 			console.log('Block verification 249 failed');
 			// Do we want to hit E-stop if block verification fails?
-			setTimeout(function() { jseBlockChain.newBlock(); }, (JSE.jseSettings.frequency - 5500) || 24500); // start next block in x - 5.5 seconds
+			setTimeout(function() { jseBlockChain.newBlock(); }, (JSE.jseSettings.frequency - 5250) || 24750); // start next block in x - 5.25 seconds
 			JSE.jseFunctions.sendStandardEmail('james@jsecoin.com','JSEcoin URGENT ERROR','There is a block verification error on block ID. '+vBlockID);
 			return false;
 		});
