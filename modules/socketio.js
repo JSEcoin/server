@@ -441,8 +441,8 @@ const jseSocketIO = {
 		 * @description Send out preHash and new blocks to miners and peers
 		 */
 		function sendOutPreHash() {
-			preHashTimer += 500;
-			if (preHashTimer >= 29000 || preHashTimerFirstResult) {
+			preHashTimer += 250;
+			if (preHashTimer >= 29500 || preHashTimerFirstResult) {
 				JSE.jseDataIO.getVariable('previousBlockPreHash',function(newPreviousBlockPreHash){
 					if (newPreviousBlockPreHash !== JSE.preHash) {
 						if (JSE.preHash !== 0) preHashTimerFirstResult = false; // change for second result after initial 0 > first preHash
@@ -470,7 +470,7 @@ const jseSocketIO = {
 					}
 				});
 			}
-			setTimeout(function() { sendOutPreHash(); }, 500);
+			setTimeout(function() { sendOutPreHash(); }, 250);
 		}
 		if (JSE.authenticatedNode) sendOutPreHash();
 
