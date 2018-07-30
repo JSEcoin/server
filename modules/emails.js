@@ -89,7 +89,7 @@ Please take a read when you get a chance and learn more about how JSEcoin can cr
 `;
 
 /* Onboarding 6 - Meet the JSE Team */
-emails.onboarding = `<table>
+emails.onboardingTeam = `<table>
 <tr><td style="padding: 5px;"><img src="https://jsecoin.com/img/team/james.png" style="height: 36px; width: 32px;" alt="James Bachini" /></td><td style="padding: 5px;">
 <a href="https://www.linkedin.com/in/james-bachini/">James Bachini</a> - CEO<br>
 James comes from a background in ad-tech and built the original proof of concept platform that went on to become JSEcoin. He previously launched two multi-million pound companies based around digital marketing and media buying.
@@ -116,8 +116,84 @@ Matthew is a CAIA charter holder and is responsible for focusing the overall dir
 </td></tr></table>
 `;
 
-/* Onboarding  -  */
-emails.onboarding = ``;
+/* Onboarding 7 - JSEcoin Pitch Deck */
+/* Requires PDF attachment */
+emails.onboardingPitch = `I have attached the JSEcoin pitch deck for your consideration.
+<br><br>
+If you wish to purchase JSE tokens now is the time to do so. We will shortly be closing the ICO and listing on exchanges where pricing will be set by open market conditions.
+<br><br>
+The team are here if you need help making a purchase and this guide outlines the simple steps to safely purchase JSE tokens.
+<br><br>
+<a href="https://jsecoin.com/HowToParticipateInICO.pdf">https://jsecoin.com/HowToParticipateInICO.pdf</a>
+<br><br>
+If you require any further assistance please do not hesitate to contact us at: <a href="https://jsecoin.com/support/contact/?utm_source=email&utm_campaign=emailonboarding&utm_content=onboardingPitch">https://jsecoin.com/support/contact/</a>
+<br><br>
+Thank you to everyone who has supported the project and helped us progress towards building a brighter more sustainable digital economy.
+`;
+
+/* Onboarding 8 - Get JSEcoin updates on youtube, facebook, telegram or twitter */
+emails.onboardingSocial = `You can connect with JSEcoin on social channels. Here’s a list of the top sites where you can keep up to date with JSE developments.
+<ul>
+<li><a href="https://twitter.com/jsecoin">https://twitter.com/jsecoin</a></li>
+<li><a href="https://www.facebook.com/officialjsecoin">https://www.facebook.com/officialjsecoin</a></li>
+<li><a href="https://t.me/jsetelegram">https://t.me/jsetelegram</a></li>
+<li><a href="https://discord.gg/3gBZsA4">https://discord.gg/3gBZsA4</a></li>
+<li><a href="https://bitcointalk.org/index.php?topic=2398571.0">https://bitcointalk.org/index.php?topic=2398571.0</a></li>
+<li><a href="https://www.reddit.com/r/JSEcoin_Official/">https://www.reddit.com/r/JSEcoin_Official/</a></li>
+<li><a href="https://steemit.com/@jsecoin">https://steemit.com/@jsecoin</a></li>
+<li><a href="https://medium.com/@jsecoin/">https://medium.com/@jsecoin/</a></li>
+<li><a href="https://www.youtube.com/channel/UCHtIF9KggJn9TDzr8pRYsYA">https://www.youtube.com/channel/UCHtIF9KggJn9TDzr8pRYsYA</a></li>
+<li><a href="https://www.linkedin.com/company/jsecoin-ltd/">https://www.linkedin.com/company/jsecoin-ltd/</a></li>
+<li><a href="https://github.com/jsecoin">https://github.com/jsecoin</a></li>
+<li><a href="https://www.instagram.com/jsecoinltd/">https://www.instagram.com/jsecoinltd/</a></li>
+</ul>
+`;
+
+/* Onboarding 9 - How Coincodes Work */
+emails.onboardingCoincodes = `The JSEcoin platform includes a section for coincodes. This allows you to export tokens as a alphanumeric key. Any user including yourself can then import these tokens back in to their platform account.
+<ul>
+<li>This opens up a lot of possibilities, such as:</li>
+<li>Sharing coincode giveaways on social media</li>
+<li>Sending funds to someone that doesn’t have an account yet</li>
+<li>Printing coincodes and storing in cold storage</li>
+<li>Printing coincodes in birthday cards</li>
+<li>Coincodes can be stored in escrow between parties</li>
+<li>Send a coincode via email or text message</li>
+</ul>
+Coincodes open up a lot of opportunities that we are only just beginning to explore. Try exporting a small amount and importing it back into your account as a demonstration of how this works at <a href="https://platform.jsecoin.com/?utm_source=email&utm_campaign=emailonboarding&utm_content=onboardingCoincodes">https://platform.jsecoin.com</a>
+`;
+
+/* Onboarding 10 - Get paid to promote the JSE project with our referrals program */
+emails.onboardingReferrals = `Did you know you can earn JSE by helping spread the word about our project. 
+<br><br>
+It’s easy to do, simply log in to the platform at <a href="https://platform.jsecoin.com/?utm_source=email&utm_campaign=emailonboarding&utm_content=onboardingReferrals">https://platform.jseocoin.com</a>
+<br><br>
+Then click "Referrals" and choose a link to send or use the share button in the top right.
+<br><br>
+You will earn JSE for each new user that signs up via your link.
+<br><br>
+Ideas for where to place your link:
+<ul>
+<li>Facebook</li>
+<li>Twitter</li>
+<li>Reddit</li>
+<li>Blog comments</li>
+<li>Forums</li>
+<li>Youtube comments</li>
+<li>Create articles on Steem.it or Medium</li>
+<li>Share with friends and colleagues via Whatsapp or Telegram</li>
+</ul>
+`;
+
+/* Onboarding 11 - How to use the desktop app */
+emails.onboardingDesktop = `The desktop app includes a number of benefits over the web platform. The most important of which is the automatic miner. This can be setup to start mining as soon as you switch your computer on in the morning until the end of the day, in the background, without needing to keep a browser window open.
+<br><br>
+You can download the desktop app from: <a href="https://jsecoin.com/downloads?utm_source=email&utm_campaign=emailonboarding&utm_content=onboardingDesktop">https://jsecoin.com/downloads</a>
+<br><br>
+The automated features are in the settings menu.
+<br><br>
+It should be pretty intuitive and easy to use but if you have any issues let us know.
+`;
 
 
 module.exports = emails;
