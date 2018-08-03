@@ -4,6 +4,70 @@
 */
 const emails = {};
 
+/* Standard email template */
+/* Requires $heading and $content, also includes sendgrid optout link */
+emails.template = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html style="margin: 0;padding: 0;" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title></title>
+  <meta name="viewport" content="width=device-width">
+  <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet" type="text/css">
+  <style>
+    @media only screen and (max-width: 720px){
+      #social-icons { margin-top: 0px !important; }
+      .social-icon { float: left !important; margin-left: 0 !important; }
+    }
+  </style>
+</head>
+<body style="font-family: Nunito, Arial, sans-seif; font-size: 13px; width: 100%; background: #F9F9F9; text-align: center; margin: 0px; padding: 0px;">
+  <a href="https://jsecoin.com" style="text-decoration:none;">
+    <img src="https://jsecoin.com/img/logoemail.png" style="height: 25px; width: 125px; margin-top: 1%;" alt="JSEcoin" />
+    <div style="font-size: 10px; color: #AAAAAA; margin-bottom: 1%;">JAVASCRIPT EMBEDDED CRYPTOCURRENCY</div>
+  </a>
+  <div style="width: 100%; margin: 0 auto; background: #FFFFFF; color: #444444;">
+    <div style="width: 50%; min-width: 300px; padding: 0% 2%; text-align: left; margin: 0 auto;">
+      <div style="margin-bottom: 10px;">
+        <img align="center" border="0" src="https://jsecoin.com/img/emailheader.png" alt="JSEcoin.com" title="JSEcoin.com" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: block !important;border: 0;height: auto;float: none;width: 100%;">
+      </div>
+      <h1 style="font-size: 15px; text-transform: uppercase;">$heading</h1>
+      <div>
+      $content
+      </div>
+      <br>Kind regards,<br><br>The JSE Team<br><br>
+      <hr style="border-top: 1px solid #CCCCCC;">
+      <a href="https://jsecoin.com/"><img src="https://jsecoin.com/img/logoemail.png" style="height: 25px; width: 125px;" alt="JSEcoin" /></a>
+      <div id="social-icons" style="margin-top: -32px;">
+        <div class="social-icon" style="margin:5px; float: right;"><a href="https://t.me/jsetelegram"><img src="https://jsecoin.com/img/telegram@2x.png" alt="Telegram" style="height: 26px; width: 26px; filter: grayscale(50%);" /></a></div>
+        <div class="social-icon" style="margin:5px; float: right;"><a href="https://discord.gg/3gBZsA4"><img src="https://jsecoin.com/img/discord@2x.png" alt="Discord" style="height: 26px; width: 26px; filter: grayscale(50%);" /></a></div>
+        <div class="social-icon" style="margin:5px; float: right;"><a href="https://www.youtube.com/channel/UCHtIF9KggJn9TDzr8pRYsYA"><img src="https://jsecoin.com/img/youtube@2x.png" alt="Youtube" style="height: 26px; width: 26px; filter: grayscale(50%);" /></a></div>
+        <div class="social-icon" style="margin:5px; float: right;"><a href="https://www.reddit.com/r/JSEcoin_Official/"><img src="https://jsecoin.com/img/reddit@2x.png" alt="Reddit" style="height: 26px; width: 26px; filter: grayscale(50%);" /></a></div>
+        <div class="social-icon" style="margin:5px; float: right;"><a href="https://twitter.com/jsecoin"><img src="https://jsecoin.com/img/twitter@2x.png" alt="Twitter" style="height: 26px; width: 26px; filter: grayscale(50%);" /></a></div>
+        <div class="social-icon" style="margin:5px; float: right;"><a href="https://www.facebook.com/officialjsecoin"><img src="https://jsecoin.com/img/facebook@2x.png" alt="Facebook" style="height: 26px; width: 26px; filter: grayscale(50%);" /></a></div>
+      </div>
+      <div style="clear: both;"></div>
+      <div style="color: #AAA; font-size: 11px;">
+        <div style="font-size: 13px;">JSEcoin Ltd</div>
+        Cambridgeshire, United Kingdom.<br>
+        Registered in England No. 10940920 - Dun and Bradstreet No. 100233913837
+        <ul>
+          <li><a style="color: #AAA; text-decoration: none;" href="https://jsecoin.com/?utm_source=email&utm_campaign=nodemails">https://jsecoin.com</a></li>
+          <li><a style="color: #AAA; text-decoration: none;" href="https://platform.jsecoin.com/?utm_source=email&utm_campaign=nodemails">https://platform.jsecoin.com</a></li>
+          <li><a style="color: #AAA; text-decoration: none;" href="https://blockchain.jsecoin.com/?utm_source=email&utm_campaign=nodemails">https://blockchain.jsecoin.com</a></li>
+        </ul>
+        You have received this email because you have either registered via the platoform or subscribed to our newsletter or partners network channel.<br>
+        <a href="https://platform.jsecoin.com">Preferences</a> | <a href="<%asm_global_unsubscribe_url%>">Unsubscribe</a> | <a href="https://jsecoin.com/en/legal/privacyPolicy">Privacy</a>
+        <br><br>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+/* Template 1 - Onboading email template */
+/* As above but includes P.S. Telegram link */
+emails.template1 = emails.templateStanard.split(`<br><br>Kind regards,<br><br>The JSE Team<br><br>`).join(`<br><br>Kind regards,<br><br>The JSE Team<br><br>P.S. Questions? Join us on <a href="https://t.me/jsetelegram">Telegram</a> and let's continue our conversation there.`);
+
 /* Welcome email with confirmation link */
 /* Requires $uid, $confirmlink dynamic insertion */
 emails.welcome = `Welcome to JSEcoin. You are user number $uid to join our group of cryptocurrency enthusiasts who want to see mass adoption of a greener, more sustainable cryptocurrency.

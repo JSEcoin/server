@@ -31,6 +31,7 @@ const sr = require('secure-random');
 const helper = require('sendgrid').mail;
 const sg = require('sendgrid')(JSE.credentials.sendgridAPIKey);
 const jseAPI = require("./apifunctions.js");
+const jseEmails = require("./emails.js");
 const twilio = require('twilio')('ACc50f44970e985329a823ae84606b9cf5', JSE.credentials.twilioAuthToken);
 
 /**
@@ -247,15 +248,14 @@ function verifyHash(hash, publicKeyHex, signatureHex, successCallback, failCallb
  * @param {object} newUser A user object
  */
 function sendWelcomeEmail(newUser) {
-	const welcomeEmail = '<img src="https://jsecoin.com/img/logosmall.png" style="float: right;" alt="JSEcoin" /><br>Hello and welcome to JSEcoin<br><br>Please confirm your JSEcoin account by visiting the following link:<br><b><a href="https://server.jsecoin.com/confirm/'+newUser.uid+'/'+newUser.confirmCode+'">https://server.jsecoin.com/confirm/'+newUser.uid+'/'+newUser.confirmCode+'</a></b><br><br>Your login email is: '+newUser.email+'<br><br>Your login password has been securely hashed on the server and deleted.<br><br>Please confirm your account, make a note of your login details and then delete this email.<br><br>Thank you for signing up to the JSEcoin platform. If you get a chance take a look at our <a href="https://jsecoin.com/faq/">Frequently Asked Questions</a><br><br>If you have any feedback or would like to ask a question please do not hesitate to <a href="https://jsecoin.com/contact/">Contact Us</a>.<br><br>Kind regards,<br><br>The JSE Team<br><hr style="border-top: 1px solid #000000;"><div style="margin-bottom: 10px;"><a href="https://jsecoin.com/"><img src="https://jsecoin.com/img/logosmall.png" alt="JSEcoin" /></a><div style="margin:10px; float: right;"><a href="https://www.facebook.com/officialjsecoin"><img src="https://jsecoin.com/img/facebookemail.png" alt="Facebook" /></a></div><div style="margin:10px; float: right;"><a href="https://twitter.com/jsecoin"><img src="https://jsecoin.com/img/twitteremail.png" alt="Twitter" /></a></div></div>';
-
-	// Send confirmation email
 	const fromEmail = new helper.Email('noreply@jsecoin.com');
 	const toEmail = new helper.Email(newUser.email);
 	const subject = 'Please confirm your JSEcoin account';
-	const content = new helper.Content('text/html', welcomeEmail);
+	const htmlContent = jseEmails.welcome.split('$uid').join(newUser.uid).split('$confirmlink').join('https://server.jsecoin.com/confirm/'+newUser.uid+'/'+newUser.confirmCode);
+	const emailHTML = jseEmails.template1.split('$heading').join(subject).split('$content').join(htmlContent);
+	const content = new helper.Content('text/html', emailHTML);
 	const mail = new helper.Mail(fromEmail, subject, toEmail, content);
-	mail.categories = ["nodeserver","welcomeemail"];
+	mail.categories = ["nodeserver","welcomeemail","template1"];
 	const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
 	sg.API(requestSG, function (error, response) {
 	  if (error) { console.log('Sendgrid Error response received, welcome email '+newUser.email); }
@@ -272,7 +272,8 @@ function sendWelcomeEmail(newUser) {
 function sendStandardEmail(toEmailRaw,subject,htmlContent) {
 	const fromEmail = new helper.Email('noreply@jsecoin.com');
 	const toEmail = new helper.Email(toEmailRaw);
-	const content = new helper.Content('text/html', '<img src="https://jsecoin.com/img/logosmall.png" style="float: right;" alt="JSEcoin" /><br>'+htmlContent+'<br><br>Kind regards,<br><br>The JSE Team<br><hr style="border-top: 1px solid #000000;"><div style="margin-bottom: 10px;"><a href="https://jsecoin.com/"><img src="https://jsecoin.com/img/logosmall.png" alt="JSEcoin" /></a><div style="margin:10px; float: right;"><a href="https://www.facebook.com/officialjsecoin"><img src="https://jsecoin.com/img/facebookemail.png" alt="Facebook" /></a></div><div style="margin:10px; float: right;"><a href="https://twitter.com/jsecoin"><img src="https://jsecoin.com/img/twitteremail.png" alt="Twitter" /></a></div></div>');
+	const emailHTML = jseEmails.template.split('$heading').join(subject).split('$content').join(htmlContent);
+	const content = new helper.Content('text/html', emailHTML);
 	const mail = new helper.Mail(fromEmail, subject, toEmail, content);
 	mail.categories = ["nodeserver","standardemail"];
 	const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
@@ -291,11 +292,12 @@ function exportNotificationEmail(fromUID,transactionValue) {
 	JSE.jseDataIO.getEmail(fromUID,function(emailAddress) {
 		JSE.jseDataIO.getVariable('account/'+fromUID+'/noEmailTransaction', function(noEmailTransaction) {
 			if (noEmailTransaction === null && fromUID > 0) {
-				const welcomeEmail = '<img src="https://jsecoin.com/img/logosmall.png" style="float: right;" alt="JSEcoin" /><br>This is to confirm a coincode has been exported from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Thank you for using JSEcoin. If you did not make this transaction please contact us by replying to this email as soon as possible.<br><br>Kind regards,<br><br>JSE Administration<br><hr style="border-top: 1px solid #000000;"><div style="margin-bottom: 10px;"><a href="https://jsecoin.com/"><img src="https://jsecoin.com/img/logosmall.png" alt="JSEcoin" /></a><div style="margin:10px; float: right;"><a href="https://www.facebook.com/officialjsecoin"><img src="https://jsecoin.com/img/facebookemail.png" alt="Facebook" /></a></div><div style="margin:10px; float: right;"><a href="https://twitter.com/jsecoin"><img src="https://jsecoin.com/img/twitteremail.png" alt="Twitter" /></a></div></div>';
-				const toEmail = new helper.Email(emailAddress);
+			const toEmail = new helper.Email(emailAddress);
 				const fromEmail = new helper.Email('admin@jsecoin.com');
 				const subject = 'JSEcoin Export Confirmation';
-				const content = new helper.Content('text/html', welcomeEmail);
+				const htmlContent = 'This is to confirm a coincode has been exported from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Thank you for using JSEcoin. If you did not make this transaction please contact us by replying to this email as soon as possible.';
+				const emailHTML = jseEmails.template.split('$heading').join(subject).split('$content').join(htmlContent);
+				const content = new helper.Content('text/html', emailHTML);
 				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
 				mail.categories = ["nodeserver","exportnotification"];
 				const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
@@ -318,11 +320,12 @@ function transferNotificationEmails(fromUID,toUID,transactionValue) {
 	JSE.jseDataIO.getEmail(fromUID,function(emailAddress) {
 		JSE.jseDataIO.getVariable('account/'+fromUID+'/noEmailTransaction', function(noEmailTransaction) {
 			if (noEmailTransaction === null && fromUID > 0) {
-				const htmlEmail = '<img src="https://jsecoin.com/img/logosmall.png" style="float: right;" alt="JSEcoin" /><br>This is to confirm a transfer has been made from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Thank you for using JSEcoin. If you did not make this transaction please contact us by replying to this email as soon as possible.<br><br>Kind regards,<br><br>JSE Administration<br><hr style="border-top: 1px solid #000000;"><div style="margin-bottom: 10px;"><a href="https://jsecoin.com/"><img src="https://jsecoin.com/img/logosmall.png" alt="JSEcoin" /></a><div style="margin:10px; float: right;"><a href="https://www.facebook.com/officialjsecoin"><img src="https://jsecoin.com/img/facebookemail.png" alt="Facebook" /></a></div><div style="margin:10px; float: right;"><a href="https://twitter.com/jsecoin"><img src="https://jsecoin.com/img/twitteremail.png" alt="Twitter" /></a></div></div>';
 				const toEmail = new helper.Email(emailAddress);
 				const fromEmail = new helper.Email('admin@jsecoin.com');
 				const subject = 'JSEcoin Transfer Confirmation';
-				const content = new helper.Content('text/html', htmlEmail);
+				const htmlContent = 'This is to confirm a transfer has been made from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Thank you for using JSEcoin. If you did not make this transaction please contact us by replying to this email as soon as possible.';
+				const emailHTML = jseEmails.template.split('$heading').join(subject).split('$content').join(htmlContent);
+				const content = new helper.Content('text/html', emailHTML);
 				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
 				mail.categories = ["nodeserver","transfernotification"];
 				const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
@@ -335,11 +338,12 @@ function transferNotificationEmails(fromUID,toUID,transactionValue) {
 	JSE.jseDataIO.getEmail(toUID,function(emailAddress2) {
 		JSE.jseDataIO.getVariable('account/'+toUID+'/noEmailTransaction', function(noEmailTransaction2) {
 			if (noEmailTransaction2 === null && toUID > 0) {
-				const htmlEmail = '<img src="https://jsecoin.com/img/logosmall.png" style="float: right;" alt="JSEcoin" /><br>This is to confirm you have received a transfer to your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>For more details please log in to your account at <a href="https://platform.jsecoin.com">https://platform.jsecoin.com</a><br><br>Thank you for using JSEcoin.<br><br>Kind regards,<br><br>JSE Administration<br><hr style="border-top: 1px solid #000000;"><div style="margin-bottom: 10px;"><a href="https://jsecoin.com/"><img src="https://jsecoin.com/img/logosmall.png" alt="JSEcoin" /></a><div style="margin:10px; float: right;"><a href="https://www.facebook.com/officialjsecoin"><img src="https://jsecoin.com/img/facebookemail.png" alt="Facebook" /></a></div><div style="margin:10px; float: right;"><a href="https://twitter.com/jsecoin"><img src="https://jsecoin.com/img/twitteremail.png" alt="Twitter" /></a></div></div>';
 				const toEmail = new helper.Email(emailAddress2);
 				const fromEmail = new helper.Email('admin@jsecoin.com');
 				const subject = 'JSEcoin Funds Received';
-				const content = new helper.Content('text/html', htmlEmail);
+				const htmlContent = 'This is to confirm you have received a transfer to your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>For more details please log in to your account at <a href="https://platform.jsecoin.com">https://platform.jsecoin.com</a><br><br>Thank you for using JSEcoin.';
+				const emailHTML = jseEmails.template.split('$heading').join(subject).split('$content').join(htmlContent);
+				const content = new helper.Content('text/html', emailHTML);
 				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
 				mail.categories = ["nodeserver","transfernotification"];
 				const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
@@ -358,11 +362,12 @@ function transferNotificationEmails(fromUID,toUID,transactionValue) {
  */
 function banEmail(banUID) {
 	JSE.jseDataIO.getEmail(banUID,function(emailAddress) {
-		const welcomeEmail = '<img src="https://jsecoin.com/img/logosmall.png" style="float: right;" alt="JSEcoin" /><br>Our fraud prevention measures have detected unusual activity on your JSEcoin account. Your account has been suspended pending investigation. Please contact investigations@jsecoin.com for further information.<br><br>Kind regards,<br><br>The JSE Team<br><hr style="border-top: 1px solid #000000;"><div style="margin-bottom: 10px;"><a href="https://jsecoin.com/"><img src="https://jsecoin.com/img/logosmall.png" alt="JSEcoin" /></a><div style="margin:10px; float: right;"><a href="https://www.facebook.com/officialjsecoin"><img src="https://jsecoin.com/img/facebookemail.png" alt="Facebook" /></a></div><div style="margin:10px; float: right;"><a href="https://twitter.com/jsecoin"><img src="https://jsecoin.com/img/twitteremail.png" alt="Twitter" /></a></div></div>';
 		const fromEmail = new helper.Email('investigations@jsecoin.com');
 		const toEmail = new helper.Email(emailAddress);
 		const subject = 'JSEcoin Account Suspension';
-		const content = new helper.Content('text/html', welcomeEmail);
+		const htmlContent = 'Our fraud prevention measures have detected unusual activity on your JSEcoin account. Your account has been suspended pending further investigation. The most common reasons for account suspension are referral and mining fraud. Please contact investigations@jsecoin.com if you wish to supply evidence disputing this suspension.';
+		const emailHTML = jseEmails.template.split('$heading').join(subject).split('$content').join(htmlContent);
+		const content = new helper.Content('text/html', emailHTML);
 		const mail = new helper.Mail(fromEmail, subject, toEmail, content);
 		mail.categories = ["nodeserver","banemail"];
 		const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
