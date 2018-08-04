@@ -5,6 +5,8 @@
 const emails = {};
 const fs = require('fs');
 
+emails.suppression = require('./../misc/suppression.json');
+
 /* Standard email template */
 /* Requires $heading and $content, also includes sendgrid optout link */
 emails.template = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

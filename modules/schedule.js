@@ -83,14 +83,16 @@ function runAt5pm() {
 /**
  * @method <h2>startAutoresponder</h2>
  * @description send out welcome email series
+ * @todo to ramp up increase maxEmailsPerDay, decrease startID and remove * 2 from nextEmailTS
  */
+JSE.emailsToSend = [];
 function startAutoresponder() {
 	JSE.jseDataIO.getVariable('nextUserID',function(endID) {
-		const startID = endID - 30000; // only send to last 30k users, may need to increase if we get more than 30k users in a two week period
+		const startID = endID - 30000; // only send to last 30k users, may need to increase
 		JSE.jseDataIO.getAdminAccounts(startID,endID,function(users){
 			const nowTS =new Date().getTime();
 			let maxCount = 0;
-			const maxEmailsPerDay = 5000; // can increase this at a later date, may need to loop through and send x per second
+			const maxEmailsPerDay = 5000; // can increase this at a later date
 			Object.keys(users).forEach(function(i) {
 				if (typeof users[i] === 'undefined' || users[i] === null || maxCount > maxEmailsPerDay) return;
 				if (users[i].confirmed === true && !users[i].suspended) {
@@ -98,22 +100,39 @@ function startAutoresponder() {
 					let aff = users[i].campaign.split(/[^0-9]/).join('');
 					aff = parseFloat(aff);
 					if (users[i].source !== 'referral' || (!users[aff] || !users[aff].suspended)) {
-						maxCount += 1;
 						if (users[i].lastEmail) {
 							const lastEmailRef = users[i].lastEmail.split(',')[0]; // timestamp,ref
 							const lastEmailTS = users[i].lastEmail.split(',')[1];
-							const nextEmailTS = (new Date(Number(lastEmailTS)).getTime()) + (86400000 * lastEmailRef);
+							const nextEmailTS = (new Date(Number(lastEmailTS)).getTime()) + (86400000 * lastEmailRef * 2); // i.e. email 4 will be sent 6 days after email 3, remove end figure to speed up
 							if (nextEmailTS < nowTS) {
-								JSE.jseFunctions.sendOnboardingEmail(users[i],lastEmailRef+1);
+								maxCount += 1;
+								JSE.emailsToSend.push({ user: users[i], emailRef: lastEmailRef + 1 });
 							}
 						} else {
-							JSE.jseFunctions.sendOnboardingEmail(users[i],1);
+							maxCount += 1;
+							JSE.emailsToSend.push({ user: users[i], emailRef: 1 });
 						}
 					}
 				}
 			});
+			console.log('Sending autoresponder email series to '+JSE.emailsToSend.length+' users');
+			loopThroughEmails();
 		});
 	});
+}
+
+/**
+ * @method <h2>loopThroughEmails</h2>
+ * @description takes the JSE.emailsToSend array and sends one autoresponder email per half second
+ */
+function loopThroughEmails() {
+	if (JSE.emailsToSend.length > 0) {
+		const nextEmailData = JSE.emailsToSend.pop();
+		JSE.jseFunctions.sendOnboardingEmail(nextEmailData.user,nextEmailData.emailRef);
+		setTimeout(function() { loopThroughEmails(); },500);
+	} else {
+		console.log('Finished sending autoresponder emails');
+	}
 }
 
 /**

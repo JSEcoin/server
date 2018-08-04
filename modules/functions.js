@@ -249,6 +249,7 @@ function verifyHash(hash, publicKeyHex, signatureHex, successCallback, failCallb
  */
 function sendWelcomeEmail(newUser) {
 	const fromEmail = new helper.Email('noreply@jsecoin.com');
+	//if (jseEmails.suppression.indexOf(newUser.email) > -1) return;
 	const toEmail = new helper.Email(newUser.email);
 	const subject = 'Please confirm your JSEcoin account';
 	const templates = ['template1','template2']; // split test templates
@@ -273,6 +274,7 @@ function sendWelcomeEmail(newUser) {
 function sendOnboardingEmail(user,emailRef) {
 	if (jseEmails.onboarding[emailRef]) { // Check we haven't sent them all already.
 		const fromEmail = new helper.Email('noreply@jsecoin.com');
+		if (jseEmails.suppression.indexOf(user.email) > -1) return;
 		const toEmail = new helper.Email(user.email);
 		const templates = ['template1','template2']; // split test templates
 		const template = templates[Math.floor(Math.random()*templates.length)];
@@ -311,6 +313,7 @@ function sendOnboardingEmail(user,emailRef) {
  */
 function sendStandardEmail(toEmailRaw,subject,htmlContent) {
 	const fromEmail = new helper.Email('noreply@jsecoin.com');
+	if (jseEmails.suppression.indexOf(toEmailRaw) > -1) return;
 	const toEmail = new helper.Email(toEmailRaw);
 	const emailHTML = jseEmails.template.split('$heading').join(subject).split('$content').join(htmlContent);
 	const content = new helper.Content('text/html', emailHTML);
@@ -332,7 +335,8 @@ function exportNotificationEmail(fromUID,transactionValue) {
 	JSE.jseDataIO.getEmail(fromUID,function(emailAddress) {
 		JSE.jseDataIO.getVariable('account/'+fromUID+'/noEmailTransaction', function(noEmailTransaction) {
 			if (noEmailTransaction === null && fromUID > 0) {
-			const toEmail = new helper.Email(emailAddress);
+				if (jseEmails.suppression.indexOf(emailAddress) > -1) return;
+				const toEmail = new helper.Email(emailAddress);
 				const fromEmail = new helper.Email('admin@jsecoin.com');
 				const subject = 'JSEcoin Export Confirmation';
 				const htmlContent = 'This is to confirm a coincode has been exported from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Thank you for using JSEcoin. If you did not make this transaction please contact us by replying to this email as soon as possible.';
@@ -360,6 +364,7 @@ function transferNotificationEmails(fromUID,toUID,transactionValue) {
 	JSE.jseDataIO.getEmail(fromUID,function(emailAddress) {
 		JSE.jseDataIO.getVariable('account/'+fromUID+'/noEmailTransaction', function(noEmailTransaction) {
 			if (noEmailTransaction === null && fromUID > 0) {
+				if (jseEmails.suppression.indexOf(emailAddress) > -1) return;
 				const toEmail = new helper.Email(emailAddress);
 				const fromEmail = new helper.Email('admin@jsecoin.com');
 				const subject = 'JSEcoin Transfer Confirmation';
@@ -378,6 +383,7 @@ function transferNotificationEmails(fromUID,toUID,transactionValue) {
 	JSE.jseDataIO.getEmail(toUID,function(emailAddress2) {
 		JSE.jseDataIO.getVariable('account/'+toUID+'/noEmailTransaction', function(noEmailTransaction2) {
 			if (noEmailTransaction2 === null && toUID > 0) {
+				if (jseEmails.suppression.indexOf(emailAddress2) > -1) return;
 				const toEmail = new helper.Email(emailAddress2);
 				const fromEmail = new helper.Email('admin@jsecoin.com');
 				const subject = 'JSEcoin Funds Received';
@@ -403,6 +409,7 @@ function transferNotificationEmails(fromUID,toUID,transactionValue) {
 function banEmail(banUID) {
 	JSE.jseDataIO.getEmail(banUID,function(emailAddress) {
 		const fromEmail = new helper.Email('investigations@jsecoin.com');
+		if (jseEmails.suppression.indexOf(emailAddress) > -1) return;
 		const toEmail = new helper.Email(emailAddress);
 		const subject = 'JSEcoin Account Suspension';
 		const htmlContent = 'Our fraud prevention measures have detected unusual activity on your JSEcoin account. Your account has been suspended pending further investigation. The most common reasons for account suspension are referral and mining fraud. Please contact investigations@jsecoin.com if you wish to supply evidence disputing this suspension.';
