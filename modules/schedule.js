@@ -15,6 +15,7 @@
 const JSE = global.JSE;
 const fs = require('fs');
 const jseAPI = require("./apifunctions.js");
+const jseEmails = require("./emails.js");
 
 /**
  * @method <h2>runAtMidnight</h2>
@@ -87,14 +88,25 @@ function startAutoresponder() {
 	JSE.jseDataIO.getVariable('nextUserID',function(endID) {
 		const startID = endID - 30000; // only send to last 30k users, may need to increase if we get more than 30k users in a two week period
 		JSE.jseDataIO.getAdminAccounts(startID,endID,function(users){
+			const nowTS =new Date().getTime();
 			Object.keys(users).forEach(function(i) {
 				if (typeof users[i] === 'undefined' || users[i] === null) return;
 				if (users[i].confirmed === true && !users[i].suspended) {
 					if (users[i].noNewsletter) return;
 					let aff = users[i].campaign.split(/[^0-9]/).join('');
 					aff = parseFloat(aff);
-					if (users[i].source !== 'referral' || (users[aff] && !users[aff].suspended)) { // check affiliate sending them wasn't suspended i.e. bots
+					if (users[i].source !== 'referral' || (!users[aff] || !users[aff].suspended)) {
 						//users[i]
+						if (users[i].lastEmail) {
+							const lastEmailRef = users[i].lastEmail.split(',')[0]; // timestamp,ref
+							const lastEmailTS = users[i].lastEmail.split(',')[1];
+							const nextEmailTS = (new Date(Number(lastEmailTS)).getTime()) + (86400000 * lastEmailRef);
+							if (nextEmailTS < nowTS) {
+								JSE.jseFunctions.sendOnboardingEmail(users[i],lastEmailRef+1);
+							}
+						} else {
+							JSE.jseFunctions.sendOnboardingEmail(users[i],1);
+						}
 					}
 				}
 			});

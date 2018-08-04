@@ -1013,7 +1013,7 @@ const jseDB = {
 			JSE.publicStats.users = users;
 			JSE.jseDataIO.setVariable('publicStats/users',JSE.publicStats.users);
 			// add web3 tokens from ICO
-			const jseContractObj = require('./JSETokenSale.json');
+			const jseContractObj = require('./../misc/JSETokenSale.json');
 			const tokenSaleContract = new web3.eth.Contract(jseContractObj.abi, '0xcfc4fceb90787ef1fda15bb115630ef453f50f86');
 			tokenSaleContract.methods.totalTokensSold().call().then((t) => {
 				const jseSold = Math.floor(t/1e18);

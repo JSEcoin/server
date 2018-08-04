@@ -251,15 +251,55 @@ function sendWelcomeEmail(newUser) {
 	const fromEmail = new helper.Email('noreply@jsecoin.com');
 	const toEmail = new helper.Email(newUser.email);
 	const subject = 'Please confirm your JSEcoin account';
+	const templates = ['template1','template2']; // split test templates
+	const template = templates[Math.floor(Math.random()*templates.length)];
 	const htmlContent = jseEmails.welcome.split('$uid').join(newUser.uid).split('$confirmlink').join('https://server.jsecoin.com/confirm/'+newUser.uid+'/'+newUser.confirmCode);
-	const emailHTML = jseEmails.template1.split('$heading').join(subject).split('$content').join(htmlContent);
+	const emailHTML = jseEmails[template].split('$heading').join(subject).split('$content').join(htmlContent);
 	const content = new helper.Content('text/html', emailHTML);
 	const mail = new helper.Mail(fromEmail, subject, toEmail, content);
-	mail.categories = ["nodeserver","welcomeemail","template1"];
+	mail.categories = ["nodeserver","welcomeemail",template];
 	const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
 	sg.API(requestSG, function (error, response) {
 	  if (error) { console.log('Sendgrid Error response received, welcome email '+newUser.email); }
 	});
+}
+
+/**
+ * @method <h2>sendOnboardingEmail</h2>
+ * @description Send a autoresponder email with optional PDF using sendgrid API
+ * @param {string} user user object from account/123
+ * @param {string} emailRef autoresponder reference to send from emails.js
+ */
+function sendOnboardingEmail(user,emailRef) {
+	if (jseEmails.onboarding[emailRef]) { // Check we haven't sent them all already.
+		const fromEmail = new helper.Email('noreply@jsecoin.com');
+		const toEmail = new helper.Email(user.email);
+		const templates = ['template1','template2']; // split test templates
+		const template = templates[Math.floor(Math.random()*templates.length)];
+		const htmlContent = jseEmails.onboarding[emailRef].html;
+		const subject = jseEmails.onboarding[emailRef].subject;
+		const emailHTML = jseEmails[template].split('$heading').join(subject).split('$content').join(htmlContent);
+		const content = new helper.Content('text/html', emailHTML);
+		const mail = new helper.Mail(fromEmail, subject, toEmail, content);
+		mail.categories = ["nodeserver","onboarding","onboarding"+emailRef, template];
+		// check if PDF is required
+		if (jseEmails.onboarding[emailRef].pdf) {
+			mail.attachments = [
+				{
+					filename: jseEmails.onboarding[emailRef].pdf,
+					content: jseEmails.onboarding[emailRef].attachmentData,
+					type: 'application/pdf',
+					disposition: 'attachment',
+				},
+			];
+		}
+		const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
+		sg.API(requestSG, function (error, response) {
+			if (error) { console.log('Sendgrid Error response received, sendOnboardingEmail emailRef '+emailRef); }
+		});
+		const nowTS =new Date().getTime();
+		JSE.jseDataIO.setVariable('account/'+user.uid+'/lastEmail', nowTS+','+emailRef);
+	}
 }
 
 /**

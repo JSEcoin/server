@@ -3,6 +3,7 @@
  * @description Onboarding autoresponder email series
 */
 const emails = {};
+const fs = require('fs');
 
 /* Standard email template */
 /* Requires $heading and $content, also includes sendgrid optout link */
@@ -66,7 +67,18 @@ emails.template = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //E
 
 /* Template 1 - Onboading email template */
 /* As above but includes P.S. Telegram link */
-emails.template1 = emails.templateStanard.split(`<br><br>Kind regards,<br><br>The JSE Team<br><br>`).join(`<br><br>Kind regards,<br><br>The JSE Team<br><br>P.S. Questions? Join us on <a href="https://t.me/jsetelegram">Telegram</a> and let's continue our conversation there.`);
+emails.template1 = emails.template.split(`<br><br>Kind regards,<br><br>The JSE Team<br><br>`).join(`<br><br>Kind regards,<br><br>The JSE Team<br><br>P.S. Questions? Join us on <a href="https://t.me/jsetelegram">Telegram</a> and let's continue our conversation there.`);
+
+/* Template 2 - Onboading email template */
+/* As above but includes different header image, team mug shots and P.S. Telegram link */
+const template2Footer = `<br><br>Kind regards,<br><br>The JSE Team<br><br>
+<a href="https://jsecoin.com/en/about/meetTheTeam/?utm_source=email&utm_campaign=nodemails">
+  <img src="https://jsecoin.com/img/emailteam.png" alt="JSEcoin Ltd" style="width: 300px;" />
+</a>
+<br>
+P.S. Questions? Join us on <a href="https://t.me/jsetelegram">Telegram</a> and let's continue our conversation there.
+<br>`;
+emails.template2 = emails.template.split(`https://jsecoin.com/img/emailheader.png`).join(`https://jsecoin.com/img/emailheader2.jpg`).split(`<br><br>Kind regards,<br><br>The JSE Team<br><br>`).join(template2Footer);
 
 /* Welcome email with confirmation link */
 /* Requires $uid, $confirmlink dynamic insertion */
@@ -83,8 +95,12 @@ The platform is designed to be intuitive and the best way to get up to speed is 
 Thank you for being a JSEcoin early adopter.
 `;
 
+emails.onboarding = {};
+
 /* Onboarding 1 - Plans For The Future */
-emails.onboardingPlans = `Try and find a programmer who understands blockchain technology and doesn’t think it will change the world.
+emails.onboarding[1] = {};
+emails.onboarding[1].subject = `Plans For The Future`;
+emails.onboarding[1].html = `Try and find a programmer who understands blockchain technology and doesn’t think it will change the world.
 <br><br>
 Bitcoin opened the doors to the idea that we don’t have to depend on government backed traditional cryptocurrencies. All government currency goes down in value/purchasing power (known as inflation) and this has been accepted as the norm for too long. Poor fiscal decisions and quantitative easing (printing money) have only added to the downward slide. Look at your current savings and what you would have been able to buy with it just 20 years ago.
 <br><br>
@@ -94,7 +110,9 @@ The ultimate goal for the JSEcoin project is to reach mass adoption. When you ca
 `;
 
 /* Onboarding 2 - How To Send Funds With JSEcoin */
-emails.onboardingTransfer = `JSEcoin is not just a store of value but a live ecosystem of open transactions.
+emails.onboarding[2] = {};
+emails.onboarding[2].subject = `How To Send Funds With JSEcoin`;
+emails.onboarding[2].html = `JSEcoin is not just a store of value but a live ecosystem of open transactions.
 <br><br>
 Sending funds to and from anywhere in the world is free, there are no transfer fees. It doesn’t matter if you are sending 0.1 JSE or 1,000,000 JSE there are no costs and the transaction goes through in around 30 seconds due to our fast block times.
 <br><br>
@@ -114,7 +132,11 @@ The next time you send money from A to B, consider the benefits of using JSE.
 
 /* Onboarding 3 - How To Invest In An ICO (PDF) */
 /* Requires PDF attachment */
-emails.onboardingInvest = `If you have invested in an ICO before it seems like second nature zipping Ethereum payments about, however if it’s your first time it can seem like a daunting and challenging process.
+emails.onboarding[3] = {};
+emails.onboarding[3].subject = `How To Invest In An ICO (PDF)`;
+emails.onboarding[3].pdf = `HowToParticipateInICO.pdf`;
+fs.readFile('./misc/HowToParticipateInICO.pdf', function(err, preAttachmentData) { emails.onboarding[3].attachmentData = Buffer.from(preAttachmentData).toString('base64'); });
+emails.onboarding[3].html = `If you have invested in an ICO before it seems like second nature zipping Ethereum payments about, however if it’s your first time it can seem like a daunting and challenging process.
 <br><br>
 We have put together this simple step by step guide explaining how you can purchase JSE during the ICO (PDF attached).
 <br><br>
@@ -127,7 +149,9 @@ Thank you to everyone who has supported the JSEcoin project. We are where we are
 `;
 
 /* Onboarding 4 - Why transparency is important to the JSE project */
-emails.onboardingTransparency = `An ICO (initial coin offering) is the crypto equivalent of an IPO (initial public offering). However the same regulatory requirements don’t apply to ICO’s. Blockchain technology is built around trustless networks but trust is still required whether that be in the developers, the software or the project as a whole.
+emails.onboarding[4] = {};
+emails.onboarding[4].subject = `Why transparency is important to the JSE project`;
+emails.onboarding[4].html = `An ICO (initial coin offering) is the crypto equivalent of an IPO (initial public offering). However the same regulatory requirements don’t apply to ICO’s. Blockchain technology is built around trustless networks but trust is still required whether that be in the developers, the software or the project as a whole.
 <br><Br>
 JSEcoin aims to build trust by operating transparently and ethically in the way a public company should. Some of the steps we take to achieve this are:
 <ul>
@@ -141,7 +165,11 @@ We are lucky enough to have a great community of users and we uphold the integri
 
 /* Onboarding 5 - What We Are Building (whitepaper.pdf) */
 /* Requires PDF attachment */
-emails.onboardingWhitepaper = `JSEcoin is bridging the gap between web and blockchain technologies making a user-friendly platform that runs on a browser mined blockchain.
+emails.onboarding[5] = {};
+emails.onboarding[5].subject = `Why transparency is important to the JSE project`;
+emails.onboarding[5].pdf = `whitepaper.pdf`;
+fs.readFile('./misc/whitepaper.pdf', function(err, preAttachmentData) { emails.onboarding[5].attachmentData = Buffer.from(preAttachmentData).toString('base64'); });
+emails.onboarding[5].html = `JSEcoin is bridging the gap between web and blockchain technologies making a user-friendly platform that runs on a browser mined blockchain.
 <br><br>
 Our vision is for a future where everyday users can transfer funds around the world quickly, safely and without paying transaction fees. Cryptocurrency mining rewards should go to individual users rather than giant corporations and industrial mining pools. The platform should be intuitive and easy to use, even for non-technical users.
 <br><br>
@@ -153,7 +181,9 @@ Please take a read when you get a chance and learn more about how JSEcoin can cr
 `;
 
 /* Onboarding 6 - Meet the JSE Team */
-emails.onboardingTeam = `<table>
+emails.onboarding[6] = {};
+emails.onboarding[6].subject = `Meet the JSE Team`;
+emails.onboarding[6].html = `<table>
 <tr><td style="padding: 5px;"><img src="https://jsecoin.com/img/team/james.png" style="height: 36px; width: 32px;" alt="James Bachini" /></td><td style="padding: 5px;">
 <a href="https://www.linkedin.com/in/james-bachini/">James Bachini</a> - CEO<br>
 James comes from a background in ad-tech and built the original proof of concept platform that went on to become JSEcoin. He previously launched two multi-million pound companies based around digital marketing and media buying.
@@ -182,7 +212,11 @@ Matthew is a CAIA charter holder and is responsible for focusing the overall dir
 
 /* Onboarding 7 - JSEcoin Pitch Deck */
 /* Requires PDF attachment */
-emails.onboardingPitch = `I have attached the JSEcoin pitch deck for your consideration.
+emails.onboarding[7] = {};
+emails.onboarding[7].subject = `JSEcoin Pitch Deck`;
+emails.onboarding[7].pdf = `pitchdeck.pdf`;
+fs.readFile('./misc/pitchdeck.pdf', function(err, preAttachmentData) { emails.onboarding[7].attachmentData = Buffer.from(preAttachmentData).toString('base64'); });
+emails.onboarding[7].html = `I have attached the JSEcoin pitch deck for your consideration.
 <br><br>
 If you wish to purchase JSE tokens now is the time to do so. We will shortly be closing the ICO and listing on exchanges where pricing will be set by open market conditions.
 <br><br>
@@ -196,7 +230,9 @@ Thank you to everyone who has supported the project and helped us progress towar
 `;
 
 /* Onboarding 8 - Get JSEcoin updates on youtube, facebook, telegram or twitter */
-emails.onboardingSocial = `You can connect with JSEcoin on social channels. Here’s a list of the top sites where you can keep up to date with JSE developments.
+emails.onboarding[8] = {};
+emails.onboarding[8].subject = `Get JSEcoin updates on Youtube, Facebook, Telegram or Twitter`;
+emails.onboarding[8].html = `You can connect with JSEcoin on social channels. Here’s a list of the top sites where you can keep up to date with JSE developments.
 <ul>
 <li><a href="https://twitter.com/jsecoin">https://twitter.com/jsecoin</a></li>
 <li><a href="https://www.facebook.com/officialjsecoin">https://www.facebook.com/officialjsecoin</a></li>
@@ -214,7 +250,9 @@ emails.onboardingSocial = `You can connect with JSEcoin on social channels. Here
 `;
 
 /* Onboarding 9 - How Coincodes Work */
-emails.onboardingCoincodes = `The JSEcoin platform includes a section for coincodes. This allows you to export tokens as a alphanumeric key. Any user including yourself can then import these tokens back in to their platform account.
+emails.onboarding[9] = {};
+emails.onboarding[9].subject = `How Coincodes Work`;
+emails.onboarding[9].html = `The JSEcoin platform includes a section for coincodes. This allows you to export tokens as a alphanumeric key. Any user including yourself can then import these tokens back in to their platform account.
 <ul>
 <li>This opens up a lot of possibilities, such as:</li>
 <li>Sharing coincode giveaways on social media</li>
@@ -228,7 +266,9 @@ Coincodes open up a lot of opportunities that we are only just beginning to expl
 `;
 
 /* Onboarding 10 - Get paid to promote the JSE project with our referrals program */
-emails.onboardingReferrals = `Did you know you can earn JSE by helping spread the word about our project. 
+emails.onboarding[10] = {};
+emails.onboarding[10].subject = `Get paid to promote the JSE project`;
+emails.onboarding[10].html = `Did you know you can earn JSE by helping spread the word about our project. 
 <br><br>
 It’s easy to do, simply log in to the platform at <a href="https://platform.jsecoin.com/?utm_source=email&utm_campaign=emailonboarding&utm_content=onboardingReferrals">https://platform.jseocoin.com</a>
 <br><br>
@@ -250,7 +290,9 @@ Ideas for where to place your link:
 `;
 
 /* Onboarding 11 - How to use the desktop app */
-emails.onboardingDesktop = `The desktop app includes a number of benefits over the web platform. The most important of which is the automatic miner. This can be setup to start mining as soon as you switch your computer on in the morning until the end of the day, in the background, without needing to keep a browser window open.
+emails.onboarding[11] = {};
+emails.onboarding[11].subject = `How to use the desktop app`;
+emails.onboarding[11].html = `The desktop app includes a number of benefits over the web platform. The most important of which is the automatic miner. This can be setup to start mining as soon as you switch your computer on in the morning until the end of the day, in the background, without needing to keep a browser window open.
 <br><br>
 You can download the desktop app from: <a href="https://jsecoin.com/downloads?utm_source=email&utm_campaign=emailonboarding&utm_content=onboardingDesktop">https://jsecoin.com/downloads</a>
 <br><br>
@@ -258,6 +300,5 @@ The automated features are in the settings menu.
 <br><br>
 It should be pretty intuitive and easy to use but if you have any issues let us know.
 `;
-
 
 module.exports = emails;
