@@ -92,7 +92,7 @@ if (JSE.jseTestNet === false) {
 
 jseSchedule.runAtMidnight(); // reset stats
 jseSchedule.runAtMidday(); // do merchant subsriptions
-jseSchedule.runAt5pm(); // best time to send emails
+jseSchedule.runAt4pm(); // best time to send emails
 
 // Production use to prevent and log any crashes
 if (JSE.jseTestNet === false) {

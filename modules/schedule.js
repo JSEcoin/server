@@ -61,23 +61,23 @@ function runAtMidday() {
 }
 
 /**
- * @method <h2>runAt5pm</h2>
+ * @method <h2>runAt4pm</h2>
  * @description Runs autoresponder series
  */
-function runAt5pm() {
+function runAt4pm() {
 	const now = new Date();
 	let peakTimeObject;
 	if (now.getHours() < 17) { // start it up later today if need be
-		peakTimeObject = new Date( now.getFullYear(), now.getMonth(), now.getDate(), 17, 10, 0 ); // eslint-disable-line
+		peakTimeObject = new Date( now.getFullYear(), now.getMonth(), now.getDate(), 16, 10, 0 ); // eslint-disable-line
 	} else {
-		peakTimeObject = new Date( now.getFullYear(), now.getMonth(), now.getDate() + 1, 17, 10, 0 ); // eslint-disable-line
+		peakTimeObject = new Date( now.getFullYear(), now.getMonth(), now.getDate() + 1, 16, 10, 0 ); // eslint-disable-line
 	}
-	const msToMidday = peakTimeObject.getTime() - now.getTime();
-	console.log('runAtMidday set for '+(Math.floor(msToMidday / 60000))+' mins');
+	const msTo4pm = peakTimeObject.getTime() - now.getTime();
+	console.log('runAt4pm set for '+(Math.floor(msTo4pm / 60000))+' mins');
 	setTimeout(function() {
 		startAutoresponder();
-		runAt5pm(); // Then, reset again next midnight.
-	}, msToMidday);
+		runAt4pm(); // Then, reset again next midnight.
+	}, msTo4pm);
 }
 
 /**
@@ -339,5 +339,5 @@ function storeLogs() {
 
 
 module.exports = {
-	runAtMidnight, runAtMidday, runAt5pm, cleanNulls, backupLedger, resetBlockChainFile, storeLogs,
+	runAtMidnight, runAtMidday, runAt4pm, cleanNulls, backupLedger, resetBlockChainFile, storeLogs,
 };
