@@ -67,7 +67,7 @@ function runAtMidday() {
 function runAt4pm() {
 	const now = new Date();
 	let peakTimeObject;
-	if (now.getHours() < 17) { // start it up later today if need be
+	if (now.getHours() < 16) { // start it up later today if need be
 		peakTimeObject = new Date( now.getFullYear(), now.getMonth(), now.getDate(), 16, 10, 0 ); // eslint-disable-line
 	} else {
 		peakTimeObject = new Date( now.getFullYear(), now.getMonth(), now.getDate() + 1, 16, 10, 0 ); // eslint-disable-line
