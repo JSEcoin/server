@@ -5,6 +5,14 @@
 const emails = {};
 const fs = require('fs');
 
+let miscDir = './misc';
+if (!fs.existsSync(miscDir)) {
+  miscDir = './../misc';
+  if (!fs.existsSync(miscDir)) {
+    console.log('Misc directory not found, email.js error 12');
+  }
+}
+
 emails.suppression = require('./../misc/suppression.json');
 
 /* Standard email template */
@@ -137,7 +145,7 @@ The next time you send money from A to B, consider the benefits of using JSE.
 emails.onboarding[3] = {};
 emails.onboarding[3].subject = `How To Invest In An ICO (PDF)`;
 emails.onboarding[3].pdf = `HowToParticipateInICO.pdf`;
-fs.readFile('./misc/HowToParticipateInICO.pdf', function(err, preAttachmentData) { emails.onboarding[3].attachmentData = Buffer.from(preAttachmentData).toString('base64'); });
+fs.readFile(miscDir+'/HowToParticipateInICO.pdf', function(err, preAttachmentData) { emails.onboarding[3].attachmentData = Buffer.from(preAttachmentData).toString('base64'); });
 emails.onboarding[3].html = `If you have invested in an ICO before it seems like second nature zipping Ethereum payments about, however if it’s your first time it can seem like a daunting and challenging process.
 <br><br>
 We have put together this simple step by step guide explaining how you can purchase JSE during the ICO (PDF attached).
@@ -170,7 +178,7 @@ We are lucky enough to have a great community of users and we uphold the integri
 emails.onboarding[5] = {};
 emails.onboarding[5].subject = `Why transparency is important to the JSE project`;
 emails.onboarding[5].pdf = `whitepaper.pdf`;
-fs.readFile('./misc/whitepaper.pdf', function(err, preAttachmentData) { emails.onboarding[5].attachmentData = Buffer.from(preAttachmentData).toString('base64'); });
+fs.readFile(miscDir+'/whitepaper.pdf', function(err, preAttachmentData) { emails.onboarding[5].attachmentData = Buffer.from(preAttachmentData).toString('base64'); });
 emails.onboarding[5].html = `JSEcoin is bridging the gap between web and blockchain technologies making a user-friendly platform that runs on a browser mined blockchain.
 <br><br>
 Our vision is for a future where everyday users can transfer funds around the world quickly, safely and without paying transaction fees. Cryptocurrency mining rewards should go to individual users rather than giant corporations and industrial mining pools. The platform should be intuitive and easy to use, even for non-technical users.
@@ -217,7 +225,7 @@ Matthew is a CAIA charter holder and is responsible for focusing the overall dir
 emails.onboarding[7] = {};
 emails.onboarding[7].subject = `JSEcoin Pitch Deck`;
 emails.onboarding[7].pdf = `pitchdeck.pdf`;
-fs.readFile('./misc/pitchdeck.pdf', function(err, preAttachmentData) { emails.onboarding[7].attachmentData = Buffer.from(preAttachmentData).toString('base64'); });
+fs.readFile(miscDir+'/pitchdeck.pdf', function(err, preAttachmentData) { emails.onboarding[7].attachmentData = Buffer.from(preAttachmentData).toString('base64'); });
 emails.onboarding[7].html = `I have attached the JSEcoin pitch deck for your consideration.
 <br><br>
 If you wish to purchase JSE tokens now is the time to do so. We will shortly be closing the ICO and listing on exchanges where pricing will be set by open market conditions.
