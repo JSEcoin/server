@@ -89,14 +89,16 @@ function startAutoresponder() {
 		const startID = endID - 30000; // only send to last 30k users, may need to increase if we get more than 30k users in a two week period
 		JSE.jseDataIO.getAdminAccounts(startID,endID,function(users){
 			const nowTS =new Date().getTime();
+			let maxCount = 0;
+			const maxEmailsPerDay = 5000; // can increase this at a later date, may need to loop through and send x per second
 			Object.keys(users).forEach(function(i) {
-				if (typeof users[i] === 'undefined' || users[i] === null) return;
+				if (typeof users[i] === 'undefined' || users[i] === null || maxCount > maxEmailsPerDay) return;
 				if (users[i].confirmed === true && !users[i].suspended) {
 					if (users[i].noNewsletter) return;
 					let aff = users[i].campaign.split(/[^0-9]/).join('');
 					aff = parseFloat(aff);
 					if (users[i].source !== 'referral' || (!users[aff] || !users[aff].suspended)) {
-						//users[i]
+						maxCount += 1;
 						if (users[i].lastEmail) {
 							const lastEmailRef = users[i].lastEmail.split(',')[0]; // timestamp,ref
 							const lastEmailTS = users[i].lastEmail.split(',')[1];
