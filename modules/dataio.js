@@ -645,6 +645,18 @@ const jseDB = {
 		});
 	},
 
+	/**
+	 * @method <h2>checkSuspended</h2>
+	 * @description Check if a UID has been suspended
+	 * @param {number} uid User ID
+	 * @param {function} callback callsback with the users email
+	 */
+	checkSuspended(uid,callback) {
+		JSE.jseDataIO.getVariable('account/'+uid+'/suspended',function(suspended) {
+			callback(suspended);
+		});
+	},
+
 	/** Login Functions */
 
 	/**

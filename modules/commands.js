@@ -266,32 +266,40 @@ const jseCommands = {
 						callback4('{"fail":1,"notification":"Import Failed: Coin Code Error"}');
 					} else if (uid !== goodCredentials.uid) {
 						callback4('{"fail":1,"notification":"Import Failed: Data object user1 does not match public key"}');
+					} else if (!coinObject.uid) {
+						callback4('{"fail":1,"notification":"Import Failed: coinObject.uid not available"}');
 					} else {
-						const newData = {};
-						newData.command = 'import';
-						newData.user1 = goodCredentials.uid;
-						newData.publicKey = goodCredentials.publicKey;
-						newData.coinCode = coinObject.coinCode;
-						newData.exportedBy = coinObject.uid || 'unknown';
-						newData.value = JSE.jseFunctions.round(parseFloat(coinObject.value));
-						newData.ts = new Date().getTime();
-						JSE.jseDataIO.pushBlockData(newData,function(blockData) {
-							JSE.jseDataIO.setVariable('exported/'+coinObject.coinCode+'/used',true);
-							JSE.jseDataIO.addBalance(goodCredentials.uid,newData.value);
-							JSE.jseDataIO.setVariable('exported/'+coinObject.coinCode+'/usedTS',newData.ts);
-							JSE.jseDataIO.setVariable('exported/'+coinObject.coinCode+'/usedBy',goodCredentials.uid);
-							JSE.jseDataIO.pushVariable('history/'+goodCredentials.uid,blockData,function(pushRef) {});
-							const nowTS = new Date().getTime();
-							let lastBlockTime = nowTS;
-							if (typeof JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID)][JSE.blockID] !== 'undefined' && JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID)][JSE.blockID].startTime > 1500508800000) {
-								lastBlockTime = JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID)][JSE.blockID].startTime;
-							} else if (typeof JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID-1)][JSE.blockID-1] !== 'undefined' && JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID-1)][JSE.blockID-1].startTime > 1500508800000) {
-								lastBlockTime = JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID-1)][JSE.blockID-1].startTime + 30000;
+						JSE.jseDataIO.checkSuspended(coinObject.uid,function(suspended) {
+							if (suspended && uid !== 2895 && uid !== 0) { // only allow coincodes from suspended accounts to be imported by charity & distribution accounts
+								callback4('{"fail":1,"notification":"Import Failed: Coincode exported from suspended account"}');
+							} else {
+								const newData = {};
+								newData.command = 'import';
+								newData.user1 = goodCredentials.uid;
+								newData.publicKey = goodCredentials.publicKey;
+								newData.coinCode = coinObject.coinCode;
+								newData.exportedBy = coinObject.uid || 'unknown';
+								newData.value = JSE.jseFunctions.round(parseFloat(coinObject.value));
+								newData.ts = new Date().getTime();
+								JSE.jseDataIO.pushBlockData(newData,function(blockData) {
+									JSE.jseDataIO.setVariable('exported/'+coinObject.coinCode+'/used',true);
+									JSE.jseDataIO.addBalance(goodCredentials.uid,newData.value);
+									JSE.jseDataIO.setVariable('exported/'+coinObject.coinCode+'/usedTS',newData.ts);
+									JSE.jseDataIO.setVariable('exported/'+coinObject.coinCode+'/usedBy',goodCredentials.uid);
+									JSE.jseDataIO.pushVariable('history/'+goodCredentials.uid,blockData,function(pushRef) {});
+									const nowTS = new Date().getTime();
+									let lastBlockTime = nowTS;
+									if (typeof JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID)][JSE.blockID] !== 'undefined' && JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID)][JSE.blockID].startTime > 1500508800000) {
+										lastBlockTime = JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID)][JSE.blockID].startTime;
+									} else if (typeof JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID-1)][JSE.blockID-1] !== 'undefined' && JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID-1)][JSE.blockID-1].startTime > 1500508800000) {
+										lastBlockTime = JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID-1)][JSE.blockID-1].startTime + 30000;
+									}
+									let timeTillConfirmation = (lastBlockTime + 30000) - nowTS;
+									if (timeTillConfirmation > 30000) timeTillConfirmation = 30000;
+									if (timeTillConfirmation < 0) timeTillConfirmation = 29999;
+									callback4('{"success":1,"value":"' + coinObject.value + '","notification":"Import Successful","timeTillConfirmation":'+timeTillConfirmation+'}');
+								});
 							}
-							let timeTillConfirmation = (lastBlockTime + 30000) - nowTS;
-							if (timeTillConfirmation > 30000) timeTillConfirmation = 30000;
-							if (timeTillConfirmation < 0) timeTillConfirmation = 29999;
-							callback4('{"success":1,"value":"' + coinObject.value + '","notification":"Import Successful","timeTillConfirmation":'+timeTillConfirmation+'}');
 						});
 					}
 				},  function(failObject) {
