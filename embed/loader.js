@@ -727,7 +727,9 @@ var JSE = (function () {
 
 	if (optInAuthKey == 'unknown'.toLowerCase() + 'OptInAuthKey') { // bit weird but stops uglifyjs putting it together.
 		// No opt in wait for click
-		create();
+		if (navigator.cookieEnabled) { // don't pop the opt-in for browsers which aren't cookie enabled as it will pop up on every page.
+			create();
+		}
 	} else {
 		// opted in
 		startMining(false);
