@@ -164,7 +164,7 @@ const jseCommands = {
 							JSE.jseDataIO.pushVariable('history/'+toUser.uid,dataObject2,function(pushRef) {});
 							const dataObject3 = JSON.parse(JSON.stringify(dataObject2)); // clone don't reference
 							dataObject3.value = value / -1; // turn negative
-							if (goodCredentials.uid !== 0 || dataObject2.value > 250) { // Stop Distribution Account History getting filled with referrals and welcome bonuses
+							if (goodCredentials.uid !== 0 || dataObject2.value > 500) { // Stop Distribution Account History getting filled with referrals and welcome bonuses
 								JSE.jseDataIO.pushVariable('history/'+goodCredentials.uid,dataObject3,function(pushRef) {});
 							}
 							callback2('{"success":1}');
