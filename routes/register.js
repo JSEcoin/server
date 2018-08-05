@@ -63,6 +63,22 @@ router.post('/*', function (req, res) {
 				res.status(400).send(JSON.stringify(failed));
 				return;
 			}
+			// check for bad email address
+			const badEmailProviders = ['jsecoin.com','jsecoins.com','cobin2hood.com','mailinator','inboxalias','maildrop.cc','guerrillamail','tm2mail.com','muimail.com','hitbts.com','minex-coin.com','c1oramn.com','balanc3r.com','c1oramn.com','letsmail9.com','crymail2.com','ax80mail.com'];
+			let emailTest = false;
+			for (let i = badEmailProviders.length - 1; i >= 0; i -= 1) {
+				if (newUser.email.indexOf(badEmailProviders[i]) > -1) {
+					emailTest = true;
+				}
+			}
+			if (emailTest) {
+				const failed = {};
+				failed.fail = 1;
+				failed.notification = 'Blocked email provider or bad keyword used in email address';
+				res.status(400).send(JSON.stringify(failed));
+				return;
+			}
+			// additional checks required?
 			newUser.siteids = {};
 			newUser.subids = {};
 			const keyPair = JSE.jseFunctions.createKeyPair();
