@@ -67,7 +67,7 @@ emails.template = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //E
           <li><a style="color: #AAA; text-decoration: none;" href="https://blockchain.jsecoin.com/?utm_source=email&utm_campaign=nodemails">https://blockchain.jsecoin.com</a></li>
         </ul>
         You have received this email because you have either registered via the platoform or subscribed to our newsletter or partners network channel.<br>
-        <a href="https://platform.jsecoin.com">Preferences</a> | <a href="<%asm_global_unsubscribe_url%>">Unsubscribe</a> | <a href="https://jsecoin.com/en/legal/privacyPolicy">Privacy</a>
+        <a href="https://platform.jsecoin.com">E-mail Settings</a> | <a href="https://jsecoin.com/en/legal/privacyPolicy">Privacy</a>
         <br><br>
       </div>
     </div>
