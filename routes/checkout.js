@@ -157,7 +157,8 @@ router.post('/*', function (req, res) {
 								const buyerEmailHTML = 'This is to confirm you have made a purchase via JSEcoin for the following.<br><br>Item: '+merchantSale.item+'<br>Amount: '+merchantSale.amount+' JSE<br>Type: '+merchantSale.type+'<br>Delivery Address: '+merchantSale.deliveryAddress+'<br><br>Thank you for using JSEcoin for your digital payments.';
 								JSE.jseFunctions.sendStandardEmail(merchantSale.buyerEmail,'JSEcoin Payment Confirmation',buyerEmailHTML);
 								if (typeof checkout.ipnURL !== 'undefined') {
-									request(checkout.ipnURL, function (error, response, body) { }); // S2S Postback IPN URL
+									const ipnURL = checkout.ipnURL.split('{reference}').join(merchantSale.sellerUID+'/'+salePushRef);
+									request(ipnURL, function (error, response, body) { }); // S2S Postback IPN URL
 								}
 							});
 							// set buyer and seller to have used merchant services so both are pulled at login

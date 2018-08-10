@@ -24,18 +24,14 @@ emails.template = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //E
   <title></title>
   <meta name="viewport" content="width=device-width">
   <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet" type="text/css">
-  <style>
-    @media only screen and (max-width: 720px){
-      #social-icons { margin-top: 0px !important; }
-      .social-icon { float: left !important; margin-left: 0 !important; }
-    }
-  </style>
 </head>
 <body style="font-family: Nunito, Arial, sans-seif; font-size: 13px; width: 100%; background: #F9F9F9; text-align: center; margin: 0px; padding: 0px;">
-  <a href="https://jsecoin.com" style="text-decoration:none;">
-    <img src="https://jsecoin.com/img/logoemail.png" style="height: 25px; width: 125px; margin-top: 1%;" alt="JSEcoin" />
-    <div style="font-size: 10px; color: #AAAAAA; margin-bottom: 1%;">JAVASCRIPT EMBEDDED CRYPTOCURRENCY</div>
-  </a>
+  <div style="width: 50%; min-width: 300px; padding: 0; margin: 0 auto;">
+    <a href="https://jsecoin.com" style="text-decoration:none;">
+      <img src="https://jsecoin.com/img/logoemail.png" style="height: 25px; width: 125px; margin-top: 1%;" alt="JSEcoin" />
+      <div style="font-size: 10px; color: #AAAAAA; margin-bottom: 1%;">JAVASCRIPT EMBEDDED CRYPTOCURRENCY</div>
+    </a>
+  </div>
   <div style="width: 100%; margin: 0 auto; background: #FFFFFF; color: #444444;">
     <div style="width: 50%; min-width: 300px; padding: 0% 2%; text-align: left; margin: 0 auto;">
       <div style="margin-bottom: 10px;">
@@ -47,8 +43,8 @@ emails.template = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //E
       </div>
       <br>Kind regards,<br><br>The JSE Team<br><br>
       <hr style="border-top: 1px solid #CCCCCC;">
-      <a href="https://jsecoin.com/"><img src="https://jsecoin.com/img/logoemail.png" style="height: 25px; width: 125px;" alt="JSEcoin" /></a>
-      <div id="social-icons" style="margin-top: -32px;">
+      <a href="https://jsecoin.com/"><img src="https://jsecoin.com/img/logoemail.png" style="float: left; height: 25px; width: 125px;" alt="JSEcoin" /></a>
+      <div id="social-icons" style="float: right;">
         <div class="social-icon" style="margin:5px; float: right;"><a href="https://t.me/jsetelegram"><img src="https://jsecoin.com/img/telegram@2x.png" alt="Telegram" style="height: 26px; width: 26px; filter: grayscale(50%);" /></a></div>
         <div class="social-icon" style="margin:5px; float: right;"><a href="https://discord.gg/3gBZsA4"><img src="https://jsecoin.com/img/discord@2x.png" alt="Discord" style="height: 26px; width: 26px; filter: grayscale(50%);" /></a></div>
         <div class="social-icon" style="margin:5px; float: right;"><a href="https://www.youtube.com/channel/UCHtIF9KggJn9TDzr8pRYsYA"><img src="https://jsecoin.com/img/youtube@2x.png" alt="Youtube" style="height: 26px; width: 26px; filter: grayscale(50%);" /></a></div>
