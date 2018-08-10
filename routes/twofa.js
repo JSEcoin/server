@@ -43,6 +43,7 @@ router.post('/test2fa/*', function (req, res) {
 			console.log('New 2fa setup for '+goodCredentials.email);
 			JSE.jseDataIO.setVariable('credentials/'+goodCredentials.uid+'/twoFactorAuth',true);
 			res.send('{"success":1,"notification":"You have successfully setup two factor authentication"}');
+			JSE.jseFunctions.sendStandardEmail(goodCredentials.email,'2FA Setup On JSEcoin','Thank you for improving your account security.<br><br>Two factor authentication is now set up on your account.<br><br>Thank you for using JSEcoin to secure your digital funds.');
 		} else {
 			res.status(400).send('{"fail":1,"notification":"Token expried: Please try entering a new code"}');
 		}
@@ -66,6 +67,7 @@ router.post('/remove2fa/*', function (req, res) {
 			console.log('2fa removed for '+goodCredentials.email);
 			JSE.jseDataIO.setVariable('credentials/'+goodCredentials.uid+'/twoFactorAuth',false);
 			res.send('{"success":1,"notification":"You have successfully removed two factor authentication"}');
+			JSE.jseFunctions.sendStandardEmail(goodCredentials.email,'2FA Removed On JSEcoin','You have removed two factor authentication on your account. If you did not make this change, please contact admin@jsecoin.com as soon as possible.');
 		} else {
 			res.status(400).send('{"fail":1,"notification":"Token expried: Please try entering a new code"}');
 		}
