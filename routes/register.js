@@ -138,11 +138,11 @@ router.post('/*', function (req, res) {
 						console.log('New user: '+newUserR3.email+', From: '+newUserR3.campaign);
 						return false;
 					}, function(returnObject) { // addUser failCallback()
-						res.send(returnObject);
+						res.status(400).send(returnObject);
 					});
 				});
 			}, function(returnObject) { // checkUniqueEmail failCallback()
-				res.send(returnObject);
+				res.status(400).send(returnObject);
 			});
     } else {
 	    const failed = {};
