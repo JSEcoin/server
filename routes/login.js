@@ -62,6 +62,9 @@ function startLogin(credentials,req,res) {
 				previousSessionVar = credentials.desktopSession || null;
 				newSessionCredentials.desktopSession = newSessionVar;
 				JSE.jseDataIO.setVariable('credentials/'+newSessionCredentials.uid+'/desktopSession', newSessionCredentials.desktopSession);
+			} else if (req.body.app === 'web') { // alpha platform
+				newSessionCredentials.session = newSessionVar;
+				JSE.jseDataIO.setVariable('credentials/'+newSessionCredentials.uid+'/session', newSessionCredentials.session);
 			} else {
 				// could send through "mobile" or "ios" "android" etc
 				previousSessionVar = credentials.mobileSession || null;

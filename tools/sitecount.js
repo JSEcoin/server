@@ -1,6 +1,6 @@
 /* Quick script to see how many sites we have opted in to display advertising */
 
-const siteIDs = require('./../data/siteids.json');
+const siteIDs = require('./../data/siteids.json'); // eslint-disable-line
 
 let marketing = 0;
 Object.keys(siteIDs).forEach(function(i) {

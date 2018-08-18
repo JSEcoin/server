@@ -486,6 +486,8 @@ router.post('/logout/*', function (req, res) {
 			if (req.body.app === 'desktop') {
 				JSE.jseDataIO.setVariable('credentials/'+newCredentials.uid+'/desktopSession', newCredentials.session);
 				previousSessionVar = credentials.desktopSession || null;
+			} else if (req.body.app === 'web') { // alpha platform
+				JSE.jseDataIO.setVariable('credentials/'+newCredentials.uid+'/session', newCredentials.session);
 			} else {
 				JSE.jseDataIO.setVariable('credentials/'+newCredentials.uid+'/mobileSession', newCredentials.session);
 				previousSessionVar = credentials.mobileSession || null;
