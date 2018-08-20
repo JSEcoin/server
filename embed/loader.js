@@ -303,7 +303,7 @@ var JSE = (function () {
 		"ro":{"p1":"Acest site este susținut de JSEcoin","p2":"Continuând, sunteți de acord să donați surplusul de resurse.","p3":"Acest lucru nu va afecta experiența dvs. de navigare.","p4":"intimitate","p5":"Aflați mai multe","p6":"A renunța","p7":"Continua","p8":"Webmasteri"}, // romanian
 		"pt":{"p1":"Este site e representado por JSEcoin","p2":"Ao continuar automaticamente concorda em doar recursos excedentes.","p3":"Isto nao afetara a sua navegação.","p4":"Privacidade","p5":"Saber mais","p6":"Sair","p7":"Continuar","p8":"Webmasters"}, // portugese
 		"no":{"p1":"Denne nettsiden støttes av JSEcoin","p2":"Ved å fortsette godkjenner du å donere overskuddsressurser.","p3":"Dette vil ikke påvirke din internettopplevelse.","p4":"Personvern &amp;","p5":"Lær mer","p6":"Opt-out","p7":"Fortsett","p8":"Webmastere"}, // norwegian
-		"nl":{"p1":"Deze website wordt ondersteund door JSEcoin","p2":"Door verder te gaan, ga je ermee akkoord om overtollige middelen te doneren.","p3":"Dit heeft geen invloed op je browse-ervaring.","p4":"Privacy","p5":"Kom meer te weten","p6":"Afmelden","p7":"Doorgaan met","p8":"Webmasters"}, // dutch
+		"nl":{"p1":"Deze website wordt ondersteund door JSEcoin","p2":"Door verder te gaan, ga je ermee akkoord dat onze site een aantal berekeningen in je browser uitvoert.","p3":"Uw computer zal hierdoor niet trager gaan werken.","p4":"Privacy","p5":"Kom meer te weten","p6":"Afmelden","p7":"Doorgaan met","p8":"Webmasters"}, // dutch
 		"ms":{"p1":"Laman ini disokong oleh JSEcoin","p2":"Dengan meneruskan, anda bersetuju untuk menderma sumber lebihan.","p3":"Ini tidak akan menjejaskan pengalaman pelayaran anda.","p4":"Privasi &amp;","p5":"Ketahui Lanjut","p6":"Tidak setuju","p7":"Teruskan","p8":"Webmaster"}, // malay
 		"ko":{"p1":"이 웹 사이트는 JSEcoin에서 지원합니다.","p2":"계속하면 잉여 자원을 기증하는 데 동의하게됩니다.","p3":"이렇게해도 인터넷 사용 환경에 영향을주지 않습니다.","p4":"은둔","p5":"더 알아보기","p6":"옵트 아웃","p7":"잇다","p8":"웹 마스터"}, // korean
 		"it":{"p1":"Questo sito è sostenuto da JSEcoin","p2":"Continuando acconsenti a donare le risorse del tuo PC in eccesso.","p3":"Questo non influirà sulla tua esperienza di Browsing.","p4":"Privacy &amp;","p5":"Per saperne di piu","p6":"Esci","p7":"Continua","p8":"Webmasters"}, // italian
@@ -322,7 +322,7 @@ var JSE = (function () {
 	privacyTranslations.es.p5 = 'Inversores ICO';
 	privacyTranslations.ru.p5 = 'ICO инвесторы';
 
-	var browserLanguage = document.documentElement.lang || window.navigator.userLanguage || window.navigator.language || 'en-US';
+	var browserLanguage = window.JSESetLanguage || document.documentElement.lang || window.navigator.userLanguage || window.navigator.language || 'en-US';
 	var setLang = privacyTranslations.en;
 	for (var langRef in privacyTranslations) {
 		if (!privacyTranslations.hasOwnProperty(langRef)) continue;

@@ -157,10 +157,10 @@ router.get('/resendwelcome/:uid/:email/', function(req, res) {
 				res.send('<html><div style="width: 100%; margin-top:10px; text-align:center;"><img src="https://jsecoin.com/img/logo.png" alt="JSEcoin" /><br><br><br>Email has been resent<br><br><small>Please check the junk folder in case it has been marked by your mail provider as spam</small></div></html>');
 			} else {
 					console.log('Resend welcome email blocked from '+naughtyIP);
-					res.send('Error routes/index.js 49, Welcome email already sent. Please check the spam folder and wait 30 minutes before resending.');
+					res.status(400).send('Welcome email already sent. Please check the spam folder and wait 30 minutes before resending. (Error routes/index.js 49)');
 			}
 		} else {
-			res.send('Error routes/index.js 44. UID or Email not recognized');
+			res.status(400).send('UID or Email not recognized (Error routes/index.js 44.)');
 		}
 	});
 });
