@@ -160,7 +160,7 @@ router.get('/resendwelcome/:uid/:email/', function(req, res) {
 					res.status(400).send('Welcome email already sent. Please check the spam folder and wait 30 minutes before resending. (Error routes/index.js 49)');
 			}
 		} else {
-			res.status(400).send('UID or Email not recognized (Error routes/index.js 44.)');
+			res.status(400).send('User ID or Email not recognized (Error routes/index.js 44.)');
 		}
 	});
 });
