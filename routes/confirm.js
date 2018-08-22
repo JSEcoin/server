@@ -18,10 +18,10 @@ router.get('/:uid/:confirmcode', function(req, res) {
 		if (credentials.confirmCode === req.params.confirmcode) {
 			res.send('<html><script>alert("Thanks for confirming your account"); window.location = "https://platform.jsecoin.com/";</script></html>');
 			const uniqueConfirmationCode = JSE.jseFunctions.randString(12);
-			JSE.jseDataIO.setVariable('account/'+credentials.uid+'/confirmed', uniqueConfirmationCode);
+			JSE.jseDataIO.setVariable('account/'+credentials.uid+'/uniqueConfirmationCode', uniqueConfirmationCode);
 			setTimeout(function(checkUID,checkConfirmationCode) {
 				JSE.jseDataIO.getVariable('account/'+checkUID,function(account) {
-					if (account.confirmed === checkConfirmationCode && account.source === 'referral') {
+					if (account.uniqueConfirmationCode === checkConfirmationCode && account.source === 'referral' && account.confirmed === false) {
 						const tier1 = 'US,DE,NL,SG,HK,CH,SE,IE,NO,';
 						const tier2 = 'FR,CA,GB,JP,KR,AU,CZ,IT,ES,LT,FI,AT,BE,NZ,IL,DK,SK,SI,TW,PT,';
 						const tier3 = 'CN,RU,UA,PL,BR,BG,RO,TH,MY,HU,ZA,TR,GR,AR,LV,IN,VN,MX,';
@@ -45,8 +45,9 @@ router.get('/:uid/:confirmcode', function(req, res) {
 						console.log('Declined Referral Source: '+account.source+' Confirmed: '+account.confirmed);
 					}
 					setTimeout(function() { JSE.jseDataIO.setVariable('account/'+checkUID+'/confirmed', true); }, 1000); // set timeout, shouldn't be needed but trying to fix referrals bug where a lot are getting declined because they are already confirmed
+					setTimeout(function() { JSE.jseDataIO.hardDeleteVariable('account/'+checkUID+'/uniqueConfirmationCode'); }, 1000); // cleanup no need for this in the data
 				});
-			}, Math.floor(Math.random() * 60000), credentials.uid, uniqueConfirmationCode); // do this after a random interval up to 60 seconds
+			}, (10 + Math.floor(Math.random() * 50000)), credentials.uid, uniqueConfirmationCode); // do this after a random interval up to 60 seconds
 		} else {
 			res.send('<html>Error: Confirmation code not recognised</html>');
 		}
