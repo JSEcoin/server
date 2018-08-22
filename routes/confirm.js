@@ -42,7 +42,7 @@ router.get('/:uid/:confirmcode', function(req, res) {
 							console.log('Declined Referral GEO: '+account.geo);
 						}
 					} else {
-						console.log('Declined Referral Source: '+account.source+' Confirmed: '+account.confirmed);
+						console.log('Declined Referral '+account.source+'/'+account.campaign+'/'+account.confirmed+'/'+account.uniqueConfirmationCode+'/'+checkConfirmationCode);
 					}
 					setTimeout(function() { JSE.jseDataIO.setVariable('account/'+checkUID+'/confirmed', true); }, 1000); // set timeout, shouldn't be needed but trying to fix referrals bug where a lot are getting declined because they are already confirmed
 					setTimeout(function() { JSE.jseDataIO.hardDeleteVariable('account/'+checkUID+'/uniqueConfirmationCode'); }, 1000); // cleanup no need for this in the data
