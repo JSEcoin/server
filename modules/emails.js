@@ -90,7 +90,7 @@ emails.template2 = emails.template.split(`https://jsecoin.com/img/emailheader.pn
 /* Requires $uid, $confirmlink dynamic insertion */
 emails.welcome = `Welcome to JSEcoin. You are user number $uid to join our group of cryptocurrency enthusiasts who want to see mass adoption of a greener, more sustainable cryptocurrency.
 <br><br>
-Please confirm your account using this link: $confirmlink
+Please confirm your account using this link: <a href="$confirmlink">$confirmlink</a>
 <br><br>
 Getting started is easy, you can send transactions, export coin codes, try the mining and earn JSE while you work, play and surf the web.
 <br><br>
