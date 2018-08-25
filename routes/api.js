@@ -444,6 +444,46 @@ if (JSE.authenticatedNode) {
 		return false;
 	});
 
+	/**
+	 * @name /api/checkuseremail/*
+	 * @description Check user email and return uid, publicKey and balance
+	 * @example https://api.jsecoin.com/checkuserid/:uid/:apiKey/*
+	 * @memberof module:jseRouter
+	 */
+	router.get('/checkuseremail/:email/:apiKey/*', function(req, res) {
+		let apiKey;
+		if (typeof req.get('Authorization') !== 'undefined') {
+			apiKey = JSE.jseFunctions.cleanString(req.get('Authorization'));
+		} else {
+			apiKey = JSE.jseFunctions.cleanString(req.params.apiKey);
+		}
+		if (JSE.apiLimits[apiKey]) {
+			JSE.apiLimits[apiKey] += 1;
+		} else {
+			JSE.apiLimits[apiKey] = 1;
+		}
+		if (JSE.apiLimits[apiKey] < 300) {
+			const targetEmail = JSE.jseFunctions.cleanString(String(req.params.email)).toLowerCase();
+			JSE.jseDataIO.getUserByEmail(targetEmail,function(toUser) {
+				JSE.jseDataIO.getVariable('ledger/'+toUser.uid,function(balance){
+					const returnObject = {};
+					returnObject.success = 1;
+					returnObject.uid = toUser.uid;
+					returnObject.publicKey = toUser.publicKey;
+					returnObject.balance = balance;
+					res.send(JSON.stringify(returnObject));
+				});
+			}, function() {
+				res.status(400).send('{"fail":1,"notification":"API checkuseremail Failed: user email unknown"}');
+			});
+		} else {
+			res.status(400).send('{"fail":1,"notification":"API Limit reached checkuseremail 300 per 30 mins"}');
+		}
+		return false;
+	});
+
+
+	// Anything else, catch all
 	router.get('/*', function(req, res) {
 		res.status(400).send('{"fail":1,"notification":"Check the API documentation at https://developer.jsecoin.com/ and get your api key from the platform at https://platform.jsecoin.com"}');
 	});

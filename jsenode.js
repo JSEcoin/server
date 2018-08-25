@@ -136,6 +136,7 @@ JSE.recentSubIDs = [];
 JSE.alreadySentReset = []; // restrict reset emails to one every 30 minutes
 JSE.alreadySentWelcomes = []; // restrict resend welcome emails to 1 per 30 minutes
 JSE.alreadySentGeneral = []; // restrict support emails to 1 per 30 minutes
+JSE.apiLimits = {}; // restrict api queries
 JSE.preHash = '0';
 JSE.minerAuthKey = '0';
 JSE.vpnData = {};
@@ -144,6 +145,7 @@ setInterval(function() {
 	JSE.alreadySentReset = [];
 	JSE.alreadySentWelcomes = [];
 	JSE.alreadySentGeneral = [];
+	JSE.apiLimits = {};
 }, 1800000); // 30mins
 
 JSE.jseFunctions = require('./modules/functions.js'); // round robin bug means has to be JSE
