@@ -445,12 +445,12 @@ if (JSE.authenticatedNode) {
 	});
 
 	/**
-	 * @name /api/checkuseremail/*
-	 * @description Check user email and return uid, publicKey and balance
+	 * @name /api/checkemail/*
+	 * @description Check email and return uid, publicKey and balance
 	 * @example https://api.jsecoin.com/checkuserid/:uid/:apiKey/*
 	 * @memberof module:jseRouter
 	 */
-	router.get('/checkuseremail/:email/:apiKey/*', function(req, res) {
+	router.get('/checkemail/:email/:apiKey/*', function(req, res) {
 		let apiKey;
 		if (typeof req.get('Authorization') !== 'undefined') {
 			apiKey = JSE.jseFunctions.cleanString(req.get('Authorization'));
@@ -474,10 +474,10 @@ if (JSE.authenticatedNode) {
 					res.send(JSON.stringify(returnObject));
 				});
 			}, function() {
-				res.status(400).send('{"fail":1,"notification":"API checkuseremail Failed: user email unknown"}');
+				res.status(400).send('{"fail":1,"notification":"API checkemail Failed: user email unknown"}');
 			});
 		} else {
-			res.status(400).send('{"fail":1,"notification":"API Limit reached checkuseremail 300 per 30 mins"}');
+			res.status(400).send('{"fail":1,"notification":"API Limit reached checkemail 300 per 30 mins"}');
 		}
 		return false;
 	});
