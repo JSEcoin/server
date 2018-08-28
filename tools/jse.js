@@ -70,6 +70,26 @@ function runTxt() {
 				//JSE.jseDataIO.setVariable('publicStats/pubs',JSE.publicStats.pubs);
 			});
 	*/
+
+	/*
+	let i = 0;
+	function cleanUp() {
+		const ic = i;
+		JSE.jseDataIO.getVariable('account/'+ic+'/lastIP',function(lastIP) {
+			JSE.jseDataIO.getVariable('account/'+ic+'/lastip',function(lastip) {
+				if (lastip === null && lastIP !== null) {
+					JSE.jseDataIO.setVariable('account/'+ic+'/lastip',lastIP);
+				}
+				JSE.jseDataIO.hardDeleteVariable('account/'+ic+'/lastIP');
+				console.log('Removed lastIP for '+ic);
+				i += 1;
+				if (i < 70000) cleanUp();
+			});
+		});
+	}
+	cleanUp();
+	*/
+
 	/*
 	const newKeys = [];
 	for (var i = 0; i < 1000; i++) {
