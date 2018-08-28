@@ -293,27 +293,27 @@ var JSE = (function () {
 	/** v1.7 opt in mining code */
 
 	var privacyTranslations = {
-		"hr":{"p1":"Ovu stranicu podržava JSEcoin","p2":"Nastavkom na stranicu pristajete donirati vaše suvišne resurse.","p3":"Ovo neće utjecati na vaše korisničko iskustvo.","p4":"Privatnost i;","p5":"Pročitaj više","p6":"Izuzetci","p7":"Nastavi","p8":"Webmasteri"}, // croatian
-		"zh-TW":{"p1":"本網站由JSEcoin支持","p2":"繼續您同意捐贈剩餘資源。","p3":"這不會影響您的瀏覽體驗。","p4":"隱私","p5":"了解更多","p6":"選擇退出","p7":"繼續","p8":"網站管理員"}, // chinese traditional
-		"zh-CN":{"p1":"本网站由JSEcoin支持","p2":"继续您同意捐赠剩余资源。","p3":"这不会影响您的浏览体验。","p4":"隐私","p5":"了解更多","p6":"选择退出","p7":"继续","p8":"网站管理员"}, // chinese simplified
-		"th":{"p1":"เว็บไซต์นี้ได้รับการสนับสนุนโดย JSEcoin","p2":"เมื่อดำเนินการต่อคุณตกลงที่จะบริจาคทรัพยากรที่มากเกินไป","p3":"การดำเนินการนี้จะไม่ส่งผลต่อการเรียกดูของคุณ","p4":"ความเป็นส่วนตัว","p5":"เรียนรู้เพิ่มเติม","p6":"เลือกออก","p7":"ต่อ","p8":"เว็บมาสเตอร์"}, // thai
-		"sv":{"p1":"Den här webbplatsen stöds av JSEcoin","p2":"Genom att fortsätta accepterar du att donera överskottsresurser.","p3":"Detta påverkar inte din webbläsarupplevelse.","p4":"Integritet","p5":"Läs mer","p6":"Opt-out","p7":"Fortsätta","p8":"Webmasters"}, // sweden
-		"sl":{"p1":"Spletno stran podpira JSECoin","p2":"Z nadaljevanjem se strinjate, da boste donirali presežne vire.","p3":"To ne bo vplivalo na vašo uporabniško izkušnjo.","p4":"Zasebnost &amp;","p5":"Več informacij","p6":"Zavrni","p7":"Nadaljuj","p8":"Webmasters"}, // slovenia
-		"ru":{"p1":"Этот сайт поддерживается JSEcoin","p2":"Продолжая, вы соглашаетесь пожертвовать излишки ресурсов.","p3":"Это никак не отобразится на работе вашего браузера.","p4":"Конфиденциальность","p5":"Узнать больше","p6":"Отказаться","p7":"Продолжать","p8":"веб-мастера"}, // russian
-		"ro":{"p1":"Acest site este susținut de JSEcoin","p2":"Continuând, sunteți de acord să donați surplusul de resurse.","p3":"Acest lucru nu va afecta experiența dvs. de navigare.","p4":"intimitate","p5":"Aflați mai multe","p6":"A renunța","p7":"Continua","p8":"Webmasteri"}, // romanian
-		"pt":{"p1":"Este site e representado por JSEcoin","p2":"Ao continuar automaticamente concorda em doar recursos excedentes.","p3":"Isto nao afetara a sua navegação.","p4":"Privacidade","p5":"Saber mais","p6":"Sair","p7":"Continuar","p8":"Webmasters"}, // portugese
-		"no":{"p1":"Denne nettsiden støttes av JSEcoin","p2":"Ved å fortsette godkjenner du å donere overskuddsressurser.","p3":"Dette vil ikke påvirke din internettopplevelse.","p4":"Personvern &amp;","p5":"Lær mer","p6":"Opt-out","p7":"Fortsett","p8":"Webmastere"}, // norwegian
-		"nl":{"p1":"Deze website wordt ondersteund door JSEcoin","p2":"Door verder te gaan, ga je ermee akkoord dat onze site een aantal berekeningen in je browser uitvoert.","p3":"Uw computer zal hierdoor niet trager gaan werken.","p4":"Privacy","p5":"Kom meer te weten","p6":"Afmelden","p7":"Doorgaan met","p8":"Webmasters"}, // dutch
-		"ms":{"p1":"Laman ini disokong oleh JSEcoin","p2":"Dengan meneruskan, anda bersetuju untuk menderma sumber lebihan.","p3":"Ini tidak akan menjejaskan pengalaman pelayaran anda.","p4":"Privasi &amp;","p5":"Ketahui Lanjut","p6":"Tidak setuju","p7":"Teruskan","p8":"Webmaster"}, // malay
-		"ko":{"p1":"이 웹 사이트는 JSEcoin에서 지원합니다.","p2":"계속하면 잉여 자원을 기증하는 데 동의하게됩니다.","p3":"이렇게해도 인터넷 사용 환경에 영향을주지 않습니다.","p4":"은둔","p5":"더 알아보기","p6":"옵트 아웃","p7":"잇다","p8":"웹 마스터"}, // korean
-		"it":{"p1":"Questo sito è sostenuto da JSEcoin","p2":"Continuando acconsenti a donare le risorse del tuo PC in eccesso.","p3":"Questo non influirà sulla tua esperienza di Browsing.","p4":"Privacy &amp;","p5":"Per saperne di piu","p6":"Esci","p7":"Continua","p8":"Webmasters"}, // italian
-		"id":{"p1":"Situs web ini didukung oleh JSEcoin","p2":"Dengan melanjutkan Anda setuju untuk menyumbangkan kelebihan sumber daya.","p3":"Ini tidak akan memengaruhi pengalaman penjelajahan Anda.","p4":"Pribadi","p5":"Belajarlah lagi","p6":"Menyisih","p7":"Terus","p8":"Webmaster"}, // indo
-		"fr":{"p1":"Ce site est supporté par JSEcoin","p2":"En continuant, vous acceptez de donner des ressources excédentaires.","p3":"Cela n'aura pas d'impact sur votre expérience de navigation.","p4":"Confidentialité","p5":"En apprendre plus","p6":"Se désengager","p7":"Continuer","p8":"Webmasters"}, // french
-		"fi":{"p1":"Tämän sivuston toimintaa tuetaan JSEcoin-laskennalla","p2":"Jatkamalla hyväksyt ylimääräisten laskentaresurssien käytön.","p3":"Tämä ei vaikuta selailukokemukseesi.","p4":"Tietosuojalauseke &amp;","p5":"Lisätietoja","p6":"Jättäydy pois","p7":"Jatka","p8":"ylläpitäjät"}, // finnish
-		"es":{"p1":"Este sitio web es apoyado por JSEcoin","p2":"Al continuar, acepta donar recursos excedentes.","p3":"Esto no afectará su experiencia de navegación.","p4":"Intimidad","p5":"Aprende más","p6":"Optar por no","p7":"Continuar","p8":"Webmasters"}, // spanish
-		"de":{"p1":"Diese Website wird von JSEcoin unterstützt","p2":"Wenn Sie fortfahren, stimmen Sie zu, überschüssige System-Ressourcen zu spenden.","p3":"Dies hat keinen Einfluss auf Ihre Browser-Nutzung.","p4":"Privatsphäre","p5":"Mehr erfahren","p6":"Zustimmung verweigern","p7":"Fortsetzen","p8":"Webmasters"}, // german
-		"ar":{"p1":"ويدعم هذا الموقع من قبل جسكوين","p2":"من خلال الاستمرار كنت توافق على التبرع الموارد الفائضة.","p3":"لن يؤثر ذلك في تجربة التصفح.","p4":"الإجمالية","p5":"أعرف أكثر","p6":"انسحب","p7":"استمر","p8":"المواقع"}, // arabic
-		"en":{"p1":"This site is supported by JSEcoin","p2":"By continuing you agree to donate surplus resources.","p3":"This will not impact your browsing experience.","p4":"Privacy &amp;","p5":"Learn more","p6":"Opt-out","p7":"Continue","p8":"Webmasters"} // english
+		"hr":{"p1":"Ovu stranicu podržava JSEcoin","p2":"Nastavkom na stranicu pristajete donirati vaše suvišne resurse.","p3":"Ovo neće utjecati na vaše korisničko iskustvo.","p4":"Privatnost i;","p5":"Pročitaj više","p5m":"Pročitaj više","p6":"Izuzetci","p7":"Nastavi","p8":"Webmasteri","p9":"BESPLATNI novčanik posjetitelja", "p9m": "Novčanik posjetitelja"}, // croatian
+		"zh-TW":{"p1":"本網站由JSEcoin支持","p2":"繼續您同意捐贈剩餘資源。","p3":"這不會影響您的瀏覽體驗。","p4":"隱私","p5":"了解更多","p5m":"了解更多","p6":"選擇退出","p7":"繼續","p8":"網站管理員","p9":"免費訪客錢包", "p9m": "訪客錢包"}, // chinese traditional
+		"zh-CN":{"p1":"本网站由JSEcoin支持","p2":"继续您同意捐赠剩余资源。","p3":"这不会影响您的浏览体验。","p4":"隐私","p5":"了解更多","p5m":"了解更多","p6":"选择退出","p7":"继续","p8":"网站管理员","p9":"免费访客钱包", "p9m": "访客钱包"}, // chinese simplified
+		"th":{"p1":"เว็บไซต์นี้ได้รับการสนับสนุนโดย JSEcoin","p2":"เมื่อดำเนินการต่อคุณตกลงที่จะบริจาคทรัพยากรที่มากเกินไป","p3":"การดำเนินการนี้จะไม่ส่งผลต่อการเรียกดูของคุณ","p4":"ความเป็นส่วนตัว","p5":"เรียนรู้เพิ่มเติม","p5m":"เรียนรู้เพิ่มเติม","p6":"เลือกออก","p7":"ต่อ","p8":"เว็บมาสเตอร์","p9":"กระเป๋าสตางค์ของผู้เยี่ยมชมฟรี", "p9m": "กระเป๋าเดินทาง"}, // thai
+		"sv":{"p1":"Den här webbplatsen stöds av JSEcoin","p2":"Genom att fortsätta accepterar du att donera överskottsresurser.","p3":"Detta påverkar inte din webbläsarupplevelse.","p4":"Integritet","p5":"Läs mer","p5m":"Läs mer","p6":"Opt-out","p7":"Fortsätta","p8":"Webmasters","p9":"Gratis Besökare Plånbok", "p9m": "Besökare Plånbok"}, // sweden
+		"sl":{"p1":"Spletno stran podpira JSECoin","p2":"Z nadaljevanjem se strinjate, da boste donirali presežne vire.","p3":"To ne bo vplivalo na vašo uporabniško izkušnjo.","p4":"Zasebnost &amp;","p5":"Več informacij","p5m":"Več informacij","p6":"Zavrni","p7":"Nadaljuj","p8":"Webmasters","p9":"Brezplačna denarnica za obiskovalce", "p9m": "Visitor Denarnica"}, // slovenia
+		"ru":{"p1":"Этот сайт поддерживается JSEcoin","p2":"Продолжая, вы соглашаетесь пожертвовать излишки ресурсов.","p3":"Это никак не отобразится на работе вашего браузера.","p4":"Конфиденциальность","p5":"Узнать больше","p5m":"Узнать больше","p6":"Отказаться","p7":"Продолжать","p8":"веб-мастера","p9":"Бесплатный бумажник для посетителей", "p9m": "Бумажник для посетителей"}, // russian
+		"ro":{"p1":"Acest site este susținut de JSEcoin","p2":"Continuând, sunteți de acord să donați surplusul de resurse.","p3":"Acest lucru nu va afecta experiența dvs. de navigare.","p4":"intimitate","p5":"Aflați mai multe","p5m":"Aflați mai multe","p6":"A renunța","p7":"Continua","p8":"Webmasteri","p9":"Portofel Pentru Vizitatori", "p9m": "Portofel de Vizitatori"}, // romanian
+		"pt":{"p1":"Este site e representado por JSEcoin","p2":"Ao continuar automaticamente concorda em doar recursos excedentes.","p3":"Isto nao afetara a sua navegação.","p4":"Privacidade","p5":"Saber mais","p5m":"Saber mais","p6":"Sair","p7":"Continuar","p8":"Webmasters","p9":"Carteira de Visitantes Gratuitos", "p9m": "Carteira de Visitantes"}, // portugese
+		"no":{"p1":"Denne nettsiden støttes av JSEcoin","p2":"Ved å fortsette godkjenner du å donere overskuddsressurser.","p3":"Dette vil ikke påvirke din internettopplevelse.","p4":"Personvern &amp;","p5":"Lær mer","p5m":"Lær mer","p6":"Opt-out","p7":"Fortsett","p8":"Webmastere","p9":"Gratis Besøkende Lommebok", "p9m": "Besøkende Lommebok"}, // norwegian
+		"nl":{"p1":"Deze website wordt ondersteund door JSEcoin","p2":"Door verder te gaan, ga je ermee akkoord dat onze site een aantal berekeningen in je browser uitvoert.","p3":"Uw computer zal hierdoor niet trager gaan werken.","p4":"Privacy","p5":"Kom meer te weten","p5m":"Kom meer te weten","p6":"Afmelden","p7":"Doorgaan met","p8":"Webmasters","p9":"Gratis Bezoeker Wallet", "p9m": "Bezoeker Wallet"}, // dutch
+		"ms":{"p1":"Laman ini disokong oleh JSEcoin","p2":"Dengan meneruskan, anda bersetuju untuk menderma sumber lebihan.","p3":"Ini tidak akan menjejaskan pengalaman pelayaran anda.","p4":"Privasi &amp;","p5":"Ketahui Lanjut","p5m":"Ketahui Lanjut","p6":"Tidak setuju","p7":"Teruskan","p8":"Webmaster","p9":"Dompet Pelawat Percuma", "p9m": "Dompet Pelawat"}, // malay
+		"ko":{"p1":"이 웹 사이트는 JSEcoin에서 지원합니다.","p2":"계속하면 잉여 자원을 기증하는 데 동의하게됩니다.","p3":"이렇게해도 인터넷 사용 환경에 영향을주지 않습니다.","p4":"은둔","p5":"더 알아보기","p5m":"더 알아보기","p6":"옵트 아웃","p7":"잇다","p8":"웹 마스터","p9":"무료 방문자 지갑", "p9m": "방문자 지갑"}, // korean
+		"it":{"p1":"Questo sito è sostenuto da JSEcoin","p2":"Continuando acconsenti a donare le risorse del tuo PC in eccesso.","p3":"Questo non influirà sulla tua esperienza di Browsing.","p4":"Privacy &amp;","p5":"Per saperne di piu","p5m":"Per saperne di piu","p6":"Esci","p7":"Continua","p8":"Webmasters","p9":"Portafoglio Visitatore Gratuito", "p9m": "Portafoglio Visitatore"}, // italian
+		"id":{"p1":"Situs web ini didukung oleh JSEcoin","p2":"Dengan melanjutkan Anda setuju untuk menyumbangkan kelebihan sumber daya.","p3":"Ini tidak akan memengaruhi pengalaman penjelajahan Anda.","p4":"Pribadi","p5":"Belajarlah lagi","p5m":"Belajarlah lagi","p6":"Menyisih","p7":"Terus","p8":"Webmaster","p9":"Dompet Pengunjung Gratis", "p9m": "Dompet Pengunjung"}, // indo
+		"fr":{"p1":"Ce site est supporté par JSEcoin","p2":"En continuant, vous acceptez de donner des ressources excédentaires.","p3":"Cela n'aura pas d'impact sur votre expérience de navigation.","p4":"Confidentialité","p5":"En apprendre plus","p5m":"En apprendre plus","p6":"Se désengager","p7":"Continuer","p8":"Webmasters","p9":"Portefeuille Visiteur Gratuit", "p9m": "Portefeuille Visiteur"}, // french
+		"fi":{"p1":"Tämän sivuston toimintaa tuetaan JSEcoin-laskennalla","p2":"Jatkamalla hyväksyt ylimääräisten laskentaresurssien käytön.","p3":"Tämä ei vaikuta selailukokemukseesi.","p4":"Tietosuojalauseke &amp;","p5":"Lisätietoja","p5m":"Lisätietoja","p6":"Jättäydy pois","p7":"Jatka","p8":"ylläpitäjät","p9":"Ilmainen Vierailijan Lompakko", "p9m": "Vierailijan Lompakko"}, // finnish
+		"es":{"p1":"Este sitio web es apoyado por JSEcoin","p2":"Al continuar, acepta donar recursos excedentes.","p3":"Esto no afectará su experiencia de navegación.","p4":"Intimidad","p5":"Aprende más","p5m":"Aprende más","p6":"Optar por no","p7":"Continuar","p8":"Webmasters","p9":"Cartera gratuita de visitantes", "p9m": "Cartera de visitantes"}, // spanish
+		"de":{"p1":"Diese Website wird von JSEcoin unterstützt","p2":"Wenn Sie fortfahren, stimmen Sie zu, überschüssige System-Ressourcen zu spenden.","p3":"Dies hat keinen Einfluss auf Ihre Browser-Nutzung.","p4":"Privatsphäre","p5":"Mehr erfahren","p5m":"Mehr erfahren","p6":"Zustimmung verweigern","p7":"Fortsetzen","p8":"Webmasters","p9":"Kostenlose Besucher-Wallet", "p9m": "Besucher-Wallet"}, // german
+		"ar":{"p1":"ويدعم هذا الموقع من قبل جسكوين","p2":"من خلال الاستمرار كنت توافق على التبرع الموارد الفائضة.","p3":"لن يؤثر ذلك في تجربة التصفح.","p4":"الإجمالية","p5":"أعرف أكثر","p5m":"أعرف أكثر","p6":"انسحب","p7":"استمر","p8":"المواقع","p9":"محفظة الزائر المجانية", "p9m": "محفظة الزائر"}, // arabic
+		"en":{"p1":"This site is supported by JSEcoin","p2":"By continuing you agree to donate surplus resources.","p3":"This will not impact your browsing experience.","p4":"Privacy &amp;","p5":"Learn more","p5m":"Learn more","p6":"Opt-out","p7":"Continue","p8":"Webmasters","p9":"FREE Visitor Wallet", "p9m": "Visitor Wallet"} // english
 	}
 
 	// ICO
@@ -321,6 +321,11 @@ var JSE = (function () {
 	privacyTranslations.fr.p5 = 'Investisseurs ICO';
 	privacyTranslations.es.p5 = 'Inversores ICO';
 	privacyTranslations.ru.p5 = 'ICO инвесторы';
+
+	privacyTranslations.en.p5m = 'ICO';
+	privacyTranslations.fr.p5m = 'ICO';
+	privacyTranslations.es.p5m = 'ICO';
+	privacyTranslations.ru.p5m = 'ICO';
 
 	var browserLanguage = window.JSESetLanguage || document.documentElement.lang || window.navigator.userLanguage || window.navigator.language || 'en-US';
 	var setLang = privacyTranslations.en;
@@ -347,8 +352,10 @@ var JSE = (function () {
 			bID: rnd(), //banner wrapper
 			dID: rnd(), //divider line
 			bcID: rnd(),//mobile button wrapper
+			mlClass: rnd(),
 			pID: rnd(),	//mobile button privacy
 			lmID: rnd(),//mobile button learn more
+			fwID: rnd(), // mobile button free wallet
 			wID: rnd(),//mobile button webmasters
 			cID: rnd(),	//continue button
 			mi: rnd(), // mouse position
@@ -380,14 +387,20 @@ var JSE = (function () {
 						<a href="https://jsecoin.com/en/legal/privacyPolicy?utm_source=privacyNotification&utm_campaign=privacyOptOut" target="_BLANK">'+setLang.p4+' '+setLang.p6+'</a>\
 						<a href="https://jsecoin.com/JSEcoin_Publisher_Introduction.pdf" target="_BLANK">'+setLang.p8+'</a>\
 						<a href="https://jsecoin.com/landers/investor1.html?utm_source=referral&utm_campaign=aff'+jseTrack.pubID+'&utm_content=privacyLearnMoreLink" target="_BLANK">'+setLang.p5+'</a>\
+						<a href="https://platform.jsecoin.com/?lander=4&utm_source=referral&utm_campaign=aff'+jseTrack.pubID+'&utm_content=freeWallet" target="_BLANK">'+setLang.p9+'</a>\
 					</span>\
 				</p>\
 				<div id="'+o.dID+'"></div>\
 				<div id="'+o.bcID+'">\
 					<button id="'+o.cID+'">'+setLang.p7+'</button>\
-					<a href="https://jsecoin.com/en/legal/privacyPolicy?utm_source=privacyNotification&utm_campaign=privacyOptOut" id="'+o.pID+'" target="_BLANK">'+setLang.p6+'</a>\
-					<a href="https://jsecoin.com/JSEcoin_Publisher_Introduction.pdf" id="'+o.wID+'" target="_BLANK">'+setLang.p8+'</a>\
-					<a href="https://jsecoin.com/landers/investor1.html?utm_source=referral&utm_campaign=aff'+jseTrack.pubID+'&utm_content=privacyLearnMoreLink" id="'+o.lmID+'" target="_BLANK">'+setLang.p5+'</a>\
+					<div class="'+o.mlClass+'">\
+						<a href="https://jsecoin.com/en/legal/privacyPolicy?utm_source=privacyNotification&utm_campaign=privacyOptOut" id="'+o.pID+'" target="_BLANK">'+setLang.p6+'</a>\
+						<a href="https://jsecoin.com/JSEcoin_Publisher_Introduction.pdf" id="'+o.wID+'" target="_BLANK">'+setLang.p8+'</a>\
+					</div>\
+					<div class="'+o.mlClass+'">\
+						<a href="https://jsecoin.com/landers/investor1.html?utm_source=referral&utm_campaign=aff'+jseTrack.pubID+'&utm_content=privacyLearnMoreLink" id="'+o.lmID+'" target="_BLANK">'+setLang.p5m+'</a>\
+						<a href="https://platform.jsecoin.com/?lander=4&utm_source=referral&utm_campaign=aff'+jseTrack.pubID+'&utm_content=freeWallet" id="'+o.fwID+'" target="_BLANK">'+setLang.p9m+'</a>\
+					</div>\
 				</div>\
 			</div>';
 	}
@@ -441,7 +454,8 @@ var JSE = (function () {
 			}\
 			html div#'+o.bID+' a#'+o.pID+',\
 			html div#'+o.bID+' a#'+o.wID+',\
-			html div#'+o.bID+' a#'+o.lmID+' {\
+			html div#'+o.bID+' a#'+o.lmID+',\
+				html div#'+o.bID+' a#'+o.fwID+' {\
 				display:inline-block;\
 				background:#fff !important;\
 				color:#76797a !important;\
@@ -462,18 +476,8 @@ var JSE = (function () {
 				font-size: .875em !important;\
 				line-height: 1.6 !important;\
 			}\
-			@media screen and (max-width: 400px) {\
-				html div#'+o.bID+' a#'+o.pID+',\
-				html div#'+o.bID+' a#'+o.wID+',\
-				html div#'+o.bID+' a#'+o.lmID+' {\
-					padding:2px 6px !important;\
-				}\
-				html div#'+o.bID+' p {\
-					line-height: 1 !important;\
-				}\
-				html div#'+o.bID+' a {\
-					margin: 4px 4px 0px 0px !important;\
-				}\
+			#split {\
+				display: none;\
 			}\
 			@media screen and (min-width: 768px) {\
 				html div#'+o.bID+' {\
@@ -485,7 +489,8 @@ var JSE = (function () {
 				}\
 				html div#'+o.bID+' a#'+o.pID+',\
 				html div#'+o.bID+' a#'+o.wID+',\
-				html div#'+o.bID+' a#'+o.lmID+' {\
+				html div#'+o.bID+' a#'+o.lmID+',\
+				html div#'+o.bID+' a#'+o.fwID+' {\
 					display:none !important;\
 				}\
 				html div#'+o.bID+' div#'+o.dID+' {\
@@ -508,47 +513,85 @@ var JSE = (function () {
 					margin-right:40px !important;\
 				}\
 			}\
+			@media screen and (max-width: 1024px) {\
+				html div#'+o.bID+' p span a {\
+					margin-right:10px !important;\
+				}\
+			}\
 			@media screen and (max-width: 768px) {\
 				html div#'+o.bID+' {\
 					display:block !important;\
+					padding: 3px 2px 3px 2px !important;\
+					border-top: solid 2px #c2c5c9 !important;\
 				}\
 				html div#'+o.bID+' a {\
 					display: none !important;\
 				}\
+				html div.'+o.mlClass+' {\
+					float: left;\
+				}\
 				html div#'+o.bID+' a#'+o.pID+',\
 				html div#'+o.bID+' a#'+o.wID+',\
-				html div#'+o.bID+' a#'+o.lmID+' {\
+				html div#'+o.bID+' a#'+o.lmID+',\
+				html div#'+o.bID+' a#'+o.fwID+' {\
 					display:block !important;\
 					font-weight:bold !important;\
 					color: #0168bb !important;\
+					padding:2px 6px !important;\
 				}\
 				html div#'+o.bID+' div#'+o.dID+' {\
 					background:#eee !important;\
 					height: 1px !important;\
-					margin:10px 0px !important;\
+					margin:2px 0px !important;\
 					width: 100% !important;\
 				}\
 				html div#'+o.bID+' button {\
 					padding: 8px 16px !important;\
 					font-size:0.8em !important;\
-					margin:8px 0px 8px 0px !important;\
+					margin:8px 6px 8px 0px !important;\
 				}\
 				html div#'+o.bID+' b {\
-					padding-top:10px;\
-					margin-bottom: 6px !important;\
+					padding-top:3px;\
+					margin-bottom: 5px !important;\
 					font-size:0.8em !important;\
 					line-height:15px !important;\
 				}\
 				html div#'+o.bID+' p {\
-					background-size: 70px !important;\
-					padding-left:90px !important;\
-					min-height: 78px;\
+					background-size: 50px !important;\
+					padding-left:70px !important;\
+					min-height: 68px;\
 				}\
 				html div#'+o.bID+' p span {\
 					font-size:0.8em !important;\
 					line-height:15px !important;\
 				}\
-			}';
+			}\
+			@media screen and (max-width: 512px) {\
+				html div#'+o.bID+' a#'+o.pID+',\
+				html div#'+o.bID+' a#'+o.wID+',\
+				html div#'+o.bID+' a#'+o.lmID+',\
+				html div#'+o.bID+' a#'+o.fwID+' {\
+					padding:2px 6px !important;\
+				}\
+				html div#'+o.bID+' p {\
+					line-height: 1 !important;\
+					font-size: 0.7em !important;\
+				}\
+				html div#'+o.bID+' b {\
+					font-size:1em !important;\
+					line-height:15px !important;\
+				}\
+				html div#'+o.bID+' a {\
+					margin: 2px 4px 0px 0px !important;\
+				}\
+			}\
+				@media screen and (max-width: 300px) {\
+					html div#'+o.bID+' a#'+o.wID+',\
+					html div#'+o.bID+' a#'+o.lmID+',\
+					html div#'+o.bID+' a#'+o.fwID+' {\
+						display: none !important;\
+					}\
+				}';
 	}
 
 	function events() {
