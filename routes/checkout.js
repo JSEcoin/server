@@ -128,7 +128,6 @@ router.post('/*', function (req, res) {
 
 			JSE.jseDataIO.getCredentialsByUID(merchantSale.sellerUID, function(toUser) {
 				jseAPI.apiTransfer(goodCredentials,toUser,merchantSale.amount,merchantSale.item,false,function(jsonResult) {
-					res.send(jsonResult);
 					const returnObj = JSON.parse(jsonResult);
 					if (returnObj.success === 1) {
 						JSE.jseDataIO.pushVariable('merchantSales/'+merchantSale.sellerUID, merchantSale, function(salePushRef) {
@@ -149,6 +148,8 @@ router.post('/*', function (req, res) {
 								merchantPurchase.rebillFrequency = merchantSale.rebillFrequency;
 								merchantPurchase.payableDate = merchantSale.payableDate;
 							}
+							returnObj.reference = merchantPurchase.reference; // send back reference to be included in completion URL
+							res.send(JSON.stringify(returnObj));
 							JSE.jseDataIO.pushVariable('merchantPurchases/'+merchantSale.buyerUID, merchantPurchase, function(purchasePushRef) {
 								JSE.jseDataIO.setVariable('merchantSales/'+merchantSale.sellerUID+'/'+salePushRef+'/purchaseReference', merchantSale.buyerUID+'/'+purchasePushRef); // fireKey 'merchantPurchases/'+purchaseReference
 								JSE.jseDataIO.setVariable('merchantSales/'+merchantSale.sellerUID+'/'+salePushRef+'/reference', merchantSale.sellerUID+'/'+salePushRef); // fireKey 'merchantSales/'+reference
@@ -166,6 +167,7 @@ router.post('/*', function (req, res) {
 							JSE.jseDataIO.setVariable('account/'+merchantSale.buyerUID+'/merchant', 1);
 						});
 					} else {
+						res.send(jsonResult);
 						console.log('Merchant payment failed ref. 95 checkout.js');
 					}
 				});
