@@ -463,18 +463,24 @@ if (JSE.authenticatedNode) {
 			JSE.apiLimits[apiKey] = 1;
 		}
 		if (JSE.apiLimits[apiKey] < 300) {
-			const targetEmail = JSE.jseFunctions.cleanString(String(req.params.email)).toLowerCase();
-			JSE.jseDataIO.getUserByEmail(targetEmail,function(toUser) {
-				JSE.jseDataIO.getVariable('ledger/'+toUser.uid,function(balance){
-					const returnObject = {};
-					returnObject.success = 1;
-					returnObject.uid = toUser.uid;
-					returnObject.publicKey = toUser.publicKey;
-					returnObject.balance = balance;
-					res.send(JSON.stringify(returnObject));
+			JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(goodCredentials) {
+				if (goodCredentials.apiLevel < 1) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
+				const targetEmail = JSE.jseFunctions.cleanString(String(req.params.email)).toLowerCase();
+				JSE.jseDataIO.getUserByEmail(targetEmail,function(toUser) {
+					JSE.jseDataIO.getVariable('ledger/'+toUser.uid,function(balance){
+						const returnObject = {};
+						returnObject.success = 1;
+						returnObject.uid = toUser.uid;
+						returnObject.publicKey = toUser.publicKey;
+						returnObject.balance = balance;
+						res.send(JSON.stringify(returnObject));
+					});
+				}, function() {
+					res.status(400).send('{"fail":1,"notification":"API checkemail Failed: user email unknown"}');
 				});
+				return false;
 			}, function() {
-				res.status(400).send('{"fail":1,"notification":"API checkemail Failed: user email unknown"}');
+				res.status(400).send('{"fail":1,"notification":"API checkpublickey Failed: User API key credentials could not be matched"}');
 			});
 		} else {
 			res.status(400).send('{"fail":1,"notification":"API Limit reached checkemail 300 per 30 mins"}');
