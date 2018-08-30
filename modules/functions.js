@@ -21,6 +21,8 @@
  * <li>transferNotificationEmails</li>
  * <li>referral</li>
  * <li>genSafeUser</li>
+ * <li>sendSMS</li>
+ * <li>realityCheck</li>
  * </ul>
 */
 const JSE = global.JSE;

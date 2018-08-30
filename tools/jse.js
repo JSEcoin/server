@@ -129,6 +129,7 @@ function help() {
 	console.log('  repairstats - find bad data in stats    	- repairstats');
 	console.log('  miningmaintenance - reduce miningdb			- miningmaintenance');
 	console.log('  badledger - find bad data in ledger    	- badledger');
+	console.log('  checkip - realityCheck on IP             - checkip 13.2.3.5');
 	console.log('  sysmsg - set a new platform message      - sysmsg welcome to the jungle');
 	console.log('  runtxt - run code in the runTxt function - runtxt');
 	console.log('  exit - leave console                     - exit');
@@ -293,6 +294,17 @@ function checkAuthenticated() {
 				setTimeout(function() { process.stdout.write("\n> "); }, 2000);
 			} else if (cleanKey === 'badledger')	{
 				findBadDataInLedger();
+				setTimeout(function() { process.stdout.write("\n> "); }, 2000);
+			} else if (keySplit[0] === 'checkip' && keySplit[1])	{
+				JSE.jseFunctions.realityCheck(keySplit[1],function(response) {
+					if (response === true) {
+						console.log('Good IP');
+					} else if (response === false) {
+						console.log('Bad IP');
+					} else {
+						console.log('Response: '+response);
+					}
+				});
 				setTimeout(function() { process.stdout.write("\n> "); }, 2000);
 			} else if (cleanKey === 'miningmaintenance')	{
 				miningMaintenanceAll();
