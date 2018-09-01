@@ -88,7 +88,7 @@ function runAt5pm() {
 JSE.emailsToSend = [];
 function startAutoresponder() {
 	JSE.jseDataIO.getVariable('nextUserID',function(endID) {
-		const startID = endID - 30000; // only send to last 30k users, may need to increase
+		const startID = endID - 40000; // only send to last 40k users, may need to increase
 		JSE.jseDataIO.getAdminAccounts(startID,endID,function(users){
 			const nowTS =new Date().getTime();
 			let maxCount = 0;
@@ -103,7 +103,7 @@ function startAutoresponder() {
 						if (users[i].lastEmail) {
 							const lastEmailRef = users[i].lastEmail.split(',')[0]; // timestamp,ref
 							const lastEmailTS = users[i].lastEmail.split(',')[1];
-							const nextEmailTS = (new Date(Number(lastEmailTS)).getTime()) + (86400000 * lastEmailRef * 2); // i.e. email 4 will be sent 6 days after email 3, remove end figure to speed up
+							const nextEmailTS = (new Date(Number(lastEmailTS)).getTime()) + (86400000 * lastEmailRef * 1.5); // i.e. email 4 will be sent 6 days after email 3, remove end figure to speed up
 							if (nextEmailTS < nowTS) {
 								maxCount += 1;
 								JSE.emailsToSend.push({ user: users[i], emailRef: lastEmailRef + 1 });
