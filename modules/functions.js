@@ -549,6 +549,39 @@ function realityCheck(rawIP,callback) {
   }
 }
 
+/**
+ * @method <h2>txApprove</h2>
+ * @description Remove some of the security critical variables from the user object
+ * @param {number} user id
+ * @param {string} pushRef value for data entry
+ * @param {string} approvalType can either be email for email confirmation or admin for admin approval
+ * @returns {object} Cleaned user object
+ */
+function txApprove(uid,pushRef,approvalType) {
+	JSE.jseDataIO.getVariable('txPending/'+uid+'/'+pushRef,function(txObject) {
+		let processTx = false;
+		if (approvalType === 'email') {
+			JSE.jseDataIO.setVariable('txPending/'+uid+'/'+pushRef+'/emailApproved',true);
+			if (txObject.requireAdmin === false || txObject.adminApproved === true) processTx = true;
+		}
+		if (approvalType === 'admin') {
+			JSE.jseDataIO.setVariable('txPending/'+uid+'/'+pushRef+'/adminApproved',true);
+			if (txObject.requireEmail === false || txObject.emailApproved === true) processTx = true;
+		}
+		if (processTx) {
+			if (txObject.command === 'txlimit') {
+				JSE.jseDataIO.setVariable('credentials/'+txObject.uid+'/txLimit',txObject.newTxLimit);
+				// do we want to send an email here?
+			}
+			if (txObject.command === 'withdraw') {
+				JSE.jseDataIO.getVariable('credentials/'+txObject.uid,function(goodCredentials) {
+					// process withdrawal
+				});
+			}
+		}
+	});
+}
+
 module.exports = {
- shuffle, randString, round, cleanString, limitString, sha256, buf2hex, hex2buf, createKeyPair, signData, verifyData, signHash, verifyHash, sendWelcomeEmail, sendOnboardingEmail, sendStandardEmail, exportNotificationEmail, transferNotificationEmails, referral, genSafeUser, sendSMS, realityCheck,
+ shuffle, randString, round, cleanString, limitString, sha256, buf2hex, hex2buf, createKeyPair, signData, verifyData, signHash, verifyHash, sendWelcomeEmail, sendOnboardingEmail, sendStandardEmail, exportNotificationEmail, transferNotificationEmails, referral, genSafeUser, sendSMS, realityCheck, txApprove,
 };

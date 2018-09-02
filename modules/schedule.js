@@ -35,6 +35,7 @@ function runAtMidnight() {
 				JSE.jseDataIO.pushVariable('dailyPublicStats',latestStats,function(pushRef){ console.log('Pushed across publicStats to dailyPublicStats'); });
 				JSE.jseDataIO.resetDailyStats();
 			});
+			JSE.jseDataIO.deleteVariable('txToday');
 			runAtMidnight(); // Then, reset again next midnight.
 	}, msToMidnight);
 }

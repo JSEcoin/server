@@ -4,6 +4,34 @@ const express = require('express');
 const router = express.Router();
 
 /**
+ * @name /confirm/tx/*
+ * @description Confirm the transaction via email
+ * @example https://server.jsecoin.com/ethereum/confirm/:uid/:pushref/:confirmKey
+ * @memberof module:jseRouter
+ */
+router.get('/tx/:uid/:pushref/:confirmkey', function(req, res) {
+	let returnMsg = "Thank you for confirming the transaction";
+	const cleanUID = parseFloat(req.params.uid);
+	const pushRef = JSE.jseFunctions.cleanString(req.params.pushref);
+	const confirmKey = JSE.jseFunctions.cleanString(req.params.confirmKey);
+	JSE.jseDataIO.getVariable('txPending/'+cleanUID+'/'+pushRef,function(txObject) {
+		if (txObject === null) {
+			returnMsg = 'Transaction confirmation reference not recognised Error: ethereum.js 134';
+		} else if (txObject.status === 'pending' && txObject.confirmKey === confirmKey) {
+			JSE.jseFunctions.txApprove(cleanUID,pushRef,'email');
+			if (txObject.requireAdmin === true && txObject.adminApproved === false) {
+				returnMsg = 'Thank you for confirming the transaction. Manual checks are required which can take up to 24 hours';
+			} else {
+				returnMsg = 'Thank you for confirming the transaction.';
+			}
+		} else {
+			returnMsg = 'Something went wrong with the transaction confirmation, please contact admin@jsecoin.com - Error: ethereum.js 138';
+		}
+		res.send('<html><script>alert("'+returnMsg+'"); window.location = "https://platform.jsecoin.com/";</script></html>');
+	});
+});
+
+/**
  * @name /confirm/*
  * @description Confirm the account via double opt-in link sent in welcome email
  * @example https://server.jsecoin.com/confirm/:uid/:confirmcode

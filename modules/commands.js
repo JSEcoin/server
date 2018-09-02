@@ -127,50 +127,65 @@ const jseCommands = {
 					return false;
 				}
 				const value = JSE.jseFunctions.round(parseFloat(dataObject.value)); // can't clean string because it's not a string
-				if (value !== dataObject.value) {
-					callback2('{"fail":1,"notification":"Transfer Failed: Value does not parse security check"}');
-				} else if (goodCredentials.balance < value) {
-					callback2('{"fail":1,"notification":"Transfer Failed: Insufficient Funds"}');
-				} else if (goodCredentials.locked && goodCredentials.uid !== 0) {
-					callback2('{"fail":1,"notification":"Transfer Failed: Account locked pending recent transaction, please try again in 20 seconds"}');
-				} else if (goodCredentials.suspended && goodCredentials.suspended !== 0) {
-					callback2('{"fail":1,"notification":"Transfer Failed: This user account has been suspended. Please contact investigations@jsecoin.com"}');
-				} else if (value < 0.000001) {
-					callback2('{"fail":1,"notification":"Transfer Failed: Transfer value is negative or too small"}');
-				} else if (value === 0 || value === null || value === '' || typeof value === 'undefined') {
-					callback2('{"fail":1,"notification":"Transfer Failed: Transfer value zero"}');
-				} else if (toUser.uid === goodCredentials.uid) {
-					callback2('{"fail":1,"notification":"Transfer Failed: You cannot send money to your own account"}');
-				} else if (dataObject.user1 !== goodCredentials.uid) {
-					callback2('{"fail":1,"notification":"Transfer Failed: Data object user1 does not match public key"}');
-				} else if (dataObject.user2 !== toUser.uid) {
-					callback2('{"fail":1,"notification":"Transfer Failed: Data object user2 does not match public key"}');
-				} else if (dataObject.publicKey !== goodCredentials.publicKey) {
-					callback2('{"fail":1,"notification":"Transfer Failed: Data object user1pk does not match public key"}');
-				} else if (dataObject.toPublicKey !== toUser.publicKey) {
-					callback2('{"fail":1,"notification":"Transfer Failed: Data object user2pk does not match public key"}');
-				} else {
-					//console.log('asdf.'+JSON.stringify(dataObject));
-					JSE.jseDataIO.pushBlockData(dataObject,function(blockData) {
-						JSE.jseDataIO.minusBalance(goodCredentials.uid,value);
-						JSE.jseDataIO.addBalance(toUser.uid,value);
-						const dataObject2 = JSON.parse(JSON.stringify(dataObject)); // clone don't reference
-						if (dataObject2.private !== true) {
-							dataObject2.user1email = goodCredentials.email;
-							dataObject2.user2email = toUser.email;
-						}
-						JSE.jseDataIO.getTransactionReference(dataObject.tid,function(transactionReference) {
-							dataObject2.reference = transactionReference;
-							JSE.jseDataIO.pushVariable('history/'+toUser.uid,dataObject2,function(pushRef) {});
-							const dataObject3 = JSON.parse(JSON.stringify(dataObject2)); // clone don't reference
-							dataObject3.value = value / -1; // turn negative
-							if (goodCredentials.uid !== 0 || dataObject2.value > 500) { // Stop Distribution Account History getting filled with referrals and welcome bonuses
-								JSE.jseDataIO.pushVariable('history/'+goodCredentials.uid,dataObject3,function(pushRef) {});
+
+				const txLimit = goodCredentials.txLimit || JSE.jseSettings.txLimit;
+				JSE.jseDataIO.getVariable('txToday/'+goodCredentials.uid, function(txToday) {
+					let txCompleted;
+					if (txToday === null) {
+						txCompleted = 0;
+					} else {
+						txCompleted = txToday.total;
+					}
+					const txLeft = JSE.jseFunctions.round(txLimit - txCompleted);
+
+					if (value !== dataObject.value) {
+						callback2('{"fail":1,"notification":"Transfer Failed: Value does not parse security check"}');
+					} else if (goodCredentials.balance < value) {
+						callback2('{"fail":1,"notification":"Transfer Failed: Insufficient Funds"}');
+					} else if (txLeft < value) {
+						callback2('{"fail":1,"notification":"Transfer Failed: Value greater than current transaction limit left, '+txLeft+' JSE"}');
+					} else if (goodCredentials.locked && goodCredentials.uid !== 0) {
+						callback2('{"fail":1,"notification":"Transfer Failed: Account locked pending recent transaction, please try again in 20 seconds"}');
+					} else if (goodCredentials.suspended && goodCredentials.suspended !== 0) {
+						callback2('{"fail":1,"notification":"Transfer Failed: This user account has been suspended. Please contact investigations@jsecoin.com"}');
+					} else if (value < 0.000001) {
+						callback2('{"fail":1,"notification":"Transfer Failed: Transfer value is negative or too small"}');
+					} else if (value === 0 || value === null || value === '' || typeof value === 'undefined') {
+						callback2('{"fail":1,"notification":"Transfer Failed: Transfer value zero"}');
+					} else if (toUser.uid === goodCredentials.uid) {
+						callback2('{"fail":1,"notification":"Transfer Failed: You cannot send money to your own account"}');
+					} else if (dataObject.user1 !== goodCredentials.uid) {
+						callback2('{"fail":1,"notification":"Transfer Failed: Data object user1 does not match public key"}');
+					} else if (dataObject.user2 !== toUser.uid) {
+						callback2('{"fail":1,"notification":"Transfer Failed: Data object user2 does not match public key"}');
+					} else if (dataObject.publicKey !== goodCredentials.publicKey) {
+						callback2('{"fail":1,"notification":"Transfer Failed: Data object user1pk does not match public key"}');
+					} else if (dataObject.toPublicKey !== toUser.publicKey) {
+						callback2('{"fail":1,"notification":"Transfer Failed: Data object user2pk does not match public key"}');
+					} else {
+						//console.log('asdf.'+JSON.stringify(dataObject));
+						JSE.jseDataIO.pushBlockData(dataObject,function(blockData) {
+							JSE.jseDataIO.minusBalance(goodCredentials.uid,value);
+							JSE.jseDataIO.plusX('txToday/'+goodCredentials.uid,value);
+							JSE.jseDataIO.addBalance(toUser.uid,value);
+							const dataObject2 = JSON.parse(JSON.stringify(dataObject)); // clone don't reference
+							if (dataObject2.private !== true) {
+								dataObject2.user1email = goodCredentials.email;
+								dataObject2.user2email = toUser.email;
 							}
-							callback2('{"success":1}');
+							JSE.jseDataIO.getTransactionReference(dataObject.tid,function(transactionReference) {
+								dataObject2.reference = transactionReference;
+								JSE.jseDataIO.pushVariable('history/'+toUser.uid,dataObject2,function(pushRef) {});
+								const dataObject3 = JSON.parse(JSON.stringify(dataObject2)); // clone don't reference
+								dataObject3.value = value / -1; // turn negative
+								if (goodCredentials.uid !== 0 || dataObject2.value > 500) { // Stop Distribution Account History getting filled with referrals and welcome bonuses
+									JSE.jseDataIO.pushVariable('history/'+goodCredentials.uid,dataObject3,function(pushRef) {});
+								}
+								callback2('{"success":1}');
+							});
 						});
-					});
-				}
+					}
+				});
 				return false;
 			}, function() {
 				callback2('{"fail":1,"notification":"Transfer Failed: User receiving funds unknown"}');
@@ -200,33 +215,45 @@ const jseCommands = {
 				return false;
 			}
 			const value = JSE.jseFunctions.round(parseFloat(dataObject.value)); // can't clean string because it's not a string
-			if (value !== dataObject.value) {
-				callback3('{"fail":1,"notification":"Export Failed: Security check on value/amount failed"}');
-				return false;
-			}
-			if (goodCredentials.balance < value) {
-				callback3('{"fail":1,"notification":"Export Failed: Insufficient Funds"}');
-			} else if (goodCredentials.locked && goodCredentials.uid !== 0) {
-				callback3('{"fail":1,"notification":"Export Failed: Account locked pending recent transaction, please try again in 20 seconds"}');
+
+			const txLimit = goodCredentials.txLimit || JSE.jseSettings.txLimit;
+			JSE.jseDataIO.getVariable('txToday/'+goodCredentials.uid, function(txToday) {
+				let txCompleted;
+				if (txToday === null) {
+					txCompleted = 0;
+				} else {
+					txCompleted = txToday.total;
+				}
+				const txLeft = JSE.jseFunctions.round(txLimit - txCompleted);
+
+				if (value !== dataObject.value) {
+					callback3('{"fail":1,"notification":"Export Failed: Security check on value/amount failed"}');
+				} else if (goodCredentials.balance < value) {
+					callback3('{"fail":1,"notification":"Export Failed: Insufficient Funds"}');
+				} else if (txLeft < value) {
+					callback3('{"fail":1,"notification":"Transfer Failed: Value greater than remaining transaction limit, '+txLeft+' JSE"}');
+				} else if (goodCredentials.locked && goodCredentials.uid !== 0) {
+					callback3('{"fail":1,"notification":"Export Failed: Account locked pending recent transaction, please try again in 20 seconds"}');
 				} else if (goodCredentials.suspended && goodCredentials.suspended !== 0) {
-				callback3('{"fail":1,"notification":"Export Failed: This user account has been suspended. Please contact investigations@jsecoin.com"}');
-			} else if (value < 0.000001) {
-				callback3('{"fail":1,"notification":"Export Failed: Transfer value is negative or too small"}');
-			} else if (value === 0 || value === null || value === '' || typeof value === 'undefined') {
-				callback3('{"fail":1,"notification":"Export Failed: Transfer value zero"}');
-			} else if (dataObject.user1 !== goodCredentials.uid) {
-				callback3('{"fail":1,"notification":"Export Failed: Data object user1 does not match public key"}');
-			} else if (dataObject.publicKey !== goodCredentials.publicKey) {
-				callback3('{"fail":1,"notification":"Export Failed: Data object user1pk does not match public key"}');
-			} else {
-				JSE.jseDataIO.pushBlockData(dataObject,function(blockData) {
-					JSE.jseDataIO.minusBalance(goodCredentials.uid,value);
-					const dataObject2 = JSON.parse(JSON.stringify(dataObject)); // clone don't reference
-					dataObject2.user1email = goodCredentials.email;
-					JSE.jseDataIO.pushVariable('history/'+goodCredentials.uid,dataObject2,function(pushRef) {});
-					callback3('{"success":1}');
-				});
-			}
+					callback3('{"fail":1,"notification":"Export Failed: This user account has been suspended. Please contact investigations@jsecoin.com"}');
+				} else if (value < 0.000001) {
+					callback3('{"fail":1,"notification":"Export Failed: Transfer value is negative or too small"}');
+				} else if (value === 0 || value === null || value === '' || typeof value === 'undefined') {
+					callback3('{"fail":1,"notification":"Export Failed: Transfer value zero"}');
+				} else if (dataObject.user1 !== goodCredentials.uid) {
+					callback3('{"fail":1,"notification":"Export Failed: Data object user1 does not match public key"}');
+				} else if (dataObject.publicKey !== goodCredentials.publicKey) {
+					callback3('{"fail":1,"notification":"Export Failed: Data object user1pk does not match public key"}');
+				} else {
+					JSE.jseDataIO.pushBlockData(dataObject,function(blockData) {
+						JSE.jseDataIO.minusBalance(goodCredentials.uid,value);
+						const dataObject2 = JSON.parse(JSON.stringify(dataObject)); // clone don't reference
+						dataObject2.user1email = goodCredentials.email;
+						JSE.jseDataIO.pushVariable('history/'+goodCredentials.uid,dataObject2,function(pushRef) {});
+						callback3('{"success":1}');
+					});
+				}
+			});
 			return false;
 		}, function() {
 			callback3('{"fail":1,"notification":"Export Failed: User public key credentials could not be matched"}');

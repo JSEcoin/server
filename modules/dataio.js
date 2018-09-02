@@ -755,6 +755,7 @@ const jseDB = {
 			account.apiLevel = credentials.apiLevel;
 			account.privateKey = credentials.privateKey;
 			account.twoFactorAuth = credentials.twoFactorAuth;
+			account.txLimit = credentials.txLimit || JSE.jseSettings.txLimit;
 			if (!credentials.pin) {
 				account.requirePin = true;
 			}

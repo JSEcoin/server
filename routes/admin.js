@@ -171,6 +171,21 @@ router.get('/getinvestors/:adminpass', function(req, res) {
 	return false;
 });
 
+router.get('/txlimit/:uid/:txlimit/:adminpass', function(req, res) {
+	let adminPass;
+	if (typeof req.get('Authorization') !== 'undefined') {
+		adminPass = JSE.jseFunctions.cleanString(req.get('Authorization'));
+	} else {
+		adminPass = JSE.jseFunctions.cleanString(req.params.adminpass);
+	}
+	if (adminPass !== JSE.credentials.jseAdminKey) { return false; }
+	const uid = parseFloat(req.params.uid);
+	const txLimit = parseFloat(req.params.txlimit);
+	JSE.jseDataIO.setVariable('credentials/'+uid+'/txLimit',txLimit);
+	res.send('{"success":1}');
+	return false;
+});
+
 router.get('/affpayout/:uid/:affpayout/:adminpass', function(req, res) {
 	let adminPass;
 	if (typeof req.get('Authorization') !== 'undefined') {

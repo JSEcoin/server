@@ -621,4 +621,64 @@ router.get('/appid/:clientid/*', function(req, res) {
 	}
 });
 
+/**
+ * @name /updatetxlimit/*
+ * @description Update the transaction limit
+ * @memberof module:jseRouter
+ */
+router.post('/updatetxlimit/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error indedx.js 630. No Session Variable"}'); return false; }
+	const session = req.body.session;
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		const pin = String(req.body.pin).split(/[^0-9]/).join('');
+		let pinAttempts = 0;
+		JSE.pinAttempts.forEach((el) => { if (el === goodCredentials.uid) pinAttempts +=1; });
+		if (pinAttempts > 3) {
+			res.status(400).send('{"fail":1,"notification":"Error 637. Account locked three incorrect attempts at pin number, please check again in six hours"}');
+			return false;
+		} else if (goodCredentials.pin !== pin || pin === null || typeof pin === 'undefined') {
+			JSE.pinAttempts.push(goodCredentials.uid);
+			res.status(400).send('{"fail":1,"notification":"Error 641. Pin number incorrect or blocked, attempt '+(pinAttempts+1)+'/3"}');
+			return false;
+		}
+		const newTxLimit = parseFloat(req.body.newTxLimit);
+		JSE.jseDataIO.getVariable('ledger/'+goodCredentials.uid,function(balance) {
+			if (newTxLimit > balance) {
+				res.status(400).send('{"fail":1,"notification":"Can not set a transaction limit greater than your current account balance"}');
+			} else if (newTxLimit <= 10000) {
+				JSE.jseDataIO.setVariable('credentials/'+goodCredentials.uid+'/txLimit',newTxLimit);
+				res.send('{"success":1,"notification":"Transaction Limit Updated"}');
+			}
+			const dataObject = {};
+			dataObject.uid = goodCredentials.uid;
+			dataObject.command = 'txlimit';
+			dataObject.newTxLimit = newTxLimit;
+			dataObject.ts = new Date().getTime();
+			dataObject.requireEmail = true;
+			dataObject.emailApproved = false;
+			if (newTxLimit <= 100000) {
+				dataObject.requireAdmin = false;
+			} else {
+				dataObject.requireAdmin = true;
+				dataObject.adminApproved = false;
+			}
+			dataObject.confirmKey = JSE.jseFunctions.randString(12);
+
+			JSE.jseDataIO.pushVariable('txPending/'+goodCredentials.uid,dataObject,function(pushRef) {
+				const confirmLink = 'https://server.jsecoin.com/confirm/tx/'+goodCredentials.uid+'/'+pushRef+'/'+dataObject.confirmKey;
+				const withdrawalHTML = `Please click the link below to confirm you wish to adjust your transaction limit to:<br>
+																${dataObject.newTxLimit} JSE<br><br>
+																<a href="${confirmLink}">Confirm this withdrawal</a><br><br>
+																If you did not make this transaction please contact admin@jsecoin.com and change your account password ASAP.<br>`;
+				JSE.jseFunctions.sendStandardEmail(goodCredentials.email,'Please confirm new JSE transaction limit',withdrawalHTML);
+				res.send('{"success":1,"notification":"Transaction limit will update after email confirmation","emailRequired":true}');
+			});
+		});
+	 	return false;
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error index.js 652. Session key not recognized"}');
+	});
+	return false;
+});
+
 module.exports = router;

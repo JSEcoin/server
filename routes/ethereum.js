@@ -39,62 +39,85 @@ router.post('/getdepositaddress/*', function (req, res) {
 router.post('/withdraw/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 554. No Session Variable Supplied For 2fa Setup"}'); return false; }
 	const session = req.body.session; // No need to cleanString because it's only used for comparison
-	JSE.jseDataIO.getCredentialsBySession(session,function(preGoodCredentials) {
-		if (preGoodCredentials && preGoodCredentials.uid > 0) {
-			JSE.jseDataIO.checkUserByPublicKey(preGoodCredentials.publicKey,function(goodCredentials) {
-				const pin = String(req.body.pin).split(/[^0-9]/).join('');
-				let pinAttempts = 0;
-				JSE.pinAttempts.forEach((el) => { if (el === goodCredentials.uid) pinAttempts +=1; });
-				if (goodCredentials.pin !== pin || pin === null || typeof pin === 'undefined' || pinAttempts > 3) {
-					JSE.pinAttempts.push(goodCredentials.uid);
-					res.status(400).send('{"fail":1,"notification":"Error 252. Pin number incorrect or blocked, attempt '+(pinAttempts+1)+'/3"}');
-					return false;
-				}
-				JSE.jseDataIO.setVariable('locked/'+goodCredentials.uid,true);
-				if (JSE.lockedUIDs.indexOf(goodCredentials.uid) > -1 && goodCredentials.uid !== 0) {
-					res.status(400).send('{"fail":1,"notification":"Withdraw Failed: Account '+goodCredentials.uid+' locked pending recent transaction, please try again in 20 seconds"}');
-					return false;
-				}
-				JSE.lockedUIDs.push(goodCredentials.uid);
-				if (!req.body.withdrawalAmount) {
-					res.status(400).send('{"fail":1,"notification":"Withdraw Failed: No value provided"}');
-					return false;
-				}
-				const value = JSE.jseFunctions.round(parseFloat(req.body.withdrawalAmount)); // can't clean string because it's not a string
-				if (value !== req.body.value) {
-					res.status(400).send('{"fail":1,"notification":"Withdraw Failed: Security check on value/amount failed"}');
-					return false;
-				}
-				if (goodCredentials.balance < value) {
-					res.status(400).send('{"fail":1,"notification":"Withdraw Failed: Insufficient Funds"}');
-				} else if (goodCredentials.locked && goodCredentials.uid !== 0) {
-					res.status(400).send('{"fail":1,"notification":"Withdraw Failed: Account locked pending recent transaction, please try again in 20 seconds"}');
-					} else if (goodCredentials.suspended && goodCredentials.suspended !== 0) {
-					res.status(400).send('{"fail":1,"notification":"Withdraw Failed: This user account has been suspended. Please contact investigations@jsecoin.com"}');
-				} else if (value < 0.000001) {
-					res.status(400).send('{"fail":1,"notification":"Withdraw Failed: Transfer value is negative or too small"}');
-				} else if (value === 0 || value === null || value === '' || typeof value === 'undefined') {
-					res.status(400).send('{"fail":1,"notification":"Withdraw Failed: Transfer value zero"}');
-				} else {
-					const dataObject = {};
-					dataObject.publicKey = goodCredentials.publicKey;
-					dataObject.user1 = goodCredentials.uid;
-					dataObject.command = 'withdraw';
-					const withdrawalAddress = JSE.jseFunctions.cleanString(String(req.body.withdrawalAddress));
-					dataObject.withdrawalAddress = withdrawalAddress;
-					dataObject.value = value;
-					dataObject.ts = new Date().getTime();
-					dataObject.status = 'pending';
-					JSE.jseDataIO.pushBlockData(dataObject,function(blockData) {
-						JSE.jseDataIO.minusBalance(goodCredentials.uid,value);
-						JSE.jseDataIO.pushVariable('withdrawals/'+goodCredentials.uid,dataObject,function(pushRef) {}); // need to add withdrawals {} to datastore
-						JSE.jseDataIO.pushVariable('history/'+goodCredentials.uid,dataObject,function(pushRef) {});
-						res.send('{"success":1,"notification":"Withdrawal Success: Pending manual confirmation"}');
-					});
-				}
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials && goodCredentials.uid > 0) {
+			const pin = String(req.body.pin).split(/[^0-9]/).join('');
+			let pinAttempts = 0;
+			JSE.pinAttempts.forEach((el) => { if (el === goodCredentials.uid) pinAttempts +=1; });
+			if (goodCredentials.pin !== pin || pin === null || typeof pin === 'undefined' || pinAttempts > 3) {
+				JSE.pinAttempts.push(goodCredentials.uid);
+				res.status(400).send('{"fail":1,"notification":"Error 252. Pin number incorrect or blocked, attempt '+(pinAttempts+1)+'/3"}');
 				return false;
-			});
+			}
+			JSE.jseDataIO.setVariable('locked/'+goodCredentials.uid,true);
+			if (JSE.lockedUIDs.indexOf(goodCredentials.uid) > -1 && goodCredentials.uid !== 0) {
+				res.status(400).send('{"fail":1,"notification":"Withdraw Failed: Account '+goodCredentials.uid+' locked pending recent transaction, please try again in 20 seconds"}');
+				return false;
+			}
+			JSE.lockedUIDs.push(goodCredentials.uid);
+			if (!req.body.withdrawalAmount) {
+				res.status(400).send('{"fail":1,"notification":"Withdraw Failed: No value provided"}');
+				return false;
+			}
+			const value = JSE.jseFunctions.round(parseFloat(req.body.withdrawalAmount)); // can't clean string because it's not a string
+			const totalCost = JSE.jseFunctions.round(value + JSE.jseSettings.ethFee);
+			if (value !== req.body.value) {
+				res.status(400).send('{"fail":1,"notification":"Withdraw Failed: Security check on value/amount failed"}');
+				return false;
+			}
+			// These are double checked after email confirmation in commands.js
+			if (goodCredentials.balance < totalCost) {
+				res.status(400).send('{"fail":1,"notification":"Withdraw Failed: Insufficient Funds"}');
+			} else if (goodCredentials.locked && goodCredentials.uid !== 0) {
+				res.status(400).send('{"fail":1,"notification":"Withdraw Failed: Account locked pending recent transaction, please try again in 20 seconds"}');
+				} else if (goodCredentials.suspended && goodCredentials.suspended !== 0) {
+				res.status(400).send('{"fail":1,"notification":"Withdraw Failed: This user account has been suspended. Please contact investigations@jsecoin.com"}');
+			} else if (value < 0.000001) {
+				res.status(400).send('{"fail":1,"notification":"Withdraw Failed: Transfer value is negative or too small"}');
+			} else if (value === 0 || value === null || value === '' || typeof value === 'undefined') {
+				res.status(400).send('{"fail":1,"notification":"Withdraw Failed: Transfer value zero"}');
+			} else {
+				const dataObject = {};
+				//dataObject.publicKey = goodCredentials.publicKey;
+				//dataObject.user1 = goodCredentials.uid;
+				dataObject.uid = goodCredentials.uid;
+				dataObject.command = 'withdraw';
+				const withdrawalAddress = JSE.jseFunctions.cleanString(String(req.body.withdrawalAddress));
+				dataObject.withdrawalAddress = withdrawalAddress;
+				dataObject.value = value;
+				//dataObject.fee = JSE.jseSettings.ethFee;
+				dataObject.ts = new Date().getTime();
+				dataObject.requireEmail = true;
+				dataObject.emailApproved = false;
+				dataObject.requireAdmin = true;
+				dataObject.adminApproved = false;
+				dataObject.confirmKey = JSE.jseFunctions.randString(12);
+				JSE.jseDataIO.minusBalance(goodCredentials.uid,value);
+				JSE.jseDataIO.pushVariable('txPending/'+goodCredentials.uid,dataObject,function(pushRef) {
+					const confirmLink = 'https://server.jsecoin.com/confirm/tx/'+goodCredentials.uid+'/'+pushRef+'/'+dataObject.confirmKey;
+					const withdrawalHTML = `Please click the link below to confirm you wish to make the following withdrawal:<br>
+																	${value} JSE to address: ${withdrawalAddress}<br><br>
+																	<a href="${confirmLink}">Confirm this withdrawal</a><br><br>
+																	If you did not make this transaction please contact admin@jsecoin.com and change your account password ASAP.<br>`;
+					JSE.jseFunctions.sendStandardEmail(goodCredentials.email,'Please confirm JSE withdrawal',withdrawalHTML);
+					res.send('{"success":1,"notification":"Withdrawal Success: Pending email confirmation"}');
+				});
+
+				/*
+				JSE.jseDataIO.pushBlockData(dataObject,function(blockData) {
+					JSE.jseDataIO.minusBalance(goodCredentials.uid,value);
+					JSE.jseDataIO.pushVariable('withdrawals/'+goodCredentials.uid,dataObject,function(pushRef) {}); // need to add withdrawals {} to datastore
+					JSE.jseDataIO.pushVariable('history/'+goodCredentials.uid,dataObject,function(pushRef) {});
+					res.send('{"success":1,"notification":"Withdrawal Success: Pending manual confirmation"}');
+				});
+				*/
+			}
+		} else {
+			res.status(401).send('{"fail":1,"notification":"Session credentials could not be matched Error: ethereum.js 114"}');
 		}
+		return false;
+	},function() {
+		res.status(401).send('{"fail":1,"notification":"Session not recognized Error: ethereum.js 117"}');
 	});
 	return false;
 });
