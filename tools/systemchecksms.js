@@ -25,45 +25,48 @@ JSE.blockID = 0;
 JSE.marketCap = 0;
 JSE.users = 0;
 let errorMsg = null;
+
+
 function runChecks() {
 	errorMsg = null;
+	const now = new Date();
 	// Check blocks are changing over and database is OK
 	JSE.jseDataIO.getVariable('blockID',function(newBlockID) {
 		if (newBlockID === null) {
 			errorMsg = 'Getting null blockID';
-			sendOnceSMS('+447833239300',errorMsg);
+			sendOnceSMS(JSE.credentials.emergencyNo,errorMsg);
 		}
 		if (JSE.blockID === newBlockID) {
 			errorMsg = 'Blocks not changing over';
-			sendOnceSMS('+447833239300',errorMsg);
+			sendOnceSMS(JSE.credentials.emergencyNo,errorMsg);
 		}
 		if (!newBlockID > JSE.blockID) {
 			errorMsg = 'newBlockID not greater than blockID';
-			sendOnceSMS('+447833239300',errorMsg);
+			sendOnceSMS(JSE.credentials.emergencyNo,errorMsg);
 		}
 		JSE.blockID = newBlockID;
 	});
 	JSE.jseDataIO.getVariable('publicStats',function(newPublicStats) {
 		if (newPublicStats === null || typeof newPublicStats === 'undefined') {
 			errorMsg = 'Public Stats Data Missing';
-			sendOnceSMS('+447833239300',errorMsg);
+			sendOnceSMS(JSE.credentials.emergencyNo,errorMsg);
 		}
-		if (newPublicStats.selfMiners < 500) {
+		if (newPublicStats.selfMiners < 500 && (now.getHours() < 1)) { // check its not midnight when the stats are refreshing
 			errorMsg = 'Less than 500 self miners online';
-			sendOnceSMS('+447833239300',errorMsg);
+			sendOnceSMS(JSE.credentials.emergencyNo,errorMsg);
 		}
 		if (JSE.publicStats && JSE.publicStats.users && JSE.publicStats.coins) {
 			if (newPublicStats.users < JSE.publicStats.users) {
 				errorMsg = 'Registered user accounts has reduced';
-				sendOnceSMS('+447833239300',errorMsg);
+				sendOnceSMS(JSE.credentials.emergencyNo,errorMsg);
 			}
 			if (newPublicStats.users > (JSE.publicStats.users + 100)) {
 				errorMsg = 'More than 100 user accounts created';
-				sendOnceSMS('+447833239300',errorMsg);
+				sendOnceSMS(JSE.credentials.emergencyNo,errorMsg);
 			}
 			if (newPublicStats.coins > (JSE.publicStats.coins + 100000)) {
 				errorMsg = 'More than 100k coins created';
-				sendOnceSMS('+447833239300',errorMsg);
+				sendOnceSMS(JSE.credentials.emergencyNo,errorMsg);
 			}
 		}
 		JSE.publicStats = newPublicStats;
@@ -75,7 +78,7 @@ function runChecks() {
 		request(server, function (error, response, body) { // eslint-disable-line
 			if (error) {
 				errorMsg = 'Server down: '+server;
-				sendOnceSMS('+447833239300',errorMsg);
+				sendOnceSMS(JSE.credentials.emergencyNo,errorMsg);
 			}
 		});
 	}

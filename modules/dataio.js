@@ -1066,12 +1066,12 @@ const jseDB = {
 			JSE.jseDataIO.setVariable('publicStats/selfMiners',JSE.publicStats.selfMiners);
 		});
 
-		if (Math.random() > 0.99 || typeof JSE.publicStats.pubs === 'undefined') { // 1000 mins approx
+		if (Math.random() > 0.95 || typeof JSE.publicStats.pubs === 'undefined') { // 200 mins approx
 			JSE.jseDataIO.getVariable('publicStats/clients',function(clientStats) {
 				const now = new Date().getTime();
 				const cutOffTime = now - 3600000; // 1 hour
 				Object.keys(clientStats).forEach(function(client) {
-					if (client.updated < cutOffTime) {
+					if (clientStats[client].updated < cutOffTime) {
 						JSE.jseDataIO.hardDeleteVariable('publicStats/clients/'+client); // remove client from stats if no recent update
 					}
 				});
