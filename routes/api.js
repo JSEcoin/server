@@ -26,33 +26,28 @@ if (JSE.authenticatedNode) {
 		const toEmail = req.params.toEmailOrPublicKey.toLowerCase(); // email needs to be lower case
 		const toAmount = JSE.jseFunctions.round(parseFloat(JSE.jseFunctions.cleanString(req.params.toAmount)));
 		const toReference = JSE.jseFunctions.cleanString(req.params.toReference).substring(0, 255);
-		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(goodCredentials) {
-			if (goodCredentials.apiLevel < 2) { res.status(400).send('{"fail":1,"notification":"API key does not have write access"}'); return false; }
-			// now need to get full credentials
-			JSE.jseDataIO.getCredentialsByAPIKey(apiKey,function(goodCredentials2) { // do we need this twice? 6th March 2018
-				if (toEmail.indexOf('@') > -1) {
-					JSE.jseDataIO.getUserByEmail(toEmail,function(toUser) {
-						jseAPI.apiTransfer(goodCredentials2,toUser,toAmount,toReference,false,function(jsonResult){
-							res.send(jsonResult);
-						});
-					}, function() {
-						res.status(400).send('{"fail":1,"notification":"API Transfer Failed: User receiving funds unknown"}');
+		JSE.jseDataIO.getCredentialsByAPIKey(apiKey,function(goodCredentials) {
+			if (!(goodCredentials.apiLevel >= 2)) { res.status(400).send('{"fail":1,"notification":"API key does not have write access"}'); return false; }
+			if (toEmail.indexOf('@') > -1) {
+				JSE.jseDataIO.getUserByEmail(toEmail,function(toUser) {
+					jseAPI.apiTransfer(goodCredentials,toUser,toAmount,toReference,false,function(jsonResult){
+						res.send(jsonResult);
 					});
-				} else {
-					JSE.jseDataIO.getUserByPublicKey(toPubKey,function(toUser) {
-						jseAPI.apiTransfer(goodCredentials2,toUser,toAmount,toReference,true,function(jsonResult){
-							res.send(jsonResult);
-						});
-					}, function() {
-						res.status(400).send('{"fail":1,"notification":"API Transfer Failed: User receiving funds unknown"}');
+				}, function() {
+					res.status(400).send('{"fail":1,"notification":"API Transfer Failed: User receiving funds unknown"}');
+				});
+			} else {
+				JSE.jseDataIO.getUserByPublicKey(toPubKey,function(toUser) {
+					jseAPI.apiTransfer(goodCredentials,toUser,toAmount,toReference,true,function(jsonResult){
+						res.send(jsonResult);
 					});
-				}
-			}, function() {
-				res.status(401).send('{"fail":1,"notification":"API Transfer Failed: User API key credentials could not be found"}');
-			});
+				}, function() {
+					res.status(400).send('{"fail":1,"notification":"API Transfer Failed: User receiving funds unknown"}');
+				});
+			}
 			return false;
 		}, function() {
-			res.status(401).send('{"fail":1,"notification":"API Transfer Failed: User API key credentials could not be matched"}');
+			res.status(401).send('{"fail":1,"notification":"API Transfer Failed: User API key credentials could not be found"}');
 		});
 		return false;
 	});
@@ -73,19 +68,14 @@ if (JSE.authenticatedNode) {
 			apiKey = JSE.jseFunctions.cleanString(req.params.apiKey);
 		}
 		const exportAmount = JSE.jseFunctions.round(parseFloat(JSE.jseFunctions.cleanString(req.params.exportAmount)));
-		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(goodCredentials) {
-			if (goodCredentials.apiLevel < 2) { res.status(400).send('{"fail":1,"notification":"API key does not have write access"}'); return false; }
-			JSE.jseDataIO.getCredentialsByAPIKey(apiKey,function(goodCredentials2) { // do we need this twice? 6th March 2018
-				jseAPI.apiExport(goodCredentials2,exportAmount,function(jsonResult){
-					res.send(jsonResult);
-				});
-				return false;
-			}, function(){
-				res.status(401).send('{"fail":1,"notification":"API Export Failed: User API key credentials could be found"}');
+		JSE.jseDataIO.getCredentialsByAPIKey(apiKey,function(goodCredentials) {
+			if (!(goodCredentials.apiLevel >= 2)) { res.status(400).send('{"fail":1,"notification":"API key does not have write access"}'); return false; }
+			jseAPI.apiExport(goodCredentials,exportAmount,function(jsonResult){
+				res.send(jsonResult);
 			});
 			return false;
-		}, function() {
-			res.status(401).send('{"fail":1,"notification":"API Export Failed: User API key credentials could not be matched"}');
+		}, function(){
+			res.status(401).send('{"fail":1,"notification":"API Export Failed: User API key credentials could be found"}');
 		});
 		return false;
 	});
@@ -106,8 +96,8 @@ if (JSE.authenticatedNode) {
 			apiKey = JSE.jseFunctions.cleanString(req.params.apiKey);
 		}
 		const coinCode = JSE.jseFunctions.cleanString(req.params.coinCode);
-		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(goodCredentials) {
-			if (goodCredentials.apiLevel < 2) { res.status(400).send('{"fail":1,"notification":"API key does not have write access"}'); return false; }
+		JSE.jseDataIO.getCredentialsByAPIKey(apiKey,function(goodCredentials) {
+			if (!(goodCredentials.apiLevel >= 2)) { res.status(400).send('{"fail":1,"notification":"API key does not have write access"}'); return false; }
 				jseCommands.importCoinCode(coinCode, goodCredentials.uid,function(returnJSON) {
 					res.send(returnJSON);
 				});
@@ -135,9 +125,9 @@ if (JSE.authenticatedNode) {
 			apiKey = JSE.jseFunctions.cleanString(req.params.apiKey);
 		}
 		const lookup = JSE.jseFunctions.cleanString(req.params.lookup);
-		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(goodCredentials) {
-			if (goodCredentials.apiLevel < 1) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
-			jseAPI.apiBalance(goodCredentials,lookup,function(jsonResult){
+		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(credentialCheck) {
+			if (!(credentialCheck.apiLevel >= 1)) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
+			jseAPI.apiBalance(credentialCheck,lookup,function(jsonResult){
 				res.send(jsonResult);
 			});
 			return false;
@@ -162,9 +152,9 @@ if (JSE.authenticatedNode) {
 		} else {
 			apiKey = JSE.jseFunctions.cleanString(req.params.apiKey);
 		}
-		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(goodCredentials) {
-			if (goodCredentials.apiLevel < 1) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
-			jseAPI.apiHistory(goodCredentials,function(jsonResult){
+		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(credentialCheck) {
+			if (!(credentialCheck.apiLevel >= 1)) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
+			jseAPI.apiHistory(credentialCheck,function(jsonResult){
 				if (typeof req.params.pageBy !== 'undefined' && typeof req.params.pageNo !== 'undefined') {
 					const endRef = parseInt(req.params.pageBy,10) * parseInt(req.params.pageNo,10);
 					const startRef = endRef - parseInt(req.params.pageBy,10);
@@ -207,9 +197,9 @@ if (JSE.authenticatedNode) {
 		} else {
 			apiKey = JSE.jseFunctions.cleanString(req.params.apiKey);
 		}
-		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(goodCredentials) {
-			if (goodCredentials.apiLevel < 1) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
-			jseAPI.apiMining(goodCredentials,function(jsonResult){
+		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(credentialCheck) {
+			if (!(credentialCheck.apiLevel >= 1)) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
+			jseAPI.apiMining(credentialCheck,function(jsonResult){
 			if (typeof req.params.pageBy !== 'undefined' && typeof req.params.pageNo !== 'undefined') {
 					const endRef = parseInt(req.params.pageBy,10) * parseInt(req.params.pageNo,10);
 					const startRef = endRef - parseInt(req.params.pageBy,10);
@@ -252,8 +242,8 @@ if (JSE.authenticatedNode) {
 		} else {
 			apiKey = JSE.jseFunctions.cleanString(req.params.apiKey);
 		}
-		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(goodCredentials) {
-			if (goodCredentials.apiLevel < 1) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
+		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(credentialCheck) {
+			if (!(credentialCheck.apiLevel >= 1)) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
 			JSE.jseDataIO.getVariable('blockID',function(blockID){
 				res.send('{"success":1,"blockID":"'+blockID+'"}');
 			});
@@ -278,8 +268,8 @@ if (JSE.authenticatedNode) {
 			apiKey = JSE.jseFunctions.cleanString(req.params.apiKey);
 		}
 		const targetBlockID = parseFloat(req.params.blockNumber);
-		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(goodCredentials) {
-			if (goodCredentials.apiLevel < 1) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
+		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(credentialCheck) {
+			if (!(credentialCheck.apiLevel >= 1)) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
 				JSE.jseDataIO.getBlock(targetBlockID,function(blockObject) {
 					const returnObject = {};
 					returnObject.success = 1;
@@ -307,8 +297,8 @@ if (JSE.authenticatedNode) {
 			apiKey = JSE.jseFunctions.cleanString(req.params.apiKey);
 		}
 		const targetBlockID = parseFloat(req.params.blockNumber);
-		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(goodCredentials) {
-			if (goodCredentials.apiLevel < 1) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
+		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(credentialCheck) {
+			if (!(credentialCheck.apiLevel >= 1)) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
 				JSE.jseDataIO.buildLedger(function(ledger){
 					const returnObject = {};
 					returnObject.success = 1;
@@ -387,8 +377,8 @@ if (JSE.authenticatedNode) {
 			apiKey = JSE.jseFunctions.cleanString(req.params.apiKey);
 		}
 		const targetUID = parseFloat(req.params.uid);
-		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(goodCredentials) {
-			if (goodCredentials.apiLevel < 1) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
+		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(credentialCheck) {
+			if (!(credentialCheck.apiLevel >= 1)) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
 			JSE.jseDataIO.getUserByUID(targetUID,function(toUser) {
 				JSE.jseDataIO.getVariable('ledger/'+toUser.uid,function(balance){
 					const returnObject = {};
@@ -422,8 +412,8 @@ if (JSE.authenticatedNode) {
 			apiKey = JSE.jseFunctions.cleanString(req.params.apiKey);
 		}
 		const targetPublicKey = JSE.jseFunctions.cleanString(req.params.publicKey);
-		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(goodCredentials) {
-			if (goodCredentials.apiLevel < 1) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
+		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(credentialCheck) {
+			if (!(credentialCheck.apiLevel >= 1)) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
 			JSE.jseDataIO.getUserByPublicKey(targetPublicKey,function(toUser) {
 				JSE.jseDataIO.getVariable('ledger/'+toUser.uid,function(balance){
 					const returnObject = {};
@@ -463,8 +453,8 @@ if (JSE.authenticatedNode) {
 			JSE.apiLimits[apiKey] = 1;
 		}
 		if (JSE.apiLimits[apiKey] < 300) {
-			JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(goodCredentials) {
-				if (goodCredentials.apiLevel < 1) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
+			JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(credentialCheck) {
+				if (!(credentialCheck.apiLevel >= 1)) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
 				const targetEmail = JSE.jseFunctions.cleanString(String(req.params.email)).toLowerCase();
 				JSE.jseDataIO.getUserByEmail(targetEmail,function(toUser) {
 					JSE.jseDataIO.getVariable('ledger/'+toUser.uid,function(balance){

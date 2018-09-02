@@ -82,23 +82,23 @@ function apiExport(goodCredentials,exportAmount,callback) {
 /**
  * @method <h2>apiBalance</h2>
  * @description Return the user balance or the balance of a siteID/subID lookup query
- * @param {object} goodCredentials credentials object of the user
+ * @param {object} credentialsCheck contains uid and apiLevel
  * @param {string} lookup can be a string or 0/false if no lookup required
  * @param {function} callback callback function called on success
  */
-function apiBalance(goodCredentials,lookup,callback) {
+function apiBalance(credentialCheck,lookup,callback) {
 	if (lookup === 0 || lookup === false || lookup === '0') {
-		JSE.jseDataIO.getVariable('ledger/'+goodCredentials.uid,function(balance) {
+		JSE.jseDataIO.getVariable('ledger/'+credentialCheck.uid,function(balance) {
 			callback('{"success":1,"notification":"Your balance is '+balance+' JSE","balance":'+balance+'}');
 		});
 	} else {
 		let balance = 0;
 		const safeKey = JSE.jseDataIO.genSafeKey(lookup);
-		JSE.jseDataIO.getVariable('siteIDs/'+goodCredentials.uid+'/'+safeKey+'/c',function(siteIDBalance) {
+		JSE.jseDataIO.getVariable('siteIDs/'+credentialCheck.uid+'/'+safeKey+'/c',function(siteIDBalance) {
 			if (siteIDBalance !== null) {
 				balance += siteIDBalance;
 			}
-			JSE.jseDataIO.getVariable('subIDs/'+goodCredentials.uid+'/'+safeKey+'/c',function(subIDBalance) {
+			JSE.jseDataIO.getVariable('subIDs/'+credentialCheck.uid+'/'+safeKey+'/c',function(subIDBalance) {
 				if (subIDBalance !== null) {
 					balance += subIDBalance;
 				}
@@ -111,11 +111,11 @@ function apiBalance(goodCredentials,lookup,callback) {
 /**
  * @method <h2>apiHistory</h2>
  * @description Return the users account history
- * @param {object} goodCredentials credentials object of the user
+ * @param {object} credentialsCheck contains uid and apiLevel
  * @param {function} callback callback function called on success
  */
-function apiHistory(goodCredentials,callback) {
-	JSE.jseDataIO.getVariable('history/'+goodCredentials.uid,function(history) {
+function apiHistory(credentialCheck,callback) {
+	JSE.jseDataIO.getVariable('history/'+credentialCheck.uid,function(history) {
 		const returnObject = {};
 		returnObject.success = 1;
 		returnObject.history = history;
@@ -126,11 +126,11 @@ function apiHistory(goodCredentials,callback) {
 /**
  * @method <h2>apiMining</h2>
  * @description Return the users mining history
- * @param {object} goodCredentials credentials object of the user
+ * @param {object} credentialsCheck contains uid and apiLevel
  * @param {function} callback callback function called on success
  */
-function apiMining(goodCredentials,callback) {
-	JSE.jseDataIO.getVariable('mining/'+goodCredentials.uid,function(mining) {
+function apiMining(credentialCheck,callback) {
+	JSE.jseDataIO.getVariable('mining/'+credentialCheck.uid,function(mining) {
 		const returnObject = {};
 		returnObject.success = 1;
 		returnObject.mining = mining;

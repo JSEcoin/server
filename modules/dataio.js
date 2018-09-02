@@ -987,15 +987,9 @@ const jseDB = {
 			} else {
 				const userObj = {};
 				userObj.uid = uid;
-				JSE.jseDataIO.getVariable('ledger/'+userObj.uid,function(balance) {
-					userObj.balance = JSE.jseFunctions.round(balance);
-					JSE.jseDataIO.getVariable('locked/'+userObj.uid,function(locked) {
-						if (locked == null) { userObj.locked = false; } else { userObj.locked = true; }
-						JSE.jseDataIO.getVariable('credentials/'+userObj.uid+'/suspended',function(suspended) {
-							if (suspended == null || suspended === 0) { userObj.suspended = false; } else { userObj.suspended = true; }
-							callback(userObj);
-						});
-					});
+				JSE.jseDataIO.getVariable('credentials/'+userObj.uid+'/apiLevel',function(apiLevel) {
+					userObj.apiLevel = apiLevel;
+					callback(userObj);
 				});
 			}
 		});
