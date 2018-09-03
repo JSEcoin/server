@@ -104,13 +104,12 @@ const jseCommands = {
 						jseEthIntegration.sendJSE(dataObject.withdrawalAddress,dataObject.value,function(ethTxHash) {
 							if (ethTxHash) {
 								callback('{"success":1,"notification":"Withdraw Successful","txHash":"'+ethTxHash+'"}');
-								JSE.jseFunctions.withdrawalNotificationEmail(dataObject.user1,dataObject.value,dataObject.withdrawalAddress);
+								JSE.jseFunctions.withdrawalNotificationEmail(dataObject.user1,dataObject.value,dataObject.withdrawalAddress,ethTxHash);
 							} else {
 								callback('{"fail":1,"notification":"Withdraw Failed during eth sending"}');
-								console.log('ETH sendFunds Failed '+dataObject.withdrawalAddress'/'+dataObject.value+'JSE');
+								console.log('ETH sendFunds Failed '+dataObject.withdrawalAddress+'/'+dataObject.value+'JSE');
 							}
 						});
-
 					}
 				});
 			} else {
@@ -366,7 +365,7 @@ const jseCommands = {
 				JSE.jseDataIO.getVariable('exported/'+safeCoinCode,function(coinObject) {
 					// allow JSE Distribution to inport new coins
 					if (uid === 0) {
-						JSE.jseDataIO.addBalance(0,parseFloat(coinCode)); // coinCode is value
+						JSE.jseDataIO.addBalance(0,parseFloat(coinCode)); // coinCode is value, minting
 						callback4('{"success":1,"value":"' + parseFloat(coinCode) + '"}');
 					} else if (coinObject === null) {
 						callback4('{"fail":1,"notification":"Import Failed: Coin Code Not Recognized"}');
@@ -416,7 +415,7 @@ const jseCommands = {
 						});
 					}
 				},  function(failObject) {
-					callback4('{"fail":1,"notification":"Check User failed"}');
+					callback4('{"fail":1,"notification":"Import Failed: Check User failed"}');
 				});
 				return false;
 			}, function(failObject) {
@@ -426,6 +425,41 @@ const jseCommands = {
 			callback4('{"fail":1,"notification":"Import Failed: User public key credentials could not be matched"}');
 		});
 	},
+
+	/**
+	 * @method <h2>deposit</h2>
+	 * @description Deposit JSE ERC20 tokens into the platform
+	 * @param {object} tx eth transaction from modules/ethintegration.js checkJSE()
+	 * @param {function} callback6 user id of client importing tokens
+	 * @param {function} callback4 returns the JSON result to the calling function
+	 */
+	deposit(tx, callback6) {
+		JSE.jseDataIO.getUserByUID(tx.uid,function(quickLookup) {
+			JSE.jseDataIO.checkUserByPublicKey(quickLookup.publicKey,function(goodCredentials) {
+				JSE.jseDataIO.setVariable('locked/'+goodCredentials.uid,true);
+				JSE.lockedUIDs.push(goodCredentials.uid);
+				const newData = {};
+				newData.command = 'deposit';
+				newData.user1 = goodCredentials.uid;
+				newData.publicKey = goodCredentials.publicKey;
+				newData.txHash = tx.hash;
+				newData.txTo = tx.to;
+				newData.txFrom = tx.from;
+				newData.value = tx.value;
+				newData.ts = new Date().getTime();
+				JSE.jseDataIO.pushBlockData(newData,function(blockData) {
+					JSE.jseDataIO.addBalance(goodCredentials.uid,newData.value);
+					JSE.jseDataIO.pushVariable('history/'+goodCredentials.uid,blockData,function(pushRef) {});
+					callback6('{"success":1,"value":"' + newData.value + '","notification":"Deposit Successful"}');
+				});
+			},  function(failObject) {
+				callback6('{"fail":1,"notification":"Deposit Failed: Check User failed"}');
+			});
+		}, function() {
+			callback6('{"fail":1,"notification":"Deposit Failed: User public key credentials could not be matched"}');
+		});
+	},
+
 
 };
 

@@ -38,6 +38,7 @@ const jseAPI = require("./apifunctions.js");
 const jseEthIntegration = require("./ethintegration.js");
 const jseEmails = require("./emails.js");
 const twilio = require('twilio')('ACc50f44970e985329a823ae84606b9cf5', JSE.credentials.twilioAuthToken);
+const jseCommands = require("./commands.js");
 
 /**
  * @method <h2>shuffle</h2>
@@ -364,7 +365,7 @@ function exportNotificationEmail(fromUID,transactionValue) {
  * @param {number} fromUID User ID to send email to
  * @param {number} transactionValue Value of the transaction
  */
-function withdrawalNotificationEmail(fromUID,transactionValue,withdrawalAddress) {
+function withdrawalNotificationEmail(fromUID,transactionValue,withdrawalAddress,txHash) {
 	JSE.jseDataIO.getEmail(fromUID,function(emailAddress) {
 		JSE.jseDataIO.getVariable('account/'+fromUID+'/noEmailTransaction', function(noEmailTransaction) {
 			if (noEmailTransaction === null && fromUID > 0) {
@@ -372,7 +373,7 @@ function withdrawalNotificationEmail(fromUID,transactionValue,withdrawalAddress)
 				const toEmail = new helper.Email(emailAddress);
 				const fromEmail = new helper.Email('admin@jsecoin.com');
 				const subject = 'JSEcoin Withdrawal Confirmation';
-				const htmlContent = 'This is to confirm JSE tokens have been withdrawn from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Withdrawn to address: '+withdrawalAddress+'<br><br>Please note the transaction can be delayed due to conjestion on the Ethereum blockchain<br><br>If you did not make this transaction please contact us by replying to this email as soon as possible.<br><br>Thank you for using JSEcoin.';
+				const htmlContent = 'This is to confirm JSE tokens have been withdrawn from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Withdrawn to address: '+withdrawalAddress+'<br><br>Transaction Details: <a href="https://etherscan.io/tx/'+txHash+'">'+txHash+'</a><br><br>If you did not make this transaction please contact us by replying to this email as soon as possible.<br><br>Thank you for using JSEcoin.';
 				const emailHTML = jseEmails.template.split('$heading').join(subject).split('$content').join(htmlContent);
 				const content = new helper.Content('text/html', emailHTML);
 				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
@@ -384,6 +385,36 @@ function withdrawalNotificationEmail(fromUID,transactionValue,withdrawalAddress)
 			}
 		});
 	});
+}
+
+/**
+ * @method <h2>depositNotificationEmail</h2>
+ * @description Send a notification when a user withdraws tokens
+ * @param {number} fromUID User ID to send email to
+ * @param {number} txValue Value of the transaction
+ * @param {string} txHash ETH Transaction hash used for etherscan link
+ */
+function depositNotificationEmail(fromUID,txValue,txHash) {
+	JSE.jseDataIO.getEmail(fromUID,function(emailAddress) {
+		JSE.jseDataIO.getVariable('account/'+fromUID+'/noEmailTransaction', function(noEmailTransaction) {
+			if (noEmailTransaction === null && fromUID > 0) {
+				if (jseEmails.suppression.indexOf(emailAddress) > -1) return;
+				const toEmail = new helper.Email(emailAddress);
+				const fromEmail = new helper.Email('admin@jsecoin.com');
+				const subject = 'JSEcoin Deposit Confirmation';
+				const htmlContent = 'This is to confirm JSE tokens have been deposited to your account for the value of:<br><br><b>'+txValue+'JSE</b><br><br>Transaction Details: <a href="https://etherscan.io/tx/'+txHash+'">'+txHash+'</a><br><br>Thank you for using JSEcoin.';
+				const emailHTML = jseEmails.template.split('$heading').join(subject).split('$content').join(htmlContent);
+				const content = new helper.Content('text/html', emailHTML);
+				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
+				mail.categories = ["nodeserver","exportnotification"];
+				const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
+				sg.API(requestSG, function (error, response) {
+					if (error) { console.log('Sendgrid Error response received, export notification email '+emailAddress); }
+				});
+			}
+		});
+	});
+}
 
 /**
  * @method <h2>transferNotificationEmails</h2>

@@ -1,6 +1,6 @@
 const JSE = global.JSE;
 const express = require('express');
-const jseEthIntegration = require("./ethintegration.js");
+const jseEthIntegration = require("./../modules/ethintegration.js");
 
 const router = express.Router();
 
@@ -24,6 +24,7 @@ router.post('/getdepositaddress/*', function (req, res) {
 				res.send('{"success":1,"notification":"Your ethereum deposit address is '+ethKeyPair.address+'","ethAddress":"'+ethKeyPair.address+'"}');
 			});
 		}
+		jseEthIntegration.addToQueryPool(goodCredentials.uid,goodCredentials.ethAddress);
 	}, function() {
 		res.status(401).send('{"fail":1,"notification":"Error twofa.js 20. No Session Variable Supplied For 2fa Setup"}'); return false;
 	});
@@ -100,6 +101,7 @@ router.post('/withdraw/*', function (req, res) {
 																	If you did not make this transaction please contact admin@jsecoin.com and change your account password ASAP.<br>`;
 					JSE.jseFunctions.sendStandardEmail(goodCredentials.email,'Please confirm JSE withdrawal',withdrawalHTML);
 					res.send('{"success":1,"notification":"Withdrawal Success: Pending email confirmation"}');
+					console.log('Withdraw: '+dataObject.uid+' - '+dataObject.value+'JSE');
 				});
 
 				/*
