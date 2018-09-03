@@ -247,6 +247,7 @@ const jseCommands = {
 				} else {
 					JSE.jseDataIO.pushBlockData(dataObject,function(blockData) {
 						JSE.jseDataIO.minusBalance(goodCredentials.uid,value);
+						JSE.jseDataIO.plusX('txToday/'+goodCredentials.uid,value);
 						const dataObject2 = JSON.parse(JSON.stringify(dataObject)); // clone don't reference
 						dataObject2.user1email = goodCredentials.email;
 						JSE.jseDataIO.pushVariable('history/'+goodCredentials.uid,dataObject2,function(pushRef) {});

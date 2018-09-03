@@ -222,7 +222,7 @@ router.post('/removecoincode/*', function (req, res) {
  * @memberof module:jseRouter
  */
 router.post('/updateapilevel/*', function (req, res) {
-	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error indedx.js 72. No Session Variable"}'); return false; }
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error indedx.js 225. No Session Variable"}'); return false; }
 	const session = req.body.session;
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
 		const pin = String(req.body.pin).split(/[^0-9]/).join('');
@@ -245,6 +245,24 @@ router.post('/updateapilevel/*', function (req, res) {
 	 	return false;
 	}, function() {
 		res.send('0');
+	});
+	return false;
+});
+
+/**
+ * @name /updateapikey/*
+ * @description Update the users API Key
+ * @memberof module:jseRouter
+ */
+router.post('/updateapikey/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error indedx.js 258. No Session Variable"}'); return false; }
+	const session = req.body.session;
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		const newAPIKey = JSE.jseFunctions.randString(32);
+		JSE.jseDataIO.setVariable('credentials/'+goodCredentials.uid+'/apiKey',newAPIKey);
+		JSE.jseDataIO.setVariable('lookupAPIKey/'+newAPIKey,goodCredentials.uid);
+		JSE.jseDataIO.hardDeleteVariable('lookupAPIKey/'+goodCredentials.apiKey); // clean up old key lookup tables
+		res.send('{"success":1,"notification":"API Key Updated","newAPIKey":"'+newAPIKey+'"}');
 	});
 	return false;
 });
