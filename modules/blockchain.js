@@ -407,6 +407,12 @@ const jseBlockChain = {
 							if (vCommand === 'import') {
 								vLedger[user1] = JSE.jseFunctions.round(vLedger[user1] - tValue);
 							}
+							if (vCommand === 'withdraw') {
+								vLedger[user1] = JSE.jseFunctions.round(vLedger[user1] + tValue);
+							}
+							if (vCommand === 'deposit') {
+								vLedger[user1] = JSE.jseFunctions.round(vLedger[user1] - tValue);
+							}
 							if (vCommand === 'summary') {
 								//for (let sumUID in vInputData.data) {
 								Object.keys(vInputData.data).forEach(function(sumUID) {

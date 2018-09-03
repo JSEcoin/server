@@ -5,6 +5,10 @@
  * <ul>
  * <li>newKeyPair</li>
  * <li>addToQueryPool</li>
+ * <li>checkQueryPoolDeposits</li>
+ * <li>fromBlock</li>
+ * <li>updateFromBlock</li>
+ * <li>checkJSE</li>
  * <li>sendJSE</li>
  * </ul>
  */
@@ -119,7 +123,7 @@ const jseEthIntegration = {
       tx.to = txEvent.returnValues.to;
       if (JSE.jseTestNet) console.log('tx:'+tx.uid+'/'+tx.value+'/'+tx.from+'/'+tx.to+'/'+tx.hash+'/');
       JSE.jseDataIO.getVariable('ethProcessed/'+tx.hash,function(ethTx) {
-        if (ethTx === null && ethAddress === tx.to) {
+        if (ethTx === null && ethAddress === tx.to) { // check transaction hasn't already been processed
           JSE.jseDataIO.setVariable('ethProcessed/'+tx.hash,tx);
           jseCommands.deposit(tx,function(jsonResponse) {
             if (jsonResponse.indexOf('success') > -1) {
