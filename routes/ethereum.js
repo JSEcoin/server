@@ -1,8 +1,7 @@
 const JSE = global.JSE;
-const Web3 = require('web3');
 const express = require('express');
+const jseEthIntegration = require("./ethintegration.js");
 
-const web3 = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/'+JSE.credentials.infuraAPIKey));
 const router = express.Router();
 
 /**
@@ -18,7 +17,7 @@ router.post('/getdepositaddress/*', function (req, res) {
 			res.send('{"success":1,"notification":"Your ethereum deposit address is '+goodCredentials.ethAddress+'","ethAddress":"'+goodCredentials.ethAddress+'"}');
 		} else {
 			// no eth address present, lets set one up
-			const ethKeyPair = web3.eth.accounts.create();
+			const ethKeyPair = jseEthIntegration.newKeyPair();
 			JSE.jseDataIO.setVariable('credentials/'+goodCredentials.uid+'/ethPrivateKey',ethKeyPair.privateKey);
 			JSE.jseDataIO.setVariable('lookupETH/'+ethKeyPair.address,goodCredentials.uid);
 			JSE.jseDataIO.setVariableThen('credentials/'+goodCredentials.uid+'/ethAddress',ethKeyPair.address,function() {

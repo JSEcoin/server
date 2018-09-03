@@ -13,6 +13,7 @@
 const JSE = global.JSE;
 const crypto = require('crypto');
 const eccrypto = require('eccrypto');
+const jseEthIntegration = require("./ethintegration.js");
 
 const jseCommands = {
 
@@ -47,7 +48,7 @@ const jseCommands = {
 					const failCheck = JSON.parse(failCheckJSON);
 					if (failCheck.fail) {
 						callback(failCheckJSON);
-					} else {
+					} else if (failCheck.success) {
 						const nowTS = new Date().getTime();
 						let lastBlockTime = nowTS;
 						if (typeof JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID)][JSE.blockID] !== 'undefined' && JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID)][JSE.blockID].startTime > 1500508800000) {
@@ -69,7 +70,7 @@ const jseCommands = {
 					const failCheck = JSON.parse(failCheckJSON);
 					if (failCheck.fail) {
 						callback(failCheckJSON);
-					} else {
+					} else if (failCheck.success) {
 						const eCoin = {};
 						eCoin.coinCode = keyPair.privateKey;
 						eCoin.coinCodePublicKey = keyPair.publicKey; // not used as of 13/9/17, might come in useful later
@@ -92,6 +93,24 @@ const jseCommands = {
 						if (timeTillConfirmation < 0) timeTillConfirmation = 29999;
 						callback('{"success":1,"coinCode":"' + eCoin.coinCode + '","notification":"Export Successful","timeTillConfirmation":'+timeTillConfirmation+'}');
 						JSE.jseFunctions.exportNotificationEmail(dataObject.user1,dataObject.value);
+					}
+				});
+			} else if (dataObject.command === 'withdraw') {
+					jseCommands.verifyWithdraw(dataObject,function(failCheckJSON) {
+					const failCheck = JSON.parse(failCheckJSON);
+					if (failCheck.fail) {
+						callback(failCheckJSON);
+					} else if (failCheck.success) {
+						jseEthIntegration.sendJSE(dataObject.withdrawalAddress,dataObject.value,function(ethResult) {
+							if (ethResult === true) {
+								callback('{"success":1,"notification":"Withdraw Successful"}');
+								JSE.jseFunctions.withdrawalNotificationEmail(dataObject.user1,dataObject.value,dataObject.withdrawalAddress);
+							} else {
+								callback('{"fail":1,"notification":"Withdraw Failed during eth sending"}');
+								console.log('ETH sendFunds Failed '+dataObject.withdrawalAddress'/'+dataObject.value+'JSE');
+							}
+						});
+
 					}
 				});
 			} else {
@@ -231,7 +250,7 @@ const jseCommands = {
 				} else if (goodCredentials.balance < value) {
 					callback3('{"fail":1,"notification":"Export Failed: Insufficient Funds"}');
 				} else if (txLeft < value) {
-					callback3('{"fail":1,"notification":"Transfer Failed: Value greater than remaining transaction limit, '+txLeft+' JSE"}');
+					callback3('{"fail":1,"notification":"Export Failed: Value greater than remaining transaction limit, '+txLeft+' JSE"}');
 				} else if (goodCredentials.locked && goodCredentials.uid !== 0) {
 					callback3('{"fail":1,"notification":"Export Failed: Account locked pending recent transaction, please try again in 20 seconds"}');
 				} else if (goodCredentials.suspended && goodCredentials.suspended !== 0) {
@@ -258,6 +277,72 @@ const jseCommands = {
 			return false;
 		}, function() {
 			callback3('{"fail":1,"notification":"Export Failed: User public key credentials could not be matched"}');
+		});
+	},
+
+	/**
+	 * @method <h2>verifyWithdraw</h2>
+	 * @description Check a withdraw before writing it to the blockchain
+	 * @param {object} dataObject transaction which has been signed from the client
+	 * @param {function} callback5 returns the JSON result to the calling function
+	 */
+	verifyWithdraw(dataObject,callback5) {
+		JSE.jseDataIO.checkUserByPublicKey(dataObject.publicKey,function(goodCredentials) {
+			JSE.jseDataIO.setVariable('locked/'+goodCredentials.uid,true);
+			if (JSE.lockedUIDs.indexOf(goodCredentials.uid) > -1 && goodCredentials.uid !== 0) {
+				callback5('{"fail":1,"notification":"Withdraw Failed: Account '+goodCredentials.uid+' locked pending recent transaction, please try again in 20 seconds"}');
+				return false;
+			}
+			JSE.lockedUIDs.push(goodCredentials.uid);
+			if (!dataObject.value) {
+				callback5('{"fail":1,"notification":"Withdraw Failed: No value provided"}');
+				return false;
+			}
+			const value = JSE.jseFunctions.round(parseFloat(dataObject.value)); // can't clean string because it's not a string
+			const totalCost = JSE.jseFunctions.round(value + JSE.jseSettings.ethFee);
+
+			const txLimit = goodCredentials.txLimit || JSE.jseSettings.txLimit;
+			JSE.jseDataIO.getVariable('txToday/'+goodCredentials.uid, function(txToday) {
+				let txCompleted;
+				if (txToday === null) {
+					txCompleted = 0;
+				} else {
+					txCompleted = txToday.total;
+				}
+				const txLeft = JSE.jseFunctions.round(txLimit - txCompleted);
+
+				if (value !== dataObject.value) {
+					callback5('{"fail":1,"notification":"Withdraw Failed: Security check on value/amount failed"}');
+				} else if (goodCredentials.balance < totalCost) {
+					callback5('{"fail":1,"notification":"Withdraw Failed: Insufficient Funds"}');
+				} else if (txLeft < totalCost) {
+					callback5('{"fail":1,"notification":"Withdraw Failed: Value greater than remaining transaction limit, '+txLeft+' JSE"}');
+				} else if (goodCredentials.locked && goodCredentials.uid !== 0) {
+					callback5('{"fail":1,"notification":"Withdraw Failed: Account locked pending recent transaction, please try again in 20 seconds"}');
+				} else if (goodCredentials.suspended && goodCredentials.suspended !== 0) {
+					callback5('{"fail":1,"notification":"Withdraw Failed: This user account has been suspended. Please contact investigations@jsecoin.com"}');
+				} else if (value < 0.000001) {
+					callback5('{"fail":1,"notification":"Withdraw Failed: Transfer value is negative or too small"}');
+				} else if (value === 0 || value === null || value === '' || typeof value === 'undefined') {
+					callback5('{"fail":1,"notification":"Withdraw Failed: Transfer value zero"}');
+				} else if (dataObject.user1 !== goodCredentials.uid) {
+					callback5('{"fail":1,"notification":"Withdraw Failed: Data object user1 does not match public key"}');
+				} else if (dataObject.publicKey !== goodCredentials.publicKey) {
+					callback5('{"fail":1,"notification":"Withdraw Failed: Data object user1pk does not match public key"}');
+				} else {
+					JSE.jseDataIO.pushBlockData(dataObject,function(blockData) {
+						JSE.jseDataIO.minusBalance(goodCredentials.uid,totalCost);
+						JSE.jseDataIO.plusX('txToday/'+goodCredentials.uid,totalCost);
+						const dataObject2 = JSON.parse(JSON.stringify(dataObject)); // clone don't reference
+						dataObject2.user1email = goodCredentials.email;
+						JSE.jseDataIO.pushVariable('history/'+goodCredentials.uid,dataObject2,function(pushRef) {});
+						callback5('{"success":1}');
+					});
+				}
+			});
+			return false;
+		}, function() {
+			callback5('{"fail":1,"notification":"Withdraw Failed: User public key credentials could not be matched"}');
 		});
 	},
 

@@ -18,11 +18,13 @@
  * <li>sendWelcomeEmail</li>
  * <li>sendStandardEmail</li>
  * <li>exportNotificationEmail</li>
+ * <li>withdrawalNotificationEmail</li>
  * <li>transferNotificationEmails</li>
  * <li>referral</li>
  * <li>genSafeUser</li>
  * <li>sendSMS</li>
  * <li>realityCheck</li>
+ * <li>txApprove</li>
  * </ul>
 */
 const JSE = global.JSE;
@@ -33,6 +35,7 @@ const sr = require('secure-random');
 const helper = require('sendgrid').mail;
 const sg = require('sendgrid')(JSE.credentials.sendgridAPIKey);
 const jseAPI = require("./apifunctions.js");
+const jseEthIntegration = require("./ethintegration.js");
 const jseEmails = require("./emails.js");
 const twilio = require('twilio')('ACc50f44970e985329a823ae84606b9cf5', JSE.credentials.twilioAuthToken);
 
@@ -356,6 +359,33 @@ function exportNotificationEmail(fromUID,transactionValue) {
 }
 
 /**
+ * @method <h2>withdrawalNotificationEmail</h2>
+ * @description Send a notification when a user withdraws tokens
+ * @param {number} fromUID User ID to send email to
+ * @param {number} transactionValue Value of the transaction
+ */
+function withdrawalNotificationEmail(fromUID,transactionValue,withdrawalAddress) {
+	JSE.jseDataIO.getEmail(fromUID,function(emailAddress) {
+		JSE.jseDataIO.getVariable('account/'+fromUID+'/noEmailTransaction', function(noEmailTransaction) {
+			if (noEmailTransaction === null && fromUID > 0) {
+				if (jseEmails.suppression.indexOf(emailAddress) > -1) return;
+				const toEmail = new helper.Email(emailAddress);
+				const fromEmail = new helper.Email('admin@jsecoin.com');
+				const subject = 'JSEcoin Withdrawal Confirmation';
+				const htmlContent = 'This is to confirm JSE tokens have been withdrawn from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Withdrawn to address: '+withdrawalAddress+'<br><br>Please note the transaction can be delayed due to conjestion on the Ethereum blockchain<br><br>If you did not make this transaction please contact us by replying to this email as soon as possible.<br><br>Thank you for using JSEcoin.';
+				const emailHTML = jseEmails.template.split('$heading').join(subject).split('$content').join(htmlContent);
+				const content = new helper.Content('text/html', emailHTML);
+				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
+				mail.categories = ["nodeserver","exportnotification"];
+				const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
+				sg.API(requestSG, function (error, response) {
+					if (error) { console.log('Sendgrid Error response received, export notification email '+emailAddress); }
+				});
+			}
+		});
+	});
+
+/**
  * @method <h2>transferNotificationEmails</h2>
  * @description Send a notification email when a transfer takes place to the sender and receiver
  * @param {number} fromUID User ID who sent the transaction
@@ -576,6 +606,28 @@ function txApprove(uid,pushRef,approvalType) {
 			if (txObject.command === 'withdraw') {
 				JSE.jseDataIO.getVariable('credentials/'+txObject.uid,function(goodCredentials) {
 					// process withdrawal
+					const dataToSign = {};
+					dataToSign.publicKey = goodCredentials.publicKey;
+					dataToSign.command = 'withdraw';
+					dataToSign.withdrawalAddress = txObject.withdrawalAddress;
+					dataToSign.value = txObject.value;
+					dataToSign.fee = JSE.jseSettings.ethFee;
+					dataToSign.user1 = goodCredentials.uid;
+					dataToSign.ts = new Date().getTime();
+					const dataString = JSON.stringify(dataToSign);
+					JSE.jseFunctions.signData(dataString, goodCredentials, function(signed) {
+						if (typeof signed.fail === 'undefined') {
+							jseCommands.dataPush(signed,function(jsonResult){
+								if (jsonResult.indexOf('success') > -1) {
+									console.log('Withdrawal Success '+goodCredentials.uid+'/'+txObject.value+'JSE/'+txObject.withdrawalAddress);
+								} else {
+									console.log('Withdrawal Failed1 '+goodCredentials.uid+'/'+txObject.value+'JSE/'+txObject.withdrawalAddress);
+								}
+							});
+						} else {
+							console.log('Withdrawal Failed2 '+goodCredentials.uid+'/'+txObject.value+'JSE/'+txObject.withdrawalAddress);
+						}
+					});
 				});
 			}
 		}
@@ -583,5 +635,5 @@ function txApprove(uid,pushRef,approvalType) {
 }
 
 module.exports = {
- shuffle, randString, round, cleanString, limitString, sha256, buf2hex, hex2buf, createKeyPair, signData, verifyData, signHash, verifyHash, sendWelcomeEmail, sendOnboardingEmail, sendStandardEmail, exportNotificationEmail, transferNotificationEmails, referral, genSafeUser, sendSMS, realityCheck, txApprove,
+ shuffle, randString, round, cleanString, limitString, sha256, buf2hex, hex2buf, createKeyPair, signData, verifyData, signHash, verifyHash, sendWelcomeEmail, sendOnboardingEmail, sendStandardEmail, exportNotificationEmail, withdrawalNotificationEmail, transferNotificationEmails, referral, genSafeUser, sendSMS, realityCheck, txApprove,
 };
