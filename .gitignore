@@ -5,3 +5,4 @@ credentials\.json
 \.testcredentials\.json
 node_modules/*
 misc/suppression\.json
+modules/ethtest.js

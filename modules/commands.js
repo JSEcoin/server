@@ -101,9 +101,9 @@ const jseCommands = {
 					if (failCheck.fail) {
 						callback(failCheckJSON);
 					} else if (failCheck.success) {
-						jseEthIntegration.sendJSE(dataObject.withdrawalAddress,dataObject.value,function(ethResult) {
-							if (ethResult === true) {
-								callback('{"success":1,"notification":"Withdraw Successful"}');
+						jseEthIntegration.sendJSE(dataObject.withdrawalAddress,dataObject.value,function(ethTxHash) {
+							if (ethTxHash) {
+								callback('{"success":1,"notification":"Withdraw Successful","txHash":"'+ethTxHash+'"}');
 								JSE.jseFunctions.withdrawalNotificationEmail(dataObject.user1,dataObject.value,dataObject.withdrawalAddress);
 							} else {
 								callback('{"fail":1,"notification":"Withdraw Failed during eth sending"}');
