@@ -493,7 +493,7 @@ function banEmail(banUID) {
  * @param {string} utmCampaign utmCampaign should be "referral"
  * @param {string} utmContent utmContent should be aff12345
  */
-function referral(utmCampaign,utmContent,affPayout,geo) {
+function referral(utmCampaign,utmContent,affPayout,geo,notes) {
 	let value = affPayout;
 	const strippedUID = utmCampaign.split(/[^0-9]/).join('');
 	JSE.jseDataIO.getVariable('account/'+strippedUID,function(affiliate) {
@@ -512,6 +512,7 @@ function referral(utmCampaign,utmContent,affPayout,geo) {
 		referralObj.utmContent = utmContent;
 		referralObj.value = value;
 		referralObj.geo = geo;
+		referralObj.notes = notes;
 		const rightNow = new Date();
 		referralObj.ts = rightNow.getTime();
 		const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,"");

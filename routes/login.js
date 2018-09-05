@@ -15,7 +15,7 @@ const router = express.Router();
  * @param {object} req Express Request object
  * @param {object} res Express Result object
  */
-function sendUserData(credentials,newSessionVar,req,res) {
+function sendUserData(credentials,newSessionVar,recordLogin,req,res) {
 	JSE.jseDataIO.getUserData(credentials, function(userObjectRaw) {
 		const userObject = userObjectRaw;
 		if (typeof JSE.jseSettings.systemMessage !== 'undefined') {
@@ -37,6 +37,8 @@ function sendUserData(credentials,newSessionVar,req,res) {
 			userObject.jseUnique = jseUnique;
 		}
 		res.send(JSON.stringify(userObject)); // sends back full user object
+		JSE.jseDataIO.setVariable('account/'+credentials.uid+'/lastLogin',recordLogin);
+		JSE.jseDataIO.pushVariable('logins/'+credentials.uid, recordLogin);
 	});
 }
 
@@ -77,17 +79,23 @@ function startLogin(credentials,req,res) {
 		}
 		JSE.jseDataIO.setVariable('lookupSession/'+newSessionVar,newSessionCredentials.uid);
 		const newDate = new Date().getTime();
-		JSE.jseDataIO.setVariable('account/'+credentials.uid+'/lastLogin',newDate);
 		let lastIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
 		if (lastIP.indexOf(',') > -1) { lastIP = lastIP.split(',')[0]; }
 		if (lastIP.indexOf(':') > -1) { lastIP = lastIP.split(':').slice(-1)[0]; }
-		JSE.jseDataIO.setVariable('account/'+credentials.uid+'/lastip', lastIP);
+		//JSE.jseDataIO.setVariable('account/'+credentials.uid+'/lastip', lastIP);
+		const userAgent = JSE.jseFunctions.cleanString(String(req.body.userAgent)) || 'unknown';
+		const geoObject = geoDB.get(lastIP);
+		let geo = 'XX';
+		if (geoObject && geoObject.country) {
+			geo = geoObject.country.iso_code;
+		}
+		const recordLogin = geo+','+lastIP+','+newDate+','+userAgent;
 		if (previousSessionVar) {
 			JSE.jseDataIO.hardDeleteVariable('lookupSession/'+previousSessionVar);
 		}
-		sendUserData(newSessionCredentials,newSessionVar,req,res);
+		sendUserData(newSessionCredentials,newSessionVar,recordLogin,req,res);
 	} else {
-		sendUserData(credentials,null,req,res);
+		sendUserData(credentials,null,null,req,res);
 	}
 	return false;
 }

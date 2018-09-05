@@ -42,6 +42,9 @@ router.post('/*', function (req, res) {
 			if (req.body.content) { newUser.content = JSE.jseFunctions.cleanString(req.body.content); } else { newUser.content = 'unknown'; }
 			if (req.body.jseUnique) { newUser.jseUnique = JSE.jseFunctions.cleanString(req.body.jseUnique); } else { newUser.jseUnique = 'unknown'; }
 			if (req.body.language) { newUser.language = JSE.jseFunctions.cleanString(req.body.language); } else { newUser.language = 'unknown'; }
+			if (req.body.screen) { newUser.screen = JSE.jseFunctions.cleanString(req.body.screen); } else { newUser.screen = 'unknown'; }
+			if (req.body.platform) { newUser.platform = JSE.jseFunctions.cleanString(req.body.platform); } else { newUser.platform = 'unknown'; }
+			if (req.body.userAgent) { newUser.userAgent = JSE.jseFunctions.cleanString(req.body.userAgent); } else { newUser.userAgent = 'unknown'; }
 			if (req.body.timeOffset) { newUser.timeOffset = JSE.jseFunctions.cleanString(req.body.timeOffset); } else { newUser.timeOffset = 'unknown'; }
 			newUser.regip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
 			if (newUser.regip.indexOf(',') > -1) { newUser.regip = newUser.regip.split(',')[0]; }

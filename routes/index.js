@@ -699,4 +699,27 @@ router.post('/updatetxlimit/*', function (req, res) {
 	return false;
 });
 
+/**
+ * @name /lastlogins/*
+ * @description Get Public Stats
+ * @memberof module:jseRouter
+ */
+router.post('/lastlogins/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 708. No Session Variable"}'); return false; }
+	const session = req.body.session;
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials !== null) {
+			JSE.jseDataIO.getVariable('logins/'+goodCredentials.uid, function(logins) {
+		 		res.send(JSON.stringify(logins));
+			});
+	 	} else {
+	 		res.status(401).send('{"fail":1,"notification":"Error index.js 716. Session Variable not recognized"}');
+	 	}
+	 	return false;
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error index.js 720. Session Variable not recognized"}');
+	});
+	return false;
+});
+
 module.exports = router;

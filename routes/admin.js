@@ -516,6 +516,34 @@ router.get('/txpending/:adminpass', function(req, res) {
 	return false;
 });
 
+router.get('/getrewards/:adminpass', function(req, res) {
+	let adminPass;
+	if (typeof req.get('Authorization') !== 'undefined') {
+		adminPass = JSE.jseFunctions.cleanString(req.get('Authorization'));
+	} else {
+		adminPass = JSE.jseFunctions.cleanString(req.params.adminpass);
+	}
+	if (adminPass !== JSE.credentials.jseAdminKey) { return false; }
+	JSE.jseDataIO.getVariable('rewards/',function(rewards) {
+		res.send(JSON.stringify(rewards));
+	});
+	return false;
+});
+
+router.get('/getlogins/:adminpass', function(req, res) {
+	let adminPass;
+	if (typeof req.get('Authorization') !== 'undefined') {
+		adminPass = JSE.jseFunctions.cleanString(req.get('Authorization'));
+	} else {
+		adminPass = JSE.jseFunctions.cleanString(req.params.adminpass);
+	}
+	if (adminPass !== JSE.credentials.jseAdminKey) { return false; }
+	JSE.jseDataIO.getVariable('logins/',function(logins) {
+		res.send(JSON.stringify(logins));
+	});
+	return false;
+});
+
 router.post('/txpendingupdate/:adminpass', function(req, res) {
 	let adminPass;
 	if (typeof req.get('Authorization') !== 'undefined') {
