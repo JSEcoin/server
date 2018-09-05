@@ -630,11 +630,12 @@ function txApprove(uid,pushRef,approvalType) {
 			if (txObject.requireEmail === false || txObject.emailApproved === true) processTx = true;
 		}
 		if (processTx) {
+			const processedTimestamp = new Date().getTime();
 			if (txObject.command === 'txlimit') {
 				JSE.jseDataIO.setVariable('credentials/'+txObject.uid+'/txLimit',txObject.newTxLimit);
 				// do we want to send an email here?
-			}
-			if (txObject.command === 'withdraw') {
+				JSE.jseDataIO.setVariable('txPending/'+uid+'/'+pushRef+'/complete', processedTimestamp);
+			} else if (txObject.command === 'withdraw') {
 				JSE.jseDataIO.getVariable('credentials/'+txObject.uid,function(goodCredentials) {
 					// process withdrawal
 					const dataToSign = {};
@@ -644,13 +645,14 @@ function txApprove(uid,pushRef,approvalType) {
 					dataToSign.value = txObject.value;
 					dataToSign.fee = JSE.jseSettings.ethFee;
 					dataToSign.user1 = goodCredentials.uid;
-					dataToSign.ts = new Date().getTime();
+					dataToSign.ts = processedTimestamp;
 					const dataString = JSON.stringify(dataToSign);
 					JSE.jseFunctions.signData(dataString, goodCredentials, function(signed) {
 						if (typeof signed.fail === 'undefined') {
 							jseCommands.dataPush(signed,function(jsonResult){
 								if (jsonResult.indexOf('success') > -1) {
 									console.log('Withdrawal Success '+goodCredentials.uid+'/'+txObject.value+'JSE/'+txObject.withdrawalAddress);
+									JSE.jseDataIO.setVariable('txPending/'+uid+'/'+pushRef+'/complete', processedTimestamp);
 								} else {
 									console.log('Withdrawal Failed1 '+goodCredentials.uid+'/'+txObject.value+'JSE/'+txObject.withdrawalAddress);
 								}
