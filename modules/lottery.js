@@ -199,7 +199,9 @@ function credit(uid,siteid,subid,whatRaw){
  * @description Run the lottery on every block to pick 50 winners from each of the pools and distribute mining rewards.
  */
 function runLottery() {
-	const blockTime = new Date().getTime();
+	const rightNow = new Date();
+	const blockTime = rightNow.getTime();
+	const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,"");
 	JSE.jseDataIO.getVariable('lottery',function(lottery) {
 		if (lottery !== null) {
 			const lotteryArray = [];
@@ -227,14 +229,15 @@ function runLottery() {
 					// setTimeouts used to distribute load on firebase for non-critical stats
 					paidOut += JSE.jseSettings.publisherPayout;
 					setTimeout(function(stUID,stSiteID,stSubID,stNewData,stBlockTime) { // eslint-disable-line
-						JSE.jseDataIO.plusX('ledger/'+stUID, JSE.jseSettings.publisherPayout);
+						//JSE.jseDataIO.plusX('ledger/'+stUID, JSE.jseSettings.publisherPayout);
+						JSE.jseDataIO.plusX('rewards/'+stUID+'/'+yymmdd+'/p', JSE.jseSettings.publisherPayout); // p = publisher
 						JSE.jseDataIO.plusX('statsTotal/'+stUID+'/c', JSE.jseSettings.publisherPayout);
 						JSE.jseDataIO.plusX('statsToday/'+stUID+'/c', JSE.jseSettings.publisherPayout);
 						const safeSiteKey = JSE.jseDataIO.genSafeKey(stSiteID);
 						JSE.jseDataIO.plusX('siteIDs/'+stUID+'/'+safeSiteKey+'/c', JSE.jseSettings.publisherPayout);
 						const safeSubKey = JSE.jseDataIO.genSafeKey(stSubID);
 						JSE.jseDataIO.plusX('subIDs/'+stUID+'/'+safeSubKey+'/c', JSE.jseSettings.publisherPayout);
-						JSE.jseDataIO.pushBlockData(stNewData,function(blockData) {});
+						//JSE.jseDataIO.pushBlockData(stNewData,function(blockData) {});
 						const newData2 = JSON.parse(JSON.stringify(stNewData));
 						newData2.siteid = stSiteID;
 						newData2.subid = stSubID;
@@ -287,12 +290,13 @@ function runLottery() {
 					newData.value = JSE.jseSettings.platformPayout;
 					paidOut2 += JSE.jseSettings.platformPayout;
 					setTimeout(function(stUID,stSiteID,stNewData,stBlockTime) { // eslint-disable-line
-						JSE.jseDataIO.plusX('ledger/'+stUID, JSE.jseSettings.platformPayout);
+						//JSE.jseDataIO.plusX('ledger/'+stUID, JSE.jseSettings.platformPayout);
+						JSE.jseDataIO.plusX('rewards/'+stUID+'/'+yymmdd+'/s', JSE.jseSettings.platformPayout); // s = self-mining
 						JSE.jseDataIO.plusX('statsTotal/'+stUID+'/c', JSE.jseSettings.platformPayout);
 						JSE.jseDataIO.plusX('statsToday/'+stUID+'/c', JSE.jseSettings.platformPayout);
 						const safeSiteKey = JSE.jseDataIO.genSafeKey(stSiteID);
 						JSE.jseDataIO.plusX('siteIDs/'+stUID+'/'+safeSiteKey+'/c', JSE.jseSettings.platformPayout);
-						JSE.jseDataIO.pushBlockData(stNewData,function(blockData) {});
+						//JSE.jseDataIO.pushBlockData(stNewData,function(blockData) {});
 						const newData2 = JSON.parse(JSON.stringify(stNewData));
 						newData2.siteid = 'Platform Mining';
 						newData2.ts = stBlockTime;

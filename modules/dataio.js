@@ -765,23 +765,26 @@ const jseDB = {
 					account.statsToday = statsToday;
 					JSE.jseDataIO.getVariable('ledger/'+credentials.uid,function(balance) {
 						account.balance = balance;
-						JSE.jseDataIO.getVariable('history/'+credentials.uid,function(history) {
-							account.history = history;
-							JSE.jseDataIO.getVariable('mining/'+credentials.uid,function(mining) {
-								account.mining = mining;
-								if (typeof account.merchant === 'undefined') {
-									callback(account);
-								} else {
-									JSE.jseDataIO.getVariable('merchantSales/'+credentials.uid,function(merchantSales) {
-										account.merchantSales = merchantSales;
-										JSE.jseDataIO.getVariable('merchantPurchases/'+credentials.uid,function(merchantPurchases) {
-											account.merchantPurchases = merchantPurchases;
-											callback(account);
-										}); // merchantPurchases
-									}); // merchantSales
-								}
-							}); // mining
-						}); // history
+						JSE.jseDataIO.getVariable('rewards/'+credentials.uid,function(rewards) {
+							account.rewards = rewards;
+							JSE.jseDataIO.getVariable('history/'+credentials.uid,function(history) {
+								account.history = history;
+								JSE.jseDataIO.getVariable('mining/'+credentials.uid,function(mining) {
+									account.mining = mining;
+									if (typeof account.merchant === 'undefined') {
+										callback(account);
+									} else {
+										JSE.jseDataIO.getVariable('merchantSales/'+credentials.uid,function(merchantSales) {
+											account.merchantSales = merchantSales;
+											JSE.jseDataIO.getVariable('merchantPurchases/'+credentials.uid,function(merchantPurchases) {
+												account.merchantPurchases = merchantPurchases;
+												callback(account);
+											}); // merchantPurchases
+										}); // merchantSales
+									}
+								}); // mining
+							}); // history
+						}); // rewards
 					}); // ledger/balance
 				}); // statsToday
 			}); // statsTotal

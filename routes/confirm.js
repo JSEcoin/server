@@ -60,14 +60,14 @@ router.get('/:uid/:confirmcode', function(req, res) {
 						if (referralPayout > 0) {
 						//if (account.geo === 'US' || account.geo === 'CA' || account.geo === 'GB' || account.geo === 'IE' || account.geo === 'AU' || account.geo === 'NZ' || account.geo === 'ZA' || account.geo === 'DE' || account.geo === 'FR' || account.geo === 'CH' || account.geo === 'SE' || account.geo === 'NO' || account.geo === 'FI' || account.geo === 'BE' || account.geo === 'NL' || account.geo === 'LU' || account.geo === 'DK' || account.geo === 'AT') {
 							if (account.duplicate === null || typeof account.duplicate === 'undefined') {
-								JSE.jseFunctions.referral(account.campaign,account.content,referralPayout);
+								JSE.jseFunctions.referral(account.campaign,account.content,referralPayout,account.geo);
 							} else {
-								console.log('Declined Referral Duplicate Account: '+account.confirmed);
-								JSE.jseFunctions.referral(account.campaign,'Declined Duplicate Account Details',0.01); // Anything with Declined in will get value set to 0.01
+								console.log('Declined Referral Dupe: '+account.campaign);
+								JSE.jseFunctions.referral(account.campaign,'Declined Duplicate Account Details',0,account.geo); // Anything with Declined in will get value set to 0
 							}
 						} else {
-							JSE.jseFunctions.referral(account.campaign,'Declined Region '+account.geo,1); // declined regions go through at 1 JSE
-							console.log('Declined Referral GEO: '+account.geo);
+							JSE.jseFunctions.referral(account.campaign,'Declined Region '+account.geo,1,account.geo); // declined regions go through at 1 JSE
+							console.log('Declined Referral GEO: '+account.campaign+'/'+account.geo);
 						}
 					} else {
 						console.log('Declined Referral '+account.source+'/'+account.campaign+'/'+account.confirmed+'/'+account.uniqueConfirmationCode+'/'+checkConfirmationCode);

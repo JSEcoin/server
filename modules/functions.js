@@ -493,16 +493,12 @@ function banEmail(banUID) {
  * @param {string} utmCampaign utmCampaign should be "referral"
  * @param {string} utmContent utmContent should be aff12345
  */
-function referral(utmCampaign,utmContent,affPayout) {
+function referral(utmCampaign,utmContent,affPayout,geo) {
 	let value = affPayout;
 	const strippedUID = utmCampaign.split(/[^0-9]/).join('');
-	if (utmContent.indexOf('Declined') > -1) {
-		value = 1;
-		console.log('Declined Referral: '+utmContent);
-	}
 	JSE.jseDataIO.getVariable('account/'+strippedUID,function(affiliate) {
 		if (affiliate === null) { return false; } // watch out for wrong affids
-		if (typeof affiliate.affQuality !== 'undefined') { // put a measure incase we get bad affiliates
+		if (typeof affiliate.affQuality !== 'undefined') { // block suspended accounts
 			const rand = Math.floor(Math.random() * 10); //0-9
 			if (rand >= affiliate.affQuality) {
 				return false;
@@ -511,12 +507,21 @@ function referral(utmCampaign,utmContent,affPayout) {
 		if (typeof affiliate.affPayout !== 'undefined') {
 			value = affiliate.affPayout;
 		}
-		const reference = 'Referral Payment: '+utmContent;
-		JSE.jseDataIO.getCredentialsByUID(0,function(distributionCredentials) {
-			jseAPI.apiTransfer(distributionCredentials,affiliate,value,reference,false,function(jsonResult) {
-				console.log('Referral payment to '+strippedUID+' for '+value+' JSE');
-			});
+		const referralObj = {};
+		referralObj.uid = strippedUID;
+		referralObj.utmContent = utmContent;
+		referralObj.value = value;
+		referralObj.geo = geo;
+		const rightNow = new Date();
+		referralObj.ts = rightNow.getTime();
+		const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,"");
+		JSE.jseDataIO.pushVariable('referrals/'+strippedUID,referralObj,function(pushRef) {});
+		JSE.jseDataIO.plusX('rewards/'+strippedUID+'/'+yymmdd+'/r', value);
+		/*
+		jseAPI.apiTransfer(distributionCredentials,affiliate,value,reference,false,function(jsonResult) {
+			console.log('Referral payment to '+strippedUID+' for '+value+' JSE');
 		});
+		*/
 		return false;
 	});
 }

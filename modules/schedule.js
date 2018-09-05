@@ -28,6 +28,7 @@ function runAtMidnight() {
 	const msToMidnight = night.getTime() - now.getTime();
 	console.log('runAtMidnight set for '+(Math.floor(msToMidnight /60000))+' mins');
 	setTimeout(function() {
+			processRewards(7); // Move daily rewards across
 			// Push JSE.publicStats to dailyJSE.PublicStats
 			JSE.publicStats.ts = new Date().getTime();
 			JSE.jseDataIO.updatePublicStats();
@@ -338,6 +339,60 @@ function storeLogs() {
 	}
 }
 
+/**
+ * @method <h2>processRewards</h2>
+ * @description Move the rewards across to the ledger after x days
+ * 							Included but commented out is the option to clean up after one month.
+ * 							This might be required later as users will be pulling all this data on login
+ * @param howManyDaysBack the number of days previously we want to move the rewards across for default. 7
+ */
+function processRewards(howManyDaysBack=7) {
+	const lastWeek = new Date();
+	lastWeek.setDate(lastWeek.getDate()-howManyDaysBack);
+	const lastWeekYYMMDD = lastWeek.toISOString().slice(2,10).replace(/-/g,"");
+	const lastMonth = new Date();
+	lastMonth.setDate(lastMonth.getDate()-28);
+	const lastMonthYYMMDD = lastMonth.toISOString().slice(2,10).replace(/-/g,"");
+	JSE.jseDataIO.getVariable('rewards',function(rewards) {
+		Object.keys(rewards).forEach(function(uid) {
+			if (rewards[uid][lastWeekYYMMDD] && !rewards[uid][lastWeekYYMMDD].d) {
+				if (rewards[uid][lastWeekYYMMDD].s) { // s = self-mining
+					const jsePlatformReward = rewards[uid][lastWeekYYMMDD].s;
+					JSE.jseDataIO.plusX('ledger/'+uid, jsePlatformReward);
+					const newPlatformData = {};
+					newPlatformData.command = 'platformReward';
+					newPlatformData.user1 = uid;
+					newPlatformData.value = jsePlatformReward;
+					JSE.jseDataIO.pushBlockData(newPlatformData,function(blockData) {});
+				}
+				if (rewards[uid][lastWeekYYMMDD].p) { // p = publisher mining
+					const jsePublisherReward = rewards[uid][lastWeekYYMMDD].p;
+					JSE.jseDataIO.plusX('ledger/'+uid, jsePublisherReward);
+					const newPublisherData = {};
+					newPublisherData.command = 'publisherReward';
+					newPublisherData.user1 = uid;
+					newPublisherData.value = jsePublisherReward;
+					JSE.jseDataIO.pushBlockData(newPublisherData,function(blockData) {});
+				}
+				if (rewards[uid][lastWeekYYMMDD].r) { // r = referral
+					const jseReferralReward = rewards[uid][lastWeekYYMMDD].r;
+					JSE.jseDataIO.plusX('ledger/'+uid, jseReferralReward);
+					const newReferralData = {};
+					newReferralData.command = 'referralReward';
+					newReferralData.user1 = uid;
+					newReferralData.value = jseReferralReward;
+					JSE.jseDataIO.pushBlockData(newReferralData,function(blockData) {});
+				}
+				JSE.setVariable('rewards/'+uid+'/'+lastWeekYYMMDD+'/d',true); // d = done
+			}
+			/*
+			if (rewards[uid][lastMonthYYMMDD]) {
+				JSE.hardDeleteVariable('rewards/'+uid+'/'+lastMonthYYMMDD); // clean up after one month?
+			}
+			*/
+		});
+	});
+}
 
 module.exports = {
 	runAtMidnight, runAtMidday, runAt5pm, cleanNulls, backupLedger, resetBlockChainFile, storeLogs,
