@@ -2,6 +2,9 @@ const JSE = global.JSE;
 const express = require('express');
 const authenticator = require('authenticator');
 const request = require('request');
+const maxmind = require('maxmind');
+
+const geoDB = maxmind.openSync('./geoip/GeoIP2-Country.mmdb'); // actually in ../geoip but this is run from ../server.js
 
 const router = express.Router();
 
