@@ -6,18 +6,20 @@ const router = express.Router();
 /**
  * @name /confirm/tx/*
  * @description Confirm the transaction via email
- * @example https://server.jsecoin.com/ethereum/confirm/:uid/:pushref/:confirmKey
+ * @example https://server.jsecoin.com/confirm/tx/:uid/:pushref/:confirmKey
  * @memberof module:jseRouter
  */
 router.get('/tx/:uid/:pushref/:confirmkey', function(req, res) {
 	let returnMsg = "Thank you for confirming the transaction";
 	const cleanUID = parseFloat(req.params.uid);
 	const pushRef = JSE.jseFunctions.cleanString(req.params.pushref);
-	const confirmKey = JSE.jseFunctions.cleanString(req.params.confirmKey);
+	const confirmKey = JSE.jseFunctions.cleanString(req.params.confirmkey);
 	JSE.jseDataIO.getVariable('txPending/'+cleanUID+'/'+pushRef,function(txObject) {
 		if (txObject === null) {
-			returnMsg = 'Transaction confirmation reference not recognised Error: ethereum.js 134';
-		} else if (txObject.status === 'pending' && txObject.confirmKey === confirmKey) {
+			returnMsg = 'Transaction confirmation reference not recognised Error: confirm.js 19';
+		} else if (txObject.complete || txObject.emailApproved === true) {
+			returnMsg = 'Transaction has already been confirmed';
+		} else if (txObject.confirmKey === confirmKey) {
 			JSE.jseFunctions.txApprove(cleanUID,pushRef,'email');
 			if (txObject.requireAdmin === true && txObject.adminApproved === false) {
 				returnMsg = 'Thank you for confirming the transaction. Manual checks are required which can take up to 24 hours';
@@ -25,7 +27,7 @@ router.get('/tx/:uid/:pushref/:confirmkey', function(req, res) {
 				returnMsg = 'Thank you for confirming the transaction.';
 			}
 		} else {
-			returnMsg = 'Something went wrong with the transaction confirmation, please contact admin@jsecoin.com - Error: ethereum.js 138';
+			returnMsg = 'Something went wrong with the transaction confirmation, please contact admin@jsecoin.com - Error: confirm.js 28';
 		}
 		res.send('<html><script>alert("'+returnMsg+'"); window.location = "https://platform.jsecoin.com/";</script></html>');
 	});

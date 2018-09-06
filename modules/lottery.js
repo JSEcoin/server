@@ -241,7 +241,7 @@ function runLottery() {
 						JSE.jseDataIO.plusX('siteIDs/'+stUID+'/'+safeSiteKey+'/c', JSE.jseSettings.publisherPayout);
 						const safeSubKey = JSE.jseDataIO.genSafeKey(stSubID);
 						JSE.jseDataIO.plusX('subIDs/'+stUID+'/'+safeSubKey+'/c', JSE.jseSettings.publisherPayout);
-						//JSE.jseDataIO.pushBlockData(stNewData,function(blockData) {});
+						JSE.jseDataIO.pushBlockData(stNewData,function(blockData) {});
 						const newData2 = JSON.parse(JSON.stringify(stNewData));
 						newData2.siteid = stSiteID;
 						newData2.subid = stSubID;
@@ -300,7 +300,7 @@ function runLottery() {
 						JSE.jseDataIO.plusX('statsToday/'+stUID+'/c', JSE.jseSettings.platformPayout);
 						const safeSiteKey = JSE.jseDataIO.genSafeKey(stSiteID);
 						JSE.jseDataIO.plusX('siteIDs/'+stUID+'/'+safeSiteKey+'/c', JSE.jseSettings.platformPayout);
-						//JSE.jseDataIO.pushBlockData(stNewData,function(blockData) {});
+						JSE.jseDataIO.pushBlockData(stNewData,function(blockData) {});
 						const newData2 = JSON.parse(JSON.stringify(stNewData));
 						newData2.siteid = 'Platform Mining';
 						newData2.ts = stBlockTime;

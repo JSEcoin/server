@@ -59,14 +59,15 @@ router.post('/withdraw/*', function (req, res) {
 				res.status(400).send('{"fail":1,"notification":"Withdraw Failed: No value provided"}');
 				return false;
 			}
-			const value = JSE.jseFunctions.round(parseFloat(req.body.withdrawalAmount)); // can't clean string because it's not a string
-			const totalCost = JSE.jseFunctions.round(value + JSE.jseSettings.ethFee);
-			if (value !== req.body.value) {
+			const withdrawalAmount = JSE.jseFunctions.round(parseFloat(req.body.withdrawalAmount)); // can't clean string because it's not a string
+			const ethFee = JSE.jseSettings.ethFee || 120;
+			const value = JSE.jseFunctions.round(withdrawalAmount + ethFee);
+			if (withdrawalAmount !== req.body.withdrawalAmount) {
 				res.status(400).send('{"fail":1,"notification":"Withdraw Failed: Security check on value/amount failed"}');
 				return false;
 			}
 			// These are double checked after email confirmation in commands.js
-			if (goodCredentials.balance < totalCost) {
+			if (goodCredentials.balance < value) {
 				res.status(400).send('{"fail":1,"notification":"Withdraw Failed: Insufficient Funds"}');
 			} else if (goodCredentials.locked && goodCredentials.uid !== 0) {
 				res.status(400).send('{"fail":1,"notification":"Withdraw Failed: Account locked pending recent transaction, please try again in 20 seconds"}');
@@ -74,29 +75,31 @@ router.post('/withdraw/*', function (req, res) {
 				res.status(400).send('{"fail":1,"notification":"Withdraw Failed: This user account has been suspended. Please contact investigations@jsecoin.com"}');
 			} else if (value < 0.000001) {
 				res.status(400).send('{"fail":1,"notification":"Withdraw Failed: Transfer value is negative or too small"}');
+			} else if (withdrawalAmount < 0.000001) {
+				res.status(400).send('{"fail":1,"notification":"Withdraw Failed: withdrawalAmount value is negative or too small"}');
 			} else if (value === 0 || value === null || value === '' || typeof value === 'undefined') {
 				res.status(400).send('{"fail":1,"notification":"Withdraw Failed: Transfer value zero"}');
 			} else {
+				/* Note this object is recreated in functinos txApprove before being passed in to the blockchain or history */
 				const dataObject = {};
-				//dataObject.publicKey = goodCredentials.publicKey;
-				//dataObject.user1 = goodCredentials.uid;
-				dataObject.uid = goodCredentials.uid;
+				dataObject.uid = goodCredentials.uid; // uid becomes user1 in blockchain
+				dataObject.email = goodCredentials.email;
 				dataObject.command = 'withdraw';
 				const withdrawalAddress = JSE.jseFunctions.cleanString(String(req.body.withdrawalAddress));
 				dataObject.withdrawalAddress = withdrawalAddress;
+				dataObject.withdrawalAmount = withdrawalAmount;
+				dataObject.ethFee = ethFee;
 				dataObject.value = value;
-				//dataObject.fee = JSE.jseSettings.ethFee;
 				dataObject.ts = new Date().getTime();
 				dataObject.requireEmail = true;
 				dataObject.emailApproved = false;
 				dataObject.requireAdmin = true;
 				dataObject.adminApproved = false;
 				dataObject.confirmKey = JSE.jseFunctions.randString(12);
-				JSE.jseDataIO.minusBalance(goodCredentials.uid,value);
 				JSE.jseDataIO.pushVariable('txPending/'+goodCredentials.uid,dataObject,function(pushRef) {
 					const confirmLink = 'https://server.jsecoin.com/confirm/tx/'+goodCredentials.uid+'/'+pushRef+'/'+dataObject.confirmKey;
 					const withdrawalHTML = `Please click the link below to confirm you wish to make the following withdrawal:<br>
-																	${value} JSE to address: ${withdrawalAddress}<br><br>
+																	${withdrawalAmount} JSE to address: ${withdrawalAddress}<br><br>
 																	<a href="${confirmLink}">Confirm this withdrawal</a><br><br>
 																	If you did not make this transaction please contact admin@jsecoin.com and change your account password ASAP.<br>`;
 					JSE.jseFunctions.sendStandardEmail(goodCredentials.email,'Please confirm JSE withdrawal',withdrawalHTML);

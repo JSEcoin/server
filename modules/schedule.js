@@ -36,7 +36,6 @@ function runAtMidnight() {
 				JSE.jseDataIO.pushVariable('dailyPublicStats',latestStats,function(pushRef){ console.log('Pushed across publicStats to dailyPublicStats'); });
 				JSE.jseDataIO.resetDailyStats();
 			});
-			JSE.jseDataIO.deleteVariable('txToday');
 			runAtMidnight(); // Then, reset again next midnight.
 	}, msToMidnight);
 }
@@ -58,6 +57,7 @@ function runAtMidday() {
 	console.log('runAtMidday set for '+(Math.floor(msToMidday / 60000))+' mins');
 	setTimeout(function() {
 		runSubscriptions();
+		JSE.jseDataIO.deleteVariable('txToday');
 		runAtMidday(); // Then, reset again next midnight.
 	}, msToMidday);
 }
@@ -77,7 +77,9 @@ function runAt5pm() {
 	const msTo5pm = peakTimeObject.getTime() - now.getTime();
 	console.log('runAt5pm set for '+(Math.floor(msTo5pm / 60000))+' mins');
 	setTimeout(function() {
-		startAutoresponder();
+		if (JSE.jseTestNet === false) { // don't want to send emails when testing!
+			startAutoresponder();
+		}
 		runAt5pm(); // Then, reset again next midnight.
 	}, msTo5pm);
 }

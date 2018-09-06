@@ -92,7 +92,7 @@ const jseCommands = {
 						if (timeTillConfirmation > 30000) timeTillConfirmation = 30000;
 						if (timeTillConfirmation < 0) timeTillConfirmation = 29999;
 						callback('{"success":1,"coinCode":"' + eCoin.coinCode + '","notification":"Export Successful","timeTillConfirmation":'+timeTillConfirmation+'}');
-						JSE.jseFunctions.exportNotificationEmail(dataObject.user1,dataObject.value);
+						JSE.jseFunctions.exportNotificationEmail(dataObject.user1,dataObject.withdrawalAmount);
 					}
 				});
 			} else if (dataObject.command === 'withdraw') {
@@ -101,13 +101,13 @@ const jseCommands = {
 					if (failCheck.fail) {
 						callback(failCheckJSON);
 					} else if (failCheck.success) {
-						jseEthIntegration.sendJSE(dataObject.withdrawalAddress,dataObject.value,function(ethTxHash) {
+						jseEthIntegration.sendJSE(dataObject.withdrawalAddress,dataObject.withdrawalAmount,function(ethTxHash) {
 							if (ethTxHash) {
 								callback('{"success":1,"notification":"Withdraw Successful","txHash":"'+ethTxHash+'"}');
-								JSE.jseFunctions.withdrawalNotificationEmail(dataObject.user1,dataObject.value,dataObject.withdrawalAddress,ethTxHash);
+								JSE.jseFunctions.withdrawalNotificationEmail(dataObject.user1,dataObject.withdrawalAmount,dataObject.withdrawalAddress,ethTxHash);
 							} else {
 								callback('{"fail":1,"notification":"Withdraw Failed during eth sending"}');
-								console.log('ETH sendFunds Failed '+dataObject.withdrawalAddress+'/'+dataObject.value+'JSE');
+								console.log('ETH sendFunds Failed '+dataObject.withdrawalAddress+'/'+dataObject.withdrawalAmount+'JSE');
 							}
 						});
 					}
@@ -152,7 +152,7 @@ const jseCommands = {
 					if (txToday === null) {
 						txCompleted = 0;
 					} else {
-						txCompleted = txToday.total;
+						txCompleted = txToday;
 					}
 					const txLeft = JSE.jseFunctions.round(txLimit - txCompleted);
 
@@ -240,7 +240,7 @@ const jseCommands = {
 				if (txToday === null) {
 					txCompleted = 0;
 				} else {
-					txCompleted = txToday.total;
+					txCompleted = txToday;
 				}
 				const txLeft = JSE.jseFunctions.round(txLimit - txCompleted);
 
@@ -298,23 +298,26 @@ const jseCommands = {
 				return false;
 			}
 			const value = JSE.jseFunctions.round(parseFloat(dataObject.value)); // can't clean string because it's not a string
-			const totalCost = JSE.jseFunctions.round(value + JSE.jseSettings.ethFee);
-
-			const txLimit = goodCredentials.txLimit || JSE.jseSettings.txLimit;
+			const withdrawalAmount = JSE.jseFunctions.round(dataObject.withdrawalAmount);
+			const ethFee = JSE.jseFunctions.round(dataObject.ethFee);
+			const txLimit = goodCredentials.txLimit || JSE.jseSettings.txLimit || 1000;
 			JSE.jseDataIO.getVariable('txToday/'+goodCredentials.uid, function(txToday) {
 				let txCompleted;
 				if (txToday === null) {
 					txCompleted = 0;
 				} else {
-					txCompleted = txToday.total;
+					txCompleted = txToday;
 				}
 				const txLeft = JSE.jseFunctions.round(txLimit - txCompleted);
-
 				if (value !== dataObject.value) {
-					callback5('{"fail":1,"notification":"Withdraw Failed: Security check on value/amount failed"}');
-				} else if (goodCredentials.balance < totalCost) {
+					callback5('{"fail":1,"notification":"Withdraw Failed: Security check on value failed"}');
+				} else if (withdrawalAmount !== dataObject.withdrawalAmount) {
+					callback5('{"fail":1,"notification":"Withdraw Failed: Security check on withdrawalAmount failed"}');
+				} else if (withdrawalAmount + ethFee !== value) {
+					callback5('{"fail":1,"notification":"Withdraw Failed: withdrawalAmount + ethFee does not equal value"}');
+				} else if (goodCredentials.balance < value) {
 					callback5('{"fail":1,"notification":"Withdraw Failed: Insufficient Funds"}');
-				} else if (txLeft < totalCost) {
+				} else if (txLeft < value) {
 					callback5('{"fail":1,"notification":"Withdraw Failed: Value greater than remaining transaction limit, '+txLeft+' JSE"}');
 				} else if (goodCredentials.locked && goodCredentials.uid !== 0) {
 					callback5('{"fail":1,"notification":"Withdraw Failed: Account locked pending recent transaction, please try again in 20 seconds"}');
@@ -330,8 +333,8 @@ const jseCommands = {
 					callback5('{"fail":1,"notification":"Withdraw Failed: Data object user1pk does not match public key"}');
 				} else {
 					JSE.jseDataIO.pushBlockData(dataObject,function(blockData) {
-						JSE.jseDataIO.minusBalance(goodCredentials.uid,totalCost);
-						JSE.jseDataIO.plusX('txToday/'+goodCredentials.uid,totalCost);
+						JSE.jseDataIO.minusBalance(goodCredentials.uid,value);
+						JSE.jseDataIO.plusX('txToday/'+goodCredentials.uid,value);
 						const dataObject2 = JSON.parse(JSON.stringify(dataObject)); // clone don't reference
 						dataObject2.user1email = goodCredentials.email;
 						JSE.jseDataIO.pushVariable('history/'+goodCredentials.uid,dataObject2,function(pushRef) {});
@@ -425,41 +428,6 @@ const jseCommands = {
 			callback4('{"fail":1,"notification":"Import Failed: User public key credentials could not be matched"}');
 		});
 	},
-
-	/**
-	 * @method <h2>deposit</h2>
-	 * @description Deposit JSE ERC20 tokens into the platform
-	 * @param {object} tx eth transaction from modules/ethintegration.js checkJSE()
-	 * @param {function} callback6 user id of client importing tokens
-	 * @param {function} callback4 returns the JSON result to the calling function
-	 */
-	deposit(tx, callback6) {
-		JSE.jseDataIO.getUserByUID(tx.uid,function(quickLookup) {
-			JSE.jseDataIO.checkUserByPublicKey(quickLookup.publicKey,function(goodCredentials) {
-				JSE.jseDataIO.setVariable('locked/'+goodCredentials.uid,true);
-				JSE.lockedUIDs.push(goodCredentials.uid);
-				const newData = {};
-				newData.command = 'deposit';
-				newData.user1 = goodCredentials.uid;
-				newData.publicKey = goodCredentials.publicKey;
-				newData.txHash = tx.hash;
-				newData.txTo = tx.to;
-				newData.txFrom = tx.from;
-				newData.value = tx.value;
-				newData.ts = new Date().getTime();
-				JSE.jseDataIO.pushBlockData(newData,function(blockData) {
-					JSE.jseDataIO.addBalance(goodCredentials.uid,newData.value);
-					JSE.jseDataIO.pushVariable('history/'+goodCredentials.uid,blockData,function(pushRef) {});
-					callback6('{"success":1,"value":"' + newData.value + '","notification":"Deposit Successful"}');
-				});
-			},  function(failObject) {
-				callback6('{"fail":1,"notification":"Deposit Failed: Check User failed"}');
-			});
-		}, function() {
-			callback6('{"fail":1,"notification":"Deposit Failed: User public key credentials could not be matched"}');
-		});
-	},
-
 
 };
 

@@ -5,9 +5,9 @@ global.JSE = JSE;
 JSE.testServer = 'https://load.jsecoin.com';
 JSE.dbServer = 'http://35.188.209.171';
 */
-JSE.testServer = 'http://localhost:81';
-JSE.dataStore1 = 'http://localhost:82';
-JSE.blockStore1 = 'http://localhost:83';
+JSE.testServer = 'http://localhost:81'; // node jsenode.js -t local -s localhost -p 81 -n jimv18 -d http://localhost:82 -e http://localhost:83 -m 0
+JSE.dataStore1 = 'http://localhost:82'; // node datastore.js -p 82 -t local
+JSE.blockStore1 = 'http://localhost:83'; // node datastore.js -p 83 -t local
 
 console.log('Starting Test For: '+JSE.testServer);
 

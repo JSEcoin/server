@@ -648,8 +648,10 @@ function txApprove(uid,pushRef,approvalType) {
 					dataToSign.publicKey = goodCredentials.publicKey;
 					dataToSign.command = 'withdraw';
 					dataToSign.withdrawalAddress = txObject.withdrawalAddress;
-					dataToSign.value = txObject.value;
-					dataToSign.fee = JSE.jseSettings.ethFee;
+					dataToSign.withdrawalAmount = txObject.withdrawalAmount;
+					dataToSign.ethFee = txObject.ethFee || JSE.jseSettings.ethFee || 118;
+					dataToSign.value = JSE.jseFunctions.round(dataToSign.withdrawalAmount + dataToSign.ethFee);
+
 					dataToSign.user1 = goodCredentials.uid;
 					dataToSign.ts = processedTimestamp;
 					const dataString = JSON.stringify(dataToSign);
@@ -674,5 +676,5 @@ function txApprove(uid,pushRef,approvalType) {
 }
 
 module.exports = {
- shuffle, randString, round, cleanString, limitString, sha256, buf2hex, hex2buf, createKeyPair, signData, verifyData, signHash, verifyHash, sendWelcomeEmail, sendOnboardingEmail, sendStandardEmail, exportNotificationEmail, withdrawalNotificationEmail, transferNotificationEmails, referral, genSafeUser, sendSMS, realityCheck, txApprove,
+ shuffle, randString, round, cleanString, limitString, sha256, buf2hex, hex2buf, createKeyPair, signData, verifyData, signHash, verifyHash, sendWelcomeEmail, sendOnboardingEmail, sendStandardEmail, exportNotificationEmail, withdrawalNotificationEmail, depositNotificationEmail, transferNotificationEmails, referral, genSafeUser, sendSMS, realityCheck, txApprove,
 };

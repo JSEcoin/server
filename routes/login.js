@@ -40,8 +40,10 @@ function sendUserData(credentials,newSessionVar,recordLogin,req,res) {
 			userObject.jseUnique = jseUnique;
 		}
 		res.send(JSON.stringify(userObject)); // sends back full user object
-		JSE.jseDataIO.setVariable('account/'+credentials.uid+'/lastLogin',recordLogin);
-		JSE.jseDataIO.pushVariable('logins/'+credentials.uid, recordLogin);
+		if (recordLogin) { // only on initial login
+			JSE.jseDataIO.setVariable('account/'+credentials.uid+'/lastLogin',recordLogin);
+			JSE.jseDataIO.pushVariable('logins/'+credentials.uid, recordLogin);
+		}
 	});
 }
 

@@ -26,8 +26,6 @@ const jseTokenContractAddress = '0x311884c83e242192a56c3e5e4801edd3ff5b0d6c';
 const jseTokenABI = [{"constant":true,"inputs":[],"name":"mintingFinished","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"operatorAddress","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_adminAddress","type":"address"}],"name":"setAdminAddress","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_operatorAddress","type":"address"}],"name":"setOperatorAddress","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"initialSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_amount","type":"uint256"}],"name":"mint","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_value","type":"uint256"}],"name":"burn","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_subtractedValue","type":"uint256"}],"name":"decreaseApproval","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"finishMinting","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"finalized","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_addedValue","type":"uint256"}],"name":"increaseApproval","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"adminAddress","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[],"name":"Finalized","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_newAddress","type":"address"}],"name":"AdminAddressChanged","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_newAddress","type":"address"}],"name":"OperatorAddressChanged","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"amount","type":"uint256"}],"name":"Mint","type":"event"},{"anonymous":false,"inputs":[],"name":"MintFinished","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"previousOwner","type":"address"},{"indexed":true,"name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"burner","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Burn","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"},{"indexed":true,"name":"data","type":"bytes"}],"name":"Transfer","type":"event"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"},{"name":"_data","type":"bytes"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"tokenAddress","type":"address"},{"name":"tokens","type":"uint256"}],"name":"transferAnyERC20Token","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[],"name":"finalize","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"}]; // eslint-disable-line
 const token = new web3.eth.Contract(jseTokenABI, jseTokenContractAddress);
 
-const jseCommands = require("./commands.js");
-
 const jseEthIntegration = {
 
   /**
@@ -43,11 +41,11 @@ const jseEthIntegration = {
   /**
    * @method <h2>addToQueryPool</h2>
    * @description add Eth address to query pool for deposited transactions
-   * @param {string} ethAddress the users ethereum deposit address for JSE ERC20 tokens
    * @param {number} uid user id
+   * @param {string} ethAddress the users ethereum deposit address for JSE ERC20 tokens
    * @returns false
    */
-  addToQueryPool(ethAddress,uid) {
+  addToQueryPool(uid,ethAddress) {
     const queryObj = {};
     queryObj.type = 'deposit';
     queryObj.ts = new Date().getTime();
@@ -66,6 +64,7 @@ const jseEthIntegration = {
     const fromBlockDone = await jseEthIntegration.updateFromBlock();
     JSE.jseDataIO.getVariable('queryPool/',function(queryPool) {
       let queryCount = 0;
+      if (queryPool === null || typeof queryPool === 'undefined') return false;
       Object.keys(queryPool).forEach(function(i) {
         const query = queryPool[i];
         if (query.type === 'deposit') {
@@ -125,7 +124,7 @@ const jseEthIntegration = {
       JSE.jseDataIO.getVariable('ethProcessed/'+tx.hash,function(ethTx) {
         if (ethTx === null && ethAddress === tx.to) { // check transaction hasn't already been processed
           JSE.jseDataIO.setVariable('ethProcessed/'+tx.hash,tx);
-          jseCommands.deposit(tx,function(jsonResponse) {
+          jseEthIntegration.deposit(tx,function(jsonResponse) {
             if (jsonResponse.indexOf('success') > -1) {
               console.log('Deposit: '+tx.uid+' - '+tx.value+'JSE');
               JSE.jseFunctions.depositNotificationEmail(tx.uid,tx.value,tx.hash);
@@ -139,6 +138,40 @@ const jseEthIntegration = {
       });
     }
   },
+
+	/**
+	 * @method <h2>deposit</h2>
+	 * @description Deposit JSE ERC20 tokens into the platform
+	 * @param {object} tx eth transaction from modules/ethintegration.js checkJSE()
+	 * @param {function} callback6 user id of client importing tokens
+	 * @param {function} callback4 returns the JSON result to the calling function
+	 */
+	deposit(tx, callback6) {
+		JSE.jseDataIO.getUserByUID(tx.uid,function(quickLookup) {
+			JSE.jseDataIO.checkUserByPublicKey(quickLookup.publicKey,function(goodCredentials) {
+				JSE.jseDataIO.setVariable('locked/'+goodCredentials.uid,true);
+				JSE.lockedUIDs.push(goodCredentials.uid);
+				const newData = {};
+				newData.command = 'deposit';
+				newData.user1 = goodCredentials.uid;
+				newData.publicKey = goodCredentials.publicKey;
+				newData.txHash = tx.hash;
+				newData.txTo = tx.to;
+				newData.txFrom = tx.from;
+				newData.value = tx.value;
+				newData.ts = new Date().getTime();
+				JSE.jseDataIO.pushBlockData(newData,function(blockData) {
+					JSE.jseDataIO.addBalance(goodCredentials.uid,newData.value);
+					JSE.jseDataIO.pushVariable('history/'+goodCredentials.uid,blockData,function(pushRef) {});
+					callback6('{"success":1,"value":"' + newData.value + '","notification":"Deposit Successful"}');
+				});
+			},  function(failObject) {
+				callback6('{"fail":1,"notification":"Deposit Failed: Check User failed"}');
+			});
+		}, function() {
+			callback6('{"fail":1,"notification":"Deposit Failed: User public key credentials could not be matched"}');
+		});
+	},
 
   /**
    * @method <h2>sendJSE</h2>
@@ -163,7 +196,6 @@ const jseEthIntegration = {
     };
     ownerWallet.signTransaction(rawTransaction, function(error,signed) {
       if (error) console.log('ethintegration.js error 161 signTransaction: '+error);
-
       // Check it's a valid signature
       const recoveryAddress = web3.eth.accounts.recoverTransaction(signed.rawTransaction);
       const serializedTxHex = signed.rawTransaction;

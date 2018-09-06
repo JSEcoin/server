@@ -61,6 +61,7 @@ if (fs.existsSync(commandLine.credentials)) {
 JSE.jseFunctions = require('./modules/functions.js'); // round robin bug means has to be JSE
 const jseBlockChain = require('./modules/blockchain.js');
 const jseSchedule = require('./modules/schedule.js');
+const jseEthIntegration = require('./modules/ethintegration.js');
 JSE.jseDataIO = require('./modules/dataio.js'); // can't call initialiseApp twice from modules
 
 setInterval(function() {
@@ -79,8 +80,9 @@ setTimeout(function() {
 }, 10000); // give time for firebase to return initial queries
 
 setInterval(function() {
+	jseEthIntegration.checkQueryPoolDeposits();
 	JSE.jseDataIO.updatePublicStats();
-}, 600000); // every 10 mins
+}, 60000); // every 10 mins
 
 setInterval(function() {
 	jseBlockChain.verifyLedger();

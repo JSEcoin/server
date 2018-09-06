@@ -560,7 +560,9 @@ router.post('/txpendingupdate/:adminpass', function(req, res) {
 	} else if (updateType === 'declined') {
 		JSE.jseDataIO.setVariable('txPending/'+uid+'/'+pushRef+'/adminApproved',false);
 		JSE.jseDataIO.setVariable('txPending/'+uid+'/'+pushRef+'/adminDeclined',true);
+		JSE.jseDataIO.setVariable('txPending/'+uid+'/'+pushRef+'/complete',true);
 	}
+	res.send('{"success":1}');
 	return false;
 });
 

@@ -202,6 +202,10 @@ const jseBlockChain = {
 							badUser = blockObj.input[tid].user2;
 							JSE.jseDataIO.minusBalance(blockObj.input[tid].user2,blockObj.input[tid].value);
 						}
+						if (command === 'deposit') {
+							badUser = blockObj.input[tid].user2;
+							JSE.jseDataIO.minusBalance(blockObj.input[tid].user2,blockObj.input[tid].value);
+						}
 						JSE.jseFunctions.sendStandardEmail('james@jsecoin.com','JSEcoin URGENT ERROR','Double spend check failed on block ID. '+bid+' command: '+command+', badUser: '+badUser+', value: '+blockObj.input[tid].value);
 						blockObj.input[tid] = {}; // delete variable
 					}
@@ -399,7 +403,7 @@ const jseBlockChain = {
 								vLedger[user1] = JSE.jseFunctions.round(vLedger[user1] - tValue);
 							}
 							if (vCommand === 'mining') {
-								vLedger[user1] = JSE.jseFunctions.round(vLedger[user1] - tValue);
+								//vLedger[user1] = JSE.jseFunctions.round(vLedger[user1] - tValue); // removed due to pending system
 							}
 							if (vCommand === 'export') {
 								vLedger[user1] = JSE.jseFunctions.round(vLedger[user1] + tValue);
