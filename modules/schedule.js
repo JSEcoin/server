@@ -385,7 +385,7 @@ function processRewards(howManyDaysBack=7) {
 					newReferralData.value = jseReferralReward;
 					JSE.jseDataIO.pushBlockData(newReferralData,function(blockData) {});
 				}
-				JSE.setVariable('rewards/'+uid+'/'+lastWeekYYMMDD+'/d',true); // d = done
+				JSE.jseDataIO.setVariable('rewards/'+uid+'/'+lastWeekYYMMDD+'/d',true); // d = done
 			}
 			/*
 			if (rewards[uid][lastMonthYYMMDD]) {
