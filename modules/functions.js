@@ -663,6 +663,7 @@ function txApprove(uid,pushRef,approvalType) {
 									JSE.jseDataIO.setVariable('txPending/'+uid+'/'+pushRef+'/complete', processedTimestamp);
 								} else {
 									console.log('Withdrawal Failed1 '+goodCredentials.uid+'/'+txObject.value+'JSE/'+txObject.withdrawalAddress);
+									console.log(jsonResult);
 								}
 							});
 						} else {

@@ -663,9 +663,12 @@ router.post('/updatetxlimit/*', function (req, res) {
 		JSE.jseDataIO.getVariable('ledger/'+goodCredentials.uid,function(balance) {
 			if (newTxLimit > balance) {
 				res.status(400).send('{"fail":1,"notification":"Can not set a transaction limit greater than your current account balance"}');
-			} else if (newTxLimit <= 10000) {
+				return false;
+			}
+			if (newTxLimit <= 10000) {
 				JSE.jseDataIO.setVariable('credentials/'+goodCredentials.uid+'/txLimit',newTxLimit);
 				res.send('{"success":1,"notification":"Transaction Limit Updated"}');
+				return false;
 			}
 			const dataObject = {};
 			dataObject.uid = goodCredentials.uid;
@@ -690,11 +693,39 @@ router.post('/updatetxlimit/*', function (req, res) {
 																If you did not make this transaction please contact admin@jsecoin.com and change your account password ASAP.<br>`;
 				JSE.jseFunctions.sendStandardEmail(goodCredentials.email,'Please confirm new JSE transaction limit',withdrawalHTML);
 				res.send('{"success":1,"notification":"Transaction limit will update after email confirmation","emailRequired":true}');
+				return false;
 			});
+			return false;
 		});
-	 	return false;
+		return false;
 	}, function() {
 		res.status(401).send('{"fail":1,"notification":"Error index.js 652. Session key not recognized"}');
+	});
+	return false;
+});
+
+/**
+ * @name /txtoday/*
+ * @description Get a users txToday figure for transaction limit calculations, this shows how much he has used.
+ * @memberof module:jseRouter
+ */
+router.post('/txtoday/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 708. No Session Variable"}'); return false; }
+	const session = req.body.session;
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials !== null) {
+			JSE.jseDataIO.getVariable('txToday/'+goodCredentials.uid, function(txToday) {
+				const returnObject = {};
+				returnObject.success = 1;
+				returnObject.txToday = txToday || 0;
+				res.send(JSON.stringify(returnObject));
+			});
+	 	} else {
+	 		res.status(401).send('{"fail":1,"notification":"Error index.js 716. Session Variable not recognized"}');
+	 	}
+	 	return false;
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error index.js 720. Session Variable not recognized"}');
 	});
 	return false;
 });

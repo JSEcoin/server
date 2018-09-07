@@ -28,7 +28,7 @@ function runAtMidnight() {
 	const msToMidnight = night.getTime() - now.getTime();
 	console.log('runAtMidnight set for '+(Math.floor(msToMidnight /60000))+' mins');
 	setTimeout(function() {
-			processRewards(7); // Move daily rewards across
+			processRewards(1); // Move daily rewards across
 			// Push JSE.publicStats to dailyJSE.PublicStats
 			JSE.publicStats.ts = new Date().getTime();
 			JSE.jseDataIO.updatePublicStats();
@@ -92,7 +92,7 @@ function runAt5pm() {
 JSE.emailsToSend = [];
 function startAutoresponder() {
 	JSE.jseDataIO.getVariable('nextUserID',function(endID) {
-		const startID = endID - 40000; // only send to last 40k users, may need to increase
+		const startID = endID - 30000; // only send to last 40k users, may need to increase
 		JSE.jseDataIO.getAdminAccounts(startID,endID,function(users){
 			const nowTS =new Date().getTime();
 			let maxCount = 0;
@@ -105,9 +105,9 @@ function startAutoresponder() {
 					aff = parseFloat(aff);
 					if (users[i].source !== 'referral' || (!users[aff] || !users[aff].suspended)) {
 						if (users[i].lastEmail) {
-							const lastEmailRef = users[i].lastEmail.split(',')[0]; // timestamp,ref
-							const lastEmailTS = users[i].lastEmail.split(',')[1];
-							const nextEmailTS = (new Date(Number(lastEmailTS)).getTime()) + (86400000 * lastEmailRef * 1.5); // i.e. email 4 will be sent 6 days after email 3, remove end figure to speed up
+							const lastEmailTS = users[i].lastEmail.split(',')[0]; // timestamp,ref
+							const lastEmailRef = users[i].lastEmail.split(',')[1];
+							const nextEmailTS = (new Date(Number(lastEmailTS)).getTime()) + (86400000 * lastEmailRef * 2); // i.e. email 4 will be sent 6 days after email 3, remove end figure to speed up
 							if (nextEmailTS < nowTS) {
 								maxCount += 1;
 								JSE.emailsToSend.push({ user: users[i], emailRef: lastEmailRef + 1 });

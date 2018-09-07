@@ -755,7 +755,7 @@ const jseDB = {
 			account.apiLevel = credentials.apiLevel;
 			account.privateKey = credentials.privateKey;
 			account.twoFactorAuth = credentials.twoFactorAuth;
-			account.txLimit = credentials.txLimit || JSE.jseSettings.txLimit;
+			account.txLimit = credentials.txLimit || JSE.jseSettings.txLimit || 1000;
 			if (!credentials.pin) {
 				account.requirePin = true;
 			}
@@ -895,8 +895,9 @@ const jseDB = {
 						userObj.balance = JSE.jseFunctions.round(balance);
 						JSE.jseDataIO.getVariable('locked/'+userObj.uid,function(locked) {
 							if (locked == null) { userObj.locked = false; } else { userObj.locked = true; }
-							JSE.jseDataIO.getVariable('credentials/'+userObj.uid+'/suspended',function(suspended) {
-								if (suspended == null || suspended === 0) { userObj.suspended = false; } else { userObj.suspended = true; }
+							JSE.jseDataIO.getVariable('credentials/'+userObj.uid,function(credentials) {
+								if (credentials.suspended == null || credentials.suspended === 0) { userObj.suspended = false; } else { userObj.suspended = true; }
+								userObj.txLimit = credentials.txLimit;
 								callback(userObj);
 							});
 						});

@@ -65,14 +65,19 @@ const jseEthIntegration = {
     JSE.jseDataIO.getVariable('queryPool/',function(queryPool) {
       let queryCount = 0;
       if (queryPool === null || typeof queryPool === 'undefined') return false;
-      Object.keys(queryPool).forEach(function(i) {
-        const query = queryPool[i];
+      const now = new Date().getTime();
+      Object.keys(queryPool).forEach(function(uidRef) {
+        const query = queryPool[uidRef];
         if (query.type === 'deposit') {
           queryCount += 1;
           jseEthIntegration.checkJSE(query.ethAddress,query.uid);
         }
+        if (query.ts < now - 3600000) {
+          JSE.jseDataIO.hardDeleteVariable('queryPool/'+uidRef);
+        }
       });
       if (JSE.jseTestNet) console.log('queryPool: '+queryCount);
+      return false;
     });
     return false;
   },

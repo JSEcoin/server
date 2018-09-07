@@ -309,6 +309,7 @@ const jseCommands = {
 					txCompleted = txToday;
 				}
 				const txLeft = JSE.jseFunctions.round(txLimit - txCompleted);
+				console.log(txLeft+'/'+value+'/'+txLimit+'/'+txCompleted);
 				if (value !== dataObject.value) {
 					callback5('{"fail":1,"notification":"Withdraw Failed: Security check on value failed"}');
 				} else if (withdrawalAmount !== dataObject.withdrawalAmount) {
