@@ -3,6 +3,7 @@ const JSE = global.JSE;
 const assert = require('assert');
 
 JSE.jseFunctions = require('./../modules/functions.js');
+const jseEthIntegration = require("./../modules/ethintegration.js");
 
 describe('jseFunctions Unit Test', function() {
 	it('jseFunctions.shuffle', function() {
@@ -95,5 +96,18 @@ describe('jseFunctions Unit Test', function() {
 		assert(typeof safeUser.confirmCode === 'undefined');
 		assert(typeof safeUser.authKey === 'undefined');
 		assert(typeof safeUser.niceVariable === 'string');
+	});
+
+	it('jseFunctions.realityCheck', function(done) {
+		JSE.jseFunctions.realityCheck('83.193.2.1', function(result) {
+			assert(result === true);
+			done();
+		});
+	});
+
+	it('jseEthIntegration.newKeyPair', function() {
+		const keyPair = jseEthIntegration.newKeyPair();
+		assert(keyPair.address.substring(0,2) === '0x');
+		assert(keyPair.privateKey.length === 66);
 	});
 });

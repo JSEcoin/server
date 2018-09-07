@@ -570,6 +570,11 @@ function sendSMS(toPhoneNo,txtMsg) {
  */
 function realityCheck(rawIP,callback) {
 	const ip = cleanString(rawIP);
+	if (!JSE.vpnData) {
+		console.log('VPN Data Missing');
+		callback(true);
+		return false;
+	}
   if (ip in JSE.vpnData) {
     if (JSE.jseTestNet) console.log('Result found in JSE.vpnData: '+JSE.vpnData[ip]);
     callback(JSE.vpnData[ip]);
@@ -613,7 +618,8 @@ function realityCheck(rawIP,callback) {
 				callback(false); // badIP found in ipCheck  :(
 			}
 		});
-  }
+	}
+	return false;
 }
 
 /**

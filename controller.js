@@ -3,7 +3,7 @@
  * @name JSE Controller (controller.js)
  * @example forever start -c "node --max-old-space-size=3000" controller.js &
  * @example "node controller.js -t local -d http://localhost:82 -e http://localhost:83
- * @version 1.8.0
+ * @version 1.8.1
  * @description The controller carries out maintenance tasks for the JSE platform and blockchain.
  */
 
