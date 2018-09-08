@@ -28,7 +28,7 @@ function runAtMidnight() {
 	const msToMidnight = night.getTime() - now.getTime();
 	console.log('runAtMidnight set for '+(Math.floor(msToMidnight /60000))+' mins');
 	setTimeout(function() {
-			processRewards(1); // Move daily rewards across
+			processRewards(7); // Move daily rewards across
 			// Push JSE.publicStats to dailyJSE.PublicStats
 			JSE.publicStats.ts = new Date().getTime();
 			JSE.jseDataIO.updatePublicStats();
