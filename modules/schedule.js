@@ -132,8 +132,9 @@ function startAutoresponder() {
 function loopThroughEmails() {
 	if (JSE.emailsToSend.length > 0) {
 		const nextEmailData = JSE.emailsToSend.pop();
-		JSE.jseFunctions.sendOnboardingEmail(nextEmailData.user,nextEmailData.emailRef);
-		setTimeout(function() { loopThroughEmails(); },500);
+		JSE.jseFunctions.sendOnboardingEmail(nextEmailData.user,nextEmailData.emailRef, function() {
+			setTimeout(function() { loopThroughEmails(); },500);
+		});
 	} else {
 		console.log('Finished sending autoresponder emails');
 	}

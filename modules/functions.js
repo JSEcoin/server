@@ -276,8 +276,9 @@ function sendWelcomeEmail(newUser) {
  * @description Send a autoresponder email with optional PDF using sendgrid API
  * @param {string} user user object from account/123
  * @param {string} emailRef autoresponder reference to send from emails.js
+ * @param {string} callback callback used to loop through emails from modules/schedule.js
  */
-function sendOnboardingEmail(user,emailRef) {
+function sendOnboardingEmail(user,emailRef,callback) {
 	if (jseEmails.onboarding[emailRef]) { // Check we haven't sent them all already.
 		const fromEmail = new helper.Email('noreply@jsecoin.com');
 		if (jseEmails.suppression.indexOf(user.email) > -1) return;
@@ -304,6 +305,7 @@ function sendOnboardingEmail(user,emailRef) {
 		const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
 		sg.API(requestSG, function (error, response) {
 			if (error) { console.log('Sendgrid Error response received, sendOnboardingEmail emailRef '+emailRef); }
+			callback();
 		});
 		const nowTS =new Date().getTime();
 		JSE.jseDataIO.setVariable('account/'+user.uid+'/lastEmail', nowTS+','+emailRef);
