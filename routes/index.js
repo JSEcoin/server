@@ -489,6 +489,29 @@ router.post('/pubstats/*', function (req, res) {
 });
 
 /**
+ * @name /referrals/*
+ * @description Get Referrals
+ * @memberof module:jseRouter
+ */
+router.post('/referrals/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 696. No Session Variable"}'); return false; }
+	const session = req.body.session;
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials !== null) {
+			JSE.jseDataIO.getVariable('referrals/'+goodCredentials.uid, function(referrals) {
+		 		res.send(JSON.stringify(referrals)); // null is checked for clientside
+			});
+	 	} else {
+	 		res.status(401).send('{"fail":1,"notification":"Error index.js 139. Session Variable not recognized"}');
+	 	}
+	 	return false;
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error index.js 142. Session Variable not recognized"}');
+	});
+	return false;
+});
+
+/**
  * @name /logout/*
  * @description Log out of the platform or app by overwriting the session key
  * @memberof module:jseRouter
