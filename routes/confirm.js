@@ -4,6 +4,36 @@ const express = require('express');
 const router = express.Router();
 
 /**
+ * @name /confirm/tx/*
+ * @description Confirm the transaction via email
+ * @example https://server.jsecoin.com/confirm/tx/:uid/:pushref/:confirmKey
+ * @memberof module:jseRouter
+ */
+router.get('/tx/:uid/:pushref/:confirmkey', function(req, res) {
+	let returnMsg = "Thank you for confirming the transaction";
+	const cleanUID = parseFloat(req.params.uid);
+	const pushRef = JSE.jseFunctions.cleanString(req.params.pushref);
+	const confirmKey = JSE.jseFunctions.cleanString(req.params.confirmkey);
+	JSE.jseDataIO.getVariable('txPending/'+cleanUID+'/'+pushRef,function(txObject) {
+		if (txObject === null) {
+			returnMsg = 'Transaction confirmation reference not recognised Error: confirm.js 19';
+		} else if (txObject.complete || txObject.emailApproved === true) {
+			returnMsg = 'Transaction has already been confirmed';
+		} else if (txObject.confirmKey === confirmKey) {
+			JSE.jseFunctions.txApprove(cleanUID,pushRef,'email');
+			if (txObject.requireAdmin === true && txObject.adminApproved === false) {
+				returnMsg = 'Thank you for confirming the transaction. Manual checks are required which can take up to 24 hours';
+			} else {
+				returnMsg = 'Thank you for confirming the transaction.';
+			}
+		} else {
+			returnMsg = 'Something went wrong with the transaction confirmation, please contact admin@jsecoin.com - Error: confirm.js 28';
+		}
+		res.send('<html><script>alert("'+returnMsg+'"); window.location = "https://platform.jsecoin.com/";</script></html>');
+	});
+});
+
+/**
  * @name /confirm/*
  * @description Confirm the account via double opt-in link sent in welcome email
  * @example https://server.jsecoin.com/confirm/:uid/:confirmcode
@@ -32,14 +62,14 @@ router.get('/:uid/:confirmcode', function(req, res) {
 						if (referralPayout > 0) {
 						//if (account.geo === 'US' || account.geo === 'CA' || account.geo === 'GB' || account.geo === 'IE' || account.geo === 'AU' || account.geo === 'NZ' || account.geo === 'ZA' || account.geo === 'DE' || account.geo === 'FR' || account.geo === 'CH' || account.geo === 'SE' || account.geo === 'NO' || account.geo === 'FI' || account.geo === 'BE' || account.geo === 'NL' || account.geo === 'LU' || account.geo === 'DK' || account.geo === 'AT') {
 							if (account.duplicate === null || typeof account.duplicate === 'undefined') {
-								JSE.jseFunctions.referral(account.campaign,account.content,referralPayout);
+								JSE.jseFunctions.referral(account.campaign,account.content,referralPayout,account.geo,'Confirmed');
 							} else {
-								console.log('Declined Referral Duplicate Account: '+account.confirmed);
-								JSE.jseFunctions.referral(account.campaign,'Declined Duplicate Account Details',0.01); // Anything with Declined in will get value set to 0.01
+								console.log('Declined Referral Dupe: '+account.campaign);
+								JSE.jseFunctions.referral(account.campaign,account.content,0,account.geo,'Declined Duplicate Account'); // Anything with Declined in will get value set to 0
 							}
 						} else {
-							JSE.jseFunctions.referral(account.campaign,'Declined Region '+account.geo,1); // declined regions go through at 1 JSE
-							console.log('Declined Referral GEO: '+account.geo);
+							JSE.jseFunctions.referral(account.campaign,account.content,1,account.geo,'Declined Region'); // declined regions go through at 1 JSE
+							console.log('Declined Referral GEO: '+account.campaign+'/'+account.geo);
 						}
 					} else {
 						console.log('Declined Referral '+account.source+'/'+account.campaign+'/'+account.confirmed+'/'+account.uniqueConfirmationCode+'/'+checkConfirmationCode);

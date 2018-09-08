@@ -18,11 +18,13 @@
  * <li>sendWelcomeEmail</li>
  * <li>sendStandardEmail</li>
  * <li>exportNotificationEmail</li>
+ * <li>withdrawalNotificationEmail</li>
  * <li>transferNotificationEmails</li>
  * <li>referral</li>
  * <li>genSafeUser</li>
  * <li>sendSMS</li>
  * <li>realityCheck</li>
+ * <li>txApprove</li>
  * </ul>
 */
 const JSE = global.JSE;
@@ -33,8 +35,10 @@ const sr = require('secure-random');
 const helper = require('sendgrid').mail;
 const sg = require('sendgrid')(JSE.credentials.sendgridAPIKey);
 const jseAPI = require("./apifunctions.js");
+const jseEthIntegration = require("./ethintegration.js");
 const jseEmails = require("./emails.js");
 const twilio = require('twilio')('ACc50f44970e985329a823ae84606b9cf5', JSE.credentials.twilioAuthToken);
+const jseCommands = require("./commands.js");
 
 /**
  * @method <h2>shuffle</h2>
@@ -272,8 +276,9 @@ function sendWelcomeEmail(newUser) {
  * @description Send a autoresponder email with optional PDF using sendgrid API
  * @param {string} user user object from account/123
  * @param {string} emailRef autoresponder reference to send from emails.js
+ * @param {string} callback callback used to loop through emails from modules/schedule.js
  */
-function sendOnboardingEmail(user,emailRef) {
+function sendOnboardingEmail(user,emailRef,callback) {
 	if (jseEmails.onboarding[emailRef]) { // Check we haven't sent them all already.
 		const fromEmail = new helper.Email('noreply@jsecoin.com');
 		if (jseEmails.suppression.indexOf(user.email) > -1) return;
@@ -300,6 +305,7 @@ function sendOnboardingEmail(user,emailRef) {
 		const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
 		sg.API(requestSG, function (error, response) {
 			if (error) { console.log('Sendgrid Error response received, sendOnboardingEmail emailRef '+emailRef); }
+			callback();
 		});
 		const nowTS =new Date().getTime();
 		JSE.jseDataIO.setVariable('account/'+user.uid+'/lastEmail', nowTS+','+emailRef);
@@ -342,6 +348,63 @@ function exportNotificationEmail(fromUID,transactionValue) {
 				const fromEmail = new helper.Email('admin@jsecoin.com');
 				const subject = 'JSEcoin Export Confirmation';
 				const htmlContent = 'This is to confirm a coincode has been exported from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Thank you for using JSEcoin. If you did not make this transaction please contact us by replying to this email as soon as possible.';
+				const emailHTML = jseEmails.template.split('$heading').join(subject).split('$content').join(htmlContent);
+				const content = new helper.Content('text/html', emailHTML);
+				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
+				mail.categories = ["nodeserver","exportnotification"];
+				const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
+				sg.API(requestSG, function (error, response) {
+					if (error) { console.log('Sendgrid Error response received, export notification email '+emailAddress); }
+				});
+			}
+		});
+	});
+}
+
+/**
+ * @method <h2>withdrawalNotificationEmail</h2>
+ * @description Send a notification when a user withdraws tokens
+ * @param {number} fromUID User ID to send email to
+ * @param {number} transactionValue Value of the transaction
+ */
+function withdrawalNotificationEmail(fromUID,transactionValue,withdrawalAddress,txHash) {
+	JSE.jseDataIO.getEmail(fromUID,function(emailAddress) {
+		JSE.jseDataIO.getVariable('account/'+fromUID+'/noEmailTransaction', function(noEmailTransaction) {
+			if (noEmailTransaction === null && fromUID > 0) {
+				if (jseEmails.suppression.indexOf(emailAddress) > -1) return;
+				const toEmail = new helper.Email(emailAddress);
+				const fromEmail = new helper.Email('admin@jsecoin.com');
+				const subject = 'JSEcoin Withdrawal Confirmation';
+				const htmlContent = 'This is to confirm JSE tokens have been withdrawn from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Withdrawn to address: '+withdrawalAddress+'<br><br>Transaction Details: <a href="https://etherscan.io/tx/'+txHash+'">'+txHash+'</a><br><br>If you did not make this transaction please contact us by replying to this email as soon as possible.<br><br>Thank you for using JSEcoin.';
+				const emailHTML = jseEmails.template.split('$heading').join(subject).split('$content').join(htmlContent);
+				const content = new helper.Content('text/html', emailHTML);
+				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
+				mail.categories = ["nodeserver","exportnotification"];
+				const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
+				sg.API(requestSG, function (error, response) {
+					if (error) { console.log('Sendgrid Error response received, export notification email '+emailAddress); }
+				});
+			}
+		});
+	});
+}
+
+/**
+ * @method <h2>depositNotificationEmail</h2>
+ * @description Send a notification when a user withdraws tokens
+ * @param {number} fromUID User ID to send email to
+ * @param {number} txValue Value of the transaction
+ * @param {string} txHash ETH Transaction hash used for etherscan link
+ */
+function depositNotificationEmail(fromUID,txValue,txHash) {
+	JSE.jseDataIO.getEmail(fromUID,function(emailAddress) {
+		JSE.jseDataIO.getVariable('account/'+fromUID+'/noEmailTransaction', function(noEmailTransaction) {
+			if (noEmailTransaction === null && fromUID > 0) {
+				if (jseEmails.suppression.indexOf(emailAddress) > -1) return;
+				const toEmail = new helper.Email(emailAddress);
+				const fromEmail = new helper.Email('admin@jsecoin.com');
+				const subject = 'JSEcoin Deposit Confirmation';
+				const htmlContent = 'This is to confirm JSE tokens have been deposited to your account for the value of:<br><br><b>'+txValue+'JSE</b><br><br>Transaction Details: <a href="https://etherscan.io/tx/'+txHash+'">'+txHash+'</a><br><br>Thank you for using JSEcoin.';
 				const emailHTML = jseEmails.template.split('$heading').join(subject).split('$content').join(htmlContent);
 				const content = new helper.Content('text/html', emailHTML);
 				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
@@ -432,16 +495,12 @@ function banEmail(banUID) {
  * @param {string} utmCampaign utmCampaign should be "referral"
  * @param {string} utmContent utmContent should be aff12345
  */
-function referral(utmCampaign,utmContent,affPayout) {
+function referral(utmCampaign,utmContent,affPayout,geo,notes) {
 	let value = affPayout;
 	const strippedUID = utmCampaign.split(/[^0-9]/).join('');
-	if (utmContent.indexOf('Declined') > -1) {
-		value = 1;
-		console.log('Declined Referral: '+utmContent);
-	}
 	JSE.jseDataIO.getVariable('account/'+strippedUID,function(affiliate) {
 		if (affiliate === null) { return false; } // watch out for wrong affids
-		if (typeof affiliate.affQuality !== 'undefined') { // put a measure incase we get bad affiliates
+		if (typeof affiliate.affQuality !== 'undefined') { // block suspended accounts
 			const rand = Math.floor(Math.random() * 10); //0-9
 			if (rand >= affiliate.affQuality) {
 				return false;
@@ -450,12 +509,22 @@ function referral(utmCampaign,utmContent,affPayout) {
 		if (typeof affiliate.affPayout !== 'undefined') {
 			value = affiliate.affPayout;
 		}
-		const reference = 'Referral Payment: '+utmContent;
-		JSE.jseDataIO.getCredentialsByUID(0,function(distributionCredentials) {
-			jseAPI.apiTransfer(distributionCredentials,affiliate,value,reference,false,function(jsonResult) {
-				console.log('Referral payment to '+strippedUID+' for '+value+' JSE');
-			});
+		const referralObj = {};
+		referralObj.uid = strippedUID;
+		referralObj.utmContent = utmContent;
+		referralObj.value = value;
+		referralObj.geo = geo;
+		referralObj.notes = notes;
+		const rightNow = new Date();
+		referralObj.ts = rightNow.getTime();
+		const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,"");
+		JSE.jseDataIO.pushVariable('referrals/'+strippedUID,referralObj,function(pushRef) {});
+		JSE.jseDataIO.plusX('rewards/'+strippedUID+'/'+yymmdd+'/r', value);
+		/*
+		jseAPI.apiTransfer(distributionCredentials,affiliate,value,reference,false,function(jsonResult) {
+			console.log('Referral payment to '+strippedUID+' for '+value+' JSE');
 		});
+		*/
 		return false;
 	});
 }
@@ -503,6 +572,11 @@ function sendSMS(toPhoneNo,txtMsg) {
  */
 function realityCheck(rawIP,callback) {
 	const ip = cleanString(rawIP);
+	if (!JSE.vpnData) {
+		console.log('VPN Data Missing');
+		callback(true);
+		return false;
+	}
   if (ip in JSE.vpnData) {
     if (JSE.jseTestNet) console.log('Result found in JSE.vpnData: '+JSE.vpnData[ip]);
     callback(JSE.vpnData[ip]);
@@ -546,9 +620,70 @@ function realityCheck(rawIP,callback) {
 				callback(false); // badIP found in ipCheck  :(
 			}
 		});
-  }
+	}
+	return false;
+}
+
+/**
+ * @method <h2>txApprove</h2>
+ * @description Remove some of the security critical variables from the user object
+ * @param {number} user id
+ * @param {string} pushRef value for data entry
+ * @param {string} approvalType can either be email for email confirmation or admin for admin approval
+ * @returns {object} Cleaned user object
+ */
+function txApprove(uid,pushRef,approvalType) {
+	JSE.jseDataIO.getVariable('txPending/'+uid+'/'+pushRef,function(txObject) {
+		let processTx = false;
+		if (approvalType === 'email') {
+			JSE.jseDataIO.setVariable('txPending/'+uid+'/'+pushRef+'/emailApproved',true);
+			if (txObject.requireAdmin === false || txObject.adminApproved === true) processTx = true;
+		}
+		if (approvalType === 'admin') {
+			JSE.jseDataIO.setVariable('txPending/'+uid+'/'+pushRef+'/adminApproved',true);
+			if (txObject.requireEmail === false || txObject.emailApproved === true) processTx = true;
+		}
+		if (processTx) {
+			const processedTimestamp = new Date().getTime();
+			if (txObject.command === 'txlimit') {
+				JSE.jseDataIO.setVariable('credentials/'+txObject.uid+'/txLimit',txObject.newTxLimit);
+				// do we want to send an email here?
+				JSE.jseDataIO.setVariable('txPending/'+uid+'/'+pushRef+'/complete', processedTimestamp);
+			} else if (txObject.command === 'withdraw') {
+				JSE.jseDataIO.getVariable('credentials/'+txObject.uid,function(goodCredentials) {
+					// process withdrawal
+					const dataToSign = {};
+					dataToSign.publicKey = goodCredentials.publicKey;
+					dataToSign.command = 'withdraw';
+					dataToSign.withdrawalAddress = txObject.withdrawalAddress;
+					dataToSign.withdrawalAmount = txObject.withdrawalAmount;
+					dataToSign.ethFee = txObject.ethFee || JSE.jseSettings.ethFee || 118;
+					dataToSign.value = JSE.jseFunctions.round(dataToSign.withdrawalAmount + dataToSign.ethFee);
+
+					dataToSign.user1 = goodCredentials.uid;
+					dataToSign.ts = processedTimestamp;
+					const dataString = JSON.stringify(dataToSign);
+					JSE.jseFunctions.signData(dataString, goodCredentials, function(signed) {
+						if (typeof signed.fail === 'undefined') {
+							jseCommands.dataPush(signed,function(jsonResult){
+								if (jsonResult.indexOf('success') > -1) {
+									console.log('Withdrawal Success '+goodCredentials.uid+'/'+txObject.value+'JSE/'+txObject.withdrawalAddress);
+									JSE.jseDataIO.setVariable('txPending/'+uid+'/'+pushRef+'/complete', processedTimestamp);
+								} else {
+									console.log('Withdrawal Failed1 '+goodCredentials.uid+'/'+txObject.value+'JSE/'+txObject.withdrawalAddress);
+									console.log(jsonResult);
+								}
+							});
+						} else {
+							console.log('Withdrawal Failed2 '+goodCredentials.uid+'/'+txObject.value+'JSE/'+txObject.withdrawalAddress);
+						}
+					});
+				});
+			}
+		}
+	});
 }
 
 module.exports = {
- shuffle, randString, round, cleanString, limitString, sha256, buf2hex, hex2buf, createKeyPair, signData, verifyData, signHash, verifyHash, sendWelcomeEmail, sendOnboardingEmail, sendStandardEmail, exportNotificationEmail, transferNotificationEmails, referral, genSafeUser, sendSMS, realityCheck,
+ shuffle, randString, round, cleanString, limitString, sha256, buf2hex, hex2buf, createKeyPair, signData, verifyData, signHash, verifyHash, sendWelcomeEmail, sendOnboardingEmail, sendStandardEmail, exportNotificationEmail, withdrawalNotificationEmail, depositNotificationEmail, transferNotificationEmails, referral, genSafeUser, sendSMS, realityCheck, txApprove,
 };

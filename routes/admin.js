@@ -171,6 +171,21 @@ router.get('/getinvestors/:adminpass', function(req, res) {
 	return false;
 });
 
+router.get('/txlimit/:uid/:txlimit/:adminpass', function(req, res) {
+	let adminPass;
+	if (typeof req.get('Authorization') !== 'undefined') {
+		adminPass = JSE.jseFunctions.cleanString(req.get('Authorization'));
+	} else {
+		adminPass = JSE.jseFunctions.cleanString(req.params.adminpass);
+	}
+	if (adminPass !== JSE.credentials.jseAdminKey) { return false; }
+	const uid = parseFloat(req.params.uid);
+	const txLimit = parseFloat(req.params.txlimit);
+	JSE.jseDataIO.setVariable('credentials/'+uid+'/txLimit',txLimit);
+	res.send('{"success":1}');
+	return false;
+});
+
 router.get('/affpayout/:uid/:affpayout/:adminpass', function(req, res) {
 	let adminPass;
 	if (typeof req.get('Authorization') !== 'undefined') {
@@ -263,7 +278,6 @@ router.get('/resetpassword/:uid/:adminpass', function(req, res) {
 	res.send(newPassword);
 	return false;
 });
-
 
 router.get('/remove2fa/:uid/:adminpass', function(req, res) {
 	let adminPass;
@@ -392,7 +406,6 @@ router.get('/fraudbuster/:adminpass', function(req, res) {
 	return false;
 });
 
-
 router.get('/publisherIPs/:adminpass', function(req, res) {
 	let adminPass;
 	if (typeof req.get('Authorization') !== 'undefined') {
@@ -489,5 +502,68 @@ router.post('/bountyUpdate/:adminpass', function(req, res) {
 	return false;
 });
 
+router.get('/txpending/:adminpass', function(req, res) {
+	let adminPass;
+	if (typeof req.get('Authorization') !== 'undefined') {
+		adminPass = JSE.jseFunctions.cleanString(req.get('Authorization'));
+	} else {
+		adminPass = JSE.jseFunctions.cleanString(req.params.adminpass);
+	}
+	if (adminPass !== JSE.credentials.jseAdminKey) { return false; }
+	JSE.jseDataIO.getVariable('txPending/',function(txPending) {
+		res.send(JSON.stringify(txPending));
+	});
+	return false;
+});
+
+router.get('/getrewards/:adminpass', function(req, res) {
+	let adminPass;
+	if (typeof req.get('Authorization') !== 'undefined') {
+		adminPass = JSE.jseFunctions.cleanString(req.get('Authorization'));
+	} else {
+		adminPass = JSE.jseFunctions.cleanString(req.params.adminpass);
+	}
+	if (adminPass !== JSE.credentials.jseAdminKey) { return false; }
+	JSE.jseDataIO.getVariable('rewards/',function(rewards) {
+		res.send(JSON.stringify(rewards));
+	});
+	return false;
+});
+
+router.get('/getlogins/:adminpass', function(req, res) {
+	let adminPass;
+	if (typeof req.get('Authorization') !== 'undefined') {
+		adminPass = JSE.jseFunctions.cleanString(req.get('Authorization'));
+	} else {
+		adminPass = JSE.jseFunctions.cleanString(req.params.adminpass);
+	}
+	if (adminPass !== JSE.credentials.jseAdminKey) { return false; }
+	JSE.jseDataIO.getVariable('logins/',function(logins) {
+		res.send(JSON.stringify(logins));
+	});
+	return false;
+});
+
+router.post('/txpendingupdate/:adminpass', function(req, res) {
+	let adminPass;
+	if (typeof req.get('Authorization') !== 'undefined') {
+		adminPass = JSE.jseFunctions.cleanString(req.get('Authorization'));
+	} else {
+		adminPass = JSE.jseFunctions.cleanString(req.params.adminpass);
+	}
+	if (adminPass !== JSE.credentials.jseAdminKey) { return false; }
+	const uid = parseFloat(req.body.uid);
+	const pushRef = JSE.jseFunctions.cleanString(req.body.pushRef);
+	const updateType = JSE.jseFunctions.cleanString(req.body.updateType);
+	if (updateType === 'approved') {
+		JSE.jseFunctions.txApprove(uid,pushRef,'admin');
+	} else if (updateType === 'declined') {
+		JSE.jseDataIO.setVariable('txPending/'+uid+'/'+pushRef+'/adminApproved',false);
+		JSE.jseDataIO.setVariable('txPending/'+uid+'/'+pushRef+'/adminDeclined',true);
+		JSE.jseDataIO.setVariable('txPending/'+uid+'/'+pushRef+'/complete',true);
+	}
+	res.send('{"success":1}');
+	return false;
+});
 
 module.exports = router;

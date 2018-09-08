@@ -28,6 +28,7 @@ function runAtMidnight() {
 	const msToMidnight = night.getTime() - now.getTime();
 	console.log('runAtMidnight set for '+(Math.floor(msToMidnight /60000))+' mins');
 	setTimeout(function() {
+			processRewards(7); // Move daily rewards across
 			// Push JSE.publicStats to dailyJSE.PublicStats
 			JSE.publicStats.ts = new Date().getTime();
 			JSE.jseDataIO.updatePublicStats();
@@ -56,6 +57,7 @@ function runAtMidday() {
 	console.log('runAtMidday set for '+(Math.floor(msToMidday / 60000))+' mins');
 	setTimeout(function() {
 		runSubscriptions();
+		JSE.jseDataIO.deleteVariable('txToday');
 		runAtMidday(); // Then, reset again next midnight.
 	}, msToMidday);
 }
@@ -75,7 +77,9 @@ function runAt5pm() {
 	const msTo5pm = peakTimeObject.getTime() - now.getTime();
 	console.log('runAt5pm set for '+(Math.floor(msTo5pm / 60000))+' mins');
 	setTimeout(function() {
-		startAutoresponder();
+		if (JSE.jseTestNet === false) { // don't want to send emails when testing!
+			startAutoresponder();
+		}
 		runAt5pm(); // Then, reset again next midnight.
 	}, msTo5pm);
 }
@@ -88,7 +92,7 @@ function runAt5pm() {
 JSE.emailsToSend = [];
 function startAutoresponder() {
 	JSE.jseDataIO.getVariable('nextUserID',function(endID) {
-		const startID = endID - 40000; // only send to last 40k users, may need to increase
+		const startID = endID - 30000; // only send to last 40k users, may need to increase
 		JSE.jseDataIO.getAdminAccounts(startID,endID,function(users){
 			const nowTS =new Date().getTime();
 			let maxCount = 0;
@@ -101,9 +105,9 @@ function startAutoresponder() {
 					aff = parseFloat(aff);
 					if (users[i].source !== 'referral' || (!users[aff] || !users[aff].suspended)) {
 						if (users[i].lastEmail) {
-							const lastEmailRef = users[i].lastEmail.split(',')[0]; // timestamp,ref
-							const lastEmailTS = users[i].lastEmail.split(',')[1];
-							const nextEmailTS = (new Date(Number(lastEmailTS)).getTime()) + (86400000 * lastEmailRef * 1.5); // i.e. email 4 will be sent 6 days after email 3, remove end figure to speed up
+							const lastEmailTS = users[i].lastEmail.split(',')[0]; // timestamp,ref
+							const lastEmailRef = users[i].lastEmail.split(',')[1];
+							const nextEmailTS = (new Date(Number(lastEmailTS)).getTime()) + (86400000 * lastEmailRef * 2); // i.e. email 4 will be sent 6 days after email 3, remove end figure to speed up
 							if (nextEmailTS < nowTS) {
 								maxCount += 1;
 								JSE.emailsToSend.push({ user: users[i], emailRef: lastEmailRef + 1 });
@@ -128,8 +132,9 @@ function startAutoresponder() {
 function loopThroughEmails() {
 	if (JSE.emailsToSend.length > 0) {
 		const nextEmailData = JSE.emailsToSend.pop();
-		JSE.jseFunctions.sendOnboardingEmail(nextEmailData.user,nextEmailData.emailRef);
-		setTimeout(function() { loopThroughEmails(); },500);
+		JSE.jseFunctions.sendOnboardingEmail(nextEmailData.user,nextEmailData.emailRef, function() {
+			setTimeout(function() { loopThroughEmails(); },500);
+		});
 	} else {
 		console.log('Finished sending autoresponder emails');
 	}
@@ -337,6 +342,69 @@ function storeLogs() {
 	}
 }
 
+/**
+ * @method <h2>processRewards</h2>
+ * @description Move the rewards across to the ledger after x days
+ * 							Included but commented out is the option to clean up after one month.
+ * 							This might be required later as users will be pulling all this data on login
+ * @param howManyDaysBack the number of days previously we want to move the rewards across for default. 7
+ */
+function processRewards(howManyDaysBack=7) {
+	const lastWeek = new Date();
+	lastWeek.setDate(lastWeek.getDate()-howManyDaysBack);
+	const lastWeekYYMMDD = lastWeek.toISOString().slice(2,10).replace(/-/g,"");
+	const lastMonth = new Date();
+	lastMonth.setDate(lastMonth.getDate()-28);
+	const lastMonthYYMMDD = lastMonth.toISOString().slice(2,10).replace(/-/g,"");
+	JSE.jseDataIO.getVariable('rewards',function(rewards) {
+		Object.keys(rewards).forEach(function(uid) {
+			if (rewards[uid][lastWeekYYMMDD] && !rewards[uid][lastWeekYYMMDD].d) {
+				if (rewards[uid][lastWeekYYMMDD].s) { // s = self-mining
+					const jsePlatformReward = rewards[uid][lastWeekYYMMDD].s;
+					JSE.jseDataIO.plusX('ledger/'+uid, jsePlatformReward);
+					const newPlatformData = {};
+					newPlatformData.command = 'platformReward';
+					newPlatformData.reference = 'Platform Mining Reward '+lastWeekYYMMDD;
+					newPlatformData.user1 = uid;
+					newPlatformData.value = jsePlatformReward;
+					newPlatformData.ts = new Date().getTime();
+					JSE.jseDataIO.pushBlockData(newPlatformData,function(blockData) {});
+					JSE.jseDataIO.pushVariable('history/'+uid,newPlatformData,function(pushRef) {});
+				}
+				if (rewards[uid][lastWeekYYMMDD].p) { // p = publisher mining
+					const jsePublisherReward = rewards[uid][lastWeekYYMMDD].p;
+					JSE.jseDataIO.plusX('ledger/'+uid, jsePublisherReward);
+					const newPublisherData = {};
+					newPublisherData.command = 'publisherReward';
+					newPublisherData.reference = 'Publisher Mining Reward '+lastWeekYYMMDD;
+					newPublisherData.user1 = uid;
+					newPublisherData.value = jsePublisherReward;
+					newPublisherData.ts = new Date().getTime();
+					JSE.jseDataIO.pushBlockData(newPublisherData,function(blockData) {});
+					JSE.jseDataIO.pushVariable('history/'+uid,newPublisherData,function(pushRef) {});
+				}
+				if (rewards[uid][lastWeekYYMMDD].r) { // r = referral
+					const jseReferralReward = rewards[uid][lastWeekYYMMDD].r;
+					JSE.jseDataIO.plusX('ledger/'+uid, jseReferralReward);
+					const newReferralData = {};
+					newReferralData.command = 'referralReward';
+					newReferralData.reference = 'Referral Reward '+lastWeekYYMMDD;
+					newReferralData.user1 = uid;
+					newReferralData.value = jseReferralReward;
+					newReferralData.ts = new Date().getTime();
+					JSE.jseDataIO.pushBlockData(newReferralData,function(blockData) {});
+					JSE.jseDataIO.pushVariable('history/'+uid,newReferralData,function(pushRef) {});
+				}
+				JSE.jseDataIO.setVariable('rewards/'+uid+'/'+lastWeekYYMMDD+'/d',true); // d = done
+			}
+			/*
+			if (rewards[uid][lastMonthYYMMDD]) {
+				JSE.hardDeleteVariable('rewards/'+uid+'/'+lastMonthYYMMDD); // clean up after one month?
+			}
+			*/
+		});
+	});
+}
 
 module.exports = {
 	runAtMidnight, runAtMidday, runAt5pm, cleanNulls, backupLedger, resetBlockChainFile, storeLogs,

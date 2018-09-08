@@ -222,7 +222,7 @@ router.post('/removecoincode/*', function (req, res) {
  * @memberof module:jseRouter
  */
 router.post('/updateapilevel/*', function (req, res) {
-	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error indedx.js 72. No Session Variable"}'); return false; }
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error indedx.js 225. No Session Variable"}'); return false; }
 	const session = req.body.session;
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
 		const pin = String(req.body.pin).split(/[^0-9]/).join('');
@@ -245,6 +245,24 @@ router.post('/updateapilevel/*', function (req, res) {
 	 	return false;
 	}, function() {
 		res.send('0');
+	});
+	return false;
+});
+
+/**
+ * @name /updateapikey/*
+ * @description Update the users API Key
+ * @memberof module:jseRouter
+ */
+router.post('/updateapikey/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error indedx.js 258. No Session Variable"}'); return false; }
+	const session = req.body.session;
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		const newAPIKey = JSE.jseFunctions.randString(32);
+		JSE.jseDataIO.setVariable('credentials/'+goodCredentials.uid+'/apiKey',newAPIKey);
+		JSE.jseDataIO.setVariable('lookupAPIKey/'+newAPIKey,goodCredentials.uid);
+		JSE.jseDataIO.hardDeleteVariable('lookupAPIKey/'+goodCredentials.apiKey); // clean up old key lookup tables
+		res.send('{"success":1,"notification":"API Key Updated","newAPIKey":"'+newAPIKey+'"}');
 	});
 	return false;
 });
@@ -619,6 +637,120 @@ router.get('/appid/:clientid/*', function(req, res) {
 	} else {
 		res.status(401).send('{"fail":1,"notification":"Error index.js 618. Client ID not recognized"}');
 	}
+});
+
+/**
+ * @name /updatetxlimit/*
+ * @description Update the transaction limit
+ * @memberof module:jseRouter
+ */
+router.post('/updatetxlimit/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error indedx.js 630. No Session Variable"}'); return false; }
+	const session = req.body.session;
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		const pin = String(req.body.pin).split(/[^0-9]/).join('');
+		let pinAttempts = 0;
+		JSE.pinAttempts.forEach((el) => { if (el === goodCredentials.uid) pinAttempts +=1; });
+		if (pinAttempts > 3) {
+			res.status(400).send('{"fail":1,"notification":"Error 637. Account locked three incorrect attempts at pin number, please check again in six hours"}');
+			return false;
+		} else if (goodCredentials.pin !== pin || pin === null || typeof pin === 'undefined') {
+			JSE.pinAttempts.push(goodCredentials.uid);
+			res.status(400).send('{"fail":1,"notification":"Error 641. Pin number incorrect or blocked, attempt '+(pinAttempts+1)+'/3"}');
+			return false;
+		}
+		const newTxLimit = parseFloat(req.body.newTxLimit);
+		JSE.jseDataIO.getVariable('ledger/'+goodCredentials.uid,function(balance) {
+			if (newTxLimit > balance) {
+				res.status(400).send('{"fail":1,"notification":"Can not set a transaction limit greater than your current account balance"}');
+				return false;
+			}
+			if (newTxLimit <= 10000) {
+				JSE.jseDataIO.setVariable('credentials/'+goodCredentials.uid+'/txLimit',newTxLimit);
+				res.send('{"success":1,"notification":"Transaction Limit Updated"}');
+				return false;
+			}
+			const dataObject = {};
+			dataObject.uid = goodCredentials.uid;
+			dataObject.command = 'txlimit';
+			dataObject.newTxLimit = newTxLimit;
+			dataObject.ts = new Date().getTime();
+			dataObject.requireEmail = true;
+			dataObject.emailApproved = false;
+			if (newTxLimit <= 100000) {
+				dataObject.requireAdmin = false;
+			} else {
+				dataObject.requireAdmin = true;
+				dataObject.adminApproved = false;
+			}
+			dataObject.confirmKey = JSE.jseFunctions.randString(12);
+
+			JSE.jseDataIO.pushVariable('txPending/'+goodCredentials.uid,dataObject,function(pushRef) {
+				const confirmLink = 'https://server.jsecoin.com/confirm/tx/'+goodCredentials.uid+'/'+pushRef+'/'+dataObject.confirmKey;
+				const withdrawalHTML = `Please click the link below to confirm you wish to adjust your transaction limit to:<br>
+																${dataObject.newTxLimit} JSE<br><br>
+																<a href="${confirmLink}">Confirm this withdrawal</a><br><br>
+																If you did not make this transaction please contact admin@jsecoin.com and change your account password ASAP.<br>`;
+				JSE.jseFunctions.sendStandardEmail(goodCredentials.email,'Please confirm new JSE transaction limit',withdrawalHTML);
+				res.send('{"success":1,"notification":"Transaction limit will update after email confirmation","emailRequired":true}');
+				return false;
+			});
+			return false;
+		});
+		return false;
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error index.js 652. Session key not recognized"}');
+	});
+	return false;
+});
+
+/**
+ * @name /txtoday/*
+ * @description Get a users txToday figure for transaction limit calculations, this shows how much he has used.
+ * @memberof module:jseRouter
+ */
+router.post('/txtoday/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 708. No Session Variable"}'); return false; }
+	const session = req.body.session;
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials !== null) {
+			JSE.jseDataIO.getVariable('txToday/'+goodCredentials.uid, function(txToday) {
+				const returnObject = {};
+				returnObject.success = 1;
+				returnObject.txToday = txToday || 0;
+				res.send(JSON.stringify(returnObject));
+			});
+	 	} else {
+	 		res.status(401).send('{"fail":1,"notification":"Error index.js 716. Session Variable not recognized"}');
+	 	}
+	 	return false;
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error index.js 720. Session Variable not recognized"}');
+	});
+	return false;
+});
+
+/**
+ * @name /lastlogins/*
+ * @description Get Public Stats
+ * @memberof module:jseRouter
+ */
+router.post('/lastlogins/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 708. No Session Variable"}'); return false; }
+	const session = req.body.session;
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials !== null) {
+			JSE.jseDataIO.getVariable('logins/'+goodCredentials.uid, function(logins) {
+		 		res.send(JSON.stringify(logins));
+			});
+	 	} else {
+	 		res.status(401).send('{"fail":1,"notification":"Error index.js 716. Session Variable not recognized"}');
+	 	}
+	 	return false;
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error index.js 720. Session Variable not recognized"}');
+	});
+	return false;
 });
 
 module.exports = router;

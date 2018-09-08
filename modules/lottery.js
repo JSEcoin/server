@@ -22,6 +22,7 @@ function getCreditAccount(strippedUID,callback) {
 			if (account === null) { return false; }
 			JSE.creditQuickLookup[strippedUID] = {};
 			JSE.creditQuickLookup[strippedUID].mineQuality = account.mineQuality || null;
+			if (account.suspended) JSE.creditQuickLookup[strippedUID].suspended = true; // set suspended to boolean
 			callback(JSE.creditQuickLookup[strippedUID]);
 			return false;
 		});
@@ -44,8 +45,8 @@ function credit(uid,siteid,subid,whatRaw){
 	if (what !== 'hit' && what !== 'unique' && what !== 'hash' && what !== 'optin' && what !== 'nolotteryunique' && what !== 'nolotteryhash' && what !== 'nolotteryhit' && what !== 'nolotteryoptin' && what !== 'optinlotteryonly') { return false; }
 	const strippedUID = parseFloat(uid);
 	if (strippedUID === 0 || strippedUID === null || strippedUID === 'NaN') { return false; }
-	getCreditAccount(strippedUID,function(account) {
-		if (account === null) { return false; } // watch out for wrong affids
+	getCreditAccount(strippedUID,function(accountLookup) {
+		if (accountLookup === null) { return false; } // watch out for wrong affids
 		let noLottery = false;
 		if (what === 'nolotteryhash') { // fraud measure, add stats but don't enter for lottery
 			what = 'hash';
@@ -87,7 +88,7 @@ function credit(uid,siteid,subid,whatRaw){
 						if (what === 'unique') { JSE.jseDataIO.plusOne('siteIDs/'+strippedUID+'/'+safeKey+'/u'); }
 						if (what === 'optin') { JSE.jseDataIO.plusOne('siteIDs/'+strippedUID+'/'+safeKey+'/o'); }
 						if (what === 'hash') { JSE.jseDataIO.plusOne('siteIDs/'+strippedUID+'/'+safeKey+'/a'); }
-						if (what === 'coin') { JSE.jseDataIO.plusOne('siteIDs/'+strippedUID+'/'+safeKey+'/c'); }
+						if (what === 'coin') { JSE.jseDataIO.plusOne('siteIDs/'+strippedUID+'/'+safeKey+'/c'); } // this doesn't seem to be used? 6th Sept 2018
 					}
 				});
 			} else {
@@ -159,10 +160,13 @@ function credit(uid,siteid,subid,whatRaw){
 			if (what === 'hash') { JSE.jseDataIO.plusOne('statsToday/'+strippedUID+'/a'); }
 			if (what === 'coin') { JSE.jseDataIO.plusOne('statsToday/'+strippedUID+'/c'); }
 		}
-		if (noLottery) { return false; }
-		if (typeof account.mineQuality !== 'undefined' && account.mineQuality !== null) { // manual method to stop naughty miners
-			const rand = Math.floor(Math.random() * 10); //0-9
-			if (rand >= account.mineQuality) {
+		if (noLottery) {
+			return false;
+		} else if (accountLookup.suspended) {
+			return false;
+		} else if (typeof accountLookup.mineQuality !== 'undefined' && accountLookup.mineQuality !== null) { // manual method to stop naughty miners
+			const rand = Math.random() * 10; //0-9
+			if (rand >= accountLookup.mineQuality) {
 				return false;
 			}
 		}
@@ -174,7 +178,7 @@ function credit(uid,siteid,subid,whatRaw){
 				//JSE.jseDataIO.pushVariable('lottery',lotteryInput); // no lottery entry for hits now.
 			//}
 		} else if (what === 'unique') {
-			if (Math.random() > 0.975) { // lower in due course
+			if (Math.random() > 0.99) { // increase or remove completely in due course
 				JSE.jseDataIO.pushVariable('lottery',lotteryInput,function(pushRef) {});
 			}
 		} else if (what === 'optin') {
@@ -199,7 +203,9 @@ function credit(uid,siteid,subid,whatRaw){
  * @description Run the lottery on every block to pick 50 winners from each of the pools and distribute mining rewards.
  */
 function runLottery() {
-	const blockTime = new Date().getTime();
+	const rightNow = new Date();
+	const blockTime = rightNow.getTime();
+	const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,"");
 	JSE.jseDataIO.getVariable('lottery',function(lottery) {
 		if (lottery !== null) {
 			const lotteryArray = [];
@@ -227,7 +233,8 @@ function runLottery() {
 					// setTimeouts used to distribute load on firebase for non-critical stats
 					paidOut += JSE.jseSettings.publisherPayout;
 					setTimeout(function(stUID,stSiteID,stSubID,stNewData,stBlockTime) { // eslint-disable-line
-						JSE.jseDataIO.plusX('ledger/'+stUID, JSE.jseSettings.publisherPayout);
+						//JSE.jseDataIO.plusX('ledger/'+stUID, JSE.jseSettings.publisherPayout);
+						JSE.jseDataIO.plusX('rewards/'+stUID+'/'+yymmdd+'/p', JSE.jseSettings.publisherPayout); // p = publisher
 						JSE.jseDataIO.plusX('statsTotal/'+stUID+'/c', JSE.jseSettings.publisherPayout);
 						JSE.jseDataIO.plusX('statsToday/'+stUID+'/c', JSE.jseSettings.publisherPayout);
 						const safeSiteKey = JSE.jseDataIO.genSafeKey(stSiteID);
@@ -287,7 +294,8 @@ function runLottery() {
 					newData.value = JSE.jseSettings.platformPayout;
 					paidOut2 += JSE.jseSettings.platformPayout;
 					setTimeout(function(stUID,stSiteID,stNewData,stBlockTime) { // eslint-disable-line
-						JSE.jseDataIO.plusX('ledger/'+stUID, JSE.jseSettings.platformPayout);
+						//JSE.jseDataIO.plusX('ledger/'+stUID, JSE.jseSettings.platformPayout);
+						JSE.jseDataIO.plusX('rewards/'+stUID+'/'+yymmdd+'/s', JSE.jseSettings.platformPayout); // s = self-mining
 						JSE.jseDataIO.plusX('statsTotal/'+stUID+'/c', JSE.jseSettings.platformPayout);
 						JSE.jseDataIO.plusX('statsToday/'+stUID+'/c', JSE.jseSettings.platformPayout);
 						const safeSiteKey = JSE.jseDataIO.genSafeKey(stSiteID);

@@ -34,9 +34,14 @@ npm install
 mkdir logs/
 mkdir data/
 
-node datastore.js
-node controller.js
-node jsenode.js -s localhost -n jsetestnet -t local
+node --max-old-space-size=3000 datastore.js -p 82 -t local
+node --max-old-space-size=3000 datastore.js -p 83 -t local
+node controller.js -t local -d http://localhost:82 -e http://localhost:83
+node jsenode.js -t local -s localhost -p 81 -n jimv18 -d http://localhost:82 -e http://localhost:83 -m 0
+
+npm run test
+node jsenode.js -d http://localhost:82 -e http://localhost:83 -m 0 -i
+http://localhost/jsecoin/github/v1platform/testnet.html?testnet=local
 ```
 
 ---
