@@ -9,6 +9,7 @@
  * <li>fromBlock</li>
  * <li>updateFromBlock</li>
  * <li>checkJSE</li>
+ * <li>deposit</li>
  * <li>sendJSE</li>
  * </ul>
  */
@@ -28,121 +29,121 @@ const token = new web3.eth.Contract(jseTokenABI, jseTokenContractAddress);
 
 const jseEthIntegration = {
 
-  /**
-   * @method <h2>newKeyPair</h2>
-   * @description create an eth key pair
-   * @returns {object} including privateKey and address (publicKey)
-   */
-  newKeyPair() {
-    const ethKeyPair = web3.eth.accounts.create();
-    return ethKeyPair;
-  },
+	/**
+	 * @method <h2>newKeyPair</h2>
+	 * @description create an eth key pair
+	 * @returns {object} including privateKey and address (publicKey)
+	 */
+	newKeyPair() {
+		const ethKeyPair = web3.eth.accounts.create();
+		return ethKeyPair;
+	},
 
-  /**
-   * @method <h2>addToQueryPool</h2>
-   * @description add Eth address to query pool for deposited transactions
-   * @param {number} uid user id
-   * @param {string} ethAddress the users ethereum deposit address for JSE ERC20 tokens
-   * @returns false
-   */
-  addToQueryPool(uid,ethAddress) {
-    const queryObj = {};
-    queryObj.type = 'deposit';
-    queryObj.ts = new Date().getTime();
-    queryObj.uid = uid;
-    queryObj.ethAddress = ethAddress;
-    JSE.jseDataIO.setVariable('queryPool/'+uid,queryObj); // overwrites previous query, new timestamp
-    return false;
-  },
+	/**
+	 * @method <h2>addToQueryPool</h2>
+	 * @description add Eth address to query pool for deposited transactions
+	 * @param {number} uid user id
+	 * @param {string} ethAddress the users ethereum deposit address for JSE ERC20 tokens
+	 * @returns false
+	 */
+	addToQueryPool(uid,ethAddress) {
+		const queryObj = {};
+		queryObj.type = 'deposit';
+		queryObj.ts = new Date().getTime();
+		queryObj.uid = uid;
+		queryObj.ethAddress = ethAddress;
+		JSE.jseDataIO.setVariable('queryPool/'+uid,queryObj); // overwrites previous query, new timestamp
+		return false;
+	},
 
-  /**
-   * @method <h2>checkQueryPool</h2>
-   * @description check query pool for deposited transactions
-   * @returns false
-   */
-  checkQueryPoolDeposits: async() => {
-    const fromBlockDone = await jseEthIntegration.updateFromBlock();
-    JSE.jseDataIO.getVariable('queryPool/',function(queryPool) {
-      let queryCount = 0;
-      if (queryPool === null || typeof queryPool === 'undefined') return false;
-      const now = new Date().getTime();
-      Object.keys(queryPool).forEach(function(uidRef) {
-        const query = queryPool[uidRef];
-        if (query.type === 'deposit') {
-          queryCount += 1;
-          jseEthIntegration.checkJSE(query.ethAddress,query.uid);
-        }
-        if (query.ts < now - 3600000) {
-          JSE.jseDataIO.hardDeleteVariable('queryPool/'+uidRef);
-        }
-      });
-      if (JSE.jseTestNet) console.log('queryPool: '+queryCount);
-      return false;
-    });
-    return false;
-  },
+	/**
+	 * @method <h2>checkQueryPool</h2>
+	 * @description check query pool for deposited transactions
+	 * @returns false
+	 */
+	checkQueryPoolDeposits: async() => {
+		const fromBlockDone = await jseEthIntegration.updateFromBlock();
+		JSE.jseDataIO.getVariable('queryPool/',function(queryPool) {
+			let queryCount = 0;
+			if (queryPool === null || typeof queryPool === 'undefined') return false;
+			const now = new Date().getTime();
+			Object.keys(queryPool).forEach(function(uidRef) {
+				const query = queryPool[uidRef];
+				if (query.type === 'deposit') {
+					queryCount += 1;
+					jseEthIntegration.checkJSE(query.ethAddress,query.uid);
+				}
+				if (query.ts < now - 3600000) {
+					JSE.jseDataIO.hardDeleteVariable('queryPool/'+uidRef);
+				}
+			});
+			if (JSE.jseTestNet) console.log('queryPool: '+queryCount);
+			return false;
+		});
+		return false;
+	},
 
-  /**
-   * @var fromBlock
-   * @description the current block number for ethereum - 3 hours
-   * set in checkQueryPoolDeposits once every time the queryPool is checked (10mins), used in checkJSE
-   */
-  fromBlock: 0,
+	/**
+	 * @var fromBlock
+	 * @description the current block number for ethereum - 3 hours
+	 * set in checkQueryPoolDeposits once every time the queryPool is checked (10mins), used in checkJSE
+	 */
+	fromBlock: 0,
 
-  updateFromBlock: async() => {
-    const currentEthBlockNo = await web3.eth.getBlockNumber();
-    jseEthIntegration.fromBlock = currentEthBlockNo - 1000; // change this number if we want to look back further. Eth block times are between 10-15secs
-    if (JSE.jseTestNet) console.log('Eth Current Block:'+currentEthBlockNo);
-    return jseEthIntegration.fromBlock;
-  },
+	updateFromBlock: async() => {
+		const currentEthBlockNo = await web3.eth.getBlockNumber();
+		jseEthIntegration.fromBlock = currentEthBlockNo - 1000; // change this number if we want to look back further. Eth block times are between 10-15secs
+		if (JSE.jseTestNet) console.log('Eth Current Block:'+currentEthBlockNo);
+		return jseEthIntegration.fromBlock;
+	},
 
-  /**
-   * @method <h2>checkJSE</h2>
-   * @description check eth address for deposited JSE ERC20 tokens
-   * @param {string} ethAddress ethereum hex address
-   * @param {number} uid user id
-   * @returns false
-   */
-  checkJSE: async (ethAddress,uid) => {
-    const events = await token.getPastEvents("Transfer", {
-      fromBlock: jseEthIntegration.fromBlock,
-      filter: {
-        isError: 0,
-        txreceipt_status: 1,
-      },
-      topics: [
-        web3.utils.sha3("Transfer(address,address,uint256)"),
-        null,
-        web3.utils.padLeft(ethAddress, 64),
-      ],
-    });
-    for (let i = 0; i < events.length; i+=1) {
-      const txEvent = events[i];
-      const tx = {};
-      tx.uid = uid;
-      tx.hash = txEvent.transactionHash;
-      const rawValue = web3.utils.fromWei(txEvent.returnValues.value);
-      tx.value = JSE.jseFunctions.round(parseFloat(rawValue));
-      tx.from = txEvent.returnValues.from;
-      tx.to = txEvent.returnValues.to;
-      if (JSE.jseTestNet) console.log('tx:'+tx.uid+'/'+tx.value+'/'+tx.from+'/'+tx.to+'/'+tx.hash+'/');
-      JSE.jseDataIO.getVariable('ethProcessed/'+tx.hash,function(ethTx) {
-        if (ethTx === null && ethAddress === tx.to) { // check transaction hasn't already been processed
-          JSE.jseDataIO.setVariable('ethProcessed/'+tx.hash,tx);
-          jseEthIntegration.deposit(tx,function(jsonResponse) {
-            if (jsonResponse.indexOf('success') > -1) {
-              console.log('Deposit: '+tx.uid+' - '+tx.value+'JSE');
-              JSE.jseFunctions.depositNotificationEmail(tx.uid,tx.value,tx.hash);
-            } else {
-              console.log('Deposit Fail error etheintegration.js 128 - '+tx.uid+' - '+tx.value+'JSE');
-            }
-          });
-        } else if (JSE.jseTestNet) {
-          console.log('tx Already Processed: '+tx.hash);
-        }
-      });
-    }
-  },
+	/**
+	 * @method <h2>checkJSE</h2>
+	 * @description check eth address for deposited JSE ERC20 tokens
+	 * @param {string} ethAddress ethereum hex address
+	 * @param {number} uid user id
+	 * @returns false
+	 */
+	checkJSE: async (ethAddress,uid) => {
+		const events = await token.getPastEvents("Transfer", {
+			fromBlock: jseEthIntegration.fromBlock,
+			filter: {
+				isError: 0,
+				txreceipt_status: 1,
+			},
+			topics: [
+				web3.utils.sha3("Transfer(address,address,uint256)"),
+				null,
+				web3.utils.padLeft(ethAddress, 64),
+			],
+		});
+		for (let i = 0; i < events.length; i+=1) {
+			const txEvent = events[i];
+			const tx = {};
+			tx.uid = uid;
+			tx.hash = txEvent.transactionHash;
+			const rawValue = web3.utils.fromWei(txEvent.returnValues.value);
+			tx.value = JSE.jseFunctions.round(parseFloat(rawValue));
+			tx.from = txEvent.returnValues.from;
+			tx.to = txEvent.returnValues.to;
+			if (JSE.jseTestNet) console.log('tx:'+tx.uid+'/'+tx.value+'/'+tx.from+'/'+tx.to+'/'+tx.hash+'/');
+			JSE.jseDataIO.getVariable('ethProcessed/'+tx.hash,function(ethTx) {
+				if (ethTx === null && ethAddress === tx.to) { // check transaction hasn't already been processed
+					JSE.jseDataIO.setVariable('ethProcessed/'+tx.hash,tx);
+					jseEthIntegration.deposit(tx,function(jsonResponse) {
+						if (jsonResponse.indexOf('success') > -1) {
+							console.log('Deposit: '+tx.uid+' - '+tx.value+'JSE');
+							JSE.jseFunctions.depositNotificationEmail(tx.uid,tx.value,tx.hash);
+						} else {
+							console.log('Deposit Fail error etheintegration.js 128 - '+tx.uid+' - '+tx.value+'JSE');
+						}
+					});
+				} else if (JSE.jseTestNet) {
+					console.log('tx Already Processed: '+tx.hash);
+				}
+			});
+		}
+	},
 
 	/**
 	 * @method <h2>deposit</h2>
@@ -178,43 +179,43 @@ const jseEthIntegration = {
 		});
 	},
 
-  /**
-   * @method <h2>sendJSE</h2>
-   * @description send JSE ERC20 tokens to an address
-   * @returns {object} including privateKey and address (publicKey)
-   */
-  sendJSE: async (withdrawalAddress,value,callback) => {
-    const ownerWallet = web3.eth.accounts.wallet.add(JSE.credentials.ethAccount1);
-    const transactionCount = await web3.eth.getTransactionCount(ownerWallet.address);
-    const transferAmount = web3.utils.toWei(value.toString()); //value * 1e18; // this is the decimal 18 decimals
-    const gasPrice = await web3.eth.getGasPrice();
-    const gasLimit = 999000; //90000;
-    const rawTransaction = {
-      from: ownerWallet.address,
-      nonce: web3.utils.toHex(transactionCount),
-      gasPrice: web3.utils.toHex(gasPrice),
-      gasLimit: web3.utils.toHex(gasLimit),
-      to: jseTokenContractAddress,
-      value: "0x0",
-      data: token.methods.transfer(withdrawalAddress, transferAmount).encodeABI(),
-      chainId: 4,
-    };
-    ownerWallet.signTransaction(rawTransaction, function(error,signed) {
-      if (error) console.log('ethintegration.js error 161 signTransaction: '+error);
-      // Check it's a valid signature
-      const recoveryAddress = web3.eth.accounts.recoverTransaction(signed.rawTransaction);
-      const serializedTxHex = signed.rawTransaction;
-      web3.eth.sendSignedTransaction(serializedTxHex)
-      .on('transactionHash', function(hash) {
-        callback(hash);
-      })
-      //.on('receipt', function(receipt) {})
-      //.on('confirmation', function(confirmationNumber, receipt){})
-      .on('error', function(error1) {
-        callback(false);
-      });
-    });
-  },
+	/**
+	 * @method <h2>sendJSE</h2>
+	 * @description send JSE ERC20 tokens to an address
+	 * @returns {object} including privateKey and address (publicKey)
+	 */
+	sendJSE: async (withdrawalAddress,value,callback) => {
+		const ownerWallet = web3.eth.accounts.wallet.add(JSE.credentials.ethAccount1);
+		const transactionCount = await web3.eth.getTransactionCount(ownerWallet.address);
+		const transferAmount = web3.utils.toWei(value.toString()); //value * 1e18; // this is the decimal 18 decimals
+		const gasPrice = await web3.eth.getGasPrice();
+		const gasLimit = 999000; //90000;
+		const rawTransaction = {
+			from: ownerWallet.address,
+			nonce: web3.utils.toHex(transactionCount),
+			gasPrice: web3.utils.toHex(gasPrice),
+			gasLimit: web3.utils.toHex(gasLimit),
+			to: jseTokenContractAddress,
+			value: "0x0",
+			data: token.methods.transfer(withdrawalAddress, transferAmount).encodeABI(),
+			chainId: 4,
+		};
+		ownerWallet.signTransaction(rawTransaction, function(error,signed) {
+			if (error) console.log('ethintegration.js error 161 signTransaction: '+error);
+			// Check it's a valid signature
+			const recoveryAddress = web3.eth.accounts.recoverTransaction(signed.rawTransaction);
+			const serializedTxHex = signed.rawTransaction;
+			web3.eth.sendSignedTransaction(serializedTxHex)
+			.on('transactionHash', function(hash) {
+				callback(hash);
+			})
+			//.on('receipt', function(receipt) {})
+			//.on('confirmation', function(confirmationNumber, receipt){})
+			.on('error', function(error1) {
+				callback(false);
+			});
+		});
+	},
 
 };
 
