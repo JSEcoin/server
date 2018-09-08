@@ -3,7 +3,7 @@
  * @name JSE Controller (controller.js)
  * @example forever start -c "node --max-old-space-size=3000" controller.js &
  * @example "node controller.js -t local -d http://localhost:82 -e http://localhost:83
- * @version 1.8.1
+ * @version 1.8.2
  * @description The controller carries out maintenance tasks for the JSE platform and blockchain.
  */
 
@@ -24,7 +24,7 @@ JSE.jseTestNet = commandLine.testnet;
 
 if (JSE.jseTestNet !== false) console.log('WARNING: RUNNING IN TESTNET MODE - '+JSE.jseTestNet); // idiot check
 
-JSE.jseVersion = 'JSEcoin Controller v1.8.0';
+JSE.jseVersion = 'JSEcoin Controller v1.8.2';
 
 const fs = require('fs');
 const request = require('request');

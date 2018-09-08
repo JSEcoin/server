@@ -3,7 +3,7 @@
  * @name JSE Datastore (datastore.js)
  * @example forever start -c "node --max-old-space-size=11500" datastore.js &
  * @example node --max-old-space-size=3000 datastore.js -p 82 -t local
- * @version 1.8.1
+ * @version 1.8.2
  * @description The JSE datastore is a custom key value storage system design to efficiently handle Javascript objects via socket.io
  */
 
@@ -21,7 +21,7 @@ JSE.jseTestNet = commandLine.testnet;
 
 if (JSE.jseTestNet !== false) console.log('WARNING: RUNNING IN TESTNET MODE - '+JSE.jseTestNet); // idiot check
 
-JSE.jseVersion = 'JSEcoin Datastore Server v1.8.0';
+JSE.jseVersion = 'JSEcoin Datastore Server v1.8.2';
 
 const dataDir = './data/'; // start with ./ relative to this files location ane end in slash i.e. ./data/
 const bkupDir = './logs/'; // as above
