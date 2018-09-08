@@ -363,27 +363,36 @@ function processRewards(howManyDaysBack=7) {
 					JSE.jseDataIO.plusX('ledger/'+uid, jsePlatformReward);
 					const newPlatformData = {};
 					newPlatformData.command = 'platformReward';
+					newPlatformData.reference = 'Platform Mining Reward '+lastWeekYYMMDD;
 					newPlatformData.user1 = uid;
 					newPlatformData.value = jsePlatformReward;
+					newPlatformData.ts = new Date().getTime();
 					JSE.jseDataIO.pushBlockData(newPlatformData,function(blockData) {});
+					JSE.jseDataIO.pushVariable('history/'+uid,newPlatformData,function(pushRef) {});
 				}
 				if (rewards[uid][lastWeekYYMMDD].p) { // p = publisher mining
 					const jsePublisherReward = rewards[uid][lastWeekYYMMDD].p;
 					JSE.jseDataIO.plusX('ledger/'+uid, jsePublisherReward);
 					const newPublisherData = {};
 					newPublisherData.command = 'publisherReward';
+					newPublisherData.reference = 'Publisher Mining Reward '+lastWeekYYMMDD;
 					newPublisherData.user1 = uid;
 					newPublisherData.value = jsePublisherReward;
+					newPublisherData.ts = new Date().getTime();
 					JSE.jseDataIO.pushBlockData(newPublisherData,function(blockData) {});
+					JSE.jseDataIO.pushVariable('history/'+uid,newPublisherData,function(pushRef) {});
 				}
 				if (rewards[uid][lastWeekYYMMDD].r) { // r = referral
 					const jseReferralReward = rewards[uid][lastWeekYYMMDD].r;
 					JSE.jseDataIO.plusX('ledger/'+uid, jseReferralReward);
 					const newReferralData = {};
 					newReferralData.command = 'referralReward';
+					newReferralData.reference = 'Referral Reward '+lastWeekYYMMDD;
 					newReferralData.user1 = uid;
 					newReferralData.value = jseReferralReward;
+					newReferralData.ts = new Date().getTime();
 					JSE.jseDataIO.pushBlockData(newReferralData,function(blockData) {});
+					JSE.jseDataIO.pushVariable('history/'+uid,newReferralData,function(pushRef) {});
 				}
 				JSE.jseDataIO.setVariable('rewards/'+uid+'/'+lastWeekYYMMDD+'/d',true); // d = done
 			}
