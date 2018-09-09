@@ -695,8 +695,10 @@ router.post('/updatetxlimit/*', function (req, res) {
 			}
 			const dataObject = {};
 			dataObject.uid = goodCredentials.uid;
+			dataObject.email = goodCredentials.email;
 			dataObject.command = 'txlimit';
 			dataObject.newTxLimit = newTxLimit;
+			dataObject.currentTxLimit = goodCredentials.txLimit;
 			dataObject.ts = new Date().getTime();
 			dataObject.requireEmail = true;
 			dataObject.emailApproved = false;
