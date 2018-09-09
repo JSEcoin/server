@@ -94,7 +94,17 @@ function startLogin(credentials,req,res) {
 		if (geoObject && geoObject.country) {
 			geo = geoObject.country.iso_code;
 		}
-		const recordLogin = geo+','+lastIP+','+newDate+','+userAgent;
+		let lastApp = 'platform';
+		if (req.body.app) {
+			lastApp = JSE.jseFunctions.cleanString(String(req.body.app));
+		}
+		const recordLogin = {
+			geo,
+			ip: lastIP,
+			ts: newDate,
+			ua: userAgent,
+			app: lastApp,
+		};
 		if (previousSessionVar) {
 			JSE.jseDataIO.hardDeleteVariable('lookupSession/'+previousSessionVar);
 		}
