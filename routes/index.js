@@ -698,7 +698,7 @@ router.post('/updatetxlimit/*', function (req, res) {
 			dataObject.email = goodCredentials.email;
 			dataObject.command = 'txlimit';
 			dataObject.newTxLimit = newTxLimit;
-			dataObject.currentTxLimit = goodCredentials.txLimit;
+			dataObject.currentTxLimit = goodCredentials.txLimit || JSE.jseSettings.txLimit || 1000;
 			dataObject.ts = new Date().getTime();
 			dataObject.requireEmail = true;
 			dataObject.emailApproved = false;
@@ -743,6 +743,7 @@ router.post('/txtoday/*', function (req, res) {
 				const returnObject = {};
 				returnObject.success = 1;
 				returnObject.txToday = txToday || 0;
+				returnObject.txLimit = goodCredentials.txLimit || JSE.jseSettings.txLimit || 1000;
 				res.send(JSON.stringify(returnObject));
 			});
 	 	} else {

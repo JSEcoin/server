@@ -146,7 +146,7 @@ const jseCommands = {
 				}
 				const value = JSE.jseFunctions.round(parseFloat(dataObject.value)); // can't clean string because it's not a string
 
-				const txLimit = goodCredentials.txLimit || JSE.jseSettings.txLimit;
+				const txLimit = goodCredentials.txLimit || JSE.jseSettings.txLimit || 1000;
 				JSE.jseDataIO.getVariable('txToday/'+goodCredentials.uid, function(txToday) {
 					let txCompleted;
 					if (txToday === null) {
@@ -234,7 +234,7 @@ const jseCommands = {
 			}
 			const value = JSE.jseFunctions.round(parseFloat(dataObject.value)); // can't clean string because it's not a string
 
-			const txLimit = goodCredentials.txLimit || JSE.jseSettings.txLimit;
+			const txLimit = goodCredentials.txLimit || JSE.jseSettings.txLimit || 1000;
 			JSE.jseDataIO.getVariable('txToday/'+goodCredentials.uid, function(txToday) {
 				let txCompleted;
 				if (txToday === null) {
