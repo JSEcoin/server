@@ -181,12 +181,11 @@ const jseCommands = {
 					} else if (dataObject.toPublicKey !== toUser.publicKey) {
 						callback2('{"fail":1,"notification":"Transfer Failed: Data object user2pk does not match public key"}');
 					} else {
-						//console.log('asdf.'+JSON.stringify(dataObject));
 						JSE.jseDataIO.pushBlockData(dataObject,function(blockData) {
 							JSE.jseDataIO.minusBalance(goodCredentials.uid,value);
 							JSE.jseDataIO.plusX('txToday/'+goodCredentials.uid,value);
 							JSE.jseDataIO.addBalance(toUser.uid,value);
-							const dataObject2 = JSON.parse(JSON.stringify(dataObject)); // clone don't reference
+							const dataObject2 = JSON.parse(JSON.stringify(blockData)); // clone don't reference
 							if (dataObject2.private !== true) {
 								dataObject2.user1email = goodCredentials.email;
 								dataObject2.user2email = toUser.email;
@@ -266,7 +265,7 @@ const jseCommands = {
 					JSE.jseDataIO.pushBlockData(dataObject,function(blockData) {
 						JSE.jseDataIO.minusBalance(goodCredentials.uid,value);
 						JSE.jseDataIO.plusX('txToday/'+goodCredentials.uid,value);
-						const dataObject2 = JSON.parse(JSON.stringify(dataObject)); // clone don't reference
+						const dataObject2 = JSON.parse(JSON.stringify(blockData)); // clone don't reference
 						dataObject2.user1email = goodCredentials.email;
 						JSE.jseDataIO.pushVariable('history/'+goodCredentials.uid,dataObject2,function(pushRef) {});
 						callback3('{"success":1}');
@@ -336,7 +335,7 @@ const jseCommands = {
 					JSE.jseDataIO.pushBlockData(dataObject,function(blockData) {
 						JSE.jseDataIO.minusBalance(goodCredentials.uid,value);
 						JSE.jseDataIO.plusX('txToday/'+goodCredentials.uid,value);
-						const dataObject2 = JSON.parse(JSON.stringify(dataObject)); // clone don't reference
+						const dataObject2 = JSON.parse(JSON.stringify(blockData)); // clone don't reference
 						dataObject2.user1email = goodCredentials.email;
 						JSE.jseDataIO.pushVariable('history/'+goodCredentials.uid,dataObject2,function(pushRef) {});
 						callback5('{"success":1}');

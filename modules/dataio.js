@@ -403,19 +403,20 @@ const jseDB = {
 	 * @param {object} blockData transaction data to push into blockchain
 	 * @param {function} callback callback with the blockData
 	 */
-	pushBlockData(blockData,callback) {
-		JSE.jseDataIO.getVariable('blockID',function(result){
-			JSE.blockID = result; // update JSE.blockID as we have the data
-			const targetBlockID = result;
-			const blockRef = JSE.jseDataIO.getBlockRef(targetBlockID);
-			JSE.jseDataIO.getVariable('blockChain/'+blockRef+'/'+targetBlockID+'/open',function(trueFalse) {
+	pushBlockData(blockDataRaw,callback) {
+		const blockData = blockDataRaw;
+		JSE.jseDataIO.getVariable('blockID',function(latestBlockID){
+			JSE.blockID = latestBlockID; // update JSE.blockID as we have the data
+			blockData.blockID = latestBlockID; // store blockID in tranasction
+			const blockRef = JSE.jseDataIO.getBlockRef(blockData.blockID);
+			JSE.jseDataIO.getVariable('blockChain/'+blockRef+'/'+blockData.blockID+'/open',function(trueFalse) {
 				if (trueFalse === true) {
-					JSE.jseDataIO.pushVariable('blockChain/'+blockRef+'/'+targetBlockID+'/input',blockData,function(pushRef) {
+					JSE.jseDataIO.pushVariable('blockChain/'+blockRef+'/'+blockData.blockID+'/input',blockData,function(pushRef) {
 						callback(blockData);
 					});
 				} else {
-					console.log('Warning 346 changing block ('+targetBlockID+') command: '+blockData.command);
-					setTimeout(function() { JSE.jseDataIO.pushBlockData(blockData,callback); }, 2000); // Might be changing block, try again in a couple of seconds
+					console.log('Warning 346 changing block ('+blockData.blockID+') command: '+blockData.command);
+					setTimeout(function() { JSE.jseDataIO.pushBlockData(blockData,callback); }, 3000); // Might be changing block, try again in a couple of seconds
 				}
 			});
 		});
