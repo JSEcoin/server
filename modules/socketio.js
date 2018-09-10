@@ -422,15 +422,14 @@ const jseSocketIO = {
 			socket.on('getChainData', function(fireKey, callback) {
 				if (JSE.jseTestNet) console.log('getChainData Request: '+fireKey);
 				const chainData = getTarget(fireKey); // getTarget function below
-				callback(chainData);
-			});
-
-			socket.on('getNodeChainData', function(fireKey, callback) {
-				if (JSE.jseTestNet) console.log('getChainData Request: '+fireKey);
-				if (fireKey.substr(0,11) === 'blockChain/' && fireKey.length > 12) { // check request is for public blockChain data
-					JSE.jseDataIO.getVariable(fireKey,function(chainData) {
-						callback(chainData);
+				if (chainData) {
+					callback(chainData);
+				} else if (fireKey.substr(0,11) === 'blockChain/' && fireKey.length > 12) { // check request is for public blockChain data
+					JSE.jseDataIO.getVariable(fireKey,function(chainData2) {
+						callback(chainData2);
 					});
+				} else {
+					callback(null);
 				}
 			});
 
