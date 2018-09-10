@@ -297,7 +297,7 @@ function nextSubKey(subKeysCurrent, subBkupFiles, rootKeysCurrent, bkupFiles, bk
 function nextRootKey(rootKeysCurrent, bkupFiles, bkupStartTime) {
 	const rootKey = rootKeysCurrent[bkupFiles];
 	try {
-		if (rootKey === 'blockChain') { // blockchain exceeds size limit
+		if (rootKey === 'blockChain') { // blockChain exceeds size limit
 			//bkupJSON[rootKey] = {};
 			const subBkupFiles = 0;
 			const subKeysCurrent = Object.keys(data[rootKey]);

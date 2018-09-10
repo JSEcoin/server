@@ -215,7 +215,7 @@ const jseCommands = {
 
 	/**
 	 * @method <h2>verifyExport</h2>
-	 * @description Check a export before writing it to the blockchain
+	 * @description Check a export before writing it to the blockChain
 	 * @param {object} dataObject transaction which has been signed from the client
 	 * @param {function} callback3 returns the JSON result to the calling function
 	 */
@@ -280,7 +280,7 @@ const jseCommands = {
 
 	/**
 	 * @method <h2>verifyWithdraw</h2>
-	 * @description Check a withdraw before writing it to the blockchain
+	 * @description Check a withdraw before writing it to the blockChain
 	 * @param {object} dataObject transaction which has been signed from the client
 	 * @param {function} callback5 returns the JSON result to the calling function
 	 */

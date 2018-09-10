@@ -382,7 +382,7 @@ const jseSocketIO = {
 
 			/**
 			 * @function <h2>getTarget</h2>
-			 * @description Used to lookup a firebase key of the blockchain i.e. blockChain/123/123456
+			 * @description Used to lookup a firebase key of the blockChain i.e. blockChain/123/123456
 			 * @param {string} key firebase style key
 			 * @returns {object} Returns the value at key
 			 */
@@ -427,7 +427,7 @@ const jseSocketIO = {
 
 			socket.on('getNodeChainData', function(fireKey, callback) {
 				if (JSE.jseTestNet) console.log('getChainData Request: '+fireKey);
-				if (fireKey.substr(0,11) === 'blockchain/') { // check request is for public blockchain data
+				if (fireKey.substr(0,11) === 'blockChain/' && fireKey.length > 12) { // check request is for public blockChain data
 					JSE.jseDataIO.getVariable(fireKey,function(chainData) {
 						callback(chainData);
 					});

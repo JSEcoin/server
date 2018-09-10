@@ -2,7 +2,7 @@
  * @module jsePeerConnections
  * @description Client connects to initial peer set in server.js and requests a peerList (plus blockID&jseSettings).<br>
  * Then it will connect to 3 peers (definable in JSE.maxPeers with -m command line arg) that are first to respond<br>
- * It then requests the last 1000 blocks (litenode) or the entire blockchain (fullnode)<br>
+ * It then requests the last 1000 blocks (litenode) or the entire blockChain (fullnode)<br>
  * Then it subscribes to any new blocks and transactions coming in on the network<br>
  * New blocks received are validated and checked before being assigned to the JSE.currentChain
  * <h5>Exported</h5>
