@@ -425,6 +425,15 @@ const jseSocketIO = {
 				callback(chainData);
 			});
 
+			socket.on('getNodeChainData', function(fireKey, callback) {
+				if (JSE.jseTestNet) console.log('getChainData Request: '+fireKey);
+				if (fireKey.substr(0,11) === 'blockchain/') { // check request is for public blockchain data
+					JSE.jseDataIO.getVariable(fireKey,function(chainData) {
+						callback(chainData);
+					});
+				}
+			});
+
 			socket.on('getLedger', function(callback) {
 				if (JSE.jseTestNet) console.log('getLedger Request');
 				JSE.jseDataIO.getVariable('ledger/',function(currentLedger) {
