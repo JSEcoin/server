@@ -407,11 +407,18 @@ const jseDB = {
 		const blockData = blockDataRaw;
 		JSE.jseDataIO.getVariable('blockID',function(latestBlockID){
 			JSE.blockID = latestBlockID; // update JSE.blockID as we have the data
-			blockData.blockID = latestBlockID; // store blockID in tranasction
+			if (blockData.command && blockData.command !== 'mining') {
+				blockData.blockID = latestBlockID; // store blockID in tranasction
+			}
 			const blockRef = JSE.jseDataIO.getBlockRef(blockData.blockID);
 			JSE.jseDataIO.getVariable('blockChain/'+blockRef+'/'+blockData.blockID+'/open',function(trueFalse) {
 				if (trueFalse === true) {
 					JSE.jseDataIO.pushVariable('blockChain/'+blockRef+'/'+blockData.blockID+'/input',blockData,function(pushRef) {
+						if (blockData.command && blockData.command !== 'mining') {
+							blockData.tx = pushRef;
+							JSE.jseDataIO.setVariable('blockChain/'+blockRef+'/'+blockData.blockID+'/input/'+pushRef+'/tx',pushRef); // set tx to pushRef for blockchain explorer lookup
+						}
+
 						callback(blockData);
 					});
 				} else {
