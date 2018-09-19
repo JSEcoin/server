@@ -714,7 +714,7 @@ router.post('/updatetxlimit/*', function (req, res) {
 				const confirmLink = 'https://server.jsecoin.com/confirm/tx/'+goodCredentials.uid+'/'+pushRef+'/'+dataObject.confirmKey;
 				const withdrawalHTML = `Please click the link below to confirm you wish to adjust your transaction limit to:<br>
 																${dataObject.newTxLimit} JSE<br><br>
-																<a href="${confirmLink}">Confirm this withdrawal</a><br><br>
+																<a href="${confirmLink}">Confirm new transaction limit</a><br><br>
 																If you did not make this transaction please contact admin@jsecoin.com and change your account password ASAP.<br>`;
 				JSE.jseFunctions.sendStandardEmail(goodCredentials.email,'Please confirm new JSE transaction limit',withdrawalHTML);
 				res.send('{"success":1,"notification":"Transaction limit will update after email confirmation","emailRequired":true}');
