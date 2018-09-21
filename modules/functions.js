@@ -498,6 +498,7 @@ function banEmail(banUID) {
 function referral(utmCampaign,utmContent,affPayout,geo,notes) {
 	let value = affPayout;
 	const strippedUID = utmCampaign.split(/[^0-9]/).join('');
+	if (!strippedUID) return false; // check for blank UIDs
 	JSE.jseDataIO.getVariable('account/'+strippedUID,function(affiliate) {
 		if (affiliate === null) { return false; } // watch out for wrong affids
 		if (typeof affiliate.affQuality !== 'undefined') { // block suspended accounts
@@ -527,6 +528,7 @@ function referral(utmCampaign,utmContent,affPayout,geo,notes) {
 		*/
 		return false;
 	});
+	return false;
 }
 
 /**

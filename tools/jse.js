@@ -129,6 +129,7 @@ function help() {
 	console.log('  repairstats - find bad data in stats    	- repairstats');
 	console.log('  miningmaintenance - reduce miningdb			- miningmaintenance');
 	console.log('  badledger - find bad data in ledger    	- badledger');
+	console.log('  rewards - manually process rewrads   		- rewards 180914');
 	console.log('  checkip - realityCheck on IP             - checkip 13.2.3.5');
 	console.log('  sysmsg - set a new platform message      - sysmsg welcome to the jungle');
 	console.log('  runtxt - run code in the runTxt function - runtxt');
@@ -313,6 +314,11 @@ function checkAuthenticated() {
 				const sysMsgString = keySplit.slice(1,99).join(' ');
 				JSE.jseDataIO.setVariable('jseSettings/systemMessage',sysMsgString);
 				setTimeout(function() { process.stdout.write("\n> "); }, 2000);
+			} else if (keySplit[0] === 'rewards' && keySplit[1])	{
+				const YYMMDD = keySplit[1];
+				console.log('Manually processing rewards for '+YYMMDD);
+				manualProcessRewards(YYMMDD);
+				setTimeout(function() { process.stdout.write("\n> "); }, 60000);
 			} else if (cleanKey === 'runtxt')	{
 				runTxt();
 				setTimeout(function() { process.stdout.write("\n> "); }, 2000);
@@ -375,6 +381,69 @@ function bkupAll() {
 	}
 }
 
+/**
+ * @method <h2>manualProcessRewards</h2>
+ * @description Move the rewards across to the ledger for a certain date.
+ * 							Included but commented out is the option to add to block data and history as well depending on if this has been done already
+ * 							Uncomment the final line /d true as well if this hasn't been done. Hard delete month old data has been removed. May need doing manually.
+ * @param YYMMDD the date we want to process manually.
+ */
+function manualProcessRewards(YYMMDD) {
+	const lastWeekYYMMDD = YYMMDD;
+	JSE.jseDataIO.getVariable('rewards',function(rewards) {
+		Object.keys(rewards).forEach(function(uid) {
+			if (!uid || !rewards[uid]) return; // check for blank uids and skip any uid's with no pending rewards
+			if (rewards[uid][lastWeekYYMMDD] && !rewards[uid][lastWeekYYMMDD].d) {
+				if (rewards[uid][lastWeekYYMMDD].s) { // s = self-mining
+					const jsePlatformReward = rewards[uid][lastWeekYYMMDD].s;
+					JSE.jseDataIO.plusX('ledger/'+uid, jsePlatformReward);
+					/*
+					const newPlatformData = {};
+					newPlatformData.command = 'platformReward';
+					newPlatformData.reference = 'Platform Mining Reward '+lastWeekYYMMDD;
+					newPlatformData.user1 = uid;
+					newPlatformData.value = jsePlatformReward;
+					newPlatformData.ts = new Date().getTime();
+					JSE.jseDataIO.pushBlockData(newPlatformData,function(blockData) {});
+					JSE.jseDataIO.pushVariable('history/'+uid,newPlatformData,function(pushRef) {});
+					*/
+				}
+				if (rewards[uid][lastWeekYYMMDD].p) { // p = publisher mining
+					const jsePublisherReward = rewards[uid][lastWeekYYMMDD].p;
+					JSE.jseDataIO.plusX('ledger/'+uid, jsePublisherReward);
+					/*
+					const newPublisherData = {};
+					newPublisherData.command = 'publisherReward';
+					newPublisherData.reference = 'Publisher Mining Reward '+lastWeekYYMMDD;
+					newPublisherData.user1 = uid;
+					newPublisherData.value = jsePublisherReward;
+					newPublisherData.ts = new Date().getTime();
+					JSE.jseDataIO.pushBlockData(newPublisherData,function(blockData) {});
+					JSE.jseDataIO.pushVariable('history/'+uid,newPublisherData,function(pushRef) {});
+					*/
+				}
+				if (rewards[uid][lastWeekYYMMDD].r) { // r = referral
+					const jseReferralReward = rewards[uid][lastWeekYYMMDD].r;
+					JSE.jseDataIO.plusX('ledger/'+uid, jseReferralReward);
+					/*
+					const newReferralData = {};
+					newReferralData.command = 'referralReward';
+					newReferralData.reference = 'Referral Reward '+lastWeekYYMMDD;
+					newReferralData.user1 = uid;
+					newReferralData.value = jseReferralReward;
+					newReferralData.ts = new Date().getTime();
+					JSE.jseDataIO.pushBlockData(newReferralData,function(blockData) {});
+					JSE.jseDataIO.pushVariable('history/'+uid,newReferralData,function(pushRef) {});
+					*/
+				}
+				console.log(uid);
+				//JSE.jseDataIO.setVariable('rewards/'+uid+'/'+lastWeekYYMMDD+'/d',true); // d = done
+			}
+		});
+	});
+}
+
+
 function importJSONFile(key, fileLocation) {
 	const newObj = require(fileLocation); // eslint-disable-line
 	console.log('Writing '+Object.keys(newObj).length+' fields to '+key);
@@ -398,7 +467,6 @@ function importBigJSONFile(key, fileLocation) {
 		}, c, fullKey, newObj[subKey]);
 	});
 }
-
 
 function importEntireDB() {
 	// need to do this is

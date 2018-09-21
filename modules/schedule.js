@@ -345,8 +345,6 @@ function storeLogs() {
 /**
  * @method <h2>processRewards</h2>
  * @description Move the rewards across to the ledger after x days
- * 							Included but commented out is the option to clean up after one month.
- * 							This might be required later as users will be pulling all this data on login
  * @param howManyDaysBack the number of days previously we want to move the rewards across for default. 7
  */
 function processRewards(howManyDaysBack=7) {
@@ -358,6 +356,7 @@ function processRewards(howManyDaysBack=7) {
 	const lastMonthYYMMDD = lastMonth.toISOString().slice(2,10).replace(/-/g,"");
 	JSE.jseDataIO.getVariable('rewards',function(rewards) {
 		Object.keys(rewards).forEach(function(uid) {
+			if (!uid || !rewards[uid]) return; // check for blank uids
 			if (rewards[uid][lastWeekYYMMDD] && !rewards[uid][lastWeekYYMMDD].d) {
 				if (rewards[uid][lastWeekYYMMDD].s) { // s = self-mining
 					const jsePlatformReward = rewards[uid][lastWeekYYMMDD].s;
@@ -397,11 +396,9 @@ function processRewards(howManyDaysBack=7) {
 				}
 				JSE.jseDataIO.setVariable('rewards/'+uid+'/'+lastWeekYYMMDD+'/d',true); // d = done
 			}
-			/*
 			if (rewards[uid][lastMonthYYMMDD]) {
 				JSE.hardDeleteVariable('rewards/'+uid+'/'+lastMonthYYMMDD); // clean up after one month?
 			}
-			*/
 		});
 	});
 }
