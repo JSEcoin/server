@@ -328,7 +328,10 @@ function checkAuthenticated() {
 			} else if (cleanKey === 'exit')	{
 				console.log("Thanks for using JSE console :)\n");
 				process.exit();
-			} else {
+			} else if (cleanKey === '') {
+				console.log('');
+				process.stdout.write("\n> ");
+			}else {
 				console.log('Command not recognised :(');
 				process.stdout.write("\n> ");
 			}
@@ -386,17 +389,24 @@ function bkupAll() {
  * @description Move the rewards across to the ledger for a certain date.
  * 							Included but commented out is the option to add to block data and history as well depending on if this has been done already
  * 							Uncomment the final line /d true as well if this hasn't been done. Hard delete month old data has been removed. May need doing manually.
+ * 							!rewards[uid][lastWeekYYMMDD].d check removed
  * @param YYMMDD the date we want to process manually.
  */
 function manualProcessRewards(YYMMDD) {
 	const lastWeekYYMMDD = YYMMDD;
 	JSE.jseDataIO.getVariable('rewards',function(rewards) {
+		console.log('Rewards Pending Data Returned For '+lastWeekYYMMDD+' - '+Object.keys(rewards).length+' Users');
 		Object.keys(rewards).forEach(function(uid) {
 			if (!uid || !rewards[uid]) return; // check for blank uids and skip any uid's with no pending rewards
-			if (rewards[uid][lastWeekYYMMDD] && !rewards[uid][lastWeekYYMMDD].d) {
+			//if (rewards[uid][lastWeekYYMMDD] && !rewards[uid][lastWeekYYMMDD].d) {
+			if (rewards[uid][lastWeekYYMMDD]) {
+					console.log('# UID: '+uid);
+				let totalPending = 0;
 				if (rewards[uid][lastWeekYYMMDD].s) { // s = self-mining
 					const jsePlatformReward = rewards[uid][lastWeekYYMMDD].s;
-					JSE.jseDataIO.plusX('ledger/'+uid, jsePlatformReward);
+					totalPending += jsePlatformReward;
+					console.log(jsePlatformReward);
+					//JSE.jseDataIO.plusX('ledger/'+uid, jsePlatformReward);
 					/*
 					const newPlatformData = {};
 					newPlatformData.command = 'platformReward';
@@ -410,7 +420,9 @@ function manualProcessRewards(YYMMDD) {
 				}
 				if (rewards[uid][lastWeekYYMMDD].p) { // p = publisher mining
 					const jsePublisherReward = rewards[uid][lastWeekYYMMDD].p;
-					JSE.jseDataIO.plusX('ledger/'+uid, jsePublisherReward);
+					totalPending += jsePublisherReward;
+					console.log(jsePublisherReward);
+					//JSE.jseDataIO.plusX('ledger/'+uid, jsePublisherReward);
 					/*
 					const newPublisherData = {};
 					newPublisherData.command = 'publisherReward';
@@ -424,7 +436,9 @@ function manualProcessRewards(YYMMDD) {
 				}
 				if (rewards[uid][lastWeekYYMMDD].r) { // r = referral
 					const jseReferralReward = rewards[uid][lastWeekYYMMDD].r;
-					JSE.jseDataIO.plusX('ledger/'+uid, jseReferralReward);
+					totalPending += jseReferralReward;
+					console.log(jseReferralReward);
+					//JSE.jseDataIO.plusX('ledger/'+uid, jseReferralReward);
 					/*
 					const newReferralData = {};
 					newReferralData.command = 'referralReward';
@@ -436,7 +450,8 @@ function manualProcessRewards(YYMMDD) {
 					JSE.jseDataIO.pushVariable('history/'+uid,newReferralData,function(pushRef) {});
 					*/
 				}
-				console.log(uid);
+				console.log(uid+' = '+totalPending);
+				JSE.jseDataIO.plusX('ledger/'+uid, totalPending);
 				//JSE.jseDataIO.setVariable('rewards/'+uid+'/'+lastWeekYYMMDD+'/d',true); // d = done
 			}
 		});
