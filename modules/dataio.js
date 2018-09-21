@@ -405,24 +405,24 @@ const jseDB = {
 	 */
 	pushBlockData(blockDataRaw,callback) {
 		const blockData = blockDataRaw;
-		JSE.jseDataIO.getVariable('blockID',function(latestBlockID){
+		JSE.jseDataIO.getVariable('blockID',function(latestBlockID) {
 			JSE.blockID = latestBlockID; // update JSE.blockID as we have the data
 			if (blockData.command && blockData.command !== 'mining') {
 				blockData.blockID = latestBlockID; // store blockID in tranasction
 			}
-			const blockRef = JSE.jseDataIO.getBlockRef(blockData.blockID);
-			JSE.jseDataIO.getVariable('blockChain/'+blockRef+'/'+blockData.blockID+'/open',function(trueFalse) {
+			const blockRef = JSE.jseDataIO.getBlockRef(latestBlockID);
+			JSE.jseDataIO.getVariable('blockChain/'+blockRef+'/'+latestBlockID+'/open',function(trueFalse) {
 				if (trueFalse === true) {
-					JSE.jseDataIO.pushVariable('blockChain/'+blockRef+'/'+blockData.blockID+'/input',blockData,function(pushRef) {
+					JSE.jseDataIO.pushVariable('blockChain/'+blockRef+'/'+latestBlockID+'/input',blockData,function(pushRef) {
 						if (blockData.command && blockData.command !== 'mining') {
 							blockData.tx = pushRef;
-							JSE.jseDataIO.setVariable('blockChain/'+blockRef+'/'+blockData.blockID+'/input/'+pushRef+'/tx',pushRef); // set tx to pushRef for blockchain explorer lookup
+							JSE.jseDataIO.setVariable('blockChain/'+blockRef+'/'+latestBlockID+'/input/'+pushRef+'/tx',pushRef); // set tx to pushRef for blockchain explorer lookup
 						}
 
 						callback(blockData);
 					});
 				} else {
-					console.log('Warning 346 changing block ('+blockData.blockID+') command: '+blockData.command);
+					console.log('Warning 346 changing block ('+latestBlockID+') command: '+blockData.command);
 					setTimeout(function() { JSE.jseDataIO.pushBlockData(blockData,callback); }, 3000); // Might be changing block, try again in a couple of seconds
 				}
 			});
