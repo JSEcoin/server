@@ -2,6 +2,7 @@ const JSE = global.JSE;
 const { exec } = require('child_process');
 const fs = require('fs');
 //const debug = require('debug')('*')
+const jseSchedule = require('./../modules/schedule.js');
 
 const now = new Date().getTime();
 
@@ -27,6 +28,7 @@ function updateNext(i) {
 function runTxt() {
 	// ### RUN ALL FUNCTIONS HERE
 
+	jseSchedule.startAutoresponder();
 	//importJSONFile('ledger','./../../../bkup/2018/February/180207/ledger.json');
 	//importBigJSONFile('history','./../../../bkup/2018/February/180202/history180202A.json');
 	//importEntireDB(); // warning this will overwrite entire database
@@ -331,7 +333,7 @@ function checkAuthenticated() {
 			} else if (cleanKey === '') {
 				console.log('');
 				process.stdout.write("\n> ");
-			}else {
+			} else {
 				console.log('Command not recognised :(');
 				process.stdout.write("\n> ");
 			}

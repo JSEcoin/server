@@ -77,7 +77,7 @@ function runAt5pm() {
 	const msTo5pm = peakTimeObject.getTime() - now.getTime();
 	console.log('runAt5pm set for '+(Math.floor(msTo5pm / 60000))+' mins');
 	setTimeout(function() {
-		if (JSE.jseTestNet === false) { // don't want to send emails when testing!
+		if (!JSE.jseTestNet) { // don't want to send emails when testing!
 			startAutoresponder();
 		}
 		runAt5pm(); // Then, reset again next midnight.
@@ -106,11 +106,12 @@ function startAutoresponder() {
 					if (users[i].source !== 'referral' || (!users[aff] || !users[aff].suspended)) {
 						if (users[i].lastEmail) {
 							const lastEmailTS = users[i].lastEmail.split(',')[0]; // timestamp,ref
-							const lastEmailRef = users[i].lastEmail.split(',')[1];
+							const lastEmailRef = parseInt(users[i].lastEmail.split(',')[1],10);
 							const nextEmailTS = (new Date(Number(lastEmailTS)).getTime()) + (86400000 * lastEmailRef * 2); // i.e. email 4 will be sent 6 days after email 3, remove end figure to speed up
 							if (nextEmailTS < nowTS) {
 								maxCount += 1;
-								JSE.emailsToSend.push({ user: users[i], emailRef: lastEmailRef + 1 });
+								const nextEmailRef = lastEmailRef + 1;
+								JSE.emailsToSend.push({ user: users[i], emailRef: nextEmailRef });
 							}
 						} else {
 							maxCount += 1;
@@ -404,5 +405,5 @@ function processRewards(howManyDaysBack=7) {
 }
 
 module.exports = {
-	runAtMidnight, runAtMidday, runAt5pm, cleanNulls, backupLedger, resetBlockChainFile, storeLogs,
+	runAtMidnight, runAtMidday, runAt5pm, cleanNulls, backupLedger, startAutoresponder, resetBlockChainFile, storeLogs,
 };
