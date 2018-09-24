@@ -279,10 +279,14 @@ function sendWelcomeEmail(newUser) {
  * @param {string} callback callback used to loop through emails from modules/schedule.js
  */
 function sendOnboardingEmail(user,emailRef,callback) {
-	if (jseEmails.onboarding[emailRef]) { // Check we haven't sent them all already.
+	if (jseEmails.onboarding[emailRef]) { // Check we haven't sent them all already. email template doesn't exist
 		const fromEmail = new helper.Email('noreply@jsecoin.com');
-		if (jseEmails.suppression.indexOf(user.email) > -1) return;
+		if (jseEmails.suppression.indexOf(user.email) > -1) {
+			callback();
+			return;
+		}
 		const toEmail = new helper.Email(user.email);
+		console.log('Sending onboarding email to: '+user.email+' '+emailRef);
 		const templates = ['template1','template2']; // split test templates
 		const template = templates[Math.floor(Math.random()*templates.length)];
 		const htmlContent = jseEmails.onboarding[emailRef].html;
@@ -307,8 +311,10 @@ function sendOnboardingEmail(user,emailRef,callback) {
 			if (error) { console.log('Sendgrid Error response received, sendOnboardingEmail emailRef '+emailRef); }
 			callback();
 		});
-		const nowTS =new Date().getTime();
+		const nowTS = new Date().getTime();
 		JSE.jseDataIO.setVariable('account/'+user.uid+'/lastEmail', nowTS+','+emailRef);
+	} else {
+		callback();
 	}
 }
 

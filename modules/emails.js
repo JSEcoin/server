@@ -172,7 +172,7 @@ We are lucky enough to have a great community of users and we uphold the integri
 /* Onboarding 5 - What We Are Building (whitepaper.pdf) */
 /* Requires PDF attachment */
 emails.onboarding[5] = {};
-emails.onboarding[5].subject = `Why transparency is important to the JSE project`;
+emails.onboarding[5].subject = `What We Are Building (whitepaper.pdf)`;
 emails.onboarding[5].pdf = `whitepaper.pdf`;
 fs.readFile(miscDir+'/whitepaper.pdf', function(err, preAttachmentData) { emails.onboarding[5].attachmentData = Buffer.from(preAttachmentData).toString('base64'); });
 emails.onboarding[5].html = `JSEcoin is bridging the gap between web and blockchain technologies making a user-friendly platform that runs on a browser mined blockchain.

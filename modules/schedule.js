@@ -92,25 +92,24 @@ function runAt5pm() {
 JSE.emailsToSend = [];
 function startAutoresponder() {
 	JSE.jseDataIO.getVariable('nextUserID',function(endID) {
-		const startID = endID - 30000; // only send to last 40k users, may need to increase
+		const startID = endID - 50000; // only send to last 50k users, may need to increase
 		JSE.jseDataIO.getAdminAccounts(startID,endID,function(users){
 			const nowTS =new Date().getTime();
 			let maxCount = 0;
-			const maxEmailsPerDay = 5000; // can increase this at a later date
+			const maxEmailsPerDay = 10000; // can increase this at a later date
 			Object.keys(users).forEach(function(i) {
 				if (typeof users[i] === 'undefined' || users[i] === null || maxCount > maxEmailsPerDay) return;
 				if (users[i].confirmed === true && !users[i].suspended) {
 					if (users[i].noNewsletter) return;
-					let aff = users[i].campaign.split(/[^0-9]/).join('');
-					aff = parseFloat(aff);
+					const aff =  parseInt(users[i].campaign.split(/[^0-9]/).join(''),10);
 					if (users[i].source !== 'referral' || (!users[aff] || !users[aff].suspended)) {
 						if (users[i].lastEmail) {
 							const lastEmailTS = users[i].lastEmail.split(',')[0]; // timestamp,ref
 							const lastEmailRef = parseInt(users[i].lastEmail.split(',')[1],10);
-							const nextEmailTS = (new Date(Number(lastEmailTS)).getTime()) + (86400000 * lastEmailRef * 2); // i.e. email 4 will be sent 6 days after email 3, remove end figure to speed up
+							const nextEmailTS = (new Date(Number(lastEmailTS)).getTime()) + (86400000 * lastEmailRef); // * 2 removed 24th Sept, previous note i.e. email 4 will be sent 6 days after email 3, remove end figure to speed up
 							if (nextEmailTS < nowTS) {
 								maxCount += 1;
-								const nextEmailRef = lastEmailRef + 1;
+								const nextEmailRef = Number(lastEmailRef) + 1;
 								JSE.emailsToSend.push({ user: users[i], emailRef: nextEmailRef });
 							}
 						} else {
