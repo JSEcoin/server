@@ -215,7 +215,7 @@ const jseSocketIO = {
 					JSE.publisherIPs.push(socket.realIP);
 					if (ipCount <= 2) {
 						jseLottery.credit(pubID,siteID,subID,'optin');
-					} else if (ipCount <= 5) {
+					}	else if (ipCount <= 4) {
 						jseLottery.credit(pubID,siteID,subID,'optinlotteryonly'); // could be removed when we have enough volume
 					}
 				}

@@ -129,7 +129,6 @@ JSE.platformUIDs = [];
 JSE.platformUniqueIDs = [];
 JSE.publisherIPs = [];
 JSE.pinAttempts = [];
-JSE.publisherAuthKeys = [];
 JSE.creditQuickLookup = {}; // dont db query on each hit,hash,unique
 JSE.recentSiteIDs = [];
 JSE.recentSubIDs = [];
@@ -280,16 +279,23 @@ function fairReset() {
 }
 fairReset();
 
-/**  Limit publisher mining rewards to one per IP per 6 hours */
+/**  Limit pin attempts to 3 per 6 hours */
 function fairResetLong() {
-	JSE.publisherIPs = [];
-	JSE.publisherAuthKeys = [];
 	JSE.pinAttempts = [];
 	setTimeout(function() {
 		fairResetLong();
 	}, 21600000); // 6 hours
 }
 fairResetLong();
+
+/**  Limit publisher mining rewards to one per IP per 24 hours */
+function fairResetDaily() {
+	JSE.publisherIPs = [];
+	setTimeout(function() {
+		fairResetDaily();
+	}, 86400000); // 24 hours
+}
+fairResetDaily();
 
 /**  Create a minerAuthKey every 60 mins from a private seed and the current date and time */
 function genMinerAuthKey() {
