@@ -381,7 +381,7 @@ const jseCommands = {
 						callback4('{"fail":1,"notification":"Import Failed: Coin Code Error"}');
 					} else if (uid !== goodCredentials.uid) {
 						callback4('{"fail":1,"notification":"Import Failed: Data object user1 does not match public key"}');
-					} else if (!coinObject.uid) {
+					} else if (!coinObject.uid && coinObject.uid !== 0) {
 						callback4('{"fail":1,"notification":"Import Failed: coinObject.uid not available"}');
 					} else {
 						JSE.jseDataIO.checkSuspended(coinObject.uid,function(suspended) {
