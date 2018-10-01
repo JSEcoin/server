@@ -118,7 +118,9 @@ const jseBlockChain = {
 			const bidMinus1 = newBlockID - 1;
 			if (bidMinus1 > 0) { // close current block, no more pushing data
 				const blockRefMinus1 = JSE.jseDataIO.getBlockRef(bidMinus1);
-				JSE.jseDataIO.setVariable('blockChain/'+blockRefMinus1+'/'+bidMinus1+'/open',false);
+				JSE.jseDataIO.setVariableThen('blockChain/'+blockRefMinus1+'/'+bidMinus1+'/open',false,function() {
+					jseBlockChain.setPreviousPreHash(blockRefMinus1,bidMinus1);
+				});
 			}
 			jseBlockChain.webMine(newBlockID,function(bidMinus2,nonce,hash){
 				JSE.jseDataIO.deleteVariable('currentHashes');
@@ -132,7 +134,6 @@ const jseBlockChain = {
 						if (JSE.jseTestNet) console.log('Signed solved block, signature: '+signature);
 					});
 				}
-				jseBlockChain.setPreviousPreHash(newBlockID);
 				jseSchedule.storeLogs();
 				callback();
 				setTimeout(function() { jseLottery.runLottery(); jseBlockChain.verifyBlockID(bidMinus2); }, 5000);
@@ -159,16 +160,13 @@ const jseBlockChain = {
 	 * @description Take the previous block and convert it to a string for hashing
 	 * @param {number} set the previous hash in to the current block to create chronological blockchain
 	 */
-	setPreviousPreHash (newBlockID) {
-		const previousBlockID = parseFloat(newBlockID) - 1;
-		JSE.jseDataIO.getBlock(previousBlockID,function(block) { // previous block
-			const checkedBlock = jseBlockChain.doubleSpendCheck(previousBlockID, block);
+	setPreviousPreHash (refMinusOne,blockMinusOne) {
+		JSE.jseDataIO.getBlock(blockMinusOne,function(block) { // previous block
+			const checkedBlock = jseBlockChain.doubleSpendCheck(blockMinusOne, block);
 			const blockJSON = JSON.stringify(checkedBlock);
-			//console.log('PreviousBlockJSON '+previousBlockID+"\n\n"+blockJSON+"\n\n")
 			const blockPreHash = jseBlockChain.sha256(blockJSON);
 			JSE.jseDataIO.setVariable('previousBlockPreHash',blockPreHash);
-			const blockRef = JSE.jseDataIO.getBlockRef(previousBlockID);
-			JSE.jseDataIO.setVariable('blockChain/'+blockRef+'/'+previousBlockID+'/preHash',blockPreHash);
+			JSE.jseDataIO.setVariable('blockChain/'+refMinusOne+'/'+blockMinusOne+'/preHash',blockPreHash);
 		});
 	},
 
@@ -235,7 +233,8 @@ const jseBlockChain = {
 	// Fallback to mining on the server if we have no hashes submitted
 	serverMine (targetBlockID,callback) {
 		let found = false;
-		JSE.jseDataIO.getVariable('previousBlockPreHash',function(previousBlockPreHash) {
+		const blockRef = JSE.jseDataIO.getBlockRef(targetBlockID);
+		JSE.jseDataIO.getVariable('blockChain/'+blockRef+'/'+targetBlockID+'/preHash',function(previousBlockPreHash) {
 			for (let x = 0; x <= 5000000 && !found; x+=1) {
 				const targetTextWithNonce = previousBlockPreHash+','+x;
 				const hash = jseBlockChain.sha256(targetTextWithNonce);
