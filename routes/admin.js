@@ -475,15 +475,18 @@ router.post('/bountyUpdate/:adminpass', function(req, res) {
 			const reason = JSE.jseFunctions.cleanString(req.body.reason);
 			const pHTML = `Your ${bountyType} bounty submission ref. ${pushRef} has been declined.<br><br>${reason}`;
 			JSE.jseFunctions.sendStandardEmail(affiliate.email,'JSEcoin Bounty Declined',pHTML);
+			res.send('{"success":1}');
 		});
 	} else if (req.body.update === 'declinedNoEmail') {
 		JSE.jseDataIO.setVariable('bounty/'+pushRef+'/status',2);
+		res.send('{"success":1}');
 	} else if (req.body.update === 'airdropConfirmation') {
 		JSE.jseDataIO.setVariable('bounty/'+pushRef+'/status',3);
 		JSE.jseDataIO.getVariable('account/'+strippedUID,function(affiliate) {
 			JSE.jseDataIO.setVariable('account/'+strippedUID+'/airDrop',true);
 			const pHTML = `Your airdrop submission ref. ${pushRef} has been approved and your account will be credited on 2018-07-04.<br><br>Thank you for supporting the JSEcoin project`;
 			JSE.jseFunctions.sendStandardEmail(affiliate.email,'JSEcoin Airdrop Approved',pHTML);
+			res.send('{"success":1}');
 		});
 	} else if (req.body.update === 'ambassadorPayment') {
 		JSE.jseDataIO.setVariable('bounty/'+pushRef+'/status',3);
