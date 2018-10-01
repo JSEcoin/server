@@ -119,7 +119,7 @@ const jseBlockChain = {
 			if (bidMinus1 > 0) { // close current block, no more pushing data
 				const blockRefMinus1 = JSE.jseDataIO.getBlockRef(bidMinus1);
 				JSE.jseDataIO.setVariableThen('blockChain/'+blockRefMinus1+'/'+bidMinus1+'/open',false,function() {
-					jseBlockChain.setPreviousPreHash(blockRefMinus1,bidMinus1);
+					//jseBlockChain.setPreviousPreHash(blockRefMinus1,bidMinus1);
 				});
 			}
 			jseBlockChain.webMine(newBlockID,function(bidMinus2,nonce,hash){
@@ -134,6 +134,7 @@ const jseBlockChain = {
 						if (JSE.jseTestNet) console.log('Signed solved block, signature: '+signature);
 					});
 				}
+				jseBlockChain.setPreviousPreHash(blockRefMinus1,bidMinus1);
 				jseSchedule.storeLogs();
 				callback();
 				setTimeout(function() { jseLottery.runLottery(); jseBlockChain.verifyBlockID(bidMinus2); }, 5000);
