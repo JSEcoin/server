@@ -135,12 +135,7 @@ const jseBlockChain = {
 				jseBlockChain.setPreviousPreHash(newBlockID);
 				jseSchedule.storeLogs();
 				callback();
-				setTimeout(function(thisNewBlockID) {
-					jseBlockChain.setPreviousPreHash(thisNewBlockID); // redo this just in case we've had any late transactions come in
-					jseLottery.runLottery();
-					const thisNewBlockIDMinus2 = thisNewBlockID - 2;
-					jseBlockChain.verifyBlockID(thisNewBlockIDMinus2);
-				}, 5000, newBlockID);
+				setTimeout(function() { jseLottery.runLottery(); jseBlockChain.verifyBlockID(bidMinus2); }, 5000);
 			});
 		});
 	},
