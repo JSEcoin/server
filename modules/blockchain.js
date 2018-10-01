@@ -135,7 +135,12 @@ const jseBlockChain = {
 				jseBlockChain.setPreviousPreHash(newBlockID);
 				jseSchedule.storeLogs();
 				callback();
-				setTimeout(function() { jseLottery.runLottery(); jseBlockChain.verifyBlockID(bidMinus2); }, 5000);
+				setTimeout(function(thisNewBlockID) {
+					jseBlockChain.setPreviousPreHash(thisNewBlockID); // recheck for late transactions
+					jseLottery.runLottery();
+					const thisNewBlockIDMinus2 = thisNewBlockID - 2;
+					jseBlockChain.verifyBlockID(thisNewBlockIDMinus2);
+				}, 5000, newBlockID);
 			});
 		});
 	},
@@ -164,6 +169,7 @@ const jseBlockChain = {
 		const refMinusOne = JSE.jseDataIO.getBlockRef(blockMinusOne);
 		JSE.jseDataIO.getBlock(blockMinusOne,function(block) { // previous block
 			const checkedBlock = jseBlockChain.doubleSpendCheck(blockMinusOne, block);
+			if (checkedBlock.preHash) delete checkedBlock.preHash; // remove preHash if it's already been set
 			const blockJSON = JSON.stringify(checkedBlock);
 			const blockPreHash = jseBlockChain.sha256(blockJSON);
 			JSE.jseDataIO.setVariable('previousBlockPreHash',blockPreHash);
