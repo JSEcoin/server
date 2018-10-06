@@ -27,8 +27,9 @@ function updateNext(i) {
 
 function runTxt() {
 	// ### RUN ALL FUNCTIONS HERE
+	//cleanRewards();
 
-	jseSchedule.startAutoresponder();
+	//jseSchedule.startAutoresponder();
 	//importJSONFile('ledger','./../../../bkup/2018/February/180207/ledger.json');
 	//importBigJSONFile('history','./../../../bkup/2018/February/180202/history180202A.json');
 	//importEntireDB(); // warning this will overwrite entire database
@@ -392,6 +393,8 @@ function bkupAll() {
  * 							Included but commented out is the option to add to block data and history as well depending on if this has been done already
  * 							Uncomment the final line /d true as well if this hasn't been done. Hard delete month old data has been removed. May need doing manually.
  * 							!rewards[uid][lastWeekYYMMDD].d check removed
+ * 							Rewards are aggregated then sent all at once at the end on line 453. 
+ * 							If YYMMDD = 7 days back then it will automatically run cleanRewads for month old ones after 15secs 
  * @param YYMMDD the date we want to process manually.
  */
 function manualProcessRewards(YYMMDD) {
@@ -400,16 +403,16 @@ function manualProcessRewards(YYMMDD) {
 		console.log('Rewards Pending Data Returned For '+lastWeekYYMMDD+' - '+Object.keys(rewards).length+' Users');
 		Object.keys(rewards).forEach(function(uid) {
 			if (!uid || !rewards[uid]) return; // check for blank uids and skip any uid's with no pending rewards
-			//if (rewards[uid][lastWeekYYMMDD] && !rewards[uid][lastWeekYYMMDD].d) {
-			if (rewards[uid][lastWeekYYMMDD]) {
-					console.log('# UID: '+uid);
+			if (rewards[uid][lastWeekYYMMDD] && !rewards[uid][lastWeekYYMMDD].d) {
+			//if (rewards[uid][lastWeekYYMMDD]) {
+				console.log('# UID: '+uid);
 				let totalPending = 0;
 				if (rewards[uid][lastWeekYYMMDD].s) { // s = self-mining
 					const jsePlatformReward = rewards[uid][lastWeekYYMMDD].s;
 					totalPending += jsePlatformReward;
 					console.log(jsePlatformReward);
 					//JSE.jseDataIO.plusX('ledger/'+uid, jsePlatformReward);
-					/*
+					/** comment out below to prevent history and block data */
 					const newPlatformData = {};
 					newPlatformData.command = 'platformReward';
 					newPlatformData.reference = 'Platform Mining Reward '+lastWeekYYMMDD;
@@ -418,14 +421,12 @@ function manualProcessRewards(YYMMDD) {
 					newPlatformData.ts = new Date().getTime();
 					JSE.jseDataIO.pushBlockData(newPlatformData,function(blockData) {});
 					JSE.jseDataIO.pushVariable('history/'+uid,newPlatformData,function(pushRef) {});
-					*/
 				}
 				if (rewards[uid][lastWeekYYMMDD].p) { // p = publisher mining
 					const jsePublisherReward = rewards[uid][lastWeekYYMMDD].p;
 					totalPending += jsePublisherReward;
 					console.log(jsePublisherReward);
 					//JSE.jseDataIO.plusX('ledger/'+uid, jsePublisherReward);
-					/*
 					const newPublisherData = {};
 					newPublisherData.command = 'publisherReward';
 					newPublisherData.reference = 'Publisher Mining Reward '+lastWeekYYMMDD;
@@ -434,14 +435,12 @@ function manualProcessRewards(YYMMDD) {
 					newPublisherData.ts = new Date().getTime();
 					JSE.jseDataIO.pushBlockData(newPublisherData,function(blockData) {});
 					JSE.jseDataIO.pushVariable('history/'+uid,newPublisherData,function(pushRef) {});
-					*/
 				}
 				if (rewards[uid][lastWeekYYMMDD].r) { // r = referral
 					const jseReferralReward = rewards[uid][lastWeekYYMMDD].r;
 					totalPending += jseReferralReward;
 					console.log(jseReferralReward);
 					//JSE.jseDataIO.plusX('ledger/'+uid, jseReferralReward);
-					/*
 					const newReferralData = {};
 					newReferralData.command = 'referralReward';
 					newReferralData.reference = 'Referral Reward '+lastWeekYYMMDD;
@@ -450,16 +449,37 @@ function manualProcessRewards(YYMMDD) {
 					newReferralData.ts = new Date().getTime();
 					JSE.jseDataIO.pushBlockData(newReferralData,function(blockData) {});
 					JSE.jseDataIO.pushVariable('history/'+uid,newReferralData,function(pushRef) {});
-					*/
 				}
 				console.log(uid+' = '+totalPending);
 				JSE.jseDataIO.plusX('ledger/'+uid, totalPending);
-				//JSE.jseDataIO.setVariable('rewards/'+uid+'/'+lastWeekYYMMDD+'/d',true); // d = done
+				JSE.jseDataIO.setVariable('rewards/'+uid+'/'+lastWeekYYMMDD+'/d',true); // d = done
+			}
+		});
+	});
+	// clean up rewards after processing
+	const lastWeek = new Date();
+	lastWeek.setDate(lastWeek.getDate()-howManyDaysBack);
+	const lastWeekYYMMDD2 = lastWeek.toISOString().slice(2,10).replace(/-/g,"");
+	if (lastWeekYYMMDD2 === lastWeekYYMMDD) {
+		setTimeout(function () { cleanRewards(); }, 15);
+	}
+}
+
+function cleanRewards() {
+	const lastMonth = new Date();
+	lastMonth.setDate(lastMonth.getDate()-28);
+	const lastMonthYYMMDD = lastMonth.toISOString().slice(2,10).replace(/-/g,"");
+	JSE.jseDataIO.getVariable('rewards',function(rewards) {
+		console.log('Rewards Pending Data Returned For '+lastMonthYYMMDD+' - '+Object.keys(rewards).length+' Users');
+		Object.keys(rewards).forEach(function(uid) {
+			if (!uid || !rewards[uid]) return; // check for blank uids and skip any uid's with no pending rewards
+			if (rewards[uid][lastMonthYYMMDD]) {
+				console.log('Cleaning rewards for: rewards/'+uid+'/'+lastMonthYYMMDD);
+				JSE.jseDataIO.hardDeleteVariable('rewards/'+uid+'/'+lastMonthYYMMDD); // clean up after one month?
 			}
 		});
 	});
 }
-
 
 function importJSONFile(key, fileLocation) {
 	const newObj = require(fileLocation); // eslint-disable-line
