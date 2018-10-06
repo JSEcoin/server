@@ -397,7 +397,7 @@ function processRewards(howManyDaysBack=7) {
 				JSE.jseDataIO.setVariable('rewards/'+uid+'/'+lastWeekYYMMDD+'/d',true); // d = done
 			}
 			if (rewards[uid][lastMonthYYMMDD]) {
-				JSE.hardDeleteVariable('rewards/'+uid+'/'+lastMonthYYMMDD); // clean up after one month?
+				JSE.jseDataIO.hardDeleteVariable('rewards/'+uid+'/'+lastMonthYYMMDD); // clean up after one month?
 			}
 		});
 	});
