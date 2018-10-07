@@ -28,6 +28,7 @@ function updateNext(i) {
 function runTxt() {
 	// ### RUN ALL FUNCTIONS HERE
 	//cleanRewards();
+	//resetDailyStatsManually();
 
 	//jseSchedule.startAutoresponder();
 	//importJSONFile('ledger','./../../../bkup/2018/February/180207/ledger.json');
@@ -395,6 +396,7 @@ function bkupAll() {
  * 							!rewards[uid][lastWeekYYMMDD].d check removed
  * 							Rewards are aggregated then sent all at once at the end on line 453. 
  * 							If YYMMDD = 7 days back then it will automatically run cleanRewads for month old ones after 15secs 
+ * 							If the publisher rewards breaks then so will resetDailyStatsManually(); which has been added.
  * @param YYMMDD the date we want to process manually.
  */
 function manualProcessRewards(YYMMDD) {
@@ -462,6 +464,7 @@ function manualProcessRewards(YYMMDD) {
 	const lastWeekYYMMDD2 = lastWeek.toISOString().slice(2,10).replace(/-/g,"");
 	if (lastWeekYYMMDD2 === lastWeekYYMMDD) {
 		setTimeout(function () { cleanRewards(); }, 15);
+		//setTimeout(function() { resetDailyStatsManually(); }, 25);
 	}
 }
 
