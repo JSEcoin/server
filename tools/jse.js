@@ -394,8 +394,8 @@ function bkupAll() {
  * 							Included but commented out is the option to add to block data and history as well depending on if this has been done already
  * 							Uncomment the final line /d true as well if this hasn't been done. Hard delete month old data has been removed. May need doing manually.
  * 							!rewards[uid][lastWeekYYMMDD].d check removed
- * 							Rewards are aggregated then sent all at once at the end on line 453. 
- * 							If YYMMDD = 7 days back then it will automatically run cleanRewads for month old ones after 15secs 
+ * 							Rewards are aggregated then sent all at once at the end on line 453.
+ * 							If YYMMDD = 7 days back then it will automatically run cleanRewads for month old ones after 15secs
  * 							If the publisher rewards breaks then so will resetDailyStatsManually(); which has been added.
  * @param YYMMDD the date we want to process manually.
  */
@@ -460,7 +460,7 @@ function manualProcessRewards(YYMMDD) {
 	});
 	// clean up rewards after processing
 	const lastWeek = new Date();
-	lastWeek.setDate(lastWeek.getDate()-howManyDaysBack);
+	lastWeek.setDate(lastWeek.getDate()-7);
 	const lastWeekYYMMDD2 = lastWeek.toISOString().slice(2,10).replace(/-/g,"");
 	if (lastWeekYYMMDD2 === lastWeekYYMMDD) {
 		setTimeout(function () { cleanRewards(); }, 15);

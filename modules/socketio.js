@@ -113,6 +113,24 @@ const jseSocketIO = {
 				}
 			});
 
+
+			/**
+			 * @function <h2>checkSessionValid</h2>
+			 * @description Checks a session variable is valid and callsback true / false
+			 * @param {integar} uid user ID
+			 * @param {string} session session key
+			 * @param {function} callback function is passsed either true for valid or false for invalid
+			 */
+			function checkSessionValid(uid, session, callback) {
+				JSE.jseDataIO.lookupSession(session,function(sUID) {
+					if (parseInt(sUID,10) === parseInt(uid,10)) {
+						callback(true);
+					} else {
+						callback(false);
+					}
+				});
+			}
+
 			/** Platform Login Connections */
 
 			socket.on('registerSession', function(uid,session,callback) {
@@ -124,31 +142,23 @@ const jseSocketIO = {
 						// these aren't verified so need to check they match if any critical data is being sent
 						if (JSE.vpnData[socket.realIP] && JSE.vpnData[socket.realIP] === true) {
 							JSE.socketConnections[socket.id].goodIP = true;
+							checkSessionValid(uid, session, callback);
 						} else if (JSE.vpnData[socket.realIP] && JSE.vpnData[socket.realIP] === false) {
 							JSE.socketConnections[socket.id].goodIP = false;
+							callback(false);
 						} else {
 							JSE.jseFunctions.realityCheck(socket.realIP, function(goodIPTrue) {
 								if (goodIPTrue === true && typeof JSE.socketConnections[socket.id] !== 'undefined') {
 									JSE.socketConnections[socket.id].goodIP = true;
+									checkSessionValid(uid, session, callback);
 								} else if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
 									JSE.socketConnections[socket.id].goodIP = false;
+									callback(false);
 								}
 							});
 						}
 					}
 					if (JSE.jseTestNet) console.log('registerSession from '+uid);
-					if (JSE.socketConnections[socket.id].goodIP === true) {
-						// Check session is valid
-						JSE.jseDataIO.lookupSession(session,function(sUID) {
-							if (parseInt(sUID,10) === parseInt(uid,10)) {
-								callback(true);
-							} else {
-								callback(false);
-							}
-						});
-					} else {
-						callback(false);
-					}
 				} else if (JSE.jseTestNet) {
 					console.log('Error socketio.js 143: callback not a function '+uid);
 				}
