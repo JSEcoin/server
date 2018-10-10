@@ -683,6 +683,10 @@ router.post('/updatetxlimit/*', function (req, res) {
 			return false;
 		}
 		const newTxLimit = parseFloat(req.body.newTxLimit);
+		if (typeof newTxLimit !== 'number') {
+			res.status(400).send('{"fail":1,"notification":"New transaction limit not recognised, please input a new transaction limit in the box provided"}');
+			return false;
+		}
 		JSE.jseDataIO.getVariable('ledger/'+goodCredentials.uid,function(balance) {
 			if (newTxLimit > balance) {
 				res.status(400).send('{"fail":1,"notification":"Can not set a transaction limit greater than your current account balance"}');
