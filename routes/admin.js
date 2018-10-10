@@ -580,10 +580,12 @@ router.get('/ipcheck/:ip/:adminpass', function(req, res) {
 	const ip = req.params.ip.split(/[^.0-9]/).join('');
 	if (ip.length > 8) {
 		JSE.jseFunctions.realityCheck(ip, function(goodIPTrue) {
-			if (goodIPTrue) {
+			if (goodIPTrue === true) {
 				res.send('{"success":1,"notification":"Good IP"}');
-			} else {
+			} else if (goodIPTrue === false) {
 				res.send('{"success":1,"notification":"Bad IP"}');
+			} else {
+				res.send('{"success":1,"notification":"Unknown IP"}');
 			}
 		});
 	} else {
