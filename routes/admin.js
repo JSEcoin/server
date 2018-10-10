@@ -569,4 +569,66 @@ router.post('/txpendingupdate/:adminpass', function(req, res) {
 	return false;
 });
 
+router.get('/ipcheck/:ip/:adminpass', function(req, res) {
+	let adminPass;
+	if (typeof req.get('Authorization') !== 'undefined') {
+		adminPass = JSE.jseFunctions.cleanString(req.get('Authorization'));
+	} else {
+		adminPass = JSE.jseFunctions.cleanString(req.params.adminpass);
+	}
+	if (adminPass !== JSE.credentials.jseAdminKey) { return false; }
+	const ip = req.params.ip.split(/[^.0-9]/).join('');
+	if (ip.length > 8) {
+		JSE.jseFunctions.realityCheck(ip, function(goodIPTrue) {
+			if (goodIPTrue) {
+				res.send('{"success":1,"notification":"Good IP"}');
+			} else {
+				res.send('{"success":1,"notification":"Bad IP"}');
+			}
+		});
+	} else {
+		res.status(400).send('{"fail":1,"notification":"IP address not valid"}');
+	}
+	return false;
+});
+
+router.get('/ipwhitelist/:ip/:adminpass', function(req, res) {
+	let adminPass;
+	if (typeof req.get('Authorization') !== 'undefined') {
+		adminPass = JSE.jseFunctions.cleanString(req.get('Authorization'));
+	} else {
+		adminPass = JSE.jseFunctions.cleanString(req.params.adminpass);
+	}
+	if (adminPass !== JSE.credentials.jseAdminKey) { return false; }
+	const ip = req.params.ip.split(/[^.0-9]/).join('');
+	if (ip.length > 8) {
+		JSE.jseDataIO.setVariable('ipCheck/'+ip,true);
+		JSE.vpnData[ip] = true;
+		res.send('{"success":1,"notification":"IP updated changes may take up to 24 hours for nodes to refresh data"}');
+	} else {
+		res.status(400).send('{"fail":1,"notification":"IP address not valid"}');
+	}
+	return false;
+});
+
+router.get('/ipblacklist/:ip/:adminpass', function(req, res) {
+	let adminPass;
+	if (typeof req.get('Authorization') !== 'undefined') {
+		adminPass = JSE.jseFunctions.cleanString(req.get('Authorization'));
+	} else {
+		adminPass = JSE.jseFunctions.cleanString(req.params.adminpass);
+	}
+	if (adminPass !== JSE.credentials.jseAdminKey) { return false; }
+	const ip = req.params.ip.split(/[^.0-9]/).join('');
+	if (ip.length > 8) {
+		JSE.jseDataIO.setVariable('ipCheck/'+ip,false);
+		JSE.vpnData[ip] = false;
+		res.send('{"success":1,"notification":"IP updated changes may take up to 24 hours for nodes to refresh data"}');
+	} else {
+		res.status(400).send('{"fail":1,"notification":"IP address not valid"}');
+	}
+	return false;
+});
+
+
 module.exports = router;
