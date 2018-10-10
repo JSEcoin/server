@@ -683,7 +683,7 @@ router.post('/updatetxlimit/*', function (req, res) {
 			return false;
 		}
 		const newTxLimit = parseFloat(req.body.newTxLimit);
-		if (typeof newTxLimit !== 'number') {
+		if (!(typeof newTxLimit === 'number' && newTxLimit >= 0)) {
 			res.status(400).send('{"fail":1,"notification":"New transaction limit not recognised, please input a new transaction limit in the box provided"}');
 			return false;
 		}
