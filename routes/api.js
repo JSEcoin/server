@@ -267,9 +267,15 @@ if (JSE.authenticatedNode) {
 		} else {
 			apiKey = JSE.jseFunctions.cleanString(req.params.apiKey);
 		}
-		const targetBlockID = parseFloat(req.params.blockNumber);
-		JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(credentialCheck) {
-			if (!(credentialCheck.apiLevel >= 1)) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
+		if (JSE.apiLimits[apiKey]) {
+			JSE.apiLimits[apiKey] += 1;
+		} else {
+			JSE.apiLimits[apiKey] = 1;
+		}
+		if (JSE.apiLimits[apiKey] < 300) {
+			const targetBlockID = parseFloat(req.params.blockNumber);
+			JSE.jseDataIO.checkCredentialsByAPIKey(apiKey,function(credentialCheck) {
+				if (!(credentialCheck.apiLevel >= 1)) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
 				JSE.jseDataIO.getBlock(targetBlockID,function(blockObject) {
 					const returnObject = {};
 					returnObject.success = 1;
@@ -277,9 +283,12 @@ if (JSE.authenticatedNode) {
 					res.send(JSON.stringify(returnObject));
 				});
 				return false;
-		}, function() {
-			res.status(401).send('{"fail":1,"notification":"API Balance Failed: User API key credentials could not be matched"}');
-		});
+			}, function() {
+				res.status(401).send('{"fail":1,"notification":"API getblock Failed: User API key credentials could not be matched"}');
+			});
+		} else {
+			res.status(400).send('{"fail":1,"notification":"API Limit reached checkemail 300 per 30 mins"}');
+		}
 		return false;
 	});
 
