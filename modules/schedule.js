@@ -308,11 +308,13 @@ function storeLogs() {
 			}, 90000);
 		}
 		if (rightNow.getHours() === 1 || rightNow.getHours() === 12) {
+			/*
 			setTimeout(function() {
 				JSE.jseDataIO.getVariable('history',function(history) {
 					fs.writeFile(JSE.logDirectory+"history"+yymmdd+fileAddition+".json", JSON.stringify(history), function(){});
 				});
 			}, 270000);
+			*/
 			setTimeout(function() {
 				JSE.jseDataIO.getVariable('siteIDs',function(siteIDs) {
 					fs.writeFile(JSE.logDirectory+"siteIDs"+yymmdd+fileAddition+".json", JSON.stringify(siteIDs), function(){});
