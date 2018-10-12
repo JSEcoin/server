@@ -209,6 +209,7 @@ const jseEthIntegration = {
 			//.on('receipt', function(receipt) {})
 			//.on('confirmation', function(confirmationNumber, receipt){})
 			.on('error', function(error1) {
+				console.log('ethIntegration Error line 212 ethintegration.js',error1);
 				callback(false);
 			});
 		});
