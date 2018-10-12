@@ -184,9 +184,10 @@ const jseEthIntegration = {
 	sendJSE: async (withdrawalAddress,value,callback) => {
 		const ownerWallet = web3.eth.accounts.wallet.add(JSE.credentials.ethAccount1);
 		const transactionCount = await web3.eth.getTransactionCount(ownerWallet.address);
+		console.log('Transaction Count: '+transactionCount);
 		const transferAmount = web3.utils.toWei(value.toString()); //value * 1e18; // this is the decimal 18 decimals
 		const gasPrice = await web3.eth.getGasPrice();
-		const gasLimit = 999000; //90000;
+		const gasLimit = 90000; // updated to 90000 (mainnet) from 999000 in testing;
 		const rawTransaction = {
 			from: ownerWallet.address,
 			nonce: web3.utils.toHex(transactionCount),
@@ -195,7 +196,7 @@ const jseEthIntegration = {
 			to: jseTokenContractAddress,
 			value: "0x0",
 			data: token.methods.transfer(withdrawalAddress, transferAmount).encodeABI(),
-			chainId: 4,
+			chainId: 1, // needs updating from rinkeby to mainnet
 		};
 		ownerWallet.signTransaction(rawTransaction, function(error,signed) {
 			if (error) console.log('ethintegration.js error 161 signTransaction: '+error);
@@ -209,7 +210,7 @@ const jseEthIntegration = {
 			//.on('receipt', function(receipt) {})
 			//.on('confirmation', function(confirmationNumber, receipt){})
 			.on('error', function(error1) {
-				console.log('ethIntegration Error line 212 ethintegration.js',error1);
+				console.log('ethIntegration Error line 212 ethintegration.js');
 				callback(false);
 			});
 		});
