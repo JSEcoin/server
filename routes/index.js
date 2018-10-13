@@ -63,6 +63,16 @@ router.get('/stats/*', function(req, res) {
 });
 
 /**
+ * @name /circulatingsupply/*
+ * @description Display the current circulating supply from JSE.publicStats
+ * @memberof module:jseRouter
+ */
+router.get('/circulatingsupply/*', function(req, res) {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.send(JSE.publicStats.coins);
+});
+
+/**
  * @name /dailystats/*
  * @description Display JSON string of JSE.dailyPublicStats
  * @memberof module:jseRouter

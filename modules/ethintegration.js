@@ -177,6 +177,19 @@ const jseEthIntegration = {
 	},
 
 	/**
+	 * @method <h2>calculateGasPrice</h2>
+	 * @description get the current gas price for a network and then add one gwei
+	 * @returns string gas price
+	 */
+	calculateGasPrice: async () => {
+		const gasPrice = await web3.eth.getGasPrice();
+		let gasPriceInt = parseInt(gasPrice,10); // gas price is returned as a string
+		gasPriceInt += 1000000000; // +1 gwei
+		const finalGasPrice = String(gasPriceInt);
+		return finalGasPrice;
+	},
+
+	/**
 	 * @method <h2>sendJSE</h2>
 	 * @description send JSE ERC20 tokens to an address
 	 * @returns {object} including privateKey and address (publicKey)
@@ -184,9 +197,10 @@ const jseEthIntegration = {
 	sendJSE: async (withdrawalAddress,value,callback) => {
 		const ownerWallet = web3.eth.accounts.wallet.add(JSE.credentials.ethAccount1);
 		const transactionCount = await web3.eth.getTransactionCount(ownerWallet.address);
-		console.log('Transaction Count: '+transactionCount);
+		console.log(`TC: ${transactionCount} Sending ${value} JSE to ${withdrawalAddress}`);
 		const transferAmount = web3.utils.toWei(value.toString()); //value * 1e18; // this is the decimal 18 decimals
-		const gasPrice = await web3.eth.getGasPrice();
+		//const gasPrice = await web3.eth.getGasPrice();
+		const gasPrice = await jseEthIntegration.calculateGasPrice();
 		const gasLimit = 90000; // updated to 90000 (mainnet) from 999000 in testing;
 		const rawTransaction = {
 			from: ownerWallet.address,
@@ -203,19 +217,27 @@ const jseEthIntegration = {
 			// Check it's a valid signature
 			const recoveryAddress = web3.eth.accounts.recoverTransaction(signed.rawTransaction);
 			const serializedTxHex = signed.rawTransaction;
+			let txHash = null;
 			web3.eth.sendSignedTransaction(serializedTxHex)
 			.on('transactionHash', function(hash) {
-				callback(hash);
+				//callback(hash);
+				console.log(`TC: ${transactionCount} txHash: ${hash}`);
+				txHash = hash;
 			})
 			//.on('receipt', function(receipt) {})
-			//.on('confirmation', function(confirmationNumber, receipt){})
+			.on('confirmation', function(confirmationNumber, receipt){
+				//console.log(typeof confirmationNumber +' / '+confirmationNumber);
+				if (confirmationNumber === 2) {
+					console.log(`TC: ${transactionCount} confirmed`);
+					callback(txHash);
+				}
+			})
 			.on('error', function(error1) {
 				console.log('ethIntegration Error line 212 ethintegration.js');
 				callback(false);
 			});
 		});
 	},
-
 };
 
 module.exports = jseEthIntegration;
