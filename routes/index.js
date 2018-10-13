@@ -69,7 +69,7 @@ router.get('/stats/*', function(req, res) {
  */
 router.get('/circulatingsupply/*', function(req, res) {
 	res.header("Access-Control-Allow-Origin", "*");
-	res.send(JSE.publicStats.coins);
+	res.send(String(JSE.publicStats.coins));
 });
 
 /**
