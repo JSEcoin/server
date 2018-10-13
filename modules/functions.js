@@ -668,7 +668,6 @@ function txApprove(uid,pushRef,approvalType) {
 					dataToSign.withdrawalAmount = txObject.withdrawalAmount;
 					dataToSign.ethFee = txObject.ethFee || JSE.jseSettings.ethFee || 118;
 					dataToSign.value = JSE.jseFunctions.round(dataToSign.withdrawalAmount + dataToSign.ethFee);
-
 					dataToSign.user1 = goodCredentials.uid;
 					dataToSign.ts = processedTimestamp;
 					const dataString = JSON.stringify(dataToSign);
@@ -681,10 +680,16 @@ function txApprove(uid,pushRef,approvalType) {
 								} else {
 									console.log('Withdrawal Failed1 '+goodCredentials.uid+'/'+txObject.value+'JSE/'+txObject.withdrawalAddress);
 									console.log(jsonResult);
+									JSE.jseDataIO.setVariable('txPending/'+goodCredentials.uid+'/'+pushRef+'/adminApproved',false);
+									JSE.jseDataIO.setVariable('txPending/'+goodCredentials.uid+'/'+pushRef+'/adminDeclined',true);
+									JSE.jseDataIO.setVariable('txPending/'+goodCredentials.uid+'/'+pushRef+'/complete',processedTimestamp);
 								}
 							});
 						} else {
 							console.log('Withdrawal Failed2 '+goodCredentials.uid+'/'+txObject.value+'JSE/'+txObject.withdrawalAddress);
+							JSE.jseDataIO.setVariable('txPending/'+goodCredentials.uid+'/'+pushRef+'/adminApproved',false);
+							JSE.jseDataIO.setVariable('txPending/'+goodCredentials.uid+'/'+pushRef+'/adminDeclined',true);
+							JSE.jseDataIO.setVariable('txPending/'+goodCredentials.uid+'/'+pushRef+'/complete',processedTimestamp);
 						}
 					});
 				});
