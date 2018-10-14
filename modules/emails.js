@@ -136,20 +136,19 @@ We’ve made it as simple as possible to send cryptocurrency payments online. Be
 The next time you send money from A to B, consider the benefits of using JSE.
 `;
 
-/* Onboarding 3 - How To Invest In An ICO (PDF) */
+/* Onboarding 3 - How To Purchase JSE Tokens */
 /* Requires PDF attachment */
 emails.onboarding[3] = {};
-emails.onboarding[3].subject = `How To Invest In An ICO (PDF)`;
-emails.onboarding[3].pdf = `HowToParticipateInICO.pdf`;
-fs.readFile(miscDir+'/HowToParticipateInICO.pdf', function(err, preAttachmentData) { emails.onboarding[3].attachmentData = Buffer.from(preAttachmentData).toString('base64'); });
-emails.onboarding[3].html = `If you have invested in an ICO before it seems like second nature zipping Ethereum payments about, however if it’s your first time it can seem like a daunting and challenging process.
+emails.onboarding[3].subject = `How To Purchase JSE Tokens`;
+emails.onboarding[3].html = `Like the JSEcoin project? You can purchase JSE tokens at the following exchanges:
+<ul>
+<li><a href="https://idex.market">IDEX</a></li>
+<li><a href="https://bit.ly/2NV1eOW">LATOKEN</a></li>
+</ul>
 <br><br>
-We have put together this simple step by step guide explaining how you can purchase JSE during the ICO (PDF attached).
+You will need to purchase some ethereum to load on to the trading exchange via a broker such as <a href="https://coinbase.com">coinbase</a>. Once you have some ethereum simply set up an account with the exchange of your choice and then load transfer the ethereum funds to your deposit address on the exchange. You can then use the trading platform to trade your ETH for JSE tokens.
 <br><br>
-There is also a demonstration video where you can see the whole process as it happens live.
-<a href="https://www.youtube.com/watch?v=ivVxijQAQT8">https://www.youtube.com/watch?v=ivVxijQAQT8</a>
-<br><br>
-Our technical support team are always available to assist you along the way as well so if you have any questions please do not hesitate to contact us.
+There is both deposit and withdraw functions on the platform funds page to transfer JSE to and from exchanges and ERC20 compatible wallets.
 <br><br>
 Thank you to everyone who has supported the JSEcoin project. We are where we are today because of the strong support from the cryptocurrency community.
 `;
@@ -222,15 +221,14 @@ emails.onboarding[7] = {};
 emails.onboarding[7].subject = `JSEcoin Pitch Deck`;
 emails.onboarding[7].pdf = `pitchdeck.pdf`;
 fs.readFile(miscDir+'/pitchdeck.pdf', function(err, preAttachmentData) { emails.onboarding[7].attachmentData = Buffer.from(preAttachmentData).toString('base64'); });
-emails.onboarding[7].html = `I have attached the JSEcoin pitch deck for your consideration.
+emails.onboarding[7].html = `I have attached the JSEcoin pitch deck outlining our project for investors.
 <br><br>
-If you wish to purchase JSE tokens now is the time to do so. We will shortly be closing the ICO and listing on exchanges where pricing will be set by open market conditions.
-<br><br>
-The team are here if you need help making a purchase and this guide outlines the simple steps to safely purchase JSE tokens.
-<br><br>
-<a href="https://jsecoin.com/HowToParticipateInICO.pdf">https://jsecoin.com/HowToParticipateInICO.pdf</a>
-<br><br>
-If you require any further assistance please do not hesitate to contact us at: <a href="https://jsecoin.com/support/contact/?utm_source=email&utm_campaign=emailonboarding&utm_content=onboardingPitch">https://jsecoin.com/support/contact/</a>
+JSE Tokens are available for purchase at the following exchanges:
+<ul>
+<li><a href="https://idex.market">IDEX</a></li>
+<li><a href="https://bit.ly/2NV1eOW">LATOKEN</a></li>
+</ul>
+These exchanges are 3rd party platforms where cryptocurrency tokens are bought and sold. To make a purchase you will need some Ethereum from a broker such as <a href="https://coinbase.com">Coinbase</a> to load into account on the exchange.
 <br><br>
 Thank you to everyone who has supported the project and helped us progress towards building a brighter more sustainable digital economy.
 `;
