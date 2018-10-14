@@ -286,7 +286,7 @@ function sendOnboardingEmail(user,emailRef,callback) {
 			return;
 		}
 		const toEmail = new helper.Email(user.email);
-		console.log('Sending onboarding email to: '+user.email+' '+emailRef);
+		//console.log('Sending onboarding email to: '+user.email+' '+emailRef);
 		const templates = ['template1','template2']; // split test templates
 		const template = templates[Math.floor(Math.random()*templates.length)];
 		const htmlContent = jseEmails.onboarding[emailRef].html;
