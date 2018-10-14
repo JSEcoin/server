@@ -178,13 +178,21 @@ const jseEthIntegration = {
 
 	/**
 	 * @method <h2>calculateGasPrice</h2>
-	 * @description get the current gas price for a network and then add one gwei
+	 * @description get the current gas price for a network and then add a bit to ensure the tx gets through
 	 * @returns string gas price
 	 */
 	calculateGasPrice: async () => {
 		const gasPrice = await web3.eth.getGasPrice();
 		let gasPriceInt = parseInt(gasPrice,10); // gas price is returned as a string
-		gasPriceInt += 1000000000; // +1 gwei
+		if (gasPrice > 30000000000) {
+			gasPriceInt += 5000000000; // if > 30 +5 gwei
+		} else if (gasPrice > 15000000000) {
+			gasPriceInt += 3000000000; // if > 15 +3 gwei
+		} else if (gasPrice > 5000000000) {
+			gasPriceInt += 2000000000; // if > 5 +2 gwei
+		} else {
+			gasPriceInt += 1000000000; // if < 5 +1 gwei
+		}
 		const finalGasPrice = String(gasPriceInt);
 		return finalGasPrice;
 	},
@@ -195,7 +203,11 @@ const jseEthIntegration = {
 	 * @returns {object} including privateKey and address (publicKey)
 	 */
 	sendJSE: async (withdrawalAddress,value,callback) => {
-		const ownerWallet = web3.eth.accounts.wallet.add(JSE.credentials.ethAccount1);
+		// Select one of four eth accounts to rotate them
+		JSE.ethAccount = (JSE.ethAccount || 0) + 1;
+		if (JSE.ethAccount > 4) JSE.ethAccount = 1;
+		const ownerWallet = web3.eth.accounts.wallet.add(JSE.credentials[`ethAccount${JSE.ethAccount}`]);
+		//const ownerWallet = web3.eth.accounts.wallet.add(JSE.credentials[`ethAccount1`]);
 		const transactionCount = await web3.eth.getTransactionCount(ownerWallet.address);
 		console.log(`TC: ${transactionCount} Sending ${value} JSE to ${withdrawalAddress}`);
 		const transferAmount = web3.utils.toWei(value.toString()); //value * 1e18; // this is the decimal 18 decimals
