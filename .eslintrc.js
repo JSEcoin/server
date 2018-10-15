@@ -36,7 +36,8 @@ module.exports = {
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
 	// disable rules from base configurations
-    "no-console": "off",
+  "arrow-body-style": "off",
+  "no-console": "off",
 	"func-names": 0,
 	"comma-spacing": 0,
 	"space-infix-ops": 0,

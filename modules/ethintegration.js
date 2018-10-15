@@ -250,6 +250,25 @@ const jseEthIntegration = {
 			});
 		});
 	},
+
+	balanceETH: async (account) => {
+		return new Promise((resolve,reject) => {
+			web3.eth.getBalance(account,'latest').then((weiBalance) => {
+				const ethBalance = JSE.jseFunctions.round(web3.utils.fromWei(weiBalance));
+				resolve(ethBalance);
+			});
+		});
+	},
+
+	balanceJSE: async (account) => {
+		return new Promise((resolve,reject) => {
+			token.methods.balanceOf(account).call().then((weiBalance) => {
+				const jseBalance = JSE.jseFunctions.round(web3.utils.fromWei(weiBalance));
+				resolve(jseBalance);
+			});
+		});
+	},
+
 };
 
 module.exports = jseEthIntegration;

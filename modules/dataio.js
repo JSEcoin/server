@@ -60,9 +60,7 @@
 const JSE = global.JSE;
 const fs = require('fs'); // only required temporarily for testing
 const io = require('socket.io-client');
-const Web3 = require('web3');
-
-const web3 = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/'+JSE.credentials.infuraAPIKey));
+const jseEthIntegration = require("./ethintegration.js");
 
 const dataStore1 = io.connect(JSE.dataStore1, {
 	reconnect: true, transports: ["websocket"], heartbeatTimeout: 1800000, maxHttpBufferSize: 1000000000,
@@ -1031,12 +1029,9 @@ const jseDB = {
 			});
 			JSE.publicStats.users = users;
 			JSE.jseDataIO.setVariable('publicStats/users',JSE.publicStats.users);
-			// add web3 tokens from ICO
-			const jseContractObj = require('./../misc/JSETokenSale.json');
-			const tokenSaleContract = new web3.eth.Contract(jseContractObj.abi, '0xcfc4fceb90787ef1fda15bb115630ef453f50f86');
-			tokenSaleContract.methods.totalTokensSold().call().then((t) => {
-				const jseSold = Math.floor(t/1e18);
-				const coinTotal = Math.round(platformCoins + jseSold);
+			// add ERC20 tokens
+			jseEthIntegration.balanceJSE('0xc880f4143950bfb27ed021793991f35466b99201').then((coldStorageBalance) => {
+				const coinTotal = Math.round(platformCoins + (10000000000 - coldStorageBalance));
 				JSE.publicStats.coins = coinTotal;
 				JSE.jseDataIO.setVariable('publicStats/coins',JSE.publicStats.coins);
 			});
