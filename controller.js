@@ -82,7 +82,7 @@ setTimeout(function() {
 setInterval(function() {
 	jseEthIntegration.checkQueryPoolDeposits();
 	JSE.jseDataIO.updatePublicStats();
-}, 60000); // every 10 mins
+}, 600000); // every 10 mins
 
 setInterval(function() {
 	jseBlockChain.verifyLedger();

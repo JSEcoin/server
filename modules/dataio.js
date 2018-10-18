@@ -1018,7 +1018,7 @@ const jseDB = {
 		JSE.publicStats.exchangeRates = await jseExchanges.getExchangeRates();
 		JSE.jseDataIO.setVariable('publicStats/exchangeRates',JSE.publicStats.exchangeRates);
 		// update market cap
-		JSE.publicStats.marketCap = JSE.publicStats.coins * JSE.publicStats.exchangeRates.USDJSE;
+		JSE.publicStats.marketCap = Math.round(JSE.publicStats.coins * JSE.publicStats.exchangeRates.USDJSE);
 		JSE.jseDataIO.setVariable('publicStats/marketCap',JSE.publicStats.marketCap);
 	},
 

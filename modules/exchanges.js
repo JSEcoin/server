@@ -70,10 +70,11 @@ const jseExchanges = {
 		const exchangeRates = {};
 		exchangeRates.USDETH = await jseExchanges.latokenAPI('USDT/ETH');
 		exchangeRates.USDBTC = await jseExchanges.latokenAPI('USDT/BTC');
-		exchangeRates.latokenETHJSE = await jseExchanges.latokenAPI('ETH/JSE');
-		exchangeRates.idexETHJSE = await jseExchanges.idexAPI('ETH/JSE');
-		exchangeRates.ETHJSE = exchangeRates.latokenETHJSE; // use latokens price to start with
+		exchangeRates.ETHJSE = await jseExchanges.latokenAPI('ETH/JSE');
+		exchangeRates.ETHJSE2 = await jseExchanges.idexAPI('ETH/JSE');
 		exchangeRates.USDJSE = JSE.jseFunctions.round(exchangeRates.ETHJSE * exchangeRates.USDETH);
+		exchangeRates.USDETH = Math.round(exchangeRates.USDETH);
+		exchangeRates.USDBTC = Math.round(exchangeRates.USDBTC);
 		console.log(exchangeRates);
 		return exchangeRates;
 	},
