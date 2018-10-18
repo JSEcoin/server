@@ -1015,8 +1015,11 @@ const jseDB = {
 	 * @description Update the JSE.publicStats variable, this is run from the controller every 10 minutes
 	 */
 	updateExchangeRates: async() => {
-		const exchangeRates = await jseExchanges.getExchangeRates();
-		JSE.jseDataIO.setVariable('publicStats/exchangeRates',exchangeRates);
+		JSE.publicStats.exchangeRates = await jseExchanges.getExchangeRates();
+		JSE.jseDataIO.setVariable('publicStats/exchangeRates',JSE.publicStats.exchangeRates);
+		// update market cap
+		JSE.publicStats.marketCap = JSE.publicStats.coins * JSE.publicStats.exchangeRates.USDJSE;
+		JSE.jseDataIO.setVariable('publicStats/marketCap',JSE.publicStats.marketCap);
 	},
 
 	/**
