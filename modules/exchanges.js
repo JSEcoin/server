@@ -75,7 +75,7 @@ const jseExchanges = {
 		exchangeRates.USDJSE = JSE.jseFunctions.round(exchangeRates.ETHJSE * exchangeRates.USDETH);
 		exchangeRates.USDETH = Math.round(exchangeRates.USDETH);
 		exchangeRates.USDBTC = Math.round(exchangeRates.USDBTC);
-		console.log(exchangeRates);
+		//console.log(exchangeRates);
 		return exchangeRates;
 	},
 
