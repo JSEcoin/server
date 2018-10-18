@@ -61,6 +61,8 @@ const JSE = global.JSE;
 const fs = require('fs'); // only required temporarily for testing
 const io = require('socket.io-client');
 const jseEthIntegration = require("./ethintegration.js");
+const jseExchanges = require('./exchanges.js');
+
 
 const dataStore1 = io.connect(JSE.dataStore1, {
 	reconnect: true, transports: ["websocket"], heartbeatTimeout: 1800000, maxHttpBufferSize: 1000000000,
@@ -1012,6 +1014,15 @@ const jseDB = {
 	 * @method <h2>updatePublicStats</h2>
 	 * @description Update the JSE.publicStats variable, this is run from the controller every 10 minutes
 	 */
+	updateExchangeRates: async() => {
+		const exchangeRates = await jseExchanges.getExchangeRates();
+		JSE.jseDataIO.setVariable('publicStats/exchangeRates',exchangeRates);
+	},
+
+	/**
+	 * @method <h2>updatePublicStats</h2>
+	 * @description Update the JSE.publicStats variable, this is run from the controller every 10 minutes
+	 */
 	updatePublicStats() {
 		JSE.publicStats.ts = new Date().getTime();
 		JSE.jseDataIO.buildLedger(function(ledger) {
@@ -1108,6 +1119,7 @@ const jseDB = {
 		JSE.publicStats.days = diffDays; // days since launch
 		JSE.jseDataIO.setVariable('publicStats/ts',JSE.publicStats.ts);
 		JSE.jseDataIO.setVariable('publicStats/days',JSE.publicStats.days);
+		JSE.jseDataIO.updateExchangeRates(); // async exchange api calls
 	},
 
 	/**
