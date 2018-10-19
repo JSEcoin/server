@@ -69,7 +69,7 @@ router.post('/withdraw/*', function (req, res) {
 				return false;
 			}
 
-			const txLimit = goodCredentials.txLimit || JSE.jseSettings.txLimit;
+			const txLimit = goodCredentials.txLimit || JSE.jseSettings.txLimit || 2000;
 			JSE.jseDataIO.getVariable('txToday/'+goodCredentials.uid, function(txToday) {
 				let txCompleted;
 				if (txToday === null) {
