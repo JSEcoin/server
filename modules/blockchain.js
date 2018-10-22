@@ -281,7 +281,7 @@ const jseBlockChain = {
 					return null;
 				});
 				JSE.jseDataIO.getBlock(targetBlockID,function(blockObject) {
-					const targetPreHash = blockObject.preHash;
+					const targetPreHash = blockObject.preHash || '0'; // fallback in case can't get preHash data 19/10/2018
 					let blockVerified = false;
 					for (let i = 0; i < bestHashes.length && blockVerified === false; i+=1) {
 						if (bestHashes[i] && bestHashes[i].split) {
