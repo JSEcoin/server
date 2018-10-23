@@ -1018,8 +1018,10 @@ const jseDB = {
 		JSE.publicStats.exchangeRates = await jseExchanges.getExchangeRates();
 		JSE.jseDataIO.setVariable('publicStats/exchangeRates',JSE.publicStats.exchangeRates);
 		// update market cap
-		JSE.publicStats.marketCap = Math.round(JSE.publicStats.coins * JSE.publicStats.exchangeRates.USDJSE);
-		JSE.jseDataIO.setVariable('publicStats/marketCap',JSE.publicStats.marketCap);
+		if (JSE.publicStats.coins) { // don't update if the circulating supply hasn't completed
+			JSE.publicStats.marketCap = Math.round(JSE.publicStats.coins * JSE.publicStats.exchangeRates.USDJSE);
+			JSE.jseDataIO.setVariable('publicStats/marketCap',JSE.publicStats.marketCap);
+		}
 	},
 
 	/**
@@ -1036,8 +1038,6 @@ const jseDB = {
 			let users = 0;
 			let platformCoins = 0; // total circulation on JSE Ledger
 			Object.keys(ledger).forEach(function(key) {
-			//for(const key in ledger) {
-				//if (!ledger.hasOwnProperty(key)) continue;
 				users +=1;
 				platformCoins += ledger[key];
 			});
