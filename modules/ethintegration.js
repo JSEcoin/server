@@ -187,11 +187,13 @@ const jseEthIntegration = {
 		if (gasPrice > 30000000000) {
 			gasPriceInt += 5000000000; // if > 30 +5 gwei
 		} else if (gasPrice > 15000000000) {
-			gasPriceInt += 3000000000; // if > 15 +3 gwei
+			gasPriceInt += 4000000000; // if > 15 +4 gwei
 		} else if (gasPrice > 5000000000) {
-			gasPriceInt += 2000000000; // if > 5 +2 gwei
+			gasPriceInt += 3000000000; // if > 5 +3 gwei
+		} else if (gasPrice > 2000000000) {
+			gasPriceInt += 2000000000; // if > 2 +2 gwei
 		} else {
-			gasPriceInt += 1000000000; // if < 5 +1 gwei
+			gasPriceInt += 1000000000; // if < 2 +1 gwei
 		}
 		const finalGasPrice = String(gasPriceInt);
 		return finalGasPrice;
@@ -206,9 +208,16 @@ const jseEthIntegration = {
 		// Select one of four eth accounts to rotate them
 		JSE.ethAccount = (JSE.ethAccount || 0) + 1;
 		if (JSE.ethAccount > 4) JSE.ethAccount = 1;
+		//JSE.ethAccount = 1; // just use account1 for testing
 		const ownerWallet = web3.eth.accounts.wallet.add(JSE.credentials[`ethAccount${JSE.ethAccount}`]);
-		//const ownerWallet = web3.eth.accounts.wallet.add(JSE.credentials[`ethAccount1`]);
-		const transactionCount = await web3.eth.getTransactionCount(ownerWallet.address);
+		let transactionCount = await web3.eth.getTransactionCount(ownerWallet.address);
+		if (!JSE.transactionCounts)	JSE.transactionCounts = {};
+		if (transactionCount === JSE.transactionCounts[`ethAccount${JSE.ethAccount}`]) {
+			transactionCount += 1;
+			JSE.transactionCounts[`ethAccount${JSE.ethAccount}`] = transactionCount;
+		} else {
+			JSE.transactionCounts[`ethAccount${JSE.ethAccount}`] = transactionCount;
+		}
 		console.log(`TC: ${transactionCount} Sending ${value} JSE to ${withdrawalAddress}`);
 		const transferAmount = web3.utils.toWei(value.toString()); //value * 1e18; // this is the decimal 18 decimals
 		//const gasPrice = await web3.eth.getGasPrice();
