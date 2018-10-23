@@ -63,6 +63,16 @@ router.get('/stats/*', function(req, res) {
 });
 
 /**
+ * @name /platformsupply/*
+ * @description Display the current total of the JSE ledger from JSE.publicStats
+ * @memberof module:jseRouter
+ */
+router.get('/platformsupply/*', function(req, res) {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.send(String(JSE.publicStats.platformCoins));
+});
+
+/**
  * @name /circulatingsupply/*
  * @description Display the current circulating supply from JSE.publicStats
  * @memberof module:jseRouter

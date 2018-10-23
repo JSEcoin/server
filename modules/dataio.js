@@ -1034,7 +1034,7 @@ const jseDB = {
 			JSE.jseDataIO.setVariable('publicStats/distributionAccount',JSE.publicStats.distributionAccount);
 			JSE.jseDataIO.setVariable('publicStats/charityAccount',JSE.publicStats.charityAccount);
 			let users = 0;
-			let platformCoins = 0; // total circulation
+			let platformCoins = 0; // total circulation on JSE Ledger
 			Object.keys(ledger).forEach(function(key) {
 			//for(const key in ledger) {
 				//if (!ledger.hasOwnProperty(key)) continue;
@@ -1043,11 +1043,16 @@ const jseDB = {
 			});
 			JSE.publicStats.users = users;
 			JSE.jseDataIO.setVariable('publicStats/users',JSE.publicStats.users);
+			JSE.publicStats.platformCoins = JSE.jseFunctions.round(platformCoins);
+			JSE.jseDataIO.setVariable('publicStats/platformCoins',JSE.publicStats.platformCoins);
 			// add ERC20 tokens
 			jseEthIntegration.balanceJSE('0xc880f4143950bfb27ed021793991f35466b99201').then((coldStorageBalance) => {
-				const coinTotal = Math.round(platformCoins + (10000000000 - coldStorageBalance));
-				JSE.publicStats.coins = coinTotal;
-				JSE.jseDataIO.setVariable('publicStats/coins',JSE.publicStats.coins);
+				jseEthIntegration.balanceJSE('0x7a1f4c1031f11571a95e4778c2b4281af88c1e28').then((jseFundsBalance) => {
+					const erc20Coins = 10000000000 - coldStorageBalance - jseFundsBalance;
+					const coinTotal = platformCoins + erc20Coins;
+					JSE.publicStats.coins = JSE.jseFunctions.round(coinTotal);
+					JSE.jseDataIO.setVariable('publicStats/coins',JSE.publicStats.coins);
+				});
 			});
 		});
 		JSE.jseDataIO.getVariable('statsToday',function(statsDaily) {
