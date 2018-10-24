@@ -63,6 +63,29 @@ const jseExchanges = {
 	},
 
 	/**
+	 * @method <h2>coingeckoAPI</h2>
+	 * @description Return API data from CoinGecko
+	 * @returns {float} price/exchange rate
+	 */
+	coingeckoAPI: async () => {
+		const apiURL = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=jsecoin%2Cbitcoin%2Cethereum`;
+		return new Promise(function(resolve, reject) {
+			request.get({
+				url: apiURL,
+				json: true,
+			}, (err, res, result) => {
+				if (typeof result === 'object') {
+					resolve(result);
+				} else {
+					console.log('LATOKEN API ERROR exchanges.js 32');
+					resolve(false);
+				}
+			});
+		});
+	},
+
+
+	/**
 	 * @method <h2>updateCurrencyData</h2>
 	 * @description Calculate the average pricing from idex api data
 	 * @returns {float} price/exchange rate
@@ -112,12 +135,22 @@ const jseExchanges = {
  */
 	getExchangeRates: async () => {
 		const exchangeRates = {};
-		exchangeRates.USDETH = await jseExchanges.latokenAPI('USDT/ETH');
-		exchangeRates.USDBTC = await jseExchanges.latokenAPI('USDT/BTC');
 		exchangeRates.ETHJSE = await jseExchanges.latokenAPI('ETH/JSE');
 		exchangeRates.ETHJSE2 = await jseExchanges.idexAPI('ETH/JSE');
-		if (!exchangeRates.ETHJSE) return false; // quit if LATOKEN API isn't working
-		exchangeRates.USDJSE = JSE.jseFunctions.round(exchangeRates.ETHJSE * exchangeRates.USDETH);
+		if (!exchangeRates.ETHJSE) { // if LATOKEN isn't working try coingecko
+			const coinGeckoData = await jseExchanges.coingeckoAPI();
+			if (!coinGeckoData) return false; // quit if LATOKEN and CoinGecko API aren't working
+			coinGeckoData.forEach((coinObject) => {
+				if (coinObject.symbol === 'btc') exchangeRates.USDBTC = coinObject.current_price;
+				if (coinObject.symbol === 'eth') exchangeRates.USDETH = coinObject.current_price;
+				if (coinObject.symbol === 'jse') exchangeRates.USDJSE = coinObject.current_price;
+			});
+			exchangeRates.ETHJSE = JSE.jseFunctions.round(exchangeRates.USDJSE / exchangeRates.USDETH);
+		} else {
+			exchangeRates.USDETH = await jseExchanges.latokenAPI('USDT/ETH');
+			exchangeRates.USDBTC = await jseExchanges.latokenAPI('USDT/BTC');
+			exchangeRates.USDJSE = JSE.jseFunctions.round(exchangeRates.ETHJSE * exchangeRates.USDETH);
+		}
 		const nowTS = new Date().getTime();
 		const oneHourAgo = nowTS - 3600000; // Update currency exchange rate data at 1 hour intervals
 		if (!JSE.currencyData || (JSE.currencyData && JSE.currencyData.ts < oneHourAgo)) {
