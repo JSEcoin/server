@@ -101,6 +101,7 @@ function startAutoresponder() {
 				if (typeof users[i] === 'undefined' || users[i] === null || maxCount > maxEmailsPerDay) return;
 				if (users[i].confirmed === true && !users[i].suspended) {
 					if (users[i].noNewsletter) return;
+					if (jseEmails.suppression.indexOf(users[i].email) > -1) return;
 					const aff =  parseInt(users[i].campaign.split(/[^0-9]/).join(''),10);
 					if (users[i].source !== 'referral' || (!users[aff] || !users[aff].suspended)) {
 						if (users[i].lastEmail) {

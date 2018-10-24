@@ -327,7 +327,7 @@ function sendOnboardingEmail(user,emailRef,callback) {
  */
 function sendStandardEmail(toEmailRaw,subject,htmlContent) {
 	const fromEmail = new helper.Email('noreply@jsecoin.com');
-	if (jseEmails.suppression.indexOf(toEmailRaw) > -1) return;
+	//if (jseEmails.suppression.indexOf(toEmailRaw) > -1) return;
 	const toEmail = new helper.Email(toEmailRaw);
 	const emailHTML = jseEmails.template.split('$heading').join(subject).split('$content').join(htmlContent);
 	const content = new helper.Content('text/html', emailHTML);
@@ -480,7 +480,7 @@ function transferNotificationEmails(fromUID,toUID,transactionValue) {
 function banEmail(banUID) {
 	JSE.jseDataIO.getEmail(banUID,function(emailAddress) {
 		const fromEmail = new helper.Email('investigations@jsecoin.com');
-		if (jseEmails.suppression.indexOf(emailAddress) > -1) return;
+		//if (jseEmails.suppression.indexOf(emailAddress) > -1) return;
 		const toEmail = new helper.Email(emailAddress);
 		const subject = 'JSEcoin Account Suspension';
 		const htmlContent = 'Our fraud prevention measures have detected unusual activity on your JSEcoin account. Your account has been suspended pending further investigation. The most common reasons for account suspension are referral and mining fraud. Please contact investigations@jsecoin.com if you wish to supply evidence disputing this suspension.';
@@ -699,5 +699,5 @@ function txApprove(uid,pushRef,approvalType) {
 }
 
 module.exports = {
- shuffle, randString, round, cleanString, limitString, sha256, buf2hex, hex2buf, createKeyPair, signData, verifyData, signHash, verifyHash, sendWelcomeEmail, sendOnboardingEmail, sendStandardEmail, exportNotificationEmail, withdrawalNotificationEmail, depositNotificationEmail, transferNotificationEmails, referral, genSafeUser, sendSMS, realityCheck, txApprove,
+ shuffle, randString, round, cleanString, limitString, sha256, buf2hex, hex2buf, createKeyPair, signData, verifyData, signHash, verifyHash, sendWelcomeEmail, sendOnboardingEmail, sendStandardEmail, exportNotificationEmail, withdrawalNotificationEmail, depositNotificationEmail, transferNotificationEmails, banEmail, referral, genSafeUser, sendSMS, realityCheck, txApprove,
 };
