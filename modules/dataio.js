@@ -1016,12 +1016,14 @@ const jseDB = {
 	 */
 	updateExchangeRates: async() => {
 		JSE.publicStats.exchangeRates = await jseExchanges.getExchangeRates();
+		if (!JSE.publicStats.exchangeRates) return false;
 		JSE.jseDataIO.setVariable('publicStats/exchangeRates',JSE.publicStats.exchangeRates);
 		// update market cap
 		if (JSE.publicStats.coins) { // don't update if the circulating supply hasn't completed
 			JSE.publicStats.marketCap = Math.round(JSE.publicStats.coins * JSE.publicStats.exchangeRates.USDJSE);
 			JSE.jseDataIO.setVariable('publicStats/marketCap',JSE.publicStats.marketCap);
 		}
+		return false;
 	},
 
 	/**

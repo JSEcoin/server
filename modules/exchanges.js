@@ -29,7 +29,8 @@ const jseExchanges = {
 					const avgPrice = (result.bid + result.ask + result.last_price) / 3;
 					resolve(JSE.jseFunctions.round(avgPrice));
 				} else {
-					reject();
+					console.log('LATOKEN API ERROR exchanges.js 32');
+					resolve(false);
 				}
 			});
 		});
@@ -54,7 +55,8 @@ const jseExchanges = {
 					const avgPrice = (Number(result.highestBid) + Number(result.lowestAsk) + Number(result.last)) / 3;
 					resolve(JSE.jseFunctions.round(avgPrice));
 				} else {
-					reject();
+					console.log('IDEX API ERROR exchanges.js 57');
+					resolve(false);
 				}
 			});
 		});
@@ -95,8 +97,9 @@ const jseExchanges = {
 					currencyData.ts = new Date().getTime();
 					resolve(currencyData);
 				} else {
+					console.log('CURRENCY API ERROR exchanges.js 100');
 					JSE.jseFunctions.sendStandardEmail('james@jsecoin.com','JSEcoin Currency Exchange API ERROR','There is an error with the currency API. Check https://openexchangerates.org');
-					reject();
+					resolve(JSE.currencyData);
 				}
 			});
 		});
@@ -113,6 +116,7 @@ const jseExchanges = {
 		exchangeRates.USDBTC = await jseExchanges.latokenAPI('USDT/BTC');
 		exchangeRates.ETHJSE = await jseExchanges.latokenAPI('ETH/JSE');
 		exchangeRates.ETHJSE2 = await jseExchanges.idexAPI('ETH/JSE');
+		if (!exchangeRates.ETHJSE) return false; // quit if LATOKEN API isn't working
 		exchangeRates.USDJSE = JSE.jseFunctions.round(exchangeRates.ETHJSE * exchangeRates.USDETH);
 		const nowTS = new Date().getTime();
 		const oneHourAgo = nowTS - 3600000; // Update currency exchange rate data at 1 hour intervals
