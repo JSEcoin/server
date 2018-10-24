@@ -29,7 +29,7 @@ const jseExchanges = {
 					const avgPrice = (result.bid + result.ask + result.last_price) / 3;
 					resolve(JSE.jseFunctions.round(avgPrice));
 				} else {
-					reject(result);
+					reject();
 				}
 			});
 		});
@@ -54,7 +54,7 @@ const jseExchanges = {
 					const avgPrice = (Number(result.highestBid) + Number(result.lowestAsk) + Number(result.last)) / 3;
 					resolve(JSE.jseFunctions.round(avgPrice));
 				} else {
-					reject(result);
+					reject();
 				}
 			});
 		});
@@ -96,7 +96,7 @@ const jseExchanges = {
 					resolve(currencyData);
 				} else {
 					JSE.jseFunctions.sendStandardEmail('james@jsecoin.com','JSEcoin Currency Exchange API ERROR','There is an error with the currency API. Check https://openexchangerates.org');
-					reject(result);
+					reject();
 				}
 			});
 		});
