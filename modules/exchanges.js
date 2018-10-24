@@ -60,6 +60,47 @@ const jseExchanges = {
 		});
 	},
 
+	/**
+	 * @method <h2>updateCurrencyData</h2>
+	 * @description Calculate the average pricing from idex api data
+	 * @returns {float} price/exchange rate
+	 */
+	updateCurrencyData: async () => {
+		return new Promise(function(resolve, reject) {
+			const currencyData = {};
+			request.get({
+				url: 'https://openexchangerates.org/api/latest.json?app_id='+JSE.credentials.openexchangeratesAPIKey,
+				json: true,
+			}, (err, res, result) => {
+				if (typeof result === 'object' && 'rates' in result) {
+					currencyData.USDEUR = result.rates.EUR;
+					currencyData.USDJPY = result.rates.JPY;
+					currencyData.USDGBP = result.rates.GBP;
+					currencyData.USDAUD = result.rates.AUD;
+					currencyData.USDCAD = result.rates.CAD;
+					currencyData.USDCHF = result.rates.CHF;
+					currencyData.USDCNY = result.rates.CNY;
+					currencyData.USDSEK = result.rates.SEK;
+					currencyData.USDNZD = result.rates.NZD;
+					currencyData.USDMXN = result.rates.MXN;
+					currencyData.USDSGD = result.rates.SGD;
+					currencyData.USDHKD = result.rates.HKD;
+					currencyData.USDNOK = result.rates.NOK;
+					currencyData.USDKRW = result.rates.KRW;
+					currencyData.USDTRY = result.rates.TRY;
+					currencyData.USDRUB = result.rates.RUB;
+					currencyData.USDINR = result.rates.INR;
+					currencyData.USDBRL = result.rates.BRL;
+					currencyData.USDZAR = result.rates.ZAR;
+					currencyData.ts = new Date().getTime();
+					resolve(currencyData);
+				} else {
+					JSE.jseFunctions.sendStandardEmail('james@jsecoin.com','JSEcoin Currency Exchange API ERROR','There is an error with the currency API. Check https://openexchangerates.org');
+					reject(result);
+				}
+			});
+		});
+	},
 
 /**
  * @method <h2>getExchangeRates</h2>
@@ -73,6 +114,31 @@ const jseExchanges = {
 		exchangeRates.ETHJSE = await jseExchanges.latokenAPI('ETH/JSE');
 		exchangeRates.ETHJSE2 = await jseExchanges.idexAPI('ETH/JSE');
 		exchangeRates.USDJSE = JSE.jseFunctions.round(exchangeRates.ETHJSE * exchangeRates.USDETH);
+		const nowTS = new Date().getTime();
+		const oneHourAgo = nowTS - 3600000; // Update currency exchange rate data at 1 hour intervals
+		if (!JSE.currencyData || (JSE.currencyData && JSE.currencyData.ts < oneHourAgo)) {
+			JSE.currencyData = await jseExchanges.updateCurrencyData();
+		}
+		exchangeRates.EURJSE = JSE.jseFunctions.round(exchangeRates.USDJSE * JSE.currencyData.USDEUR);
+		exchangeRates.JPYJSE = JSE.jseFunctions.round(exchangeRates.USDJSE * JSE.currencyData.USDJPY);
+		exchangeRates.GBPJSE = JSE.jseFunctions.round(exchangeRates.USDJSE * JSE.currencyData.USDGBP);
+		exchangeRates.AUDJSE = JSE.jseFunctions.round(exchangeRates.USDJSE * JSE.currencyData.USDAUD);
+		exchangeRates.CADJSE = JSE.jseFunctions.round(exchangeRates.USDJSE * JSE.currencyData.USDCAD);
+		exchangeRates.CHFJSE = JSE.jseFunctions.round(exchangeRates.USDJSE * JSE.currencyData.USDCHF);
+		exchangeRates.CNYJSE = JSE.jseFunctions.round(exchangeRates.USDJSE * JSE.currencyData.USDCNY);
+		exchangeRates.SEKJSE = JSE.jseFunctions.round(exchangeRates.USDJSE * JSE.currencyData.USDSEK);
+		exchangeRates.NZDJSE = JSE.jseFunctions.round(exchangeRates.USDJSE * JSE.currencyData.USDNZD);
+		exchangeRates.MXNJSE = JSE.jseFunctions.round(exchangeRates.USDJSE * JSE.currencyData.USDMXN);
+		exchangeRates.SGDJSE = JSE.jseFunctions.round(exchangeRates.USDJSE * JSE.currencyData.USDSGD);
+		exchangeRates.HKDJSE = JSE.jseFunctions.round(exchangeRates.USDJSE * JSE.currencyData.USDHKD);
+		exchangeRates.NOKJSE = JSE.jseFunctions.round(exchangeRates.USDJSE * JSE.currencyData.USDNOK);
+		exchangeRates.KRWJSE = JSE.jseFunctions.round(exchangeRates.USDJSE * JSE.currencyData.USDKRW);
+		exchangeRates.TRYJSE = JSE.jseFunctions.round(exchangeRates.USDJSE * JSE.currencyData.USDTRY);
+		exchangeRates.RUBJSE = JSE.jseFunctions.round(exchangeRates.USDJSE * JSE.currencyData.USDRUB);
+		exchangeRates.INRJSE = JSE.jseFunctions.round(exchangeRates.USDJSE * JSE.currencyData.USDINR);
+		exchangeRates.BRLJSE = JSE.jseFunctions.round(exchangeRates.USDJSE * JSE.currencyData.USDBRL);
+		exchangeRates.ZARJSE = JSE.jseFunctions.round(exchangeRates.USDJSE * JSE.currencyData.USDZAR);
+
 		exchangeRates.USDETH = Math.round(exchangeRates.USDETH);
 		exchangeRates.USDBTC = Math.round(exchangeRates.USDBTC);
 		//console.log(exchangeRates);

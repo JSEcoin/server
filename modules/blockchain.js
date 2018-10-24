@@ -47,7 +47,7 @@ const jseBlockChain = {
 			JSE.jseSettings.difficulty = 4;
 		}
 		JSE.jseSettings.frequency = 30000;
-		JSE.jseSettings.adminEmail = 'dave@jsecoin.com';
+		JSE.jseSettings.adminEmail = 'admin@jsecoin.com';
 		JSE.jseSettings.systemMessage = ''; //'<span style="color:red">System is currently undergoing planned maintenance</span>'
 		JSE.jseSettings.loader = fs.readFileSync('./embed/loader.min.js').toString();
 		JSE.jseSettings.maxBlockFileSize = 1000; // how many blocks can fit in a blockchain before we restart
