@@ -64,8 +64,9 @@ const jseExchanges = {
 
 	/**
 	 * @method <h2>coingeckoAPI</h2>
-	 * @description Return API data from CoinGecko
-	 * @returns {float} price/exchange rate
+	 * @description Return API data object from CoinGecko
+	 * @returns {array} contains an array of coin objects, each includes id, symbol current_price
+	 * also contains market caps etc. Load the URL for more info.
 	 */
 	coingeckoAPI: async () => {
 		const apiURL = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=jsecoin%2Cbitcoin%2Cethereum`;
@@ -141,9 +142,9 @@ const jseExchanges = {
 			const coinGeckoData = await jseExchanges.coingeckoAPI();
 			if (!coinGeckoData) return false; // quit if LATOKEN and CoinGecko API aren't working
 			coinGeckoData.forEach((coinObject) => {
-				if (coinObject.symbol === 'btc') exchangeRates.USDBTC = coinObject.current_price;
-				if (coinObject.symbol === 'eth') exchangeRates.USDETH = coinObject.current_price;
-				if (coinObject.symbol === 'jse') exchangeRates.USDJSE = coinObject.current_price;
+				if (coinObject.symbol === 'btc') exchangeRates.USDBTC = JSE.jseFunctions.round(coinObject.current_price);
+				if (coinObject.symbol === 'eth') exchangeRates.USDETH = JSE.jseFunctions.round(coinObject.current_price);
+				if (coinObject.symbol === 'jse') exchangeRates.USDJSE = JSE.jseFunctions.round(coinObject.current_price);
 			});
 			exchangeRates.ETHJSE = JSE.jseFunctions.round(exchangeRates.USDJSE / exchangeRates.USDETH);
 		} else {
