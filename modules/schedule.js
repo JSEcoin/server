@@ -178,7 +178,8 @@ function runSubscriptions() {
 							}, timeoutCount, uidSale);
 							timeoutCount += 30000;
 						} else if (payableDateProcessed < (172800000 + nowTS) && uidSale.rebillFrequency !== 'daily' && typeof uidSale.cancelledTS === 'undefined') {
-							JSE.jseFunctions.sendStandardEmail(uidSale.buyerEmail, 'Subscription Due', 'Please note your subscription reference: '+uidSale.reference+' is due tomorrow.<br><br>Your account will be debited '+uidSale.recurringPrice+' JSE<br><br>You can cancel this contract at any time by logging in to the panel');
+							const subCurrency = uidSale.recurringCurrency || 'JSE';
+							JSE.jseFunctions.sendStandardEmail(uidSale.buyerEmail, 'Subscription Due', 'Please note your subscription reference: '+uidSale.reference+' is due tomorrow.<br><br>Your account will be debited '+uidSale.recurringPrice+' '+subCurrency+'<br><br>You can cancel this contract at any time by logging in to the panel');
 						}
 					} // reccurring sales
 				}
@@ -195,7 +196,11 @@ function runSubscriptions() {
 function processSubscription(uidSale) {
 	JSE.jseDataIO.getCredentialsByUID(uidSale.buyerUID, function(buyer) {
 		JSE.jseDataIO.getCredentialsByUID(uidSale.sellerUID, function(seller) {
-			jseAPI.apiTransfer(buyer,seller,uidSale.recurringPrice,'Subscription: '+uidSale.item,false,function(jsonResult) {
+			let thePrice = uidSale.recurringPrice;
+			if (uidSale.currency) {
+				thePrice = Math.round(uidSale.recurringPrice / JSE.publicStats.exchangeRates[uidSale.currency+'JSE']);
+			}
+			jseAPI.apiTransfer(buyer,seller,thePrice,'Subscription: '+uidSale.item,false,function(jsonResult) {
 				const returnObj = JSON.parse(jsonResult);
 				if (returnObj.success === 1) {
 					console.log('Processed subscription ref. '+uidSale.reference);

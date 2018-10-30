@@ -152,6 +152,8 @@ const jseExchanges = {
 			exchangeRates.USDBTC = await jseExchanges.latokenAPI('USDT/BTC');
 			exchangeRates.USDJSE = JSE.jseFunctions.round(exchangeRates.ETHJSE * exchangeRates.USDETH);
 		}
+		exchangeRates.BTCJSE = JSE.jseFunctions.round(exchangeRates.USDJSE / exchangeRates.USDBTC);
+
 		const nowTS = new Date().getTime();
 		const oneHourAgo = nowTS - 3600000; // Update currency exchange rate data at 1 hour intervals
 		if (!JSE.currencyData || (JSE.currencyData && JSE.currencyData.ts < oneHourAgo)) {

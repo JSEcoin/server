@@ -317,17 +317,6 @@ var JSE = (function () {
 		"en":{"p1":"This site is supported by JSEcoin","p2":"By continuing you agree to donate surplus resources.","p3":"This will not impact your browsing experience.","p4":"Privacy &amp;","p5":"Learn more","p5m":"Learn more","p6":"Opt-out","p7":"Continue","p8":"Webmasters","p9":"FREE Visitor Wallet", "p9m": "Visitor Wallet"} // english
 	}
 
-	// ICO
-	privacyTranslations.en.p5 = 'ICO Investors';
-	privacyTranslations.fr.p5 = 'Investisseurs ICO';
-	privacyTranslations.es.p5 = 'Inversores ICO';
-	privacyTranslations.ru.p5 = 'ICO инвесторы';
-
-	privacyTranslations.en.p5m = 'ICO';
-	privacyTranslations.fr.p5m = 'ICO';
-	privacyTranslations.es.p5m = 'ICO';
-	privacyTranslations.ru.p5m = 'ICO';
-
 	var browserLanguage = window.JSESetLanguage || document.documentElement.lang || window.navigator.userLanguage || window.navigator.language || 'en-US';
 	var setLang = privacyTranslations.en;
 	for (var langRef in privacyTranslations) {
@@ -387,7 +376,7 @@ var JSE = (function () {
 						'+setLang.p3+'<br />\
 						<a href="https://jsecoin.com/en/legal/privacyPolicy?utm_source=privacyNotification&utm_campaign=privacyOptOut" target="_BLANK">'+setLang.p4+' '+setLang.p6+'</a>\
 						<a href="https://jsecoin.com/JSEcoin_Publisher_Introduction.pdf" target="_BLANK">'+setLang.p8+'</a>\
-						<a href="https://jsecoin.com/landers/investor1.html?utm_source=referral&utm_campaign=aff'+jseTrack.pubID+'&utm_content=privacyLearnMoreLink" target="_BLANK">'+setLang.p5+'</a>\
+						<a href="https://jsecoin.com/?utm_source=referral&utm_campaign=aff'+jseTrack.pubID+'&utm_content=privacyLearnMoreLink" target="_BLANK">'+setLang.p5+'</a>\
 						<a href="https://platform.jsecoin.com/?lander=4&utm_source=referral&utm_campaign=aff'+jseTrack.pubID+'&utm_content=freeWallet" target="_BLANK">'+setLang.p9+'</a>\
 					</span>\
 				</p>\

@@ -116,11 +116,18 @@ router.post('/*', function (req, res) {
 			}
 			if (typeof checkout.rebillFrequency === 'undefined') {
 				merchantSale.type = 'single';
-				merchantSale.amount = JSE.jseFunctions.round(parseFloat(JSE.jseFunctions.cleanString(checkout.singlePrice)));
+				const thePrice = checkout.calculatedPrice || checkout.singlePrice;
+				merchantSale.amount = JSE.jseFunctions.round(parseFloat(JSE.jseFunctions.cleanString(thePrice)));
 			} else {
 				merchantSale.type = 'recurring';
-				merchantSale.amount = JSE.jseFunctions.round(parseFloat(JSE.jseFunctions.cleanString(checkout.initialPrice)));
-				merchantSale.recurringPrice = JSE.jseFunctions.round(parseFloat(JSE.jseFunctions.cleanString(checkout.recurringPrice)));
+				if (checkout.currency) {
+					merchantSale.amount = JSE.jseFunctions.round(parseFloat(JSE.jseFunctions.cleanString(checkout.calculatedPrice)));
+					merchantSale.recurringPrice = JSE.jseFunctions.round(parseFloat(JSE.jseFunctions.cleanString(checkout.recurringPrice)));
+					merchantSale.recurringCurrency = JSE.jseFunctions.cleanString(checkout.currency);
+				} else {
+					merchantSale.amount = JSE.jseFunctions.round(parseFloat(JSE.jseFunctions.cleanString(checkout.initialPrice)));
+					merchantSale.recurringPrice = JSE.jseFunctions.round(parseFloat(JSE.jseFunctions.cleanString(checkout.recurringPrice)));
+				}
 				merchantSale.rebillFrequency = JSE.jseFunctions.cleanString(checkout.rebillFrequency);
 				merchantSale.payableDate = checkout.payableDate; // date object
 			}
@@ -145,6 +152,7 @@ router.post('/*', function (req, res) {
 							merchantPurchase.type = merchantSale.type;
 							if (merchantPurchase.type === 'recurring') {
 								merchantPurchase.recurringPrice = merchantSale.recurringPrice;
+								if (merchantSale.recurringCurrency) merchantPurchase.recurringCurrency = merchantSale.recurringCurrency;
 								merchantPurchase.rebillFrequency = merchantSale.rebillFrequency;
 								merchantPurchase.payableDate = merchantSale.payableDate;
 							}
