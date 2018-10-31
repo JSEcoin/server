@@ -83,6 +83,16 @@ router.get('/circulatingsupply/*', function(req, res) {
 });
 
 /**
+ * @name /exchangerates/*
+ * @description Display JSON string of JSE.publicStats.exchangeRates
+ * @memberof module:jseRouter
+ */
+router.get('/exchangerates/*', function(req, res) {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.send(JSON.stringify(JSE.publicStats.exchangeRates));
+});
+
+/**
  * @name /dailystats/*
  * @description Display JSON string of JSE.dailyPublicStats
  * @memberof module:jseRouter
