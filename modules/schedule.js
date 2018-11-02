@@ -107,7 +107,7 @@ function startAutoresponder() {
 						if (users[i].lastEmail) {
 							const lastEmailTS = users[i].lastEmail.split(',')[0]; // timestamp,ref
 							const lastEmailRef = parseInt(users[i].lastEmail.split(',')[1],10);
-							const nextEmailTS = (new Date(Number(lastEmailTS)).getTime()) + (86400000 * lastEmailRef); // * 2 removed 24th Sept, previous note i.e. email 4 will be sent 6 days after email 3, remove end figure to speed up
+							const nextEmailTS = (new Date(Number(lastEmailTS)).getTime()) + (86400000 * lastEmailRef * 2); // i.e. email 4 will be sent 6 days after email 3, remove end figure to speed up
 							if (nextEmailTS < nowTS) {
 								maxCount += 1;
 								const nextEmailRef = Number(lastEmailRef) + 1;
