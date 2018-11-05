@@ -46,10 +46,12 @@ router.get('/:uid/:confirmcode', function(req, res) {
 			return false;
 		}
 		if (credentials.confirmCode === req.params.confirmcode) {
+			let confirmIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
+			if (confirmIP.indexOf(',') > -1) { confirmIP = confirmIP.split(',')[0]; }
 			res.send('<html><script>alert("Thanks for confirming your account"); window.location = "https://platform.jsecoin.com/";</script></html>');
 			const uniqueConfirmationCode = JSE.jseFunctions.randString(12);
 			JSE.jseDataIO.setVariable('account/'+credentials.uid+'/uniqueConfirmationCode', uniqueConfirmationCode);
-			setTimeout(function(checkUID,checkConfirmationCode) {
+			setTimeout(function(checkUID,checkConfirmationCode,checkIP) {
 				JSE.jseDataIO.getVariable('account/'+checkUID,function(account) {
 					if (account.uniqueConfirmationCode === checkConfirmationCode && account.source === 'referral' && account.confirmed === false) {
 						const tier1 = 'US,DE,NL,SG,HK,CH,SE,IE,NO,';
@@ -62,13 +64,13 @@ router.get('/:uid/:confirmcode', function(req, res) {
 						if (referralPayout > 0) {
 						//if (account.geo === 'US' || account.geo === 'CA' || account.geo === 'GB' || account.geo === 'IE' || account.geo === 'AU' || account.geo === 'NZ' || account.geo === 'ZA' || account.geo === 'DE' || account.geo === 'FR' || account.geo === 'CH' || account.geo === 'SE' || account.geo === 'NO' || account.geo === 'FI' || account.geo === 'BE' || account.geo === 'NL' || account.geo === 'LU' || account.geo === 'DK' || account.geo === 'AT') {
 							if (account.duplicate === null || typeof account.duplicate === 'undefined') {
-								JSE.jseFunctions.referral(account.campaign,account.content,referralPayout,account.geo,'Confirmed');
+								JSE.jseFunctions.referral(checkIP,account.campaign,account.content,referralPayout,account.geo,'Confirmed');
 							} else {
 								console.log('Declined Referral Dupe: '+account.campaign);
-								JSE.jseFunctions.referral(account.campaign,account.content,0,account.geo,'Declined Duplicate Account'); // Anything with Declined in will get value set to 0
+								JSE.jseFunctions.referral(checkIP,account.campaign,account.content,0,account.geo,'Declined Duplicate Account'); // Anything with Declined in will get value set to 0
 							}
 						} else {
-							JSE.jseFunctions.referral(account.campaign,account.content,1,account.geo,'Declined Region'); // declined regions go through at 1 JSE
+							JSE.jseFunctions.referral(checkIP,account.campaign,account.content,1,account.geo,'Declined Region'); // declined regions go through at 1 JSE
 							console.log('Declined Referral GEO: '+account.campaign+'/'+account.geo);
 						}
 					} else {
@@ -77,7 +79,7 @@ router.get('/:uid/:confirmcode', function(req, res) {
 					setTimeout(function() { JSE.jseDataIO.setVariable('account/'+checkUID+'/confirmed', true); }, 1000); // set timeout, shouldn't be needed but trying to fix referrals bug where a lot are getting declined because they are already confirmed
 					setTimeout(function() { JSE.jseDataIO.hardDeleteVariable('account/'+checkUID+'/uniqueConfirmationCode'); }, 1000); // cleanup no need for this in the data
 				});
-			}, (10 + Math.floor(Math.random() * 50000)), credentials.uid, uniqueConfirmationCode); // do this after a random interval up to 60 seconds
+			}, (10 + Math.floor(Math.random() * 50000)), credentials.uid, uniqueConfirmationCode,confirmIP); // do this after a random interval up to 60 seconds
 		} else {
 			res.send('<html>Error: Confirmation code not recognised</html>');
 		}
