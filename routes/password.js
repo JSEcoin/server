@@ -69,7 +69,7 @@ router.post('/reset/*', function (req, res) {
 				const credentials = {};
 				credentials.uid = user.uid;
 				credentials.email = user.email;
-				const passwordReset = JSE.jseFunctions.randString(12);
+				const passwordReset = JSE.jseFunctions.randString(32);
 				JSE.jseDataIO.setVariable('passwordResetCodes/'+passwordReset,credentials.uid);
 				setTimeout(function() { JSE.jseDataIO.hardDeleteVariable('passwordResetCodes/'+passwordReset); }, 3600000);
 				const passwordResetEmail = '<img src="https://jsecoin.com/img/logosmall.png" style="float: right;" alt="JSEcoin" /><br>We have received a request to reset your password. If you did not request this please <a href="https://jsecoin.com/contact/">Contact Us</a><br><br>Your login email is: '+credentials.email+'<br><br>Your security code to reset the password is: '+passwordReset+'<br><br>Please enter the security code and a new password into the form on the password reset page, then delete this email.<br><br>Your security code will expire in 60 minutes<br><br>Kind regards,<br><br>The JSE Team<br><hr style="border-top: 1px solid #000000;"><div style="margin-bottom: 10px;"><a href="https://jsecoin.com/"><img src="https://jsecoin.com/img/logosmall.png" alt="JSEcoin" /></a><div style="margin:10px; float: right;"><a href="https://www.facebook.com/officialjsecoin"><img src="https://jsecoin.com/img/facebookemail.png" alt="Facebook" /></a></div><div style="margin:10px; float: right;"><a href="https://twitter.com/jsecoin"><img src="https://jsecoin.com/img/twitteremail.png" alt="Twitter" /></a></div></div>';
