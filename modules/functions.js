@@ -498,50 +498,43 @@ function banEmail(banUID) {
 /**
  * @method <h2>referral</h2>
  * @description Send out a referral payment on DOI confirmation
- * @param {string} confirmIP IP address to reality check before issuing referral commissions.
  * @param {string} utmCampaign utmCampaign should be "referral"
  * @param {string} utmContent utmContent should be aff12345
  */
-function referral(confirmIP,utmCampaign,utmContent,affPayout,geo,notes) {
-	JSE.jseFunctions.realityCheck(confirmIP, function(goodIPTrue) {
-		if (goodIPTrue === false) {
-			console.log('Referral declined realitycheck on IP address: '+confirmIP);
-			return false;
+function referral(utmCampaign,utmContent,affPayout,geo,notes) {
+	let value = affPayout;
+	const strippedUID = utmCampaign.split(/[^0-9]/).join('');
+	if (!strippedUID) return false; // check for blank UIDs
+	JSE.jseDataIO.getVariable('account/'+strippedUID,function(affiliate) {
+		if (affiliate === null) { return false; } // watch out for wrong affids
+		if (typeof affiliate.affQuality !== 'undefined') { // block suspended accounts
+			const rand = Math.floor(Math.random() * 10); //0-9
+			if (rand >= affiliate.affQuality) {
+				return false;
+			}
 		}
-		let value = affPayout;
-		const strippedUID = utmCampaign.split(/[^0-9]/).join('');
-		if (!strippedUID) return false; // check for blank UIDs
-		JSE.jseDataIO.getVariable('account/'+strippedUID,function(affiliate) {
-			if (affiliate === null) { return false; } // watch out for wrong affids
-			if (typeof affiliate.affQuality !== 'undefined') { // block suspended accounts
-				const rand = Math.floor(Math.random() * 10); //0-9
-				if (rand >= affiliate.affQuality) {
-					return false;
-				}
-			}
-			if (typeof affiliate.affPayout !== 'undefined') {
-				value = affiliate.affPayout;
-			}
-			const referralObj = {};
-			referralObj.uid = strippedUID;
-			referralObj.utmContent = utmContent;
-			referralObj.value = value;
-			referralObj.geo = geo;
-			referralObj.notes = notes;
-			const rightNow = new Date();
-			referralObj.ts = rightNow.getTime();
-			const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,"");
-			JSE.jseDataIO.pushVariable('referrals/'+strippedUID,referralObj,function(pushRef) {});
-			JSE.jseDataIO.plusX('rewards/'+strippedUID+'/'+yymmdd+'/r', value);
-			/*
-			jseAPI.apiTransfer(distributionCredentials,affiliate,value,reference,false,function(jsonResult) {
-				console.log('Referral payment to '+strippedUID+' for '+value+' JSE');
-			});
-			*/
-			return false;
+		if (typeof affiliate.affPayout !== 'undefined') {
+			value = affiliate.affPayout;
+		}
+		const referralObj = {};
+		referralObj.uid = strippedUID;
+		referralObj.utmContent = utmContent;
+		referralObj.value = value;
+		referralObj.geo = geo;
+		referralObj.notes = notes;
+		const rightNow = new Date();
+		referralObj.ts = rightNow.getTime();
+		const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,"");
+		JSE.jseDataIO.pushVariable('referrals/'+strippedUID,referralObj,function(pushRef) {});
+		JSE.jseDataIO.plusX('rewards/'+strippedUID+'/'+yymmdd+'/r', value);
+		/*
+		jseAPI.apiTransfer(distributionCredentials,affiliate,value,reference,false,function(jsonResult) {
+			console.log('Referral payment to '+strippedUID+' for '+value+' JSE');
 		});
+		*/
 		return false;
 	});
+	return false;
 }
 
 /**
