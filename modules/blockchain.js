@@ -65,7 +65,7 @@ const jseBlockChain = {
 	 */
 	newBlock() {
 		const blockObject = {};
-		blockObject.version = global.jseVersion;
+		blockObject.version = JSE.jseVersion;
 		blockObject.startTime = new Date().getTime();
 		blockObject.frequency = JSE.jseSettings.frequency;
 		blockObject.difficulty = JSE.jseSettings.difficulty;
