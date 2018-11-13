@@ -202,7 +202,7 @@ router.get('/resendwelcome/:uid/:email/', function(req, res) {
  */
 router.post('/myexports/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 696. No Session Variable"}'); return false; }
-	const session = req.body.session;
+	const session = JSE.jseFunctions.cleanString(req.body.session);
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
 		if (goodCredentials !== null) {
 			const myExports = [];
@@ -226,7 +226,7 @@ router.post('/myexports/*', function (req, res) {
  */
 router.post('/removecoincode/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 696. No Session Variable"}'); return false; }
-	const session = req.body.session;
+	const session = JSE.jseFunctions.cleanString(req.body.session);
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
 		if (goodCredentials !== null) {
 			const coinCode = JSE.jseFunctions.cleanString(req.body.coinCode);
@@ -253,7 +253,7 @@ router.post('/removecoincode/*', function (req, res) {
  */
 router.post('/updateapilevel/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error indedx.js 225. No Session Variable"}'); return false; }
-	const session = req.body.session;
+	const session = JSE.jseFunctions.cleanString(req.body.session);
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
 		const pin = String(req.body.pin).split(/[^0-9]/).join('');
 		let pinAttempts = 0;
@@ -279,20 +279,63 @@ router.post('/updateapilevel/*', function (req, res) {
 	return false;
 });
 
+
 /**
- * @name /updateapikey/*
+ * @name /getapikey/*
  * @description Update the users API Key
  * @memberof module:jseRouter
  */
-router.post('/updateapikey/*', function (req, res) {
+router.post('/getapikey/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error indedx.js 258. No Session Variable"}'); return false; }
-	const session = req.body.session;
+	const session = JSE.jseFunctions.cleanString(req.body.session);
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
-		const newAPIKey = JSE.jseFunctions.randString(32);
-		JSE.jseDataIO.setVariable('credentials/'+goodCredentials.uid+'/apiKey',newAPIKey);
-		JSE.jseDataIO.setVariable('lookupAPIKey/'+newAPIKey,goodCredentials.uid);
-		JSE.jseDataIO.hardDeleteVariable('lookupAPIKey/'+goodCredentials.apiKey); // clean up old key lookup tables
-		res.send('{"success":1,"notification":"API Key Updated","newAPIKey":"'+newAPIKey+'"}');
+		const pin = String(req.body.pin).split(/[^0-9]/).join('');
+		let pinAttempts = 0;
+		JSE.pinAttempts.forEach((el) => { if (el === goodCredentials.uid) pinAttempts +=1; });
+		if (pinAttempts > 3) {
+			res.status(400).send('{"fail":1,"notification":"Error 295. Account locked three incorrect attempts at pin number, please check again in six hours"}');
+			return false;
+		} else if (goodCredentials.pin !== pin || pin === null || typeof pin === 'undefined') {
+			JSE.pinAttempts.push(goodCredentials.uid);
+			res.status(400).send('{"fail":1,"notification":"Error 299. Pin number incorrect or blocked, attempt '+(pinAttempts+1)+'/3"}');
+			return false;
+		}
+		if (goodCredentials !== null) {
+			res.send('{"success":1,"apiKey":"'+goodCredentials.apiKey+'"}');
+		}
+		return false;
+	});
+	return false;
+});
+
+/**
+ * @name /resetapikey/*
+ * @description Update the users API Key
+ * @memberof module:jseRouter
+ */
+router.post('/resetapikey/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error indedx.js 258. No Session Variable"}'); return false; }
+	const session = JSE.jseFunctions.cleanString(req.body.session);
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		const pin = String(req.body.pin).split(/[^0-9]/).join('');
+		let pinAttempts = 0;
+		JSE.pinAttempts.forEach((el) => { if (el === goodCredentials.uid) pinAttempts +=1; });
+		if (pinAttempts > 3) {
+			res.status(400).send('{"fail":1,"notification":"Error 295. Account locked three incorrect attempts at pin number, please check again in six hours"}');
+			return false;
+		} else if (goodCredentials.pin !== pin || pin === null || typeof pin === 'undefined') {
+			JSE.pinAttempts.push(goodCredentials.uid);
+			res.status(400).send('{"fail":1,"notification":"Error 299. Pin number incorrect or blocked, attempt '+(pinAttempts+1)+'/3"}');
+			return false;
+		}
+		if (goodCredentials !== null) {
+			const newAPIKey = JSE.jseFunctions.randString(32);
+			JSE.jseDataIO.setVariable('credentials/'+goodCredentials.uid+'/apiKey',newAPIKey);
+			JSE.jseDataIO.setVariable('lookupAPIKey/'+newAPIKey,goodCredentials.uid);
+			JSE.jseDataIO.hardDeleteVariable('lookupAPIKey/'+goodCredentials.apiKey); // clean up old key lookup tables
+			res.send('{"success":1,"notification":"API Key Updated","newAPIKey":"'+newAPIKey+'"}');
+		}
+		return false;
 	});
 	return false;
 });
@@ -304,7 +347,7 @@ router.post('/updateapikey/*', function (req, res) {
  */
 router.post('/updatedetails/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 717. No Session Variable"}'); return false; }
-	const session = req.body.session;
+	const session = JSE.jseFunctions.cleanString(req.body.session);
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
 		const pin = String(req.body.pin).split(/[^0-9]/).join('');
 		let pinAttempts = 0;
@@ -501,7 +544,7 @@ router.post('/whitelisting/*', upload.single('file'), function (req, res) {
  */
 router.post('/pubstats/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 696. No Session Variable"}'); return false; }
-	const session = req.body.session;
+	const session = JSE.jseFunctions.cleanString(req.body.session);
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
 		if (goodCredentials !== null) {
 			JSE.jseDataIO.getPubStats(goodCredentials.uid, function(pubStats) { // pubStats.statsDaily pubStats.subIDs pubStats.siteIDs
@@ -525,7 +568,7 @@ router.post('/pubstats/*', function (req, res) {
  */
 router.post('/referrals/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 696. No Session Variable"}'); return false; }
-	const session = req.body.session;
+	const session = JSE.jseFunctions.cleanString(req.body.session);
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
 		if (goodCredentials !== null) {
 			JSE.jseDataIO.getVariable('referrals/'+goodCredentials.uid, function(referrals) {
@@ -548,7 +591,7 @@ router.post('/referrals/*', function (req, res) {
  */
 router.post('/logout/*', function (req, res) {
   if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"No session provided"}'); return false; }
-  const session = req.body.session;
+  const session = JSE.jseFunctions.cleanString(req.body.session);
   JSE.jseDataIO.getCredentialsBySession(session,function(credentials) {
   	const newCredentials = credentials;
 		let previousSessionVar = credentials.session || null;
@@ -612,7 +655,7 @@ router.post('/bountysubmission/*', function (req, res) {
  */
 router.post('/setpin/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 519. No Session Variable"}'); return false; }
-	const session = req.body.session;
+	const session = JSE.jseFunctions.cleanString(req.body.session);
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
 		if (goodCredentials !== null) {
 			if (goodCredentials.pin) {
@@ -643,7 +686,7 @@ router.post('/setpin/*', function (req, res) {
  */
 router.post('/toggleemail/:type/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 519. No Session Variable"}'); return false; }
-	const session = req.body.session;
+	const session = JSE.jseFunctions.cleanString(req.body.session);
 	const mailType = JSE.jseFunctions.cleanString(req.params.type);
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
 		if (goodCredentials !== null) {
@@ -699,7 +742,7 @@ router.get('/appid/:clientid/*', function(req, res) {
  */
 router.post('/updatetxlimit/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error indedx.js 630. No Session Variable"}'); return false; }
-	const session = req.body.session;
+	const session = JSE.jseFunctions.cleanString(req.body.session);
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
 		const pin = String(req.body.pin).split(/[^0-9]/).join('');
 		let pinAttempts = 0;
@@ -770,7 +813,7 @@ router.post('/updatetxlimit/*', function (req, res) {
  */
 router.post('/txtoday/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 708. No Session Variable"}'); return false; }
-	const session = req.body.session;
+	const session = JSE.jseFunctions.cleanString(req.body.session);
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
 		if (goodCredentials !== null) {
 			JSE.jseDataIO.getVariable('txToday/'+goodCredentials.uid, function(txToday) {
@@ -797,7 +840,7 @@ router.post('/txtoday/*', function (req, res) {
  */
 router.post('/lastlogins/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 708. No Session Variable"}'); return false; }
-	const session = req.body.session;
+	const session = JSE.jseFunctions.cleanString(req.body.session);
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
 		if (goodCredentials !== null) {
 			JSE.jseDataIO.getVariable('logins/'+goodCredentials.uid, function(logins) {
