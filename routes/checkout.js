@@ -4,6 +4,7 @@ const jseAPI = require("./../modules/apifunctions.js");
 const helper = require('sendgrid').mail;
 const sg = require('sendgrid')(JSE.credentials.sendgridAPIKey);
 const request = require('request');
+const crypto = require('crypto');
 
 const router = express.Router();
 
@@ -133,7 +134,14 @@ router.post('/*', function (req, res) {
 			}
 			merchantSale.completedTS = new Date().getTime();
 
-			JSE.jseDataIO.getCredentialsByUID(merchantSale.sellerUID, function(toUser) {
+			JSE.jseDataIO.getCredentialsByUID(merchantSale.sellerUID, async function(toUser) {
+				if (checkout.encoded && checkout.hash) {
+					const hashTest = await checkMerchantHash(toUser,checkout.encoded,checkout.hash);
+					if (hashTest === false) {
+						res.status(400).send('{"fail":1,"notification":"Payment Failed: Merchant Hash Does Not Match Sales Data."}');
+						return false;
+					}
+				}
 				jseAPI.apiTransfer(goodCredentials,toUser,merchantSale.amount,merchantSale.item,false,function(jsonResult) {
 					const returnObj = JSON.parse(jsonResult);
 					if (returnObj.success === 1) {
@@ -179,6 +187,7 @@ router.post('/*', function (req, res) {
 						console.log('Merchant payment failed ref. 95 checkout.js');
 					}
 				});
+				return false;
 			});
 		} else {
 			res.status(400).send('{"fail":1,"notification":"Payment Failed: UserID does not match sessionID."}');
@@ -188,5 +197,19 @@ router.post('/*', function (req, res) {
 		res.status(401).send('{"fail":1,"notification":"Payment Failed: Session credentials could not be verified."}');
 	});
 });
+
+const checkMerchantHash = async (toUserCredentials, encodedURL, hashURL) => {
+  return new Promise(resolve => {
+		JSE.jseDataIO.getUserData(toUserCredentials, function(toUserData) {
+			const safeHashString = encodedURL+toUserData.email+toUserData.apiKey.substring(0, 10)+toUserData.regip+toUserData.registrationDate; // 10 digits public/private api sub-key mixed in with some user data to prevent brute force attack
+			const sha256hash = crypto.createHash('sha256').update(safeHashString).digest("hex");
+			if (sha256hash === hashURL) {
+				resolve(true);
+			} else {
+				resolve(false);
+			}
+		});
+  });
+};
 
 module.exports = router;
