@@ -45,6 +45,21 @@ function runTxt() {
 	*/
 
 	/*
+	// Remove siteID
+	const file = './logs/cli-siteIDs.json';
+	console.log('Starting JSON Import');
+	const jsonString = fs.readFileSync(file).toString();
+	const obj = JSON.parse(jsonString);	
+	Object.keys(obj).forEach(function(key) {
+		//console.log(key);
+		if (obj[key] && typeof obj[key]['badsitecom'] !== 'undefined') {
+			JSE.jseDataIO.hardDeleteVariable('siteIDs/'+key+'/badsitecom');
+			console.log(key);
+		}
+	});
+	*/
+
+	/*
 	const naughtyUsers = ['19522','19547','19590','19598','19606','19626'];
 	const banReason = 'referral fraud';
 	for (var i = 0; i < naughtyUsers.length; i+=1) {
