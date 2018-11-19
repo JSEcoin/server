@@ -194,19 +194,110 @@ const jseSocketIO = {
 				return testAuthKey;
 			}
 
+			/**
+			 * @function <h2>calculateInitialRating</h2>
+			 * @description Calculate an initial rating of client quality
+			 * @param {object} jseTrack browser data object
+			 * @returns {int} initial rating -99 - 99
+			 */
+			function calculateInitialRating(jseTrack) {
+				var initialRating = 0;
+        // User Agent Check
+        var botRegEx = new RegExp("(googlebot\/|Googlebot-Mobile|Googlebot-Image|Google favicon|Mediapartners-Google|bingbot|slurp|java|wget|curl|headless|puppeteer|Commons-HttpClient|Python-urllib|libwww|httpunit|nutch|phpcrawl|msnbot|jyxobot|FAST-WebCrawler|FAST Enterprise Crawler|biglotron|teoma|convera|seekbot|gigablast|exabot|ngbot|ia_archiver|GingerCrawler|webmon |httrack|webcrawler|grub.org|UsineNouvelleCrawler|antibot|netresearchserver|speedy|fluffy|bibnum.bnf|findlink|msrbot|panscient|yacybot|AISearchBot|IOI|ips-agent|tagoobot|MJ12bot|dotbot|woriobot|yanga|buzzbot|mlbot|yandexbot|purebot|Linguee Bot|Voyager|CyberPatrol|voilabot|baiduspider|citeseerxbot|spbot|twengabot|postrank|turnitinbot|scribdbot|page2rss|sitebot|linkdex|Adidxbot|blekkobot|ezooms|dotbot|Mail.RU_Bot|discobot|heritrix|findthatfile|europarchive.org|NerdByNature.Bot|sistrix crawler|ahrefsbot|Aboundex|domaincrawler|wbsearchbot|summify|ccbot|edisterbot|seznambot|ec2linkfinder|gslfbot|aihitbot|intelium_bot|facebookexternalhit|yeti|RetrevoPageAnalyzer|lb-spider|sogou|lssbot|careerbot|wotbox|wocbot|ichiro|DuckDuckBot|lssrocketcrawler|drupact|webcompanycrawler|acoonbot|openindexspider|gnam gnam spider|web-archive-net.com.bot|backlinkcrawler|coccoc|integromedb|content crawler spider|toplistbot|seokicks-robot|it2media-domain-crawler|ip-web-crawler.com|siteexplorer.info|elisabot|proximic|changedetection|blexbot|arabot|WeSEE:Search|niki-bot|CrystalSemanticsBot|rogerbot|360Spider|psbot|InterfaxScanBot|Lipperhey SEO Service|CC Metadata Scaper|g00g1e.net|GrapeshotCrawler|urlappendbot|brainobot|fr-crawler|binlar|SimpleCrawler|Livelapbot|Twitterbot|cXensebot|smtbot|bnf.fr_bot|A6-Indexer|ADmantX|Facebot|Twitterbot|OrangeBot|memorybot|AdvBot|MegaIndex|SemanticScholarBot|ltx71|nerdybot|xovibot|BUbiNG|Qwantify|archive.org_bot|Applebot|TweetmemeBot|crawler4j|findxbot|SemrushBot|yoozBot|lipperhey|y!j-asr|Domain Re-Animator Bot|AddThis)", 'i');
+        var mobileRegEx = new RegExp("(Mobile|iP(hone|od|ad)|Android|BlackBerry|IEMobile|Kindle|NetFront|Silk-Accelerated|(hpw|web)OS|Fennec|Minimo|Opera M(obi|ini)|Blazer|Dolfin|Dolphin|Skyfire|Zune)", 'i');
+        var desktopRegEx = new RegExp("(Win64|CrOS|Mac( ||-)OS( ||-)X|WOW64|Windows NT)", 'i');
+        if (botRegEx.test(jseTrack.userAgent)) {
+          initialRating = -99;
+        } else if (mobileRegEx.test(jseTrack.userAgent)) {
+          initialRating = 10;
+        } else if (desktopRegEx.test(jseTrack.userAgent)) {
+          initialRating = 10;
+        }
+
+        // Check Timezone Offset Matches GEO
+        var geo = jseTrack.geo || 'XX';
+        var timezoneOffset = String(jseTrack.timezoneOffset || 0);
+        var timeZones = [["AF","+04:30"],["AX","+02:00"],["AL","+01:00"],["DZ","+01:00"],["AS","-11:00"],["AD","+01:00"],["AO","+01:00"],["AI","-04:00"],["AQ","+08:00"],["AQ","+07:00"],["AQ","+10:00"],["AQ","+05:00"],["AQ","+13:00"],["AQ","-03:00"],["AQ","-03:00"],["AQ","+03:00"],["AQ","+06:00"],["AG","-04:00"],["AR","-03:00"],["AR","-03:00"],["AR","-03:00"],["AR","-03:00"],["AR","-03:00"],["AR","-03:00"],["AR","-03:00"],["AR","-03:00"],["AR","-03:00"],["AR","-03:00"],["AR","-03:00"],["AR","-03:00"],["AM","+04:00"],["AW","-04:00"],["AU","+11:00"],["AU","+10:30"],["AU","+10:00"],["AU","+10:30"],["AU","+11:00"],["AU","+09:30"],["AU","+08:45"],["AU","+11:00"],["AU","+10:00"],["AU","+11:00"],["AU","+11:00"],["AU","+08:00"],["AU","+11:00"],["AT","+01:00"],["AZ","+04:00"],["BS","-05:00"],["BH","+03:00"],["BD","+06:00"],["BB","-04:00"],["BY","+03:00"],["BE","+01:00"],["BZ","-06:00"],["BJ","+01:00"],["BM","-04:00"],["BT","+06:00"],["BO","-04:00"],["BQ","-04:00"],["BA","+01:00"],["BW","+02:00"],["BR","-03:00"],["BR","-03:00"],["BR","-03:00"],["BR","-04:00"],["BR","-03:00"],["BR","-03:00"],["BR","-05:00"],["BR","-03:00"],["BR","-03:00"],["BR","-04:00"],["BR","-02:00"],["BR","-04:00"],["BR","-03:00"],["BR","-05:00"],["BR","-03:00"],["BR","-02:00"],["IO","+06:00"],["VG","-04:00"],["BN","+08:00"],["BG","+02:00"],["BI","+02:00"],["KH","+07:00"],["CM","+01:00"],["CA","-05:00"],["CA","-04:00"],["CA","-07:00"],["CA","-07:00"],["CA","-08:00"],["CA","-07:00"],["CA","-07:00"],["CA","-07:00"],["CA","-04:00"],["CA","-04:00"],["CA","-04:00"],["CA","-07:00"],["CA","-05:00"],["CA","-04:00"],["CA","-05:00"],["CA","-05:00"],["CA","-06:00"],["CA","-06:00"],["CA","-06:00"],["CA","-06:00"],["CA","-03:30"],["CA","-06:00"],["CA","-05:00"],["CA","-05:00"],["CA","-08:00"],["CA","-08:00"],["CA","-06:00"],["CA","-07:00"],["CV","-01:00"],["KY","-05:00"],["CF","+01:00"],["TD","+01:00"],["CL","-03:00"],["CL","-03:00"],["CL","-05:00"],["CN","+08:00"],["CN","+06:00"],["CX","+07:00"],["CC","+06:30"],["CO","-05:00"],["KM","+03:00"],["CK","-10:00"],["CR","-06:00"],["HR","+01:00"],["CU","-05:00"],["CW","-04:00"],["CY","+02:00"],["CY","+02:00"],["CZ","+01:00"],["CD","+01:00"],["CD","+02:00"],["DK","+01:00"],["DJ","+03:00"],["DM","-04:00"],["DO","-04:00"],["TL","+09:00"],["EC","-05:00"],["EC","-06:00"],["EG","+02:00"],["SV","-06:00"],["GQ","+01:00"],["ER","+03:00"],["EE","+02:00"],["ET","+03:00"],["FK","-03:00"],["FO","0"],["FJ","+13:00"],["FI","+02:00"],["FR","+01:00"],["GF","-03:00"],["PF","-09:00"],["PF","-09:30"],["PF","-10:00"],["TF","+05:00"],["GA","+01:00"],["GM","0"],["GE","+04:00"],["DE","+01:00"],["DE","+01:00"],["GH","0"],["GI","+01:00"],["GR","+02:00"],["GL","0"],["GL","-03:00"],["GL","-01:00"],["GL","-04:00"],["GD","-04:00"],["GP","-04:00"],["GU","+10:00"],["GT","-06:00"],["GG","0"],["GN","0"],["GW","0"],["GY","-04:00"],["HT","-05:00"],["HN","-06:00"],["HK","+08:00"],["HU","+01:00"],["IS","0"],["IN","+05:30"],["ID","+07:00"],["ID","+09:00"],["ID","+08:00"],["ID","+07:00"],["IR","+03:30"],["IQ","+03:00"],["IE","0"],["IM","0"],["IL","+02:00"],["IT","+01:00"],["CI","0"],["JM","-05:00"],["JP","+09:00"],["JE","0"],["JO","+02:00"],["KZ","+06:00"],["KZ","+05:00"],["KZ","+05:00"],["KZ","+05:00"],["KZ","+05:00"],["KZ","+06:00"],["KE","+03:00"],["KI","+13:00"],["KI","+14:00"],["KI","+12:00"],["KW","+03:00"],["KG","+06:00"],["LA","+07:00"],["LV","+02:00"],["LB","+02:00"],["LS","+02:00"],["LR","0"],["LY","+02:00"],["LI","+01:00"],["LT","+02:00"],["LU","+01:00"],["MO","+08:00"],["MK","+01:00"],["MG","+03:00"],["MW","+02:00"],["MY","+08:00"],["MY","+08:00"],["MV","+05:00"],["ML","0"],["MT","+01:00"],["MH","+12:00"],["MH","+12:00"],["MQ","-04:00"],["MR","0"],["MU","+04:00"],["YT","+03:00"],["MX","-06:00"],["MX","-05:00"],["MX","-07:00"],["MX","-07:00"],["MX","-06:00"],["MX","-07:00"],["MX","-06:00"],["MX","-06:00"],["MX","-06:00"],["MX","-07:00"],["MX","-08:00"],["FM","+10:00"],["FM","+11:00"],["FM","+11:00"],["MD","+02:00"],["MC","+01:00"],["MN","+08:00"],["MN","+07:00"],["MN","+08:00"],["ME","+01:00"],["MS","-04:00"],["MA","+01:00"],["MZ","+02:00"],["MM","+06:30"],["NA","+02:00"],["NR","+12:00"],["NP","+05:45"],["NL","+01:00"],["NC","+11:00"],["NZ","+13:00"],["NZ","+13:45"],["NI","-06:00"],["NE","+01:00"],["NG","+01:00"],["NU","-11:00"],["NF","+11:00"],["KP","+09:00"],["MP","+10:00"],["NO","+01:00"],["OM","+04:00"],["PK","+05:00"],["PW","+09:00"],["PS","+02:00"],["PS","+02:00"],["PA","-05:00"],["PG","+11:00"],["PG","+10:00"],["PY","-03:00"],["PE","-05:00"],["PH","+08:00"],["PN","-08:00"],["PL","+01:00"],["PT","-01:00"],["PT","0"],["PT","0"],["PR","-04:00"],["QA","+03:00"],["CG","+01:00"],["RE","+04:00"],["RO","+02:00"],["RU","+12:00"],["RU","+07:00"],["RU","+09:00"],["RU","+08:00"],["RU","+12:00"],["RU","+09:00"],["RU","+07:00"],["RU","+11:00"],["RU","+07:00"],["RU","+07:00"],["RU","+06:00"],["RU","+11:00"],["RU","+11:00"],["RU","+07:00"],["RU","+10:00"],["RU","+10:00"],["RU","+09:00"],["RU","+05:00"],["RU","+04:00"],["RU","+02:00"],["RU","+03:00"],["RU","+03:00"],["RU","+04:00"],["RU","+04:00"],["RU","+03:00"],["RU","+04:00"],["RU","+04:00"],["RW","+02:00"],["BL","-04:00"],["SH","0"],["KN","-04:00"],["LC","-04:00"],["MF","-04:00"],["PM","-03:00"],["VC","-04:00"],["WS","+14:00"],["SM","+01:00"],["ST","+01:00"],["SA","+03:00"],["SN","0"],["RS","+01:00"],["SC","+04:00"],["SL","0"],["SG","+08:00"],["SX","-04:00"],["SK","+01:00"],["SI","+01:00"],["SB","+11:00"],["SO","+03:00"],["ZA","+02:00"],["GS","-02:00"],["KR","+09:00"],["SS","+03:00"],["ES","+01:00"],["ES","0"],["ES","+01:00"],["LK","+05:30"],["SD","+02:00"],["SR","-03:00"],["SJ","+01:00"],["SZ","+02:00"],["SE","+01:00"],["CH","+01:00"],["SY","+02:00"],["TW","+08:00"],["TJ","+05:00"],["TZ","+03:00"],["TH","+07:00"],["TG","0"],["TK","+13:00"],["TO","+13:00"],["TT","-04:00"],["TN","+01:00"],["TR","+03:00"],["TM","+05:00"],["TC","-05:00"],["TV","+12:00"],["VI","-04:00"],["UG","+03:00"],["UA","+02:00"],["UA","+02:00"],["UA","+02:00"],["AE","+04:00"],["GB","0"],["US","-10:00"],["US","-09:00"],["US","-07:00"],["US","-06:00"],["US","-07:00"],["US","-05:00"],["US","-05:00"],["US","-06:00"],["US","-05:00"],["US","-05:00"],["US","-06:00"],["US","-05:00"],["US","-05:00"],["US","-05:00"],["US","-09:00"],["US","-05:00"],["US","-05:00"],["US","-08:00"],["US","-06:00"],["US","-09:00"],["US","-05:00"],["US","-09:00"],["US","-06:00"],["US","-06:00"],["US","-06:00"],["US","-07:00"],["US","-09:00"],["US","-09:00"],["US","-10:00"],["UM","-11:00"],["UM","+12:00"],["UY","-03:00"],["UZ","+05:00"],["UZ","+05:00"],["VU","+11:00"],["VA","+01:00"],["VE","-04:00"],["VN","+07:00"],["WF","+12:00"],["EH","+01:00"],["YE","+03:00"],["ZM","+02:00"],["ZW","+02:00"]];
+        for (var i = 0; i < timeZones.length; i++) {
+          if (geo == timeZones[i][0]) {
+            if (timezoneOffset === timeZones[i][1]) {
+              //console.log('Timezone match :)');
+              initialRating += 10;
+            }
+          }
+        }
+        if (jseTrack.language.indexOf(jseTrack.geo) > -1) {
+          initialRating += 5;
+        }
+        if (jseTrack.innerWidth > 250 && jseTrack.innerHeight > 250 && jseTrack.screenDepth > 16 && jseTrack.innerWidth < jseTrack.screenWidth && jseTrack.innerHeight < jseTrack.screenHeight) {
+          initialRating += 5;
+        }
+        if (jseTrack.deviceMemory > 2) {
+          initialRating += 5;
+        }
+        if (jseTrack.webGL) {
+          initialRating += 5;
+        }
+        if (jseTrack.storage && parseInt(jseTrack.storage,10) === jseTrack.storage) {
+					if (jseTrack.storage > 10) {
+						initialRating += 10;
+					} else {
+						initialRating += jseTrack.storage;
+					}
+      	}
+	    	return initialRating;
+			}
+
+			/**
+			 * @function <h2>machineLearningData</h2>
+			 * @description Setup and record data ready for TensorFlow.js analysis
+			 * @param {object} jseTrack browser data object
+			 * @returns {boolean} false
+			 */
+			function machineLearningData(jseTrack) {
+				const pubID = parseInt(JSE.jseFunctions.cleanString(jseTrack.pubID) || 1,10);
+				JSE.jseDataIO.getVariable('publisherMLData/'+pubID,function(publisherMLData) {
+					let pubData = publisherMLData;
+					if (!pubData) {
+						pubData = [];
+					}
+					const visitorTensor = [];
+					visitorTensor.push(jseTrack.initialRating);
+					//visitorTensor.push(jseTrack.);
+					
+
+					pubData.unshift(visitorTensor);
+					if (pubData.length > 100) {
+						pubData = pubData.slice(0, 100)
+					}
+					JSE.jseDataIO.setVariable('publicStats/clients/'+JSE.serverNickName,clientStats);
+				}
+			}
+
 			socket.on('saveUnique', function(jseTrack) {
 				try {
 					const pubID = JSE.jseFunctions.cleanString(jseTrack.pubID) || 1; // jseTrack.pubID = uid
 					const siteID = JSE.jseFunctions.cleanString(jseTrack.siteID) || 1;
 					const subID = JSE.jseFunctions.cleanString(jseTrack.subID) || 1;
 					if (jseTrack.iFrame && jseTrack.iFrame === true) { return false; }
-					// unique
-					const publisherIP = socket.realIP;
-					if (JSE.publisherIPs.indexOf(publisherIP) === -1  && socket.goodIP && socket.goodIP === true) {
+					JSE.publisherIPs.push(publisherIP);
+					jseLottery.credit(pubID,siteID,subID,'unique');
+				} catch (ex) {
+					console.log('SaveHit - Error Caught 158: '+ex);
+				}
+				return false;
+			});
+
+			socket.on('validate', function(jseTrack) {
+				try {
+					const pubID = JSE.jseFunctions.cleanString(jseTrack.pubID) || 1; // jseTrack.pubID = uid
+					const siteID = JSE.jseFunctions.cleanString(jseTrack.siteID) || 1;
+					const subID = JSE.jseFunctions.cleanString(jseTrack.subID) || 1;
+					if (jseTrack.iFrame && jseTrack.iFrame === true) { return false; }
+					const ipCount = JSE.publisherIPs.reduce(function(n, val) { return n + (val === socket.realIP); }, 0); // count ips could be one from unique already
+					if (ipCount <= 50  && socket.goodIP && socket.goodIP === true) {
 						JSE.publisherIPs.push(publisherIP);
-						jseLottery.credit(pubID,siteID,subID,'unique');
-					} else {
-						jseLottery.credit(pubID,siteID,subID,'nolotteryunique');
+						jseLottery.credit(pubID,siteID,subID,'validate');
 					}
 				} catch (ex) {
 					console.log('SaveHit - Error Caught 158: '+ex);
@@ -221,20 +312,24 @@ const jseSocketIO = {
 				if (JSE.jseTestNet) console.log('Received request for miner auth key from '+pubID);
 				const testAuthKey = buildOptInAuthKey(jseTrack);
 				const ipCount = JSE.publisherIPs.reduce(function(n, val) { return n + (val === socket.realIP); }, 0); // count ips could be one from unique already
-				if (typeof JSE.socketConnections[socket.id] !== 'undefined' && JSE.socketConnections[socket.id].goodIP && JSE.socketConnections[socket.id].goodIP === true && ipCount <= 4 && minerAuthKey === JSE.minerAuthKey) {
+				let initialRating = -99;
+				if (typeof JSE.socketConnections[socket.id] !== 'undefined' && JSE.socketConnections[socket.id].goodIP && JSE.socketConnections[socket.id].goodIP === true && ipCount <= 50 && minerAuthKey === JSE.minerAuthKey) {
 					JSE.publisherIPs.push(socket.realIP);
 					if (ipCount <= 2) {
 						jseLottery.credit(pubID,siteID,subID,'optin');
-					}	else if (ipCount <= 4) {
-						jseLottery.credit(pubID,siteID,subID,'optinlotteryonly'); // could be removed when we have enough volume
 					}
+					//	else if (ipCount <= 4) {
+					//	jseLottery.credit(pubID,siteID,subID,'optinlotteryonly'); // could be removed when we have enough volume
+					//}
+					initialRating = calculateInitialRating(jseTrack);
 				}
+				machineLearningData(jseTrack);
 				// generate new key for new optin click
 				if (optInAuthKey === null) {
 					if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
 						JSE.socketConnections[socket.id].optInAuthKey = testAuthKey;
 					}
-					callback(testAuthKey);
+					callback(testAuthKey,initialRating);
 					return false;
 				}
 				// already opted in
@@ -242,10 +337,10 @@ const jseSocketIO = {
 					if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
 						JSE.socketConnections[socket.id].optInAuthKey = testAuthKey;
 					}
-					callback(true);
+					callback(true,initialRating);
 				} else {
 					if (JSE.jseTestNet) console.log('optInAuthKey validation failed socketio.js 196 UID: '+pubID);
-					callback(testAuthKey); // set new optInAuthKey? optionally
+					callback(testAuthKey,initialRating); // set new optInAuthKey? optionally
 				}
 				return false;
 			});
@@ -275,7 +370,6 @@ const jseSocketIO = {
 						});
 					} else if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
 						JSE.socketConnections[socket.id].miningType = 1;
-						//if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(socket.realIP) && JSE.anonymousIPs[socket.realIP] === true) {
 						if (JSE.anonymousIPs[socket.realIP] === true) {
 							if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
 								JSE.socketConnections[socket.id].goodIP = false;
