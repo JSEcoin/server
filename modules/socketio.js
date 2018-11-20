@@ -336,8 +336,8 @@ const jseSocketIO = {
 				}
 
 				visitorTensor.push(jseTrack.movement || 0);
-				visitorTensor.push(jseTrack.timeFactor || 0);
-				visitorTensor.push(jseTrack.elementsFactor || 0);
+				visitorTensor.push(jseTrack.timeOnSite || 0);
+				visitorTensor.push(jseTrack.elementsTracked || 0);
 				visitorTensor.push(initialRating);
 
 				recordMLData(pubID,visitorTensor);

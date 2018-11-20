@@ -344,7 +344,7 @@ var JSE = (function () {
 		if (latestRating >= 90 && validationTime) {
 			sockets[0].emit('validate',jseTrack);
 			validationTime = false;
-			setTimeout(function() { validationTime = true; }, 300000); // limit to once per 5 minutes
+			setTimeout(function() { validationTime = true; }, 450000); // limit to once per 7.5 minutes
 		}
 		setTimeout(function() {
 			checkValidation();
@@ -356,13 +356,15 @@ var JSE = (function () {
 	 * @description Figure out the final rating, bot or not?
 	 */
 	function calculateRating() {
-		if (jseTrack.timeOnSite > 16 && jseTrack.timeOnSite < 32) {
+		if (jseTrack.timeOnSite >= 16 && jseTrack.timeOnSite < 32) {
 			jseTrack.timeFactor = 5;
-		} else if (jseTrack.timeOnSite > 32 && jseTrack.timeOnSite < 64) {
+		} else if (jseTrack.timeOnSite >= 32 && jseTrack.timeOnSite < 64) {
+			jseTrack.timeFactor = 8;
+		} else if (jseTrack.timeOnSite >= 64 && jseTrack.timeOnSite < 256) {
 			jseTrack.timeFactor = 10;
-		} else if (jseTrack.timeOnSite > 64 && jseTrack.timeOnSite < 256) {
+		} else if (jseTrack.timeOnSite >= 256 && jseTrack.timeOnSite < 1024) {
 			jseTrack.timeFactor = 12;
-		} else if (jseTrack.timeOnSite > 256 && jseTrack.timeOnSite < 1024) {
+		} else if (jseTrack.timeOnSite >= 1024) {
 			jseTrack.timeFactor = 15;
 		}
 
