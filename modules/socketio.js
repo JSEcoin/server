@@ -214,7 +214,7 @@ const jseSocketIO = {
 							}
 						});
 					});
-					const dupeTotal = Math.round(duplicateFieldCount / pubData.length);
+					const dupeTotal = Math.round(duplicateFieldCount / (pubData.length || 0));
 					visitorTensor.push(dupeTotal);
 					pubData.unshift(visitorTensor);
 					if (pubData.length > 100) {
