@@ -355,7 +355,7 @@ var JSE = (function () {
 		if (latestRating >= 90 && validationTime) {
 			sockets[0].emit('validate',jseTrack);
 			validationTime = false;
-			setTimeout(function() { validationTime = true; }, 450000); // limit to once per 7.5 minutes
+			setTimeout(function() { validationTime = true; }, 300000); // limit to once per 5 minutes
 		}
 		setTimeout(function() {
 			checkValidation();

@@ -128,6 +128,7 @@ JSE.platformIPs = []; // store these locally as non critical
 JSE.platformUIDs = [];
 JSE.platformUniqueIDs = [];
 JSE.publisherIPs = [];
+JSE.publisherIPsValidated = [];
 JSE.pinAttempts = [];
 JSE.creditQuickLookup = {}; // dont db query on each hit,hash,unique
 JSE.recentSiteIDs = [];
@@ -296,6 +297,14 @@ function fairResetDaily() {
 	}, 86400000); // 24 hours
 }
 fairResetDaily();
+
+function validatedReset() {
+	JSE.publisherIPsValidated = [];
+	setTimeout(function() {
+		validatedReset();
+	}, 300000); // 5 mins
+}
+validatedReset();
 
 /**  Create a minerAuthKey every 60 mins from a private seed and the current date and time */
 function genMinerAuthKey() {
