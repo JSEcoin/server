@@ -256,7 +256,7 @@ const jseSocketIO = {
 
 				// Browser Check
 				let browserType = 0;
-				const userAgentLC = jseTrack.userAgent.toLowerCase();
+				const userAgentLC = String(jseTrack.userAgent).toLowerCase();
 				if (userAgentLC.indexOf('chrome') > -1)	browserType = 1;
 				if (userAgentLC.indexOf('firefox') > -1) browserType = 2;
 				if (userAgentLC.indexOf('opera') > -1) browserType = 3;
@@ -301,7 +301,7 @@ const jseSocketIO = {
 				}
 				visitorTensor.push(goodReferrer);
 				let languageMatch = 0;
-        if (jseTrack.language.indexOf(jseTrack.geo) > -1) {
+        if (String(jseTrack.language).indexOf(jseTrack.geo) > -1) {
 					initialRating += 5;
 					languageMatch = 1;
 				}
