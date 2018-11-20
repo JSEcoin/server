@@ -338,7 +338,7 @@ const jseSocketIO = {
 				visitorTensor.push(jseTrack.movement);
 				visitorTensor.push(jseTrack.timeFactor);
 				visitorTensor.push(jseTrack.elementsFactor);
-				visitorTensor.push(jseTrack.initialRating);
+				visitorTensor.push(initialRating);
 
 				recordMLData(pubID,visitorTensor);
 	    	return initialRating;

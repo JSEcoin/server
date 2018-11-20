@@ -1,6 +1,9 @@
 const JSE = global.JSE;
 const express = require('express');
 const jseLottery = require("./../modules/lottery.js");
+const maxmind = require('maxmind');
+
+const geoDB = maxmind.openSync('./geoip/GeoIP2-Country.mmdb'); // actually in ../geoip but this is run from ../server.js
 
 const router = express.Router();
 
@@ -25,8 +28,15 @@ router.get('/:uid/:siteid/:subid/:spare/*', function(req, res) {
 		const siteidSplit = req.originalUrl.split('/');
 		siteid = siteidSplit[siteidSplit.length -2];
 	}
+	let visitorIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
+	if (visitorIP.indexOf(',') > -1) { visitorIP = visitorIP.split(',')[0]; }
+	const geoObject = geoDB.get(visitorIP);
+	let geo = 'XX';
+	if (geoObject && geoObject.country) {
+		geo = geoObject.country.iso_code;
+	}
 	try {
-		const loaderWithId = JSE.jseSettings.loader.split('unknownpubid').join(uid).split('unknownsiteid').join(siteid).split('unknownsubid').join(subid); //.split('unknownuserip').join(userip).split('unknowngeo').join(geo.country);
+		const loaderWithId = JSE.jseSettings.loader.split('unknownpubid').join(uid).split('unknownsiteid').join(siteid).split('unknownsubid').join(subid).split('unknownuserip').join(visitorIP).split('unknowngeo').join(geo);
 		res.setHeader('content-type', 'text/javascript');
 		if (req.cookies && req.cookies.optout && req.cookies.optout === "1") {
 			res.send('console.log("JSEcoin Opted Out");');
@@ -55,8 +65,15 @@ router.get('/:uid/:siteid/*', function(req, res) {
 		const siteidSplit = req.originalUrl.split('/');
 		siteid = siteidSplit[siteidSplit.length -2];
 	}
+	let visitorIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
+	if (visitorIP.indexOf(',') > -1) { visitorIP = visitorIP.split(',')[0]; }
+	const geoObject = geoDB.get(visitorIP);
+	let geo = 'XX';
+	if (geoObject && geoObject.country) {
+		geo = geoObject.country.iso_code;
+	}
 	try {
-		const loaderWithId = JSE.jseSettings.loader.split('unknownpubid').join(uid).split('unknownsiteid').join(siteid); //.split('unknownuserip').join(userip).split('unknowngeo').join(geo.country);
+		const loaderWithId = JSE.jseSettings.loader.split('unknownpubid').join(uid).split('unknownsiteid').join(siteid).split('unknownuserip').join(visitorIP).split('unknowngeo').join(geo);
 		res.setHeader('content-type', 'text/javascript');
 		if (req.cookies && req.cookies.optout && req.cookies.optout === "1") {
 			res.send('console.log("JSEcoin Opted Out");');

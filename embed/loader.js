@@ -63,6 +63,9 @@ var JSE = (function () {
 	jseTrack.movement = 0;
 	jseTrack.timeOnSite = 0;
 	jseTrack.elementsTracked = 0;
+	jseTrack.timeFactor = 0;
+	jseTrack.elementsFactor = 0;
+
 	var validationTime = true;
 	var lastElement = document.activeElement.id;
 	var lastX = 0;
@@ -348,7 +351,6 @@ var JSE = (function () {
 	 * @description Figure out the final rating, bot or not?
 	 */
 	function calculateRating() {
-		jseTrack.timeFactor = 0;
 		if (jseTrack.timeOnSite > 16 && jseTrack.timeOnSite < 32) {
 			jseTrack.timeFactor = 5;
 		} else if (jseTrack.timeOnSite > 32 && jseTrack.timeOnSite < 64) {
@@ -364,8 +366,7 @@ var JSE = (function () {
 		} else if (jseTrack.movement < 5) { // if no movement, set jseTrack.timeFactor to zero
 			jseTrack.timeFactor = 0;
 		}
-		
-		jseTrack.elementsFactor = 0;
+
 		if (jseTrack.elementsTracked > 0) {
 			jseTrack.elementsFactor = 5;
 		} else if (jseTrack.elementsTracked > 1) {

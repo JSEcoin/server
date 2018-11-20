@@ -44,7 +44,6 @@ function runTxt() {
 	});
 	*/
 
-	/*
 	// Remove siteID
 	const file = './logs/cli-siteIDs.json';
 	console.log('Starting JSON Import');
@@ -66,7 +65,6 @@ function runTxt() {
 			});
 		}
 	});
-	*/
 
 	/*
 	const naughtyUsers = ['19522','19547','19590','19598','19606','19626'];
