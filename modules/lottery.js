@@ -42,7 +42,7 @@ function getCreditAccount(strippedUID,callback) {
 function credit(uid,siteid,subid,whatRaw){
 	let what = whatRaw;
 	//console.log('CREDIT: '+uid+','+siteid+','+what);
-	if (what !== 'hit' && what !== 'unique' && what !== 'hash' && what !== 'optin' && what !== 'nolotteryunique' && what !== 'nolotteryhash' && what !== 'nolotteryhit' && what !== 'nolotteryoptin' && what !== 'optinlotteryonly') { return false; }
+	if (what !== 'hit' && what !== 'unique' && what !== 'hash' && what !== 'optin' && what !== 'validate' && what !== 'nolotteryunique' && what !== 'nolotteryhash' && what !== 'nolotteryhit' && what !== 'nolotteryoptin' && what !== 'optinlotteryonly') { return false; }
 	const strippedUID = parseFloat(uid);
 	if (strippedUID === 0 || strippedUID === null || strippedUID === 'NaN') { return false; }
 	getCreditAccount(strippedUID,function(accountLookup) {
@@ -81,12 +81,14 @@ function credit(uid,siteid,subid,whatRaw){
 						newSiteID.a = 0; // hash
 						newSiteID.o = 0; // optin
 						newSiteID.c = 0; // coin
+						newSiteID.v = 0; // validate
 						newSiteID.m = true; // advertising/marketing
 						JSE.jseDataIO.setVariable('siteIDs/'+strippedUID+'/'+safeKey,newSiteID);
 					} else {
 						if (what === 'hit') { JSE.jseDataIO.plusOne('siteIDs/'+strippedUID+'/'+safeKey+'/h'); }
 						if (what === 'unique') { JSE.jseDataIO.plusOne('siteIDs/'+strippedUID+'/'+safeKey+'/u'); }
 						if (what === 'optin') { JSE.jseDataIO.plusOne('siteIDs/'+strippedUID+'/'+safeKey+'/o'); }
+						if (what === 'validate') { JSE.jseDataIO.plusOne('siteIDs/'+strippedUID+'/'+safeKey+'/v'); }
 						if (what === 'hash') { JSE.jseDataIO.plusOne('siteIDs/'+strippedUID+'/'+safeKey+'/a'); }
 						if (what === 'coin') { JSE.jseDataIO.plusOne('siteIDs/'+strippedUID+'/'+safeKey+'/c'); } // this doesn't seem to be used? 6th Sept 2018
 					}
@@ -95,6 +97,7 @@ function credit(uid,siteid,subid,whatRaw){
 				if (what === 'hit') { JSE.jseDataIO.plusOne('siteIDs/'+strippedUID+'/'+safeKey+'/h'); }
 				if (what === 'unique') { JSE.jseDataIO.plusOne('siteIDs/'+strippedUID+'/'+safeKey+'/u'); }
 				if (what === 'optin') { JSE.jseDataIO.plusOne('siteIDs/'+strippedUID+'/'+safeKey+'/o'); }
+				if (what === 'validate') { JSE.jseDataIO.plusOne('siteIDs/'+strippedUID+'/'+safeKey+'/v'); }
 				if (what === 'hash') { JSE.jseDataIO.plusOne('siteIDs/'+strippedUID+'/'+safeKey+'/a'); }
 				if (what === 'coin') { JSE.jseDataIO.plusOne('siteIDs/'+strippedUID+'/'+safeKey+'/c'); }
 			}
@@ -115,12 +118,14 @@ function credit(uid,siteid,subid,whatRaw){
 							newSubID.u = 0; // unique
 							newSubID.a = 0; // hash
 							newSubID.o = 0; // optin
+							newSubID.v = 0; // validate
 							newSubID.c = 0; // coin
 							JSE.jseDataIO.setVariable('subIDs/'+strippedUID+'/'+safeKey2,newSubID);
 						} else {
 							if (what === 'hit') { JSE.jseDataIO.plusOne('subIDs/'+strippedUID+'/'+safeKey2+'/h'); }
 							if (what === 'unique') { JSE.jseDataIO.plusOne('subIDs/'+strippedUID+'/'+safeKey2+'/u'); JSE.jseDataIO.plusOne('subIDs/'+strippedUID+'/'+safeKey2+'/h'); }
 							if (what === 'optin') { JSE.jseDataIO.plusOne('subIDs/'+strippedUID+'/'+safeKey2+'/o'); }
+							if (what === 'validate') { JSE.jseDataIO.plusOne('subIDs/'+strippedUID+'/'+safeKey2+'/v'); }
 							if (what === 'hash') { JSE.jseDataIO.plusOne('subIDs/'+strippedUID+'/'+safeKey2+'/a'); }
 							if (what === 'coin') { JSE.jseDataIO.plusOne('subIDs/'+strippedUID+'/'+safeKey2+'/c'); }
 						}
@@ -129,6 +134,7 @@ function credit(uid,siteid,subid,whatRaw){
 					if (what === 'hit') { JSE.jseDataIO.plusOne('subIDs/'+strippedUID+'/'+safeKey2+'/h'); }
 					if (what === 'unique') { JSE.jseDataIO.plusOne('subIDs/'+strippedUID+'/'+safeKey2+'/u'); JSE.jseDataIO.plusOne('subIDs/'+strippedUID+'/'+safeKey2+'/h'); }
 					if (what === 'optin') { JSE.jseDataIO.plusOne('subIDs/'+strippedUID+'/'+safeKey2+'/o'); }
+					if (what === 'validate') { JSE.jseDataIO.plusOne('subIDs/'+strippedUID+'/'+safeKey2+'/v'); }
 					if (what === 'hash') { JSE.jseDataIO.plusOne('subIDs/'+strippedUID+'/'+safeKey2+'/a'); }
 					if (what === 'coin') { JSE.jseDataIO.plusOne('subIDs/'+strippedUID+'/'+safeKey2+'/c'); }
 				}
@@ -142,6 +148,7 @@ function credit(uid,siteid,subid,whatRaw){
 			if (what === 'hit') { JSE.jseDataIO.plusOne('statsTotal/'+strippedUID+'/h'); }
 			if (what === 'unique') { JSE.jseDataIO.plusOne('statsTotal/'+strippedUID+'/u'); JSE.jseDataIO.plusOne('statsTotal/'+strippedUID+'/h'); }
 			if (what === 'optin') { JSE.jseDataIO.plusOne('statsTotal/'+strippedUID+'/o'); }
+			if (what === 'validate') { JSE.jseDataIO.plusOne('statsTotal/'+strippedUID+'/v'); }
 			if (what === 'hash') { JSE.jseDataIO.plusOne('statsTotal/'+strippedUID+'/a'); }
 			if (what === 'coin') { JSE.jseDataIO.plusOne('statsTotal/'+strippedUID+'/c'); }
 			// statsToday
@@ -157,6 +164,7 @@ function credit(uid,siteid,subid,whatRaw){
 			if (what === 'hit') { JSE.jseDataIO.plusOne('statsToday/'+strippedUID+'/h'); }
 			if (what === 'unique') { JSE.jseDataIO.plusOne('statsToday/'+strippedUID+'/u'); JSE.jseDataIO.plusOne('statsToday/'+strippedUID+'/h'); }
 			if (what === 'optin') { JSE.jseDataIO.plusOne('statsToday/'+strippedUID+'/o'); }
+			if (what === 'validate') { JSE.jseDataIO.plusOne('statsToday/'+strippedUID+'/v'); }
 			if (what === 'hash') { JSE.jseDataIO.plusOne('statsToday/'+strippedUID+'/a'); }
 			if (what === 'coin') { JSE.jseDataIO.plusOne('statsToday/'+strippedUID+'/c'); }
 		}
@@ -178,10 +186,10 @@ function credit(uid,siteid,subid,whatRaw){
 				//JSE.jseDataIO.pushVariable('lottery',lotteryInput); // no lottery entry for hits now.
 			//}
 		} else if (what === 'unique') {
-			if (Math.random() > 0.99) { // increase or remove completely in due course
-				JSE.jseDataIO.pushVariable('lottery',lotteryInput,function(pushRef) {});
-			}
-		} else if (what === 'optin') {
+			//if (Math.random() > 0.99) { // increase or remove completely in due course
+			//	JSE.jseDataIO.pushVariable('lottery',lotteryInput,function(pushRef) {});
+			//}
+		} else if (what === 'validate') {
 				JSE.jseDataIO.pushVariable('lottery',lotteryInput,function(pushRef) {});
 		} else if (siteid === 'Platform Mining' && what === 'hash') {
 			JSE.jseDataIO.pushVariable('platformLottery',lotteryInput,function(pushRef) {});

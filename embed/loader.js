@@ -19,7 +19,7 @@ var JSE = (function () {
 	if (jseTestNet == 'remote') {
 		jseLoadServer = 'https://testnet.jsecoin.com:443';
 	}
-
+	
 	jseTrack.pubID = 'unknownpubid';
 	jseTrack.siteID = 'unknownsiteid';
 	jseTrack.subID = 'unknownsubid';
@@ -39,7 +39,12 @@ var JSE = (function () {
 	}
 	jseTrack.timezoneOffset = new Date().getTimezoneOffset() || 0;
 	jseTrack.appName = window.navigator.appName || 0;
-	jseTrack.screen = window.screen.width+'x'+window.screen.height+'x'+screen.colorDepth || 0;
+	jseTrack.screenWidth = window.screen.width || 0;
+	jseTrack.screenHeight = window.screen.height || 0;
+	jseTrack.screenDepth = window.screen.colorDepth || 0;
+	jseTrack.screen = `${jseTrack.screenWidth}x${jseTrack.screenHeight}x${jseTrack.screenDepth}`; // 1920x1080x24
+	jseTrack.innerWidth = window.innerWidth || 0;
+	jseTrack.innerHeight = window.innerHeight || 0;
 	jseTrack.deviceMemory = navigator.deviceMemory || navigator.hardwareConcurrency || 0;
 	jseTrack.protoString = Object.keys(navigator.__proto__).join('').substring(0, 100) || 0;
 
@@ -53,8 +58,16 @@ var JSE = (function () {
 	var preHash = '0';
 	var hashRate = 500;
 	var hps = 500;
-	var maxHashRate = hashRate;
-
+	
+	jseTrack.initialRating = 0;
+	jseTrack.movement = 0;
+	jseTrack.timeOnSite = 0;
+	jseTrack.elementsTracked = 0;
+	var validationTime = true;
+	var lastElement = document.activeElement.id;
+	var lastX = 0;
+	var lastY = 0;
+	
 	function shuffle(arrayRaw) {
 		var array = arrayRaw;
 		var counter = array.length;
@@ -71,7 +84,7 @@ var JSE = (function () {
 	}
 
 	/**
-	 * @method <h2>randString</h2>
+	 * @function <h2>randString</h2>
 	 * @description Provides a random string of n length
 	 * @param {string} length length of random string to return
 	 * @returns {string} retuns a random alphanumeric string
@@ -83,44 +96,104 @@ var JSE = (function () {
 	}
 
 	/**
-	 * @method <h2>setupHit</h2>
+	 * @function <h2>setupHit</h2>
 	 * @description Sets visitor data to log a hit or impression
 	 */
 	function setupHit() {
+		// localStorage check
+		jseTrack.storage = 0;
 		if (localStorage) {
-			var jseFirstVisit = localStorage.jseFirstVisit; 
+			var jseFirstVisit = localStorage.jseFirstVisit; // set jseFirstVisit to whatever is in localStorage
+			jseTrack.storage = 1;
+			var localStorageCounter = localStorage.localStorageCounter || 0;
+			localStorageCounter = parseInt(localStorageCounter) + 1;
+			localStorage.setItem('localStorageCounter', localStorageCounter);
+			if (localStorageCounter > 1) {
+				jseTrack.storage += localStorageCounter;
+			}	
 		}
-
+		// Test Web GL
+		var canvas = document.createElement('canvas')
+		var wgl = null
+		try {
+			wgl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
+		} catch (err) { /* na */ }
+		if (wgl) {
+			jseTrack.webGL = true;
+		} else {
+			jseTrack.webGL = false;
+		}
 		if (typeof jseFirstVisit !== 'undefined' && ts < (Number(jseFirstVisit) + 86400000)) {
-		//if (typeof localStorage.jseFirstVisit !== 'undefined' && localStorage.jseFirstVisit < (ts + 86400000)) { //24hrs
 			// Just register another hit
 			jseTrack['uniq'] = localStorage.jseTrackuniq;
 			jseTrack['hits'] = localStorage.jseTrackhits;
 			jseTrack['hits'] = parseInt(jseTrack['hits']) + 1;
 			localStorage.setItem('jseTrackhits', jseTrack['hits']);
 			jseTrack.sendHit = 1;
-			// Send hit data
-			return jseTrack;
 		} else {
 			// Log new session (this includes new uniq)
 			jseTrack['firstvisit'] = ts;
 			jseTrack['uniq'] = randString(20);
 			jseTrack['hits'] = 1;
-
 			if (localStorage) {
 				localStorage.setItem('jseFirstVisit', String(ts));
 				localStorage.setItem('jseTrackuniq', jseTrack['uniq']);
 				localStorage.setItem('jseTrackhits', jseTrack['hits']);
 			}
-
-			// Send first hit data
-			return jseTrack;
 		}
 	}
-	var jseTrackImpression = setupHit();
+	setupHit();
 
 	/**
-	 * @method <h2>fallbackSHA256</h2>
+	 * @function <h2>handleMovement</h2>
+	 * @description Handle mouse and touch movement and increase movement variable
+	 */
+	function handleMovement(event) {
+		var eventDoc, doc, body, pageX, pageY;
+		event = event || window.event;
+		if (event.pageX == null) {
+			eventDoc = (event.target && event.target.ownerDocument) || document;
+			doc = eventDoc.documentElement;
+			body = eventDoc.body;
+			event.pageX = Math.floor((event.touches && event.touches[0].clientX || event.clientX || 0) +
+				(doc && doc.scrollLeft || body && body.scrollLeft || 0) -
+				(doc && doc.clientLeft || body && body.clientLeft || 0));
+			event.pageY = Math.floor((event.touches && event.touches[0].clientY || event.clientY || 0) +
+				(doc && doc.scrollTop || body && body.scrollTop || 0) -
+				(doc && doc.clientTop || body && body.clientTop || 0));
+		}
+		// check to see if movement is normal, could get more advanced with this
+		if (lastX + 5 > event.pageX && lastX - 5 < event.pageX && lastY + 5 > event.pageY && lastY - 5 < event.pageY) {
+			jseTrack.movement += 1;
+		}
+		lastX = event.pageX;
+		lastY = event.pageY;
+	}
+	
+	document.onmousemove = handleMovement;
+	if ('ontouchmove' in document.documentElement) {
+		document.ontouchmove = handleMovement;
+	}
+
+	/**
+	 * @function <h2>getHoverID</h2>
+	 * @description Find out which element the mouse is hovering over
+	 * @returns {string} id or class of element
+	 */
+	function getHoverID() { 
+		var q = document.querySelectorAll(":hover");
+		if (q && q.length && q[q.length-1].id) {
+			return q[q.length-1].id;
+		} else if (q && q.length && q[q.length-1].className) {
+			return q[q.length-1].className;
+		} else {
+			return false;
+		}
+	};
+	var hoverElement = getHoverID();
+
+	/**
+	 * @function <h2>fallbackSHA256</h2>
 	 * @description Fallback SHA256 function for chrome browsers on sites with no https
 	 * @param {string} s string to be hashed
 	 * @param {nonce} nonce to be added to string for hashing
@@ -176,7 +249,7 @@ var JSE = (function () {
 	}
 
 	/**
-	 * @method <h2>cryptoSha256</h2>
+	 * @function <h2>cryptoSha256</h2>
 	 * @description Based on Crypto API (include hex function below)
 	 * @param {string} str string to be hashed
 	 * @param {nonce} nonce to be added to string for hashing
@@ -190,7 +263,7 @@ var JSE = (function () {
 	}
 
 	/**
-	 * @method <h2>hex</h2>
+	 * @function <h2>hex</h2>
 	 * @description Convert an array buffer to hexadecimal string
 	 * @param {array} buffer Array buffer
 	 * @return {string} hex string
@@ -212,7 +285,7 @@ var JSE = (function () {
 	}
 
 	/**
-	 * @method <h2>jseLoadScript</h2>
+	 * @function <h2>jseLoadScript</h2>
 	 * @description function to load script dynamically from js for socket.io
 	 * @param {string} url URL of script to load
 	 * @param {function} callback callback once script is loaded
@@ -228,7 +301,76 @@ var JSE = (function () {
 	}
 
 	/**
-	 * @method <h2>processHashV2</h2>
+	 * @function <h2>checkValidation</h2>
+	 * @description Check if validation rating is high enough to submit
+	 */
+	function checkValidation() {
+		jseTrack.timeOnSite += 10;
+		if (document.activeElement.id !== lastElement) {
+			jseTrack.elementsTracked += 1;
+			lastElement = document.activeElement.id;
+		} else {
+			var hoverID = getHoverID();
+			if (hoverElement !== hoverID) {
+				jseTrack.elementsTracked += 1;
+				hoverElement = hoverID;
+			}
+		}
+		var latestRating = calculateRating();
+		if (latestRating >= 99 && validationTime) {
+			sockets[0].emit('validate',jseTrack);
+			validationTime = false;
+			setTimeout(function() { validationTime = true; }, 600000); // limit to once per 10 minutes
+		}
+		setTimeout(function() {
+			checkValidation();
+		},10000);
+	}
+
+	/**
+	 * @function <h2>calculateRating</h2>
+	 * @description Figure out the final rating, bot or not?
+	 */
+	function calculateRating() {
+		jseTrack.timeFactor = 0;
+		if (jseTrack.timeOnSite > 16 && jseTrack.timeOnSite < 32) {
+			jseTrack.timeFactor = 5;
+		} else if (jseTrack.timeOnSite > 32 && jseTrack.timeOnSite < 64) {
+			jseTrack.timeFactor = 10;
+		} else if (jseTrack.timeOnSite > 64 && jseTrack.timeOnSite < 256) {
+			jseTrack.timeFactor = 12;
+		} else if (jseTrack.timeOnSite > 256 && jseTrack.timeOnSite < 1024) {
+			jseTrack.timeFactor = 15;
+		}
+
+		if (jseTrack.movement > 40) {
+			jseTrack.movement = 40;
+		} else if (jseTrack.movement < 5) { // if no movement, set jseTrack.timeFactor to zero
+			jseTrack.timeFactor = 0;
+		}
+		
+		jseTrack.elementsFactor = 0;
+		if (jseTrack.elementsTracked > 0) {
+			jseTrack.elementsFactor = 5;
+		} else if (jseTrack.elementsTracked > 1) {
+			jseTrack.elementsFactor = 10;
+		} else if (jseTrack.elementsTracked > 5) {
+			jseTrack.elementsFactor = 15;
+		} else if (jseTrack.elementsTracked > 10) {
+			jseTrack.elementsFactor = 20;
+		}
+
+		var returnRating = jseTrack.initialRating + jseTrack.movement + jseTrack.timeFactor + jseTrack.elementsFactor;
+		if (returnRating > 99) {
+			returnRating = 99;
+		} else if (returnRating < 0) {
+			returnRating = 0;
+		}
+		return returnRating;
+	}
+
+	/**
+	 * @function <h2>processHashV2</h2>
 	 * @description function to process hashes which have been found and submit them to the node
 	 * @param {string} hashSubmissionString string containing the submission prehash, nonce, hash
 	 */
@@ -238,7 +380,7 @@ var JSE = (function () {
 	}
 
 	/**
-	 * @method <h2>variableDifficulty</h2>
+	 * @function <h2>variableDifficulty</h2>
 	 * @description Function to work out variable difficulty to increase difficulty on a per block basis once a hash is found. This is to reduce load on servers.
 	 * @param {string} n difficulty
 	 * @param returns new difficulty
@@ -246,7 +388,7 @@ var JSE = (function () {
 	function variableDifficulty (n) { for (var s="", i=n; i--;) s += "0"; return s; }
 
 	/**
-	 * @method <h2>jseMineV2</h2>
+	 * @function <h2>jseMineV2</h2>
 	 * @description Mining process includes the new hash a hash system that uses a preHash instead of the entire block data.
 	 */
 	function jseMineV2() {
@@ -652,7 +794,7 @@ var JSE = (function () {
 	var sockets = [];
 
 	/**
-	 * @method <h2>checkIOLoaded</h2>
+	 * @function <h2>checkIOLoaded</h2>
 	 * @description Check to ensure the IO script is loaded
 	 * @param {function} cb callback once loaded
 	 */
@@ -669,7 +811,7 @@ var JSE = (function () {
 	}
 
 	/**
-	 * @method <h2>connectIO</h2>
+	 * @function <h2>connectIO</h2>
 	 * @description Connect to JSE node load servers via socket.io
 	 * @param {function} callback callback once connected
 	 */
@@ -722,11 +864,11 @@ var JSE = (function () {
 
 	loadIO();
 
-	var optInAuthKey = 'unknownOptInAuthKey'; // changed in routes/load.js
-	var minerAuthKey = 'unknownMinerAuthKey'; // changed in routes/load.js
+	jseTrack.optInAuthKey = 'unknownOptInAuthKey'; // changed in routes/load.js
+	jseTrack.minerAuthKey = 'unknownMinerAuthKey'; // changed in routes/load.js
 
 	/**
-	 * @method <h2>startMining</h2>
+	 * @function <h2>startMining</h2>
 	 * @description Start the mining process once a click check has been done to prevent fraud
 	 * @param {number} clickCheck check that a real click has taken place
 	 */
@@ -734,21 +876,24 @@ var JSE = (function () {
 		checkIOLoaded(function() {
 			if ((o[o.mi] && o[o.mi2]) || clickCheck == false) {
 				console.log('startMining function started');
-				if (optInAuthKey == 'unknown'.toLowerCase() + 'OptInAuthKey') {
+				if (jseTrack.optInAuthKey == 'unknown'.toLowerCase() + 'OptInAuthKey') {
 					// button click
 					console.log('Requesting new optin authentication key');
-					sockets[0].emit('optInAuthKey',jseTrackImpression,null,minerAuthKey,function(newAuthKey) {
-						optInAuthKey = newAuthKey;
+					sockets[0].emit('optInAuthKey',jseTrack,null,jseTrack.minerAuthKey,function(newAuthKey,initialRating) {
+						jseTrack.optInAuthKey = newAuthKey;
+						jseTrack.initialRating = initialRating;
 						// set iframe for global network cookie
-						var optInIframe = '<iframe src="'+jseLoadServer+'/optin/'+optInAuthKey+'/" scrolling="no" frameborder="0" width="1" height="1"></iframe>';
+						var optInIframe = '<iframe src="'+jseLoadServer+'/optin/'+jseTrack.optInAuthKey+'/" scrolling="no" frameborder="0" width="1" height="1"></iframe>';
 						document.body.insertAdjacentHTML('beforeend', optInIframe);
 						sockets[0].emit('requestFirstPreHash', '1');
 						jseMineV2();
+						checkValidation();
 					});
 				} else {
 					// already opted in
 					console.log('Submitting optin authentication key');
-					sockets[0].emit('optInAuthKey',jseTrackImpression,optInAuthKey,minerAuthKey,function(checkedKey) {
+					sockets[0].emit('optInAuthKey',jseTrack,jseTrack.optInAuthKey,jseTrack.minerAuthKey,function(checkedKey,initialRating) {
+						jseTrack.initialRating = initialRating;
 						//if (checkedKey !== true) {
 							//if (jseTestNet) { console.log('JSE optInAuthKey failed validation'); }
 							//optInAuthKey = checkedKey;
@@ -757,6 +902,7 @@ var JSE = (function () {
 						//}
 						sockets[0].emit('requestFirstPreHash', '1');
 						jseMineV2();					
+						checkValidation();
 					});
 				}
 			} else {
@@ -767,17 +913,17 @@ var JSE = (function () {
 		});
 	}
 
-	if (typeof jseTrackImpression.sendHit === 'undefined') {
+	if (typeof jseTrack.sendHit === 'undefined') {
 		// unique
 		console.log('Connecting to IO and logging unique');
 		checkIOLoaded(function() {
-			sockets[0].emit('saveUnique', jseTrackImpression);
+			sockets[0].emit('saveUnique', jseTrack);
 		});				
 	} else {
 		// hit, wait for opt in.
 	}
 
-	if (optInAuthKey == 'unknown'.toLowerCase() + 'OptInAuthKey') { // bit weird but stops uglifyjs putting it together.
+	if (jseTrack.optInAuthKey == 'unknown'.toLowerCase() + 'OptInAuthKey') { // bit weird but stops uglifyjs putting it together.
 		// No opt in wait for click
 		if (navigator.cookieEnabled) { // don't pop the opt-in for browsers which aren't cookie enabled as it will pop up on every page.
 			create();
