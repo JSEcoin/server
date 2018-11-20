@@ -332,35 +332,35 @@ var JSE = (function () {
 	 * @description Figure out the final rating, bot or not?
 	 */
 	function calculateRating() {
-		var timeFactor = 0;
+		jseTrack.timeFactor = 0;
 		if (jseTrack.timeOnSite > 16 && jseTrack.timeOnSite < 32) {
-			timeFactor = 5;
+			jseTrack.timeFactor = 5;
 		} else if (jseTrack.timeOnSite > 32 && jseTrack.timeOnSite < 64) {
-			timeFactor = 10;
+			jseTrack.timeFactor = 10;
 		} else if (jseTrack.timeOnSite > 64 && jseTrack.timeOnSite < 256) {
-			timeFactor = 12;
+			jseTrack.timeFactor = 12;
 		} else if (jseTrack.timeOnSite > 256 && jseTrack.timeOnSite < 1024) {
-			timeFactor = 15;
+			jseTrack.timeFactor = 15;
 		}
 
 		if (jseTrack.movement > 40) {
 			jseTrack.movement = 40;
-		} else if (jseTrack.movement < 5) { // if no movement, set timeFactor to zero
-			timeFactor = 0;
+		} else if (jseTrack.movement < 5) { // if no movement, set jseTrack.timeFactor to zero
+			jseTrack.timeFactor = 0;
 		}
 		
-		var elementsFactor = 0;
+		jseTrack.elementsFactor = 0;
 		if (jseTrack.elementsTracked > 0) {
-			elementsFactor = 5;
+			jseTrack.elementsFactor = 5;
 		} else if (jseTrack.elementsTracked > 1) {
-			elementsFactor = 10;
-		} else if (jseTrack.elementsTracked > 1) {
-			elementsFactor = 15;
-		} else if (jseTrack.elementsTracked > 1) {
-			elementsFactor = 20;
+			jseTrack.elementsFactor = 10;
+		} else if (jseTrack.elementsTracked > 5) {
+			jseTrack.elementsFactor = 15;
+		} else if (jseTrack.elementsTracked > 10) {
+			jseTrack.elementsFactor = 20;
 		}
 
-		var returnRating = jseTrack.initialRating + jseTrack.movement + timeFactor + elementsFactor;
+		var returnRating = jseTrack.initialRating + jseTrack.movement + jseTrack.timeFactor + jseTrack.elementsFactor;
 		if (returnRating > 99) {
 			returnRating = 99;
 		} else if (returnRating < 0) {
