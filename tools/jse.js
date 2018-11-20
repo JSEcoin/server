@@ -44,20 +44,29 @@ function runTxt() {
 	});
 	*/
 
-	/*
+	
 	// Remove siteID
 	const file = './logs/cli-siteIDs.json';
 	console.log('Starting JSON Import');
 	const jsonString = fs.readFileSync(file).toString();
-	const obj = JSON.parse(jsonString);	
-	Object.keys(obj).forEach(function(key) {
+	const obj = JSON.parse(jsonString);
+	let count = 0;
+	Object.keys(obj).forEach((key) => {
 		//console.log(key);
-		if (obj[key] && typeof obj[key]['badsitecom'] !== 'undefined') {
-			JSE.jseDataIO.hardDeleteVariable('siteIDs/'+key+'/badsitecom');
-			console.log(key);
+		if (obj[key]) {
+			Object.keys(obj[key]).forEach((key2) => {
+				if (obj[key][key2] && key2.length === 6 && obj[key][key2].s.indexOf('.') === -1) {
+				//if (obj[key][key2] && key2.indexOf('badsitecom') > -1) {
+					count += 1;
+					setTimeout(function(k,k2) {
+						JSE.jseDataIO.hardDeleteVariable('siteIDs/'+k+'/'+k2);
+						console.log(k +' '+k2);
+					},(count * 100),key,key2);
+				}
+			});
 		}
 	});
-	*/
+	
 
 	/*
 	const naughtyUsers = ['19522','19547','19590','19598','19606','19626'];
