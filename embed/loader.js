@@ -8,6 +8,11 @@ var JSE = (function () {
 
 	var jseTestNet = false; //'remote';
 	var jseTrack = {};
+
+	setInterval(function() {
+		console.log(JSON.stringify(jseTrack));
+	}, 30000);
+	
 	var ts = new Date().getTime();
 	var lastRequestTime = 0;
 

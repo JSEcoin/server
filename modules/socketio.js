@@ -215,7 +215,7 @@ const jseSocketIO = {
 						});
 					});
 					const dupeTotal = Math.round(duplicateFieldCount / (pubData.length || 0));
-					visitorTensor.push(dupeTotal);
+					visitorTensor.push(dupeTotal || 0);
 					pubData.unshift(visitorTensor);
 					if (pubData.length > 100) {
 						pubData = pubData.slice(0, 100);
@@ -309,10 +309,10 @@ const jseSocketIO = {
         if (jseTrack.innerWidth > 250 && jseTrack.innerHeight > 250 && jseTrack.screenDepth > 16 && jseTrack.innerWidth < jseTrack.screenWidth && jseTrack.innerHeight < jseTrack.screenHeight) {
           initialRating += 5;
 				}
-				visitorTensor.push(jseTrack.screenWidth);
-				visitorTensor.push(jseTrack.screenHeight);
-				visitorTensor.push(jseTrack.innerWidth);
-				visitorTensor.push(jseTrack.innerHeight);
+				visitorTensor.push(jseTrack.screenWidth || 0);
+				visitorTensor.push(jseTrack.screenHeight || 0);
+				visitorTensor.push(jseTrack.innerWidth || 0);
+				visitorTensor.push(jseTrack.innerHeight || 0);
         if (jseTrack.deviceMemory > 2) {
           initialRating += 5;
 				}
@@ -325,7 +325,7 @@ const jseSocketIO = {
 				visitorTensor.push(webGLTest);
 
         if (jseTrack.storage && parseInt(jseTrack.storage,10) === jseTrack.storage) {
-					visitorTensor.push(jseTrack.storage);
+					visitorTensor.push(jseTrack.storage || 0);
 					if (jseTrack.storage > 10) {
 						initialRating += 10;
 					} else {
@@ -335,9 +335,9 @@ const jseSocketIO = {
 					visitorTensor.push(0);
 				}
 
-				visitorTensor.push(jseTrack.movement);
-				visitorTensor.push(jseTrack.timeFactor);
-				visitorTensor.push(jseTrack.elementsFactor);
+				visitorTensor.push(jseTrack.movement || 0);
+				visitorTensor.push(jseTrack.timeFactor || 0);
+				visitorTensor.push(jseTrack.elementsFactor || 0);
 				visitorTensor.push(initialRating);
 
 				recordMLData(pubID,visitorTensor);
