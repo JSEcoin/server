@@ -390,7 +390,7 @@ const jseSocketIO = {
 					const subID = JSE.jseFunctions.cleanString(jseTrack.subID) || 1;
 					if (jseTrack.iFrame && jseTrack.iFrame === true) { return false; }
 					const ipCount = JSE.publisherIPs.reduce(function(n, val) { return n + (val === socket.realIP); }, 0); // count ips could be one from unique already
-					if (ipCount <= 50  && socket.goodIP && socket.goodIP === true && publisherIPsValidated.indexOf(socket.realIP) === -1) {
+					if (ipCount <= 50  && socket.goodIP && socket.goodIP === true && JSE.publisherIPsValidated.indexOf(socket.realIP) === -1) {
 						JSE.publisherIPs.push(socket.realIP);
 						JSE.publisherIPsValidated.push(socket.realIP);
 						jseLottery.credit(pubID,siteID,subID,'validate');
