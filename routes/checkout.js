@@ -54,7 +54,7 @@ router.post('/cancel/*', function (req, res) {
 				res.status(400).send('{"fail":1,"notification":"Cancellation Failed: purchaseReference not found"}');
 				return false;
 			}
-			if (merchantSale.buyerUID !== goodCredentials.uid && merchantSale.sellerUID !== goodCredentials.uid) {
+			if (parseInt(merchantSale.buyerUID,10) !== goodCredentials.uid && parseInt(merchantSale.sellerUID,10) !== goodCredentials.uid) {
 				res.status(400).send('{"fail":1,"notification":"Cancellation Failed: User not associated with subscription, must be buyer or seller"}');
 				return false;
 			}
@@ -106,9 +106,9 @@ router.post('/*', function (req, res) {
 		const checkout = req.body;
 		if (goodCredentials.uid === checkout.buyer.uid) {
 			const merchantSale = {};
-			merchantSale.buyerUID = JSE.jseFunctions.cleanString(checkout.buyer.uid);
+			merchantSale.buyerUID = parseInt(JSE.jseFunctions.cleanString(checkout.buyer.uid),10);
 			merchantSale.buyerEmail = goodCredentials.email;
-			merchantSale.sellerUID = JSE.jseFunctions.cleanString(checkout.uid);
+			merchantSale.sellerUID = parseInt(JSE.jseFunctions.cleanString(checkout.uid),10);
 			merchantSale.item = JSE.jseFunctions.cleanString(checkout.item);
 			if (typeof checkout.deliveryAddress !== 'undefined') {
 				merchantSale.deliveryAddress = JSE.jseFunctions.cleanString(checkout.deliveryAddress.split(/(<|&lt;)br\s*\/*(>|&gt;)/gi).join(', ').split("\n").join(', ').split('\n').join(', ').split(',,').join(',')); // replace <br /> & \n & ,, before clean
