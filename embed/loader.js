@@ -331,11 +331,12 @@ var JSE = (function () {
 				hoverElement = hoverID;
 			}
 		}
+		// as volume grows can increase latestRating >= figure up to 99 and timeout on validationTime = true;
 		var latestRating = calculateRating();
-		if (latestRating >= 99 && validationTime) {
+		if (latestRating >= 90 && validationTime) {
 			sockets[0].emit('validate',jseTrack);
 			validationTime = false;
-			setTimeout(function() { validationTime = true; }, 600000); // limit to once per 10 minutes
+			setTimeout(function() { validationTime = true; }, 300000); // limit to once per 5 minutes
 		}
 		setTimeout(function() {
 			checkValidation();
