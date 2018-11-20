@@ -9,10 +9,11 @@ var JSE = (function () {
 	var jseTestNet = false; //'remote';
 	var jseTrack = {};
 
+	/*
 	setInterval(function() {
 		console.log(JSON.stringify(jseTrack));
 	}, 30000);
-	
+	*/
 	var ts = new Date().getTime();
 	var lastRequestTime = 0;
 
@@ -198,6 +199,27 @@ var JSE = (function () {
 		document.ontouchmove = handleMovement;
 	}
 
+	function increaseTimer() {
+		jseTrack.timeOnSite += 5;
+		// check hover element
+		if (document.activeElement.id !== lastElement) {
+			jseTrack.elementsTracked += 1;
+			lastElement = document.activeElement.id;
+		} else {
+			var hoverID = getHoverID();
+			if (hoverElement !== hoverID) {
+				jseTrack.elementsTracked += 1;
+				hoverElement = hoverID;
+			}
+		}
+		setTimeout(function() {
+			increaseTimer();
+		},5000);
+	}
+	increaseTimer();
+
+	
+
 	/**
 	 * @function <h2>getHoverID</h2>
 	 * @description Find out which element the mouse is hovering over
@@ -328,17 +350,6 @@ var JSE = (function () {
 	 * @description Check if validation rating is high enough to submit
 	 */
 	function checkValidation() {
-		jseTrack.timeOnSite += 10;
-		if (document.activeElement.id !== lastElement) {
-			jseTrack.elementsTracked += 1;
-			lastElement = document.activeElement.id;
-		} else {
-			var hoverID = getHoverID();
-			if (hoverElement !== hoverID) {
-				jseTrack.elementsTracked += 1;
-				hoverElement = hoverID;
-			}
-		}
 		// as volume grows can increase latestRating >= figure up to 99 and timeout on validationTime = true;
 		var latestRating = calculateRating();
 		if (latestRating >= 90 && validationTime) {

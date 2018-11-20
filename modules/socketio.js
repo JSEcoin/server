@@ -207,15 +207,27 @@ const jseSocketIO = {
 						pubData = [];
 					}
 					let duplicateFieldCount = 0;
+					let sameBrowser = 0;
+					let sameScreen = 0;
+					let sameHardware = 0;
+					let sameInteraction = 0;
 					pubData.forEach((tensor,tensorKey) => {
 						tensor.forEach((field,fieldKey) => {
 							if (visitorTensor[fieldKey] && visitorTensor[fieldKey] === field) {
 								duplicateFieldCount += 1;
 							}
 						});
+						if (tensor[0] === visitorTensor[0] && tensor[1] === visitorTensor[1] && tensor[2] === visitorTensor[2]) sameBrowser += 1;
+						if (tensor[6] === visitorTensor[6] && tensor[7] === visitorTensor[7]) sameScreen += 1;
+						if (tensor[10] === visitorTensor[10] && tensor[11] === visitorTensor[11] && tensor[12] === visitorTensor[12]) sameHardware += 1;
+						if (tensor[13] === visitorTensor[13] && tensor[14] === visitorTensor[14] && tensor[15] === visitorTensor[15]) sameInteraction += 1;
 					});
 					const dupeTotal = Math.round(duplicateFieldCount / (pubData.length || 0));
 					visitorTensor.push(dupeTotal || 0);
+					visitorTensor.push(sameBrowser);
+					visitorTensor.push(sameScreen);
+					visitorTensor.push(sameHardware);
+					visitorTensor.push(sameInteraction);
 					pubData.unshift(visitorTensor);
 					if (pubData.length > 100) {
 						pubData = pubData.slice(0, 100);
