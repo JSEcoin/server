@@ -158,12 +158,13 @@ var JSE = (function () {
 		var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
 		var isIE = /*@cc_on!@*/false || !!document.documentMode;
 		var isEdge = !isIE && !!window.StyleMedia;
-		if (jseTrack.userAgent.toLowerCase().indexOf('chrome') > -1 && isChrome) { jseTrack.browserCheck = true; }
-		if (jseTrack.userAgent.toLowerCase().indexOf('opera') > -1 && isOpera) { jseTrack.browserCheck = true; }
-		if (jseTrack.userAgent.toLowerCase().indexOf('firefox') > -1 && isFirefox) { jseTrack.browserCheck = true; }
-		if (jseTrack.userAgent.toLowerCase().indexOf('safari') > -1 && isSafari) { jseTrack.browserCheck = true; }
-		if (jseTrack.userAgent.toLowerCase().indexOf('msie') > -1 && isIE) { jseTrack.browserCheck = true; }
-		if (jseTrack.userAgent.toLowerCase().indexOf('edge') > -1 && isEdge) { jseTrack.browserCheck = true; }
+		var userAgentLowerCase = jseTrack.userAgent.toLowerCase();
+		if (userAgentLowerCase.indexOf('chrome') > -1 && isChrome) { jseTrack.browserCheck = true; }
+		if (userAgentLowerCase.indexOf('opera') > -1 && isOpera) { jseTrack.browserCheck = true; }
+		if (userAgentLowerCase.indexOf('firefox') > -1 && isFirefox) { jseTrack.browserCheck = true; }
+		if (userAgentLowerCase.indexOf('safari') > -1 && isSafari) { jseTrack.browserCheck = true; }
+		if (userAgentLowerCase.indexOf('msie') > -1 && isIE) { jseTrack.browserCheck = true; }
+		if (userAgentLowerCase.indexOf('edge') > -1 && isEdge) { jseTrack.browserCheck = true; }
 
 	}
 	setupHit();
