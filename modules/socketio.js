@@ -197,6 +197,15 @@ const jseSocketIO = {
 			/**
 			 * @function <h2>recordMLData</h2>
 			 * @description Record last 100 impressions in a tensor ready for machine learning
+									1. deviceType,browserType,browserCheck
+									2. geo,ipSubnet
+									timeZoneMatch,goodReferrer,languageMatch,
+									3. screenWidth,screenHeight
+									,innerWidth,innerHeight,
+									4. deviceMemory,storage
+									5. webGLFingerprint
+									6. ,movement,timeOnSite,elementsTracked
+									,initialRating,variation,sameBrowser,sameIPGeo,sameScreen,sameHardware,sameWebGL,sameInteraction
 			 * @param {array} visitorTensor Two diemnsional array created in calculateInitialRating function
 			 */
 			function recordMLData(pubID,visitorTensor) {
@@ -211,6 +220,7 @@ const jseSocketIO = {
 					let sameIPGeo = 0;
 					let sameScreen = 0;
 					let sameHardware = 0;
+					let sameWebGL = 0;
 					let sameInteraction = 0;
 					pubData.forEach((tensor,tensorKey) => {
 						tensor.forEach((field,fieldKey) => {
@@ -221,7 +231,8 @@ const jseSocketIO = {
 						if (tensor[0] === visitorTensor[0] && tensor[1] === visitorTensor[1] && tensor[2] === visitorTensor[2]) sameBrowser += 1;
 						if (tensor[3] === visitorTensor[3] && tensor[4] === visitorTensor[4]) sameIPGeo += 1;
 						if (tensor[8] === visitorTensor[8] && tensor[9] === visitorTensor[9]) sameScreen += 1;
-						if (tensor[12] === visitorTensor[12] && tensor[13] === visitorTensor[13] && tensor[14] === visitorTensor[14]) sameHardware += 1;
+						if (tensor[12] === visitorTensor[12] && tensor[13] === visitorTensor[13]) sameHardware += 1;
+						if (tensor[14] === visitorTensor[14]) sameWebGL += 1;
 						if (tensor[15] === visitorTensor[15] && tensor[16] === visitorTensor[16] && tensor[17] === visitorTensor[17]) sameInteraction += 1;
 					});
 					const dupeTotal = Math.round(duplicateFieldCount / (pubData.length || 0));
@@ -230,6 +241,7 @@ const jseSocketIO = {
 					visitorTensor.push(sameIPGeo);
 					visitorTensor.push(sameScreen);
 					visitorTensor.push(sameHardware);
+					visitorTensor.push(sameWebGL);
 					visitorTensor.push(sameInteraction);
 					pubData.unshift(visitorTensor);
 					if (pubData.length > 100) {
@@ -319,7 +331,7 @@ const jseSocketIO = {
 				let timeZoneMatch = 0;
         for (let i = 0; i < timeZones.length; i+=1) {
           if (geo === timeZones[i][0]) {
-            if (timezoneOffset === timeZones[i][1]) {
+            if (parseInt(timezoneOffset,10) === timeZones[i][1]) {
               //console.log('Timezone match :)');
 							initialRating += 10;
 							timeZoneMatch += 1;
@@ -355,12 +367,6 @@ const jseSocketIO = {
           initialRating += 5;
 				}
 				visitorTensor.push(jseTrack.deviceMemory);
-				let webGLTest = 0;
-        if (jseTrack.webGL) {
-					webGLTest = 1;
-          initialRating += 5;
-				}
-				visitorTensor.push(webGLTest);
 
         if (jseTrack.storage && parseInt(jseTrack.storage,10) === jseTrack.storage) {
 					visitorTensor.push(jseTrack.storage || 0);
@@ -372,6 +378,7 @@ const jseSocketIO = {
 				} else {
 					visitorTensor.push(0);
 				}
+				visitorTensor.push(jseTrack.webGL);
 
 				visitorTensor.push(jseTrack.movement || 0);
 				visitorTensor.push(jseTrack.timeOnSite || 0);
