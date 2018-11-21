@@ -678,7 +678,7 @@ function txApprove(uid,pushRef,approvalType) {
 									console.log('Withdrawal Success '+goodCredentials.uid+'/'+txObject.value+'JSE/'+txObject.withdrawalAddress);
 									JSE.jseDataIO.setVariable('txPending/'+uid+'/'+pushRef+'/complete', processedTimestamp);
 								} else {
-									console.log('Withdrawal Failed1 '+goodCredentials.uid+'/'+txObject.value+'JSE/'+txObject.withdrawalAddress);
+									console.log('Withdrawal Failed '+goodCredentials.uid+'/'+txObject.value+'JSE/'+txObject.withdrawalAddress);
 									console.log(jsonResult);
 									JSE.jseDataIO.setVariable('txPending/'+goodCredentials.uid+'/'+pushRef+'/adminApproved',false);
 									JSE.jseDataIO.setVariable('txPending/'+goodCredentials.uid+'/'+pushRef+'/adminDeclined',true);

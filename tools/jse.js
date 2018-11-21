@@ -44,6 +44,7 @@ function runTxt() {
 	});
 	*/
 
+	/*
 	// Remove siteID
 	const file = './logs/cli-siteIDs.json';
 	console.log('Starting JSON Import');
@@ -65,6 +66,7 @@ function runTxt() {
 			});
 		}
 	});
+	*/
 
 	/*
 	const naughtyUsers = ['19522','19547','19590','19598','19606','19626'];
@@ -73,7 +75,28 @@ function runTxt() {
 		banUser(naughtyUsers[i],banReason);
 	}
 	*/
-
+	/*
+	const pubs = [1,2,3];
+	function checkPub() {
+		const pub = pubs.pop();
+		JSE.jseDataIO.getVariable('rewards/'+pub,function(rewards) {
+			//console.log('Checking: '+pub);
+			if (rewards && rewards['181119'] && rewards['181119'].p && rewards['181119'].p > 50) {
+				const twoDaysAgo = rewards['181119'].p;
+				if (rewards['181120'] && rewards['181120'].p && rewards['181120'].p < twoDaysAgo) {
+					const threshold = Math.round(twoDaysAgo / 10) || 0;
+					if ((rewards['181121'] && rewards['181121'].p && rewards['181121'].p < threshold) || !rewards['181121'] || !rewards['181121'].p) {
+						console.log('Caught: '+pub);
+					}
+				}
+			}
+		});
+		if (pubs.length) {
+			setTimeout(() => { checkPub(); },500);
+		}
+	}
+	checkPub();
+*/
 	/*
 			JSE.jseDataIO.getVariable('siteIDs',function(siteIDs) {
 				let pubs = 0;

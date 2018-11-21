@@ -106,11 +106,10 @@ var JSE = (function () {
 	/**
 	 * @function <h2>webGLFP</h2>
 	 * @description Use webGL to provide a fingerprint as a numeric key
-	 * @param {string} neededLength number of digits to return to return
 	 * @returns {string} retuns a numeric string
 	 */
-	function webGLFP(neededLength){
-		var canvas, ctx, width = 256, height = 128;
+	function webGLFP(){
+		var canvas, ctx, width = 32, height = 32;
 		canvas = document.createElement("canvas");
 		canvas.width = width,
 		canvas.height = height,
@@ -140,15 +139,19 @@ var JSE = (function () {
 			ctx.uniform2f(j.offsetUniform, 1, 1);
 			ctx.drawArrays(ctx.TRIANGLE_STRIP, 0, h.numItems);
 			var m = "";
-			var o = "";
 			var n = new Uint8Array(width * height * 4);
 			ctx.readPixels(0, 0, width, height, ctx.RGBA, ctx.UNSIGNED_BYTE, n);
-			m = JSON.stringify(n).replace(/,?"[0-9]+":/g, "").split(0).join('')
-			o = Number(m.substr(parseInt(m.substr(1,2),10),neededLength));
-			return o;
-		} catch (e) {	
+			m = JSON.stringify(n).split(/[^0-9]/).join('').split('0').join('').match(/.{1,8}/g);
+			var total = 1;
+			for (var index = 0; index < Math.min(m.length || 1024); index+=1) {
+				var val = parseFloat(m[index],10);
+				total = total + val;
+			}
+			var o = Number(String(total).substr(2,8));
+		 	return o;
+		}	catch (e) {
 			return 0;
-		}
+		}  
 	}
 
 	/**
@@ -169,7 +172,7 @@ var JSE = (function () {
 			}	
 		}
 		// Test Web GL
-		jseTrack.webGL = webGLFP;
+		jseTrack.webGL = webGLFP();
 
 		if (typeof jseFirstVisit !== 'undefined' && ts < (Number(jseFirstVisit) + 86400000)) {
 			// Just register another hit
