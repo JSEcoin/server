@@ -378,7 +378,7 @@ const jseSocketIO = {
 					JSE.publisherIPs.push(socket.realIP);
 					jseLottery.credit(pubID,siteID,subID,'unique');
 				} catch (ex) {
-					console.log('SaveHit - Error Caught 158: '+ex);
+					console.log('SaveUnique - Error Caught 381: '+ex);
 				}
 				return false;
 			});
@@ -396,7 +396,7 @@ const jseSocketIO = {
 						jseLottery.credit(pubID,siteID,subID,'validate');
 					}
 				} catch (ex) {
-					console.log('SaveHit - Error Caught 158: '+ex);
+					console.log('Validate - Error Caught 399: '+ex);
 				}
 				return false;
 			});
