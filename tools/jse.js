@@ -44,6 +44,18 @@ function runTxt() {
 	});
 	*/
 
+	//	Repair missed UID
+	/*
+	JSE.jseDataIO.getVariable('account/43470',function(reply) {
+		reply.uid = 72475;
+		JSE.jseDataIO.setVariable('account/72475',reply);
+	});
+	JSE.jseDataIO.getVariable('credentials/43470',function(reply) {
+		reply.uid = 72475;
+		JSE.jseDataIO.setVariable('credentials/72475',reply);
+	});
+	*/
+
 	/*
 	// Remove siteID
 	const file = './logs/cli-siteIDs.json';
