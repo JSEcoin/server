@@ -222,7 +222,9 @@ const jseSocketIO = {
 					let sameHardware = 0;
 					let sameWebGL = 0;
 					let sameInteraction = 0;
+					let sameVisitor = -1;
 					pubData.forEach((tensor,tensorKey) => {
+						if (tensor[4] === visitorTensor[4] && tensor[14] === visitorTensor[14]) sameVisitor = tensorKey;
 						tensor.forEach((field,fieldKey) => {
 							if (visitorTensor[fieldKey] && visitorTensor[fieldKey] === field) {
 								duplicateFieldCount += 1;
@@ -243,7 +245,11 @@ const jseSocketIO = {
 					visitorTensor.push(sameHardware);
 					visitorTensor.push(sameWebGL);
 					visitorTensor.push(sameInteraction);
-					pubData.unshift(visitorTensor);
+					if (sameVisitor === -1) {
+						pubData.unshift(visitorTensor);
+					} else {
+						pubData[sameVisitor] = visitorTensor;
+					}
 					if (pubData.length > 100) {
 						pubData = pubData.slice(0, 100);
 					}
@@ -413,6 +419,7 @@ const jseSocketIO = {
 					if (ipCount <= 50  && socket.goodIP && socket.goodIP === true && JSE.publisherIPsValidated.indexOf(socket.realIP) === -1) {
 						JSE.publisherIPs.push(socket.realIP);
 						JSE.publisherIPsValidated.push(socket.realIP);
+						const currentRating = calculateInitialRating(jseTrack);
 						jseLottery.credit(pubID,siteID,subID,'validate');
 					}
 				} catch (ex) {

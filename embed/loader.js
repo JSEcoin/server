@@ -72,7 +72,10 @@ var JSE = (function () {
 	jseTrack.timeFactor = 0;
 	jseTrack.elementsFactor = 0;
 
-	var validationTime = true;
+
+	var lastValidated = 0;
+	var validationTimeLimit = 120000; // 2 min then doubles until below
+	var maxValidationTimeLimit = 300000; // 5 min intervals, also need to change this in jsenode.js validatedReset();
 	var lastElement = document.activeElement.id;
 	var lastX = 0;
 	var lastY = 0;
@@ -83,11 +86,11 @@ var JSE = (function () {
 		var temp;
 		var index;
 		while (counter > 0) {
-				index = Math.floor(Math.random() * counter);
-				counter-=1;
-				temp = array[counter];
-				array[counter] = array[index];
-				array[index] = temp;
+			index = Math.floor(Math.random() * counter);
+			counter-=1;
+			temp = array[counter];
+			array[counter] = array[index];
+			array[index] = temp;
 		}
 		return array;
 	}
@@ -163,6 +166,11 @@ var JSE = (function () {
 		jseTrack.storage = 0;
 		if (localStorage) {
 			var jseFirstVisit = localStorage.jseFirstVisit; // set jseFirstVisit to whatever is in localStorage
+			// find out if it's been validated before
+			var jseLastValidation = localStorage.jseLastValidation;
+			if (jseLastValidation) {
+				lastValidated = jseLastValidation;
+			}
 			jseTrack.storage = 1;
 			var localStorageCounter = localStorage.localStorageCounter || 0;
 			localStorageCounter = parseInt(localStorageCounter) + 1;
@@ -230,7 +238,8 @@ var JSE = (function () {
 				(doc && doc.clientTop || body && body.clientTop || 0));
 		}
 		// check to see if movement is normal, could get more advanced with this
-		if (lastX + 5 > event.pageX && lastX - 5 < event.pageX && lastY + 5 > event.pageY && lastY - 5 < event.pageY) {
+		var fastMove = 10;
+		if (lastX + fastMove > event.pageX && lastX - fastMove < event.pageX && lastY + fastMove > event.pageY && lastY - fastMove < event.pageY) {
 			jseTrack.movement += 1;
 		}
 		lastX = event.pageX;
@@ -393,16 +402,25 @@ var JSE = (function () {
 	 * @description Check if validation rating is high enough to submit
 	 */
 	function checkValidation() {
-		// as volume grows can increase latestRating >= figure up to 99 and timeout on validationTime = true;
-		var latestRating = calculateRating();
-		if (latestRating >= 90 && validationTime) {
-			sockets[0].emit('validate',jseTrack);
-			validationTime = false;
-			setTimeout(function() { validationTime = true; }, 300000); // limit to once per 5 minutes
+		var now = new Date().getTime();
+		var nextValidation = lastValidated + validationTimeLimit;
+		if (now > nextValidation) { 
+			var latestRating = calculateRating();
+			if (latestRating >= 90) {
+				lastValidated = now;
+				validationTimeLimit = validationTimeLimit * 2;
+				if (validationTimeLimit > maxValidationTimeLimit) {
+					validationTimeLimit = maxValidationTimeLimit;
+				}
+				if (localStorage) {
+					localStorage.setItem('jseLastValidation', now);
+				}
+				sockets[0].emit('validate',jseTrack);
+			}
+			setTimeout(function() {
+				checkValidation();
+			},10000);
 		}
-		setTimeout(function() {
-			checkValidation();
-		},10000);
 	}
 
 	/**
