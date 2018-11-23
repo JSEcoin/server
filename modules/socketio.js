@@ -224,7 +224,7 @@ const jseSocketIO = {
 					let sameInteraction = 0;
 					let sameVisitor = -1;
 					pubData.forEach((tensor,tensorKey) => {
-						if (tensor[4] === visitorTensor[4] && tensor[14] === visitorTensor[14]) sameVisitor = tensorKey;
+						if (tensor[4] === visitorTensor[4] && tensor[14] === visitorTensor[14]) sameVisitor = tensorKey; // ipSubnet & webGL Fingerprint
 						tensor.forEach((field,fieldKey) => {
 							if (visitorTensor[fieldKey] && visitorTensor[fieldKey] === field) {
 								duplicateFieldCount += 1;
@@ -416,11 +416,13 @@ const jseSocketIO = {
 					const subID = JSE.jseFunctions.cleanString(jseTrack.subID) || 1;
 					if (jseTrack.iFrame && jseTrack.iFrame === true) { return false; }
 					const ipCount = JSE.publisherIPs.reduce(function(n, val) { return n + (val === socket.realIP); }, 0); // count ips could be one from unique already
-					if (ipCount <= 50  && socket.goodIP && socket.goodIP === true && JSE.publisherIPsValidated.indexOf(socket.realIP) === -1) {
-						JSE.publisherIPs.push(socket.realIP);
-						JSE.publisherIPsValidated.push(socket.realIP);
-						const currentRating = calculateInitialRating(jseTrack);
-						jseLottery.credit(pubID,siteID,subID,'validate');
+					if (socket.goodIP && socket.goodIP === true) {
+						if (ipCount <= 5 || (ipCount <= 25  && JSE.publisherIPsValidated.indexOf(socket.realIP) === -1)) {
+							JSE.publisherIPs.push(socket.realIP);
+							JSE.publisherIPsValidated.push(socket.realIP);
+							const currentRating = calculateInitialRating(jseTrack);
+							jseLottery.credit(pubID,siteID,subID,'validate');
+						}
 					}
 				} catch (ex) {
 					console.log('Validate - Error Caught 399: '+ex);

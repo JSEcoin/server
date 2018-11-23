@@ -302,7 +302,7 @@ function validatedReset() {
 	JSE.publisherIPsValidated = [];
 	setTimeout(function() {
 		validatedReset();
-	}, 300000); // 5 mins
+	}, 180000); // 3 mins
 }
 validatedReset();
 

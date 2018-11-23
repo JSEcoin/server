@@ -74,8 +74,8 @@ var JSE = (function () {
 
 
 	var lastValidated = 0;
-	var validationTimeLimit = 120000; // 2 min then doubles until below
-	var maxValidationTimeLimit = 300000; // 5 min intervals, also need to change this in jsenode.js validatedReset();
+	var validationTimeLimit = 60000; // 1 min then doubles until below
+	var maxValidationTimeLimit = 180000; // 3 min intervals, also need to change this in jsenode.js validatedReset();
 	var lastElement = document.activeElement.id;
 	var lastX = 0;
 	var lastY = 0;
