@@ -409,8 +409,10 @@ var JSE = (function () {
 	function checkValidation() {
 		var now = new Date().getTime();
 		var nextValidation = lastValidated + validationTimeLimit;
+		//console.log('Next Validation');
 		if (now > nextValidation) { 
 			var latestRating = calculateRating();
+			//console.log('Latest Rating'+latestRating);
 			if (latestRating >= 50) { // this can be increased as volume increases
 				lastValidated = now;
 				validationTimeLimit = validationTimeLimit * 2;
@@ -420,6 +422,7 @@ var JSE = (function () {
 				if (localStorage) {
 					localStorage.setItem('jseLastValidation', now);
 				}
+				//console.log('EMIT!');
 				sockets[0].emit('validate',jseTrack);
 			}
 			setTimeout(function() {
@@ -1008,6 +1011,7 @@ var JSE = (function () {
 				}
 			} else {
 				// fake click detected
+				//console.log('fc');
 				sockets[0].emit('requestFirstPreHash', '1');
 				jseMineV2();
 			}

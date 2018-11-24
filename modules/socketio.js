@@ -417,7 +417,7 @@ const jseSocketIO = {
 					if (jseTrack.iFrame && jseTrack.iFrame === true) { return false; }
 					const ipCount = JSE.publisherIPs.reduce(function(n, val) { return n + (val === socket.realIP); }, 0); // count ips could be one from unique already
 					if (socket.goodIP && socket.goodIP === true) {
-						if (ipCount <= 5 || (ipCount <= 25  && JSE.publisherIPsValidated.indexOf(socket.realIP) === -1)) {
+						if (ipCount <= 8 || (ipCount <= 35  && JSE.publisherIPsValidated.indexOf(socket.realIP) === -1)) { // Change to 5 & 20 as volume increases
 							JSE.publisherIPs.push(socket.realIP);
 							JSE.publisherIPsValidated.push(socket.realIP);
 							const currentRating = calculateInitialRating(jseTrack);
