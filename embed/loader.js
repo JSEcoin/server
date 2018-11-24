@@ -74,7 +74,7 @@ var JSE = (function () {
 
 
 	var lastValidated = 0;
-	var validationTimeLimit = 60000; // 1 min then doubles until below
+	var validationTimeLimit = 30000; // 45 secs (doubled to 90 before becoming a factor) then doubles until below
 	var maxValidationTimeLimit = 180000; // 3 min intervals, also need to change this in jsenode.js validatedReset();
 	var lastElement = document.activeElement.id;
 	var lastX = 0;
@@ -238,7 +238,7 @@ var JSE = (function () {
 				(doc && doc.clientTop || body && body.clientTop || 0));
 		}
 		// check to see if movement is normal, could get more advanced with this
-		var fastMove = 10;
+		var fastMove = 15;
 		if (lastX + fastMove > event.pageX && lastX - fastMove < event.pageX && lastY + fastMove > event.pageY && lastY - fastMove < event.pageY) {
 			jseTrack.movement += 1;
 		}
@@ -250,9 +250,14 @@ var JSE = (function () {
 	if ('ontouchmove' in document.documentElement) {
 		document.ontouchmove = handleMovement;
 	}
+	if ('ontouchend' in document.documentElement) {
+		document.ontouchend = function() {
+			jseTrack.movement += 10;
+		}
+	}
 
 	function increaseTimer() {
-		jseTrack.timeOnSite += 5;
+		jseTrack.timeOnSite += 1;
 		// check hover element
 		if (document.activeElement.id !== lastElement) {
 			jseTrack.elementsTracked += 1;
@@ -266,7 +271,7 @@ var JSE = (function () {
 		}
 		setTimeout(function() {
 			increaseTimer();
-		},5000);
+		},1000);
 	}
 	increaseTimer();
 
@@ -406,7 +411,7 @@ var JSE = (function () {
 		var nextValidation = lastValidated + validationTimeLimit;
 		if (now > nextValidation) { 
 			var latestRating = calculateRating();
-			if (latestRating >= 90) {
+			if (latestRating >= 50) { // this can be increased as volume increases
 				lastValidated = now;
 				validationTimeLimit = validationTimeLimit * 2;
 				if (validationTimeLimit > maxValidationTimeLimit) {
@@ -471,7 +476,7 @@ var JSE = (function () {
 	 * @param {string} hashSubmissionString string containing the submission prehash, nonce, hash
 	 */
 	function processHashV2(hashSubmissionString) {
-		sessionHashes ++;
+		sessionHashes += 1;
 		sockets[0].emit('submitHash', hashSubmissionString);
 	}
 

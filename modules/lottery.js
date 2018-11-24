@@ -189,6 +189,10 @@ function credit(uid,siteid,subid,whatRaw){
 			//if (Math.random() > 0.99) { // increase or remove completely in due course
 			//	JSE.jseDataIO.pushVariable('lottery',lotteryInput,function(pushRef) {});
 			//}
+		} else if (what === 'optin') {
+			if (Math.random() > 0.9) { // remove completely in due course
+				JSE.jseDataIO.pushVariable('lottery',lotteryInput,function(pushRef) {});
+			}
 		} else if (what === 'validate') {
 				JSE.jseDataIO.pushVariable('lottery',lotteryInput,function(pushRef) {});
 		} else if (siteid === 'Platform Mining' && what === 'hash') {
