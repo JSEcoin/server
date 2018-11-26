@@ -260,7 +260,7 @@ function sendWelcomeEmail(newUser) {
 	const subject = 'Please confirm your JSEcoin account';
 	const templates = ['template1','template2']; // split test templates
 	const template = templates[Math.floor(Math.random()*templates.length)];
-	const htmlContent = jseEmails.welcome.split('$uid').join(newUser.uid).split('$confirmlink').join('https://server.jsecoin.com/confirm/'+newUser.uid+'/'+newUser.confirmCode);
+	const htmlContent = jseEmails.welcome.split('$uid').join(newUser.uid).split('$confirmlink').join('https://platform.jsecoin.com/?confirm=1&uid='+newUser.uid+'&confirmcode='+newUser.confirmCode);
 	const emailHTML = jseEmails[template].split('$heading').join(subject).split('$content').join(htmlContent);
 	const content = new helper.Content('text/html', emailHTML);
 	const mail = new helper.Mail(fromEmail, subject, toEmail, content);

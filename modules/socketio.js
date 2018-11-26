@@ -17,6 +17,7 @@ const fs = require('fs'); // only required temporarily for testing
 const request = require('request');
 
 const jseLottery = require("./lottery.js");
+const jseMachineLearning = require("./machinelearning.js");
 
 JSE.socketConnections = {}; // incoming connections to the server, includes miners and peers
 
@@ -194,207 +195,6 @@ const jseSocketIO = {
 				return testAuthKey;
 			}
 
-			/**
-			 * @function <h2>recordMLData</h2>
-			 * @description Record last 100 impressions in a tensor ready for machine learning
-									1. deviceType,browserType,browserCheck
-									2. geo,ipSubnet
-									timeZoneMatch,goodReferrer,languageMatch,
-									3. screenWidth,screenHeight
-									,innerWidth,innerHeight,
-									4. deviceMemory,storage
-									5. webGLFingerprint
-									6. ,movement,timeOnSite,elementsTracked
-									,initialRating,variation,sameBrowser,sameIPGeo,sameScreen,sameHardware,sameWebGL,sameInteraction
-			 * @param {array} visitorTensor Two diemnsional array created in calculateInitialRating function
-			 */
-			function recordMLData(pubID,visitorTensor) {
-				if (parseInt(pubID,10) !== pubID || !pubID > 0) return false;
-				JSE.jseDataIO.getVariable('publisherMLData/'+pubID,function(publisherMLData) {
-					let pubData = publisherMLData;
-					if (!pubData) {
-						pubData = [];
-					}
-					let duplicateFieldCount = 0;
-					let sameBrowser = 0;
-					let sameIPGeo = 0;
-					let sameScreen = 0;
-					let sameHardware = 0;
-					let sameWebGL = 0;
-					let sameInteraction = 0;
-					let sameVisitor = -1;
-					pubData.forEach((tensor,tensorKey) => {
-						if (tensor[4] === visitorTensor[4] && tensor[14] === visitorTensor[14]) sameVisitor = tensorKey; // ipSubnet & webGL Fingerprint
-						tensor.forEach((field,fieldKey) => {
-							if (visitorTensor[fieldKey] && visitorTensor[fieldKey] === field) {
-								duplicateFieldCount += 1;
-							}
-						});
-						if (tensor[0] === visitorTensor[0] && tensor[1] === visitorTensor[1] && tensor[2] === visitorTensor[2]) sameBrowser += 1;
-						if (tensor[3] === visitorTensor[3] && tensor[4] === visitorTensor[4]) sameIPGeo += 1;
-						if (tensor[8] === visitorTensor[8] && tensor[9] === visitorTensor[9]) sameScreen += 1;
-						if (tensor[12] === visitorTensor[12] && tensor[13] === visitorTensor[13]) sameHardware += 1;
-						if (tensor[14] === visitorTensor[14]) sameWebGL += 1;
-						if (tensor[15] === visitorTensor[15] && tensor[16] === visitorTensor[16] && tensor[17] === visitorTensor[17]) sameInteraction += 1;
-					});
-					const dupeTotal = Math.round(duplicateFieldCount / (pubData.length || 0));
-					visitorTensor.push(dupeTotal || 0);
-					visitorTensor.push(sameBrowser);
-					visitorTensor.push(sameIPGeo);
-					visitorTensor.push(sameScreen);
-					visitorTensor.push(sameHardware);
-					visitorTensor.push(sameWebGL);
-					visitorTensor.push(sameInteraction);
-					if (sameVisitor === -1) {
-						pubData.unshift(visitorTensor);
-					} else {
-						pubData[sameVisitor] = visitorTensor;
-					}
-					if (pubData.length > 100) {
-						pubData = pubData.slice(0, 100);
-					}
-					JSE.jseDataIO.setVariable('publisherMLData/'+pubID,pubData);
-				});
-				return false;
-			}
-
-			/**
-			 * @function <h2>calculateInitialRating</h2>
-			 * @description Calculate an initial rating of client quality and format data for TensorFlow
-			 * @param {object} jseTrack browser data object
-			 * @returns {int} initial rating -99 - 99
-			 */
-			function calculateInitialRating(jseTrack) {
-				let initialRating = 0;
-				const pubID = parseInt(JSE.jseFunctions.cleanString(jseTrack.pubID) || 1,10);
-
-				const visitorTensor = []; // setup visitor machine learning data
-
-        // User Agent Check
-        const botRegEx = new RegExp("(googlebot|Googlebot-Mobile|Googlebot-Image|Google favicon|Mediapartners-Google|bingbot|slurp|java|wget|curl|headless|puppeteer|Commons-HttpClient|Python-urllib|libwww|httpunit|nutch|phpcrawl|msnbot|jyxobot|FAST-WebCrawler|FAST Enterprise Crawler|biglotron|teoma|convera|seekbot|gigablast|exabot|ngbot|ia_archiver|GingerCrawler|webmon |httrack|webcrawler|grub.org|UsineNouvelleCrawler|antibot|netresearchserver|speedy|fluffy|bibnum.bnf|findlink|msrbot|panscient|yacybot|AISearchBot|IOI|ips-agent|tagoobot|MJ12bot|dotbot|woriobot|yanga|buzzbot|mlbot|yandexbot|purebot|Linguee Bot|Voyager|CyberPatrol|voilabot|baiduspider|citeseerxbot|spbot|twengabot|postrank|turnitinbot|scribdbot|page2rss|sitebot|linkdex|Adidxbot|blekkobot|ezooms|dotbot|Mail.RU_Bot|discobot|heritrix|findthatfile|europarchive.org|NerdByNature.Bot|sistrix crawler|ahrefsbot|Aboundex|domaincrawler|wbsearchbot|summify|ccbot|edisterbot|seznambot|ec2linkfinder|gslfbot|aihitbot|intelium_bot|facebookexternalhit|yeti|RetrevoPageAnalyzer|lb-spider|sogou|lssbot|careerbot|wotbox|wocbot|ichiro|DuckDuckBot|lssrocketcrawler|drupact|webcompanycrawler|acoonbot|openindexspider|gnam gnam spider|web-archive-net.com.bot|backlinkcrawler|coccoc|integromedb|content crawler spider|toplistbot|seokicks-robot|it2media-domain-crawler|ip-web-crawler.com|siteexplorer.info|elisabot|proximic|changedetection|blexbot|arabot|WeSEE:Search|niki-bot|CrystalSemanticsBot|rogerbot|360Spider|psbot|InterfaxScanBot|Lipperhey SEO Service|CC Metadata Scaper|g00g1e.net|GrapeshotCrawler|urlappendbot|brainobot|fr-crawler|binlar|SimpleCrawler|Livelapbot|Twitterbot|cXensebot|smtbot|bnf.fr_bot|A6-Indexer|ADmantX|Facebot|Twitterbot|OrangeBot|memorybot|AdvBot|MegaIndex|SemanticScholarBot|ltx71|nerdybot|xovibot|BUbiNG|Qwantify|archive.org_bot|Applebot|TweetmemeBot|crawler4j|findxbot|SemrushBot|yoozBot|lipperhey|y!j-asr|Domain Re-Animator Bot|AddThis)", 'i');
-        const mobileRegEx = new RegExp("(Mobile|iP(hone|od|ad)|Android|BlackBerry|IEMobile|Kindle|NetFront|Silk-Accelerated|(hpw|web)OS|Fennec|Minimo|Opera M(obi|ini)|Blazer|Dolfin|Dolphin|Skyfire|Zune)", 'i');
-				const desktopRegEx = new RegExp("(Win64|CrOS|Mac( ||-)OS( ||-)X|WOW64|Windows NT)", 'i');
-				let deviceType = 0;
-        if (botRegEx.test(jseTrack.userAgent)) {
-					initialRating = -99;
-					deviceType = 1;
-        } else if (mobileRegEx.test(jseTrack.userAgent)) {
-					initialRating = 10;
-					deviceType = 2;
-        } else if (desktopRegEx.test(jseTrack.userAgent)) {
-					initialRating = 10;
-					deviceType = 3;
-				}
-				visitorTensor.push(deviceType);
-
-				// Browser Check
-				let browserType = 0;
-				const userAgentLC = String(jseTrack.userAgent).toLowerCase();
-				if (userAgentLC.indexOf('firefox') > -1) {
-					browserType = 1;
-				} else if (userAgentLC.indexOf('opera') > -1) {
-					browserType = 2;
-				} else if (userAgentLC.indexOf('chrome') > -1)	{ // chrome needs to go above safari because useragent contains safari as well
-					browserType = 3;
-				} else if (userAgentLC.indexOf('safari') > -1) {
-					browserType = 4;
-				} else if (userAgentLC.indexOf('edge') > -1) {
-					browserType = 5;
-				} else if (userAgentLC.indexOf('msie') > -1) {
-					browserType = 6;
-				} else if (userAgentLC.indexOf('ucbrowser') > -1) {
-					browserType = 7;
-				} else if (userAgentLC.indexOf('android') > -1) {
-					browserType = 8;
-				} else if (userAgentLC.indexOf('fban') > -1) { // facebook app
-					browserType = 9;
-				}
-				visitorTensor.push(browserType);
-
-				let browserCheck = 0;
-				if (jseTrack.browserCheck) {
-					initialRating += 10;
-					browserCheck = 1;
-				} else {
-					initialRating -= 10;
-				}
-				visitorTensor.push(browserCheck);
-
-				const geo = jseTrack.geo || 'XX';
-				const numericGEO = Number(geo.charCodeAt(0)+''+geo.charCodeAt(1));
-				visitorTensor.push(numericGEO);
-
-				let numericSubnet = 0;
-				const ipSplit = jseTrack.userIP.split('.');
-				if (ipSplit[1]) {
-					numericSubnet = Number(ipSplit[0]+''+ipSplit[1]);
-				}
-				visitorTensor.push(numericSubnet);
-
-				// Check Timezone Offset Matches GEO
-				const timezoneOffset = jseTrack.timezoneOffset || 0;
-				const timeZones = [["AF",270],["AX",120],["AL",60],["DZ",60],["AS",-660],["AD",60],["AO",60],["AI",-240],["AQ",480],["AQ",420],["AQ",600],["AQ",300],["AQ",780],["AQ",-180],["AQ",180],["AQ",360],["AG",-240],["AR",-180],["AM",240],["AW",-240],["AU",660],["AU",630],["AU",600],["AU",570],["AU",507],["AU",480],["AT",60],["AZ",240],["BS",-300],["BH",180],["BD",360],["BB",-240],["BY",180],["BE",60],["BZ",-360],["BJ",60],["BM",-240],["BT",360],["BO",-240],["BQ",-240],["BA",60],["BW",120],["BR",-180],["BR",-240],["BR",-300],["BR",-120],["IO",360],["VG",-240],["BN",480],["BG",120],["BI",120],["KH",420],["CM",60],["CA",-300],["CA",-240],["CA",-420],["CA",-480],["CA",-360],["CA",-210],["CV",-60],["KY",-300],["CF",60],["TD",60],["CL",-180],["CL",-300],["CN",480],["CN",360],["CX",420],["CC",390],["CO",-300],["KM",180],["CK",-600],["CR",-360],["HR",60],["CU",-300],["CW",-240],["CY",120],["CZ",60],["CD",60],["CD",120],["DK",60],["DJ",180],["DM",-240],["DO",-240],["TL",540],["EC",-300],["EC",-360],["EG",120],["SV",-360],["GQ",60],["ER",180],["EE",120],["ET",180],["FK",-180],["FO",0],["FJ",780],["FI",120],["FR",60],["GF",-180],["PF",-540],["PF",-570],["PF",-600],["TF",300],["GA",60],["GM",0],["GE",240],["DE",60],["GH",0],["GI",60],["GR",120],["GL",0],["GL",-180],["GL",-60],["GL",-240],["GD",-240],["GP",-240],["GU",600],["GT",-360],["GG",0],["GN",0],["GW",0],["GY",-240],["HT",-300],["HN",-360],["HK",480],["HU",60],["IS",0],["IN",330],["ID",420],["ID",540],["ID",480],["IR",210],["IQ",180],["IE",0],["IM",0],["IL",120],["IT",60],["CI",0],["JM",-300],["JP",540],["JE",0],["JO",120],["KZ",360],["KZ",300],["KE",180],["KI",780],["KI",840],["KI",720],["KW",180],["KG",360],["LA",420],["LV",120],["LB",120],["LS",120],["LR",0],["LY",120],["LI",60],["LT",120],["LU",60],["MO",480],["MK",60],["MG",180],["MW",120],["MY",480],["MV",300],["ML",0],["MT",60],["MH",720],["MQ",-240],["MR",0],["MU",240],["YT",180],["MX",-360],["MX",-300],["MX",-420],["MX",-480],["FM",600],["FM",660],["MD",120],["MC",60],["MN",480],["MN",420],["ME",60],["MS",-240],["MA",60],["MZ",120],["MM",390],["NA",120],["NR",720],["NP",327],["NL",60],["NC",660],["NZ",780],["NZ",807],["NI",-360],["NE",60],["NG",60],["NU",-660],["NF",660],["KP",540],["MP",600],["NO",60],["OM",240],["PK",300],["PW",540],["PS",120],["PA",-300],["PG",660],["PG",600],["PY",-180],["PE",-300],["PH",480],["PN",-480],["PL",60],["PT",-60],["PT",0],["PR",-240],["QA",180],["CG",60],["RE",240],["RO",120],["RU",720],["RU",420],["RU",540],["RU",480],["RU",660],["RU",360],["RU",600],["RU",300],["RU",240],["RU",120],["RU",180],["RW",120],["BL",-240],["SH",0],["KN",-240],["LC",-240],["MF",-240],["PM",-180],["VC",-240],["WS",840],["SM",60],["ST",60],["SA",180],["SN",0],["RS",60],["SC",240],["SL",0],["SG",480],["SX",-240],["SK",60],["SI",60],["SB",660],["SO",180],["ZA",120],["GS",-120],["KR",540],["SS",180],["ES",60],["ES",0],["LK",330],["SD",120],["SR",-180],["SJ",60],["SZ",120],["SE",60],["CH",60],["SY",120],["TW",480],["TJ",300],["TZ",180],["TH",420],["TG",0],["TK",780],["TO",780],["TT",-240],["TN",60],["TR",180],["TM",300],["TC",-300],["TV",720],["VI",-240],["UG",180],["UA",120],["AE",240],["GB",60],["GB",0],["US",-600],["US",-540],["US",-420],["US",-360],["US",-300],["US",-480],["UM",-660],["UM",720],["UY",-180],["UZ",300],["VU",660],["VA",60],["VE",-240],["VN",420],["WF",720],["EH",60],["YE",180],["ZM",120],["ZW",120]];
-				let timeZoneMatch = 0;
-        for (let i = 0; i < timeZones.length; i+=1) {
-          if (geo === timeZones[i][0]) {
-            if (parseInt(timezoneOffset,10) === timeZones[i][1]) {
-              //console.log('Timezone match :)');
-							initialRating += 10;
-							timeZoneMatch += 1;
-            }
-          }
-				}
-				visitorTensor.push(timeZoneMatch);
-				// Check site and referrer, could do more with this
-				if (jseTrack.referrer && (String(jseTrack.referrer).indexOf('.com') > -1 || jseTrack.siteID.indexOf('.com'))) initialRating += 5;
-				if (jseTrack.referrer && (String(jseTrack.referrer).indexOf('.edu') > -1 || jseTrack.siteID.indexOf('.edu'))) initialRating += 5;
-				if (jseTrack.referrer && (String(jseTrack.referrer).indexOf('.org') > -1 || jseTrack.siteID.indexOf('.org'))) initialRating += 2;
-				if (jseTrack.referrer && (String(jseTrack.referrer).indexOf('.org') > -1 || jseTrack.siteID.indexOf('.org'))) initialRating += 2;
-				let goodReferrer = 0;
-				if (jseTrack.referrer && /(google.com|facebook.com|youtube.com|twitter.com|microsoft.com|linkedin.com|instagram.com|wikipedia.org|plus.google.com|apple.com|adobe.com|wikipedia.org|apple.com|vimeo.com|pinterest.com|yahoo.com|amazon.com|github.com|nytimes.com|reddit.com|bbc.co.uk|cnn.com|theguardian.com|forbes.com|msn.com|bing.com|imdb.com|slideshare.net|reuters.com|live.com|medium.com|bloomberg.com|mit.edu|stanford.edu|harvard.edu)/.test(jseTrack.referrer)) {
-					initialRating += 10;
-					goodReferrer = 1;
-				}
-				visitorTensor.push(goodReferrer);
-				let languageMatch = 0;
-        if (String(jseTrack.language).indexOf(jseTrack.geo) > -1) {
-					initialRating += 5;
-					languageMatch = 1;
-				}
-				visitorTensor.push(languageMatch);
-        if (jseTrack.innerWidth > 250 && jseTrack.innerHeight > 250 && jseTrack.screenDepth > 16 && jseTrack.innerWidth < jseTrack.screenWidth && jseTrack.innerHeight < jseTrack.screenHeight) {
-          initialRating += 5;
-				}
-				visitorTensor.push(jseTrack.screenWidth || 0);
-				visitorTensor.push(jseTrack.screenHeight || 0);
-				visitorTensor.push(jseTrack.innerWidth || 0);
-				visitorTensor.push(jseTrack.innerHeight || 0);
-        if (jseTrack.deviceMemory > 2) {
-          initialRating += 5;
-				}
-				visitorTensor.push(jseTrack.deviceMemory);
-
-        if (jseTrack.storage && parseInt(jseTrack.storage,10) === jseTrack.storage) {
-					visitorTensor.push(jseTrack.storage || 0);
-					if (jseTrack.storage > 10) {
-						initialRating += 10;
-					} else {
-						initialRating += jseTrack.storage;
-					}
-				} else {
-					visitorTensor.push(0);
-				}
-				visitorTensor.push(jseTrack.webGL);
-
-				visitorTensor.push(jseTrack.movement || 0);
-				visitorTensor.push(jseTrack.timeOnSite || 0);
-				visitorTensor.push(jseTrack.elementsTracked || 0);
-				visitorTensor.push(initialRating);
-
-				recordMLData(pubID,visitorTensor);
-	    	return initialRating;
-			}
-
 			socket.on('saveUnique', function(jseTrack) {
 				try {
 					const pubID = JSE.jseFunctions.cleanString(jseTrack.pubID) || 1; // jseTrack.pubID = uid
@@ -420,7 +220,9 @@ const jseSocketIO = {
 						if (ipCount <= 8 || (ipCount <= 35  && JSE.publisherIPsValidated.indexOf(socket.realIP) === -1)) { // Change to 5 & 20 as volume increases
 							JSE.publisherIPs.push(socket.realIP);
 							JSE.publisherIPsValidated.push(socket.realIP);
-							const currentRating = calculateInitialRating(jseTrack);
+							const visitorTensor = jseMachineLearning.calculateInitialRating(jseTrack);
+							// double check currentRating (last var in visitorTensorArray) > 50 server-side once enough volume
+							jseMachineLearning.recordPublisherMLData(pubID,visitorTensor);
 							jseLottery.credit(pubID,siteID,subID,'validate');
 						}
 					}
@@ -447,7 +249,10 @@ const jseSocketIO = {
 					//}
 				}
 				let initialRating = -99;
-				initialRating = calculateInitialRating(jseTrack);
+				const visitorTensor = jseMachineLearning.calculateInitialRating(jseTrack);
+				initialRating = visitorTensor[visitorTensor.length - 1];
+				jseMachineLearning.recordPublisherMLData(pubID,visitorTensor);
+
 				// generate new key for new optin click
 				if (optInAuthKey === null) {
 					if (typeof JSE.socketConnections[socket.id] !== 'undefined') {

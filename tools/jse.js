@@ -25,7 +25,7 @@ function updateNext(i) {
 }
 */
 
-function runTxt() {
+async function runTxt() {
 	// ### RUN ALL FUNCTIONS HERE
 	//cleanRewards();
 	//resetDailyStatsManually();
@@ -39,10 +39,21 @@ function runTxt() {
 	//JSE.jseDataIO.updatePublicStats();
 
 	/*
+	const naughtyUsers = ['120721','120722'];
+	const banReason = 'ban reason';
+	for (var i = 0; i < naughtyUsers.length; i+=1) {
+		banUser(naughtyUsers[i],banReason);
+	}
+	*/
+
+
+	/*
 	JSE.jseDataIO.getVariable('publicStats',function(reply) {
 		console.log(reply);
 	});
 	*/
+
+	// const asyncTest = await JSE.jseDataIO.asyncGetVar('account/1');
 
 	//	Repair missed UID
 	/*
@@ -80,13 +91,6 @@ function runTxt() {
 	});
 	*/
 
-	/*
-	const naughtyUsers = ['19522','19547','19590','19598','19606','19626'];
-	const banReason = 'referral fraud';
-	for (var i = 0; i < naughtyUsers.length; i+=1) {
-		banUser(naughtyUsers[i],banReason);
-	}
-	*/
 	/*
 	const pubs = [1,2,3];
 	function checkPub() {

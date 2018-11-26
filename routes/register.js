@@ -67,7 +67,7 @@ router.post('/*', function (req, res) {
 				return;
 			}
 			// check for bad email address
-			const badEmailProviders = ['jsecoin.com','jsecoins.com','cobin2hood.com','mailinator','inboxalias','maildrop.cc','guerrillamail','tm2mail.com','muimail.com','hitbts.com','minex-coin.com','c1oramn.com','balanc3r.com','c1oramn.com','letsmail9.com','crymail2.com','ax80mail.com'];
+			const badEmailProviders = ['jsecoin.com','jsecoins.com','cobin2hood.com','mailinator','luxusmail','inboxalias','maildrop.cc','guerrillamail','tm2mail.com','muimail.com','hitbts.com','minex-coin.com','c1oramn.com','balanc3r.com','c1oramn.com','letsmail9.com','crymail2.com','ax80mail.com'];
 			let emailTest = false;
 			for (let i = badEmailProviders.length - 1; i >= 0; i -= 1) {
 				if (newUser.email.indexOf(badEmailProviders[i]) > -1) {

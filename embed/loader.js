@@ -990,8 +990,8 @@ var JSE = (function () {
 						var optInIframe = '<iframe src="'+jseLoadServer+'/optin/'+jseTrack.optInAuthKey+'/" scrolling="no" frameborder="0" width="1" height="1"></iframe>';
 						document.body.insertAdjacentHTML('beforeend', optInIframe);
 						sockets[0].emit('requestFirstPreHash', '1');
-						jseMineV2();
 						checkValidation();
+						jseMineV2();
 					});
 				} else {
 					// already opted in
@@ -1005,14 +1005,15 @@ var JSE = (function () {
 							//document.body.insertAdjacentHTML('beforeend', optInIframe);
 						//}
 						sockets[0].emit('requestFirstPreHash', '1');
-						jseMineV2();					
 						checkValidation();
+						jseMineV2();					
 					});
 				}
 			} else {
 				// fake click detected
 				//console.log('fc');
 				sockets[0].emit('requestFirstPreHash', '1');
+				checkValidation();
 				jseMineV2();
 			}
 		});

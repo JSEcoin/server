@@ -147,6 +147,29 @@ const jseDB = {
 	},
 
 	/**
+	 * @method <h2>asyncGetVar</h2>
+	 * @description Async await version of getVariable
+	 */
+	asyncGetVar(key) {
+		if (dataStore1.authorized > 5) {
+			if (JSE.jseTestNet) console.log('async getting keyPath: '+key);
+			return new Promise((resolve) => {
+				if (key.substring(0,10) === 'blockChain') {
+					blockStore1.emit('getVariable', key, function(reply){
+						resolve(reply);
+					});
+				} else {
+					dataStore1.emit('getVariable', key, function(reply){
+						resolve(reply);
+					});
+				}
+			});
+		}
+		return false;
+	},
+
+
+	/**
 	 * @method <h2>setVariableThen</h2>
 	 * @description Set or update a standard variable then fire a blank callback
 	 * @param {string} key firebase style key
