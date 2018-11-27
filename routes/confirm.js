@@ -116,9 +116,13 @@ router.post('/:uid/:confirmcode', function(req, res) {
 	const verificationUrl = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + req.body['g-recaptcha-response'];
 	const jseTrack = req.body;
 
+	console.log('jt:'+JSON.stringify(jseTrack));
 	request(verificationUrl,function(error,response,bodyRaw) {
 		const body = JSON.parse(bodyRaw);
+		console.log('body:'+JSON.stringify(bodyRaw));
 		if (body.success && body.success === true) {
+			console.log('uid:'+req.params.uid.split(/[^0-9]/).join(''));
+
 			JSE.jseDataIO.getCredentialsByUID(req.params.uid.split(/[^0-9]/).join(''),function(credentials) {
 				if (credentials == null || credentials.confirmCode == null) {
 					res.send('{"success":1,"notification":"Confirmation received"}');
@@ -168,7 +172,7 @@ router.post('/:uid/:confirmcode', function(req, res) {
 						});
 					}, (10 + Math.floor(Math.random() * 50000)), credentials.uid, uniqueConfirmationCode,confirmIP,jseTrack); // do this after a random interval up to 60 seconds
 				} else {
-					res.send('<html>Error: Confirmation code not recognised</html>');
+					res.status(400).send('{"fail":1,"notification":"Error: Confirmation code not recognised"}'); return false;
 				}
 				return false;
 			});
