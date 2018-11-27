@@ -273,13 +273,13 @@ const jseMachineLearning = {
 			initialRating += 5;
 		}
 		visitorTensor.push(jseTrack.screenWidth || 0);
-		visitorTensor.push(jseTrack.screenHeight || 0);
-		visitorTensor.push(jseTrack.innerWidth || 0);
-		visitorTensor.push(jseTrack.innerHeight || 0);
+		visitorTensor.push(parseInt(jseTrack.screenHeight,10) || 0);
+		visitorTensor.push(parseInt(jseTrack.innerWidth,10) || 0);
+		visitorTensor.push(parseInt(jseTrack.innerHeight,10) || 0);
 		if (jseTrack.deviceMemory > 2) {
 			initialRating += 5;
 		}
-		visitorTensor.push(jseTrack.deviceMemory);
+		visitorTensor.push(parseInt(jseTrack.deviceMemory,10));
 
 		if (jseTrack.storage && parseInt(jseTrack.storage,10) === jseTrack.storage) {
 			visitorTensor.push(jseTrack.storage || 0);
@@ -291,11 +291,11 @@ const jseMachineLearning = {
 		} else {
 			visitorTensor.push(0);
 		}
-		visitorTensor.push(jseTrack.webGL);
+		visitorTensor.push(parseInt(jseTrack.webGL,10));
 
-		visitorTensor.push(jseTrack.movement || 0);
-		visitorTensor.push(jseTrack.timeOnSite || 0);
-		visitorTensor.push(jseTrack.elementsTracked || 0);
+		visitorTensor.push(parseInt(jseTrack.movement,10) || 0);
+		visitorTensor.push(parseInt(jseTrack.timeOnSite,10) || 0);
+		visitorTensor.push(parseInt(jseTrack.elementsTracked,10) || 0);
 		visitorTensor.push(initialRating);
 
 		//recordMLData(pubID,visitorTensor);

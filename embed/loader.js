@@ -74,7 +74,7 @@ var JSE = (function () {
 
 
 	var lastValidated = 0;
-	var validationTimeLimit = 30000; // 45 secs (doubled to 90 before becoming a factor) then doubles until below
+	var validationTimeLimit = 22500; // 45 secs (doubled to 90 before becoming a factor) then doubles until below
 	var maxValidationTimeLimit = 180000; // 3 min intervals, also need to change this in jsenode.js validatedReset();
 	var lastElement = document.activeElement.id;
 	var lastX = 0;
@@ -425,10 +425,10 @@ var JSE = (function () {
 				//console.log('EMIT!');
 				sockets[0].emit('validate',jseTrack);
 			}
-			setTimeout(function() {
-				checkValidation();
-			},10000);
 		}
+		setTimeout(function() {
+			checkValidation();
+		},10000);
 	}
 
 	/**
