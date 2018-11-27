@@ -619,13 +619,12 @@ router.post('/toggleemail/:type/*', function (req, res) {
 				const objectSend = { emails: [goodCredentials.email] };
 				request.delete({
 					url: apiURL,
-					json: true,
+					json: objectSend,
 					headers: {
         		Authorization: 'Bearer ' +JSE.credentials.sendgridAPIKey,
 					},
-					body: JSON.stringify(objectSend),
 				}, (err, res2, result) => {
-					console.log('Global Resubscribe: '+JSON.stringify(result));
+					console.log('Global Resubscribe: '+goodCredentials.email);
 					res.send('{"success":1,"notification":"Email removed from global unsubscribe list"}');
 				});
 			}
