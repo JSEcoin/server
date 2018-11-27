@@ -103,7 +103,7 @@ router.get('/:uid/:confirmcode', function(req, res) {
  * @example https://server.jsecoin.com/confirm/:uid/:confirmcode
  * @memberof module:jseRouter
  */
-router.post('/:uid/:confirmcode', function(req, res) {
+router.post('/:uid/:confirmcode/*', function(req, res) {
 	// Recaptcha
 	if (req.body['g-recaptcha-response'] === undefined || req.body['g-recaptcha-response'] === '' || req.body['g-recaptcha-response'] === null) {
 		const failed = {};
