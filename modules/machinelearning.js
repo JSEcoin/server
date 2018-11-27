@@ -455,6 +455,7 @@ const jseMachineLearning = {
 			console.log('ML: Referral fraud rating:'+res1Data.toFixed(2)+' '+account.campaign);
 			JSE.jseFunctions.referral(account.campaign,account.content,0,account.geo,'Declined Risk Score');
 		} else {
+			console.log('ML: Referral approved rating:'+res1Data.toFixed(2)+' '+account.campaign);
 			JSE.jseFunctions.referral(account.campaign,account.content,payout,account.geo,'Confirmed');
 		}
 		let affTensor = jseMachineLearning.calculateInitialRating(jseTrack);

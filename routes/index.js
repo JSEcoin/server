@@ -3,6 +3,7 @@ const helper = require('sendgrid').mail;
 const sg = require('sendgrid')(JSE.credentials.sendgridAPIKey);
 const ascii = require('./../modules/ascii.js');
 const express = require('express');
+const request = require('request');
 
 const multer  = require('multer');
 
@@ -417,8 +418,8 @@ router.post('/adminemail/*', function (req, res) {
 		console.log('Contact email sent from: '+replyEmail);
 		const replyToHeader = new helper.Email(replyEmail);
 		mail.setReplyTo(replyToHeader);
-		const request = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
-		sg.API(request, function (error, response) {
+		const emailRequest = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
+		sg.API(emailRequest, function (error, response) {
 		  if (error) { console.log('Sendgrid Error response received, admin email '+JSON.stringify(response)); }
 		});
 		res.send('{"success":1,"notification":"Email sent"}');
@@ -457,82 +458,13 @@ router.post('/attachmentemail/*', upload.single('file'), function (req, res) {
 		const mail = new helper.Mail(fromEmail, subject, toEmail, content);
 		mail.setReplyTo(replyToHeader);
 		mail.addAttachment(attachment);
-		const request = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
-		sg.API(request, function (error, response) {
+		const emailRequest = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
+		sg.API(emailRequest, function (error, response) {
 		  if (error) { console.log('Sendgrid Error response received: '+JSON.stringify(response)); }
 		});
 		res.send('{"success":1,"notification":"Email sent"}');
 	} else {
 		console.log('Attachment email blocked from '+naughtyIP);
-		res.status(400).send('{"fail":1,"notification":"Error 186. Limited to sending one email per 30 minutes to prevent DoS abuse."}');
-	}
-});
-
-/**
- * @name /whitelisting/*
- * @description Apply for ICO whitelisting with photo ID attachment when amount is $10k+
- * @memberof module:jseRouter
- */
-router.post('/whitelisting/*', upload.single('file'), function (req, res) {
-	let naughtyIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
-	if (naughtyIP.indexOf(',') > -1) { naughtyIP = naughtyIP.split(',')[0]; }
-	if (naughtyIP.indexOf(':') > -1) { naughtyIP = naughtyIP.split(':').slice(-1)[0]; }
-	let naughtyCount = 0;
-	for (let i = 0; i < JSE.alreadySentGeneral.length; i+=1) {
-		if (JSE.alreadySentGeneral[i] === naughtyIP) naughtyCount += 1;
-	}
-	if (naughtyCount < 5) { // check for email and ip address for repeat requests
-		JSE.alreadySentGeneral.push(naughtyIP);
-		const fromEmail = new helper.Email('noreply@jsecoin.com');
-		const toEmail = new helper.Email('dave@jsecoin.com');
-		const subject = 'JSE Whitelisting';
-		let parsedBody;
-		if (!req.file) {
-			try {
-				parsedBody = JSON.parse(Object.keys(req.body)[0]);
-			} catch (e) {
-				parsedBody = req.body;
-			}
-		} else {
-			parsedBody = req.body;
-		}
-		const emailContent = formatEmail(parsedBody);
-		const content = new helper.Content('text/plain', emailContent);
-		const replyEmail = grabReplyEmail(emailContent);
-		console.log('Whitelisting from: '+parsedBody.emailAddress);
-		//console.log(JSON.stringify(parsedBody));
-		const replyToHeader = new helper.Email(replyEmail);
-		const attachment = new helper.Attachment();
-		if (req.file) {
-			const fileInfo = req.file;
-			attachment.setFilename(fileInfo.originalname);
-			attachment.setType(fileInfo.mimetype);
-			attachment.setContent(fileInfo.buffer.toString('base64'));
-			attachment.setDisposition('attachment');
-		}
-		const mail = new helper.Mail(fromEmail, subject, toEmail, content);
-		mail.setReplyTo(replyToHeader);
-		if (req.file) {
-			mail.addAttachment(attachment);
-		}
-		const request = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
-		sg.API(request, function (error, response) {
-		  if (error) { console.log('Sendgrid Error response received: '+JSON.stringify(response)); }
-		});
-
-		if (parsedBody.emailAddress && parsedBody.ethAddress) {
-			JSE.jseDataIO.lookupEmail(parsedBody.emailAddress.toLowerCase(),function(uid){
-				if (uid === null) {
-					res.status(400).send('{"fail":1,"notification":"Error 322. Email address not recognised, please set up an account at https://platform.jsecoin.com"}');
-				} else {
-					JSE.jseDataIO.setVariable('account/'+uid+'/whitelistAddress',JSE.jseFunctions.cleanString(parsedBody.ethAddress));
-					JSE.jseDataIO.setVariable('account/'+uid+'/whitelistAmount',parseFloat(parsedBody.intendedPurchase));
-					res.send('{"success":1,"notification":"Whitelisting Form Received"}');
-				}
-			});
-		}
-	} else {
-		console.log('Whitelisting email blocked from '+naughtyIP);
 		res.status(400).send('{"fail":1,"notification":"Error 186. Limited to sending one email per 30 minutes to prevent DoS abuse."}');
 	}
 });
@@ -621,34 +553,6 @@ router.post('/logout/*', function (req, res) {
 });
 
 /**
- * @name /bountysubmission/*
- * @description Submit Bounty Data
- * @memberof module:jseRouter
- */
-router.post('/bountysubmission/*', function (req, res) {
-  if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"No session provided"}'); return false; }
-	const session = JSE.jseFunctions.cleanString(req.body.session);
-  JSE.jseDataIO.getCredentialsBySession(session,function(credentials) {
-		const bountySubmission = {};
-		bountySubmission.uid = credentials.uid;
-		bountySubmission.email = credentials.email;
-		bountySubmission.ts = new Date().getTime();
-		bountySubmission.status = 1; // 1 pending, 2 = denied, 3 = approved
-		bountySubmission.bountyType = JSE.jseFunctions.cleanString(req.body.bountyType);
-		bountySubmission.bountyData = {};
-		Object.keys(req.body.bountyData).forEach(function(key) {
-			bountySubmission.bountyData[key] = JSE.jseFunctions.cleanString(req.body.bountyData[key]);
-		});
-  	JSE.jseDataIO.pushVariable('bounty/', bountySubmission, function(pushRef) {
-			res.send('{"success":1,"notification":"Bounty submission successful","pushRef":"'+pushRef+'"}');
-		});
-  },function() {
-  	res.status(400).send('{"fail":1,"notification":"Error index.js 496. Session Variable not recognized"}'); return false;
-  });
-  return false;
-});
-
-/**
  * @name /setpin/*
  * @description Set a pin number in credentials
  * @memberof module:jseRouter
@@ -709,6 +613,20 @@ router.post('/toggleemail/:type/*', function (req, res) {
 						JSE.jseDataIO.setVariable('account/'+goodCredentials.uid+'/noEmailTransaction',true);
 						res.send('{"success":1,"notification":"You will not receive transaction notifications","turnedOff":true}');
 					}
+				});
+			} else if (mailType === 'globalresubscribe') {
+				const apiURL = 'https://api.sendgrid.com/v3/suppression/unsubscribes';
+				const objectSend = { emails: [goodCredentials.email] };
+				request.delete({
+					url: apiURL,
+					json: true,
+					headers: {
+        		Authorization: 'Bearer ' +JSE.credentials.sendgridAPIKey,
+					},
+					body: JSON.stringify(objectSend),
+				}, (err, res2, result) => {
+					console.log('Global Resubscribe: '+JSON.stringify(result));
+					res.send('{"success":1,"notification":"Email removed from global unsubscribe list"}');
 				});
 			}
 	 	} else {
