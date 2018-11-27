@@ -15,8 +15,12 @@ router.post('/*', function (req, res) {
 	let naughtyIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
 	if (naughtyIP.indexOf(',') > -1) { naughtyIP = naughtyIP.split(',')[0]; }
 	if (naughtyIP.indexOf(':') > -1) { naughtyIP = naughtyIP.split(':').slice(-1)[0]; }
-	const ipCount = JSE.apiLimits.reduce(function(n, val) { return n + (val === naughtyIP); }, 0);
-	if (ipCount > 20) {
+	if (!JSE.apiLimits[naughtyIP]) {
+		JSE.apiLimits[naughtyIP] = 1;
+	} else {
+		JSE.apiLimits[naughtyIP] += 1;
+	}
+	if (JSE.apiLimits[naughtyIP] > 20) {
 		res.status(400).send('{"fail":1,"notification":"Too many site IDs setup at once."}');
 	} else if (newSite.indexOf(' ') > -1 || newSite.indexOf('.') === -1 || newSite.length > 50) {
 		res.status(400).send('{"fail":1,"notification":"Site ID / Domain invalid"}');
