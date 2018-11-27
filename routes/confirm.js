@@ -116,14 +116,10 @@ router.post('/:uid/:confirmcode/*', function(req, res) {
 	const verificationUrl = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + req.body['g-recaptcha-response'];
 	const jseTrack = req.body;
 
-	console.log('jt:'+JSON.stringify(jseTrack));
 	request(verificationUrl,function(error,response,bodyRaw) {
 		const body = JSON.parse(bodyRaw);
-		console.log('body:'+JSON.stringify(bodyRaw));
 		if (body.success && body.success === true) {
-			console.log('uid:'+req.params.uid.split(/[^0-9]/).join(''));
-
-			JSE.jseDataIO.getCredentialsByUID(req.params.uid.split(/[^0-9]/).join(''),function(credentials) {
+				JSE.jseDataIO.getCredentialsByUID(req.params.uid.split(/[^0-9]/).join(''),function(credentials) {
 				if (credentials == null || credentials.confirmCode == null) {
 					res.send('{"success":1,"notification":"Confirmation received"}');
 					return false;
@@ -131,6 +127,7 @@ router.post('/:uid/:confirmcode/*', function(req, res) {
 				if (credentials.confirmCode === req.params.confirmcode) {
 					let confirmIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
 					if (confirmIP.indexOf(',') > -1) { confirmIP = confirmIP.split(',')[0]; }
+					jseTrack.userIP = confirmIP;
 					const geoObject = geoDB.get(confirmIP);
 					if (geoObject && geoObject.country) {
 						jseTrack.geo = geoObject.country.iso_code;
