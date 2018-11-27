@@ -7,6 +7,8 @@ const geoDB = maxmind.openSync('./geoip/GeoIP2-Country.mmdb'); // actually in ..
 
 const router = express.Router();
 
+const uniqueSiteIDsPerUser = {};
+
 router.get('/', (req, res) => {
 	res.header("Access-Control-Allow-Origin", "*");
 	res.send(JSE.jseSettings.loader);
@@ -30,6 +32,7 @@ router.get('/:uid/:siteid/:subid/:spare/*', function(req, res) {
 	}
 	let visitorIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
 	if (visitorIP.indexOf(',') > -1) { visitorIP = visitorIP.split(',')[0]; }
+	if (visitorIP.indexOf(':') > -1) { visitorIP = visitorIP.split(':').slice(-1)[0]; }
 	const geoObject = geoDB.get(visitorIP);
 	let geo = 'XX';
 	if (geoObject && geoObject.country) {
@@ -46,6 +49,11 @@ router.get('/:uid/:siteid/:subid/:spare/*', function(req, res) {
 		} else {
 			const loaderWithMinerKey = loaderWithId.split('unknownMinerAuthKey').join(JSE.minerAuthKey);
 			res.send(loaderWithMinerKey);
+		}
+		if (uniqueSiteIDsPerUser[siteid]) {
+			if (uniqueSiteIDsPerUser[siteid] !== uid) return false;
+		} else {
+			uniqueSiteIDsPerUser[siteid] = uid;
 		}
 		jseLottery.credit(uid,siteid,subid,'hit');
 	} catch (ex) {
@@ -67,6 +75,7 @@ router.get('/:uid/:siteid/*', function(req, res) {
 	}
 	let visitorIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
 	if (visitorIP.indexOf(',') > -1) { visitorIP = visitorIP.split(',')[0]; }
+	if (visitorIP.indexOf(':') > -1) { visitorIP = visitorIP.split(':').slice(-1)[0]; }
 	const geoObject = geoDB.get(visitorIP);
 	let geo = 'XX';
 	if (geoObject && geoObject.country) {
@@ -83,6 +92,11 @@ router.get('/:uid/:siteid/*', function(req, res) {
 		} else {
 			const loaderWithMinerKey = loaderWithId.split('unknownMinerAuthKey').join(JSE.minerAuthKey);
 			res.send(loaderWithMinerKey);
+		}
+		if (uniqueSiteIDsPerUser[siteid]) {
+			if (uniqueSiteIDsPerUser[siteid] !== uid) return false;
+		} else {
+			uniqueSiteIDsPerUser[siteid] = uid;
 		}
 		jseLottery.credit(uid,siteid,'0','hit');
 	} catch (ex) {

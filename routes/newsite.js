@@ -9,9 +9,9 @@ const router = express.Router();
  * @memberof module:jseRouter
  */
 router.post('/*', function (req, res) {
-	const session = req.body.session;
-	let newSite = String(req.body.newSite);
-	let subID = String(req.body.subID);
+	const session = JSE.jseFunctions.cleanString(req.body.session);
+	let newSite = JSE.jseFunctions.cleanString(req.body.newSite);
+	const subID = String(req.body.subID).split(/[^ .,@a-zA-Z0-9]/).join('');
 	newSite = newSite.split('http://').join('').split('https://').join('').split('www.').join('');
 	// newSite test
 	if (newSite.indexOf(' ') > -1 || newSite.indexOf('.') === -1 || newSite.length > 50) {
@@ -22,16 +22,15 @@ router.post('/*', function (req, res) {
 	if (naughtyIP.indexOf(',') > -1) { naughtyIP = naughtyIP.split(',')[0]; }
 	if (naughtyIP.indexOf(':') > -1) { naughtyIP = naughtyIP.split(':').slice(-1)[0]; }
 	const ipCount = JSE.apiLimits.reduce(function(n, val) { return n + (val === naughtyIP); }, 0);
-	if (ipCount > 10) {
+	if (ipCount > 20) {
 		res.status(400).send('{"fail":1,"notification":"Too many site IDs setup at once."}');
 		return false;
 	}
 	JSE.apiLimits.push(naughtyIP);
-	subID = String(subID).split(/[^ .,@a-zA-Z0-9]/).join('');
 	const advertising = req.body.advertising;
-	JSE.jseDataIO.getCredentialsBySession(req.body.session,function(goodCredentials){
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials){
 		const newSiteID = {};
-		newSiteID.s = JSE.jseFunctions.cleanString(newSite); // siteID
+		newSiteID.s = newSite; // siteID
 		newSiteID.h = 0; // hit
 		newSiteID.u = 0; // unique
 		newSiteID.o = 0; // optin
