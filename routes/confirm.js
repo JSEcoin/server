@@ -114,7 +114,7 @@ router.post('/:uid/:confirmcode', function(req, res) {
 	}
 	const secretKey = JSE.credentials.recaptchaSecretKey;
 	const verificationUrl = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + req.body['g-recaptcha-response'];
-	const jseTrack = JSON.parse(req.body);
+	const jseTrack = req.body;
 
 	request(verificationUrl,function(error,response,bodyRaw) {
 		const body = JSON.parse(bodyRaw);
