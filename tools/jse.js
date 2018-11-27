@@ -69,10 +69,9 @@ async function runTxt() {
 
 
 	// Remove siteID
-	/*
 	const file = './logs/cli-siteIDs.json';
 	console.log('Starting JSON Import');
-	const badSite = 'badsitecom';
+	const badSite = 'JesushealsthecenturionsservantJesusraisesfromdeaththesonofthewidowofNainHepraisesJohntheBaptistasmor';
 	const jsonString = fs.readFileSync(file).toString();
 	const obj = JSON.parse(jsonString);
 	let count = 0;
@@ -91,7 +90,6 @@ async function runTxt() {
 			});
 		}
 	});
-*/
 
 	/*
 	const pubs = [1,2,3];
