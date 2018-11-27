@@ -482,8 +482,8 @@ function banEmail(banUID) {
 		const fromEmail = new helper.Email('investigations@jsecoin.com');
 		//if (jseEmails.suppression.indexOf(emailAddress) > -1) return;
 		const toEmail = new helper.Email(emailAddress);
-		const subject = 'JSEcoin Account Suspension';
-		const htmlContent = 'Our fraud prevention measures have detected unusual activity on your JSEcoin account. Your account has been suspended pending further investigation. The most common reasons for account suspension are referral and mining fraud. Please contact investigations@jsecoin.com if you wish to supply evidence disputing this suspension.';
+		const subject = 'JSEcoin Account Closed';
+		const htmlContent = 'Dear Sir/Madam,<br><br>Your account has been closed.<br><br>This is due to exceeding the threshold for acceptable use. The machine learning algorithms have categorised the data associated with your account and it matched fraudulent patterns.<br><br>We rely on machine learning for this purpose to remain impartial and remove the human factor from this decision.<br><br>Kind regards,<br><br>The JSE Team';
 		const emailHTML = jseEmails.template.split('$heading').join(subject).split('$content').join(htmlContent);
 		const content = new helper.Content('text/html', emailHTML);
 		const mail = new helper.Mail(fromEmail, subject, toEmail, content);

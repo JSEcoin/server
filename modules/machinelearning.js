@@ -253,10 +253,10 @@ const jseMachineLearning = {
 		}
 		visitorTensor.push(timeZoneMatch);
 		// Check site and referrer, could do more with this
-		if (jseTrack.referrer && (String(jseTrack.referrer).indexOf('.com') > -1 || jseTrack.siteID.indexOf('.com'))) initialRating += 5;
-		if (jseTrack.referrer && (String(jseTrack.referrer).indexOf('.edu') > -1 || jseTrack.siteID.indexOf('.edu'))) initialRating += 5;
-		if (jseTrack.referrer && (String(jseTrack.referrer).indexOf('.org') > -1 || jseTrack.siteID.indexOf('.org'))) initialRating += 2;
-		if (jseTrack.referrer && (String(jseTrack.referrer).indexOf('.org') > -1 || jseTrack.siteID.indexOf('.org'))) initialRating += 2;
+		if (jseTrack.referrer && (String(jseTrack.referrer).indexOf('.com') > -1 || (jseTrack.siteID && jseTrack.siteID.indexOf('.com')))) initialRating += 5;
+		if (jseTrack.referrer && (String(jseTrack.referrer).indexOf('.edu') > -1 || (jseTrack.siteID && jseTrack.siteID.indexOf('.edu')))) initialRating += 5;
+		if (jseTrack.referrer && (String(jseTrack.referrer).indexOf('.org') > -1 || (jseTrack.siteID && jseTrack.siteID.indexOf('.org')))) initialRating += 2;
+		if (jseTrack.referrer && (String(jseTrack.referrer).indexOf('.org') > -1 || (jseTrack.siteID && jseTrack.siteID.indexOf('.org')))) initialRating += 2;
 		let goodReferrer = 0;
 		if (jseTrack.referrer && /(google.com|facebook.com|youtube.com|twitter.com|microsoft.com|linkedin.com|instagram.com|wikipedia.org|plus.google.com|apple.com|adobe.com|wikipedia.org|apple.com|vimeo.com|pinterest.com|yahoo.com|amazon.com|github.com|nytimes.com|reddit.com|bbc.co.uk|cnn.com|theguardian.com|forbes.com|msn.com|bing.com|imdb.com|slideshare.net|reuters.com|live.com|medium.com|bloomberg.com|mit.edu|stanford.edu|harvard.edu)/.test(jseTrack.referrer)) {
 			initialRating += 10;
@@ -264,7 +264,7 @@ const jseMachineLearning = {
 		}
 		visitorTensor.push(goodReferrer);
 		let languageMatch = 0;
-		if (String(jseTrack.language).indexOf(jseTrack.geo) > -1) {
+		if (jseTrack.language && String(jseTrack.language).indexOf(jseTrack.geo) > -1) {
 			initialRating += 5;
 			languageMatch = 1;
 		}
@@ -326,7 +326,7 @@ const jseMachineLearning = {
 		if (numericCountry === numericGeo) geoMatch = 1;
 		userTensor.push(geoMatch);
 		let languageMatch = 0;
-		if (String(account.language).indexOf(account.geo) > -1) {
+		if (account.language && String(account.language).indexOf(account.geo) > -1) {
 			languageMatch = 1;
 		}
 		userTensor.push(languageMatch);
@@ -420,7 +420,7 @@ const jseMachineLearning = {
 		let dadDupe = 0;
 		let grandadSuspended = 0;
 		let grandadDupe = 0;
-		if (account.campaign.indexOf('aff') > -1) {
+		if (account.campaign && account.campaign.indexOf('aff') > -1) {
 			const dadUID = account.campaign.split(/[^0-9]/).join(''); // same as affID
 			const dad = await JSE.jseDataIO.asyncGetVar('account/'+dadUID);
 			if (dad && dad.email) {
@@ -431,7 +431,7 @@ const jseMachineLearning = {
 				if (emailData[3] === dadEmailData[3]) dadNumericEmailDomain = 1;
 				if (emailData[4] === dadEmailData[4]) dadNumericEmailTLD = 1;
 				if (dad.duplicate) dadDupe = 1;
-				if (dad.campaign.indexOf('aff') > -1) {
+				if (dad.campaign && dad.campaign.indexOf('aff') > -1) {
 					const grandadUID = account.campaign.split(/[^0-9]/).join('');
 					const grandad = await JSE.jseDataIO.asyncGetVar('account/'+grandadUID);
 					if (grandad.suspended) grandadSuspended = 1;

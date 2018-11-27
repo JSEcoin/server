@@ -67,10 +67,12 @@ async function runTxt() {
 	});
 	*/
 
-	/*
+
 	// Remove siteID
+	/*
 	const file = './logs/cli-siteIDs.json';
 	console.log('Starting JSON Import');
+	const badSite = 'badsitecom';
 	const jsonString = fs.readFileSync(file).toString();
 	const obj = JSON.parse(jsonString);
 	let count = 0;
@@ -78,8 +80,8 @@ async function runTxt() {
 		//console.log(key);
 		if (obj[key]) {
 			Object.keys(obj[key]).forEach((key2) => {
-				if (obj[key][key2] && key2.length === 6 && obj[key][key2].s.indexOf('.') === -1) {
-				//if (obj[key][key2] && key2.indexOf('badsitecom') > -1) {
+				//if (obj[key][key2] && key2.length === 6 && obj[key][key2].s.indexOf('.') === -1) {
+				if (obj[key][key2] && key2.indexOf(badSite) > -1) {
 					count += 1;
 					setTimeout(function(k,k2) {
 						JSE.jseDataIO.hardDeleteVariable('siteIDs/'+k+'/'+k2);
@@ -89,7 +91,7 @@ async function runTxt() {
 			});
 		}
 	});
-	*/
+*/
 
 	/*
 	const pubs = [1,2,3];
@@ -182,6 +184,8 @@ function help() {
 	console.log('  get - get and variable from datastore    - get account/145/regip');
 	console.log('  set - set a string variable              - set account/145/name Jim');
 	console.log('  setnum - set a number variable           - setnum statsToday/145/o 1');
+	console.log('  true - set a number variable             - true account/145/confirmed');
+	console.log('  false - set a number variable            - false account/145/confirmed');
 	console.log('  keys - print a list of object keys       - keys test/123');
 	console.log('  del - delete a variable                  - del test/123/abc');
 	console.log('  harddel - hard delete a variable        	- harddel test/123/abc');
@@ -316,6 +320,16 @@ function checkAuthenticated() {
 		  	const setNum = parseFloat(keySplit.slice(2,99).join(' '));
 			  JSE.jseDataIO.setVariableThen(keySplit[1],setNum, function() {
 					console.log('Setnum '+keySplit[1]+' to '+setNum);
+					process.stdout.write("\n> ");
+				});
+			} else if (keySplit[0] === 'true' && keySplit[1]) {
+		  	JSE.jseDataIO.setVariableThen(keySplit[1],true, function() {
+					console.log('Set '+keySplit[1]+' to boolean true');
+					process.stdout.write("\n> ");
+				});
+			} else if (keySplit[0] === 'false' && keySplit[1]) {
+		  	JSE.jseDataIO.setVariableThen(keySplit[1],false, function() {
+					console.log('Set '+keySplit[1]+' to boolean false');
 					process.stdout.write("\n> ");
 				});
 			} else if (keySplit[0] === 'keys' && keySplit[1]) {

@@ -57,7 +57,7 @@ function sendUserData(credentials,newSessionVar,recordLogin,req,res) {
  */
 function startLogin(credentials,req,res) {
 	if (credentials.suspended && credentials.suspended !== 0) {
-		res.status(400).send('{"fail":1,"notification":"Your account has been suspended pending an investigation, please contact investigations@jsecoin.com"}');
+		res.status(400).send('{"fail":1,"notification":"Your account has been closed. This is due to exceeding the threshold for acceptable use. The machine learning algorithms have categorised the data associated with your account and it matched fraudulent patterns.	We rely on machine learning for this purpose to remain impartial and remove the human factor from this decision."}');
 		return false;
 	}
 	if (req.body.initial) {
