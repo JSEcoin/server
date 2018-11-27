@@ -10,59 +10,54 @@ const router = express.Router();
  */
 router.post('/*', function (req, res) {
 	const session = JSE.jseFunctions.cleanString(req.body.session);
-	let newSite = JSE.jseFunctions.cleanString(req.body.newSite);
+	const newSite = JSE.jseFunctions.cleanString(req.body.newSite.split('http://').join('').split('https://').join('').split('www.').join(''));
 	const subID = String(req.body.subID).split(/[^ .,@a-zA-Z0-9]/).join('');
-	newSite = newSite.split('http://').join('').split('https://').join('').split('www.').join('');
-	// newSite test
-	if (newSite.indexOf(' ') > -1 || newSite.indexOf('.') === -1 || newSite.length > 50) {
-		res.status(400).send('{"fail":1,"notification":"Site ID / Domain invalid"}');
-		return false;
-	}
 	let naughtyIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
 	if (naughtyIP.indexOf(',') > -1) { naughtyIP = naughtyIP.split(',')[0]; }
 	if (naughtyIP.indexOf(':') > -1) { naughtyIP = naughtyIP.split(':').slice(-1)[0]; }
 	const ipCount = JSE.apiLimits.reduce(function(n, val) { return n + (val === naughtyIP); }, 0);
 	if (ipCount > 20) {
 		res.status(400).send('{"fail":1,"notification":"Too many site IDs setup at once."}');
-		return false;
+	} else if (newSite.indexOf(' ') > -1 || newSite.indexOf('.') === -1 || newSite.length > 50) {
+		res.status(400).send('{"fail":1,"notification":"Site ID / Domain invalid"}');
+	} else {
+		JSE.apiLimits.push(naughtyIP);
+		const advertising = req.body.advertising;
+		JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials){
+			const newSiteID = {};
+			newSiteID.s = newSite; // siteID
+			newSiteID.h = 0; // hit
+			newSiteID.u = 0; // unique
+			newSiteID.o = 0; // optin
+			newSiteID.v = 0; // validated
+			newSiteID.a = 0; // hash
+			newSiteID.c = 0; // coin
+			newSiteID.m = advertising; // advertising/marketing
+			const safeKey = JSE.jseDataIO.genSafeKey(newSite);
+			JSE.jseDataIO.getVariable('siteIDs/'+goodCredentials.uid+'/'+safeKey,function(alreadyExists) {
+				if (alreadyExists == null) {
+					JSE.jseDataIO.setVariable('siteIDs/'+goodCredentials.uid+'/'+safeKey,newSiteID);
+				}
+			});
+			const newSubID = {};
+			newSubID.s = JSE.jseFunctions.cleanString(subID); // subID
+			newSubID.h = 0; // hit
+			newSubID.u = 0; // unique
+			newSubID.o = 0; // optin
+			newSubID.v = 0; // validated
+			newSubID.a = 0; // hash
+			newSubID.c = 0; // coin
+			const safeKey2 = JSE.jseDataIO.genSafeKey(subID);
+			JSE.jseDataIO.getVariable('subIDs/'+goodCredentials.uid+'/'+safeKey2,function(alreadyExists2) {
+				if (alreadyExists2 == null) {
+					JSE.jseDataIO.setVariable('subIDs/'+goodCredentials.uid+'/'+safeKey2,newSubID);
+				}
+			});
+			res.send('{"success":1}');
+		},function() {
+			res.status(401).send('{"fail":1,"notification":"New Site Setup Failed: Incorrect credentials"}');
+		});
 	}
-	JSE.apiLimits.push(naughtyIP);
-	const advertising = req.body.advertising;
-	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials){
-		const newSiteID = {};
-		newSiteID.s = newSite; // siteID
-		newSiteID.h = 0; // hit
-		newSiteID.u = 0; // unique
-		newSiteID.o = 0; // optin
-		newSiteID.v = 0; // validated
-		newSiteID.a = 0; // hash
-		newSiteID.c = 0; // coin
-		newSiteID.m = advertising; // advertising/marketing
-		const safeKey = JSE.jseDataIO.genSafeKey(newSite);
-		JSE.jseDataIO.getVariable('siteIDs/'+goodCredentials.uid+'/'+safeKey,function(alreadyExists) {
-			if (alreadyExists == null) {
-				JSE.jseDataIO.setVariable('siteIDs/'+goodCredentials.uid+'/'+safeKey,newSiteID);
-			}
-		});
-		const newSubID = {};
-		newSubID.s = JSE.jseFunctions.cleanString(subID); // subID
-		newSubID.h = 0; // hit
-		newSubID.u = 0; // unique
-		newSubID.o = 0; // optin
-		newSubID.v = 0; // validated
-		newSubID.a = 0; // hash
-		newSubID.c = 0; // coin
-		const safeKey2 = JSE.jseDataIO.genSafeKey(subID);
-		JSE.jseDataIO.getVariable('subIDs/'+goodCredentials.uid+'/'+safeKey2,function(alreadyExists2) {
-			if (alreadyExists2 == null) {
-				JSE.jseDataIO.setVariable('subIDs/'+goodCredentials.uid+'/'+safeKey2,newSubID);
-			}
-		});
-		res.send('{"success":1}');
-	},function() {
-		res.status(401).send('{"fail":1,"notification":"New Site Setup Failed: Incorrect credentials"}');
-	});
-	return false;
 });
 
 module.exports = router;
