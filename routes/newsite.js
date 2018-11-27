@@ -25,7 +25,6 @@ router.post('/*', function (req, res) {
 	} else if (newSite.indexOf(' ') > -1 || newSite.indexOf('.') === -1 || newSite.length > 50) {
 		res.status(400).send('{"fail":1,"notification":"Site ID / Domain invalid"}');
 	} else {
-		JSE.apiLimits.push(naughtyIP);
 		const advertising = req.body.advertising;
 		JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials){
 			const newSiteID = {};
