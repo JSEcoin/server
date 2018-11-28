@@ -85,7 +85,7 @@ async function runTxt() {
 					setTimeout(function(k,k2) {
 						JSE.jseDataIO.hardDeleteVariable('siteIDs/'+k+'/'+k2);
 						console.log(k +' '+k2);
-					},(count * 500),key,key2);
+					},(count * 200),key,key2);
 				}
 			});
 		}

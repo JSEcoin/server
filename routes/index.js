@@ -375,6 +375,47 @@ router.post('/updatedetails/*', function (req, res) {
 	return false;
 });
 
+/**
+ * @name /missingtransaction/*
+ * @description Report missing transaction
+ * @memberof module:jseRouter
+ */
+router.post('/missingtransaction/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 384. No Session Variable"}'); return false; }
+	let naughtyIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
+	if (naughtyIP.indexOf(',') > -1) { naughtyIP = naughtyIP.split(',')[0]; }
+	if (naughtyIP.indexOf(':') > -1) { naughtyIP = naughtyIP.split(':').slice(-1)[0]; }
+	if (JSE.alreadySentGeneral.indexOf(naughtyIP) === -1) { // check for email and ip address for repeat requests
+		JSE.alreadySentGeneral.push(naughtyIP);
+		const session = JSE.jseFunctions.cleanString(req.body.session);
+		JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+			const fromEmail = new helper.Email('noreply@jsecoin.com');
+			const toEmail = new helper.Email(JSE.jseSettings.adminEmail);
+			const subject = 'JSE Missing Transaction';
+			let emailContent = 'UID: '+goodCredentials.uid+"\n\n";
+			if (req.body.address) emailContent += 'Address: '+req.body.address+"\n\n";
+			if (req.body.amount) emailContent += 'Amount: '+req.body.amount+" JSE \n\n";
+			const content = new helper.Content('text/plain', emailContent);
+			const mail = new helper.Mail(fromEmail, subject, toEmail, content);
+			const replyEmail = goodCredentials.email;
+			console.log('Contact email sent from: '+replyEmail);
+			const replyToHeader = new helper.Email(replyEmail);
+			mail.setReplyTo(replyToHeader);
+			const emailRequest = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
+			sg.API(emailRequest, function (error, response) {
+				if (error) { console.log('Sendgrid Error response received, admin email '+JSON.stringify(response)); }
+			});
+			res.send('{"success":1,"notification":"Email sent"}');
+		}, function() {
+			res.status(400).send('{"fail":1,"notification":"Error 395. Session variable invalid."}');
+		});
+	} else {
+		res.status(400).send('{"fail":1,"notification":"Error 398. Limited to sending one email per 30 minutes to prevent DoS abuse."}');
+	}
+	return false;
+});
+
+
 function formatEmail(bodyObjectRaw) {
 	const bodyObject = JSON.parse(JSON.stringify(bodyObjectRaw)); // clean object
 	let returnString = '';
