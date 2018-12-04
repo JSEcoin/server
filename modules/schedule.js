@@ -96,7 +96,7 @@ function startAutoresponder() {
 		JSE.jseDataIO.getAdminAccounts(startID,endID,function(users){
 			const nowTS =new Date().getTime();
 			let maxCount = 0;
-			const maxEmailsPerDay = 10000; // can increase this at a later date
+			const maxEmailsPerDay = 4000; // can increase this at a later date
 			Object.keys(users).forEach(function(i) {
 				if (typeof users[i] === 'undefined' || users[i] === null || maxCount > maxEmailsPerDay) return;
 				if (users[i].confirmed === true && !users[i].suspended) {

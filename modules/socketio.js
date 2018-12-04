@@ -217,13 +217,26 @@ const jseSocketIO = {
 					if (jseTrack.iFrame && jseTrack.iFrame === true) { return false; }
 					const ipCount = JSE.publisherIPs.reduce(function(n, val) { return n + (val === socket.realIP); }, 0); // count ips could be one from unique already
 					if (socket.goodIP && socket.goodIP === true) {
-						if (ipCount <= 8 || (ipCount <= 35  && JSE.publisherIPsValidated.indexOf(socket.realIP) === -1)) { // Change to 5 & 20 as volume increases
+						if (ipCount <= 8 || (ipCount <= 25  && JSE.publisherIPsValidated.indexOf(socket.realIP) === -1)) { // Change to 5 & 20 as volume increases
 							JSE.publisherIPs.push(socket.realIP);
-							JSE.publisherIPsValidated.push(socket.realIP);
 							const visitorTensor = jseMachineLearning.calculateInitialRating(jseTrack);
 							// double check currentRating (last var in visitorTensorArray) > 50 server-side once enough volume
 							jseMachineLearning.recordPublisherMLData(pubID,visitorTensor);
 							jseLottery.credit(pubID,siteID,subID,'validate');
+							// Full reality check after x validations
+							if (JSE.publisherIPsValidated.indexOf(socket.realIP) > -1) {
+								const ipCount2 = JSE.publisherIPsValidated.reduce(function(n, val) { return n + (val === socket.realIP); }, 0);
+								if (ipCount2 === 3) { // can adjust this depending on iphub quota, lower = more queries
+									JSE.jseFunctions.realityCheck(socket.realIP, function(goodIPTrue) {
+										if (goodIPTrue === true) {
+											if (typeof JSE.socketConnections[socket.id] !== 'undefined') JSE.socketConnections[socket.id].goodIP = true;
+										} else {
+											if (typeof JSE.socketConnections[socket.id] !== 'undefined') JSE.socketConnections[socket.id].goodIP = false;
+										}
+									});
+								}
+							}
+							JSE.publisherIPsValidated.push(socket.realIP);
 						}
 					}
 				} catch (ex) {

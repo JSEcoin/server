@@ -39,8 +39,8 @@ async function runTxt() {
 	//JSE.jseDataIO.updatePublicStats();
 
 	/*
-	const naughtyUsers = ['120721','120722'];
-	const banReason = 'ban reason';
+	const naughtyUsers = ['1','2'];
+	const banReason = 'reason';
 	for (var i = 0; i < naughtyUsers.length; i+=1) {
 		banUser(naughtyUsers[i],banReason);
 	}
@@ -67,29 +67,42 @@ async function runTxt() {
 	});
 	*/
 
+	// add naughty IP's to block list
+	/*
+	const naughtyIPs = ['1.0.199.25','50.202.100.162'];
+	naughtyIPs.forEach(async (ip) => {
+		console.log('Blacklisting: '+ip);
+		await JSE.jseDataIO.asyncSetVar('ipCheck/'+ip,false);
+	});
+	*/
 
 	// Remove siteID
-	const file = './logs/cli-siteIDs.json';
+	/*
+	const cleanWhat = 'siteIDs'; // subIDs or siteIDs
+	const file = './logs/cli-'+cleanWhat+'.json';
 	console.log('Starting JSON Import');
-	const badSite = 'JesushealsthecenturionsservantJesusraisesfromdeaththesonofthewidowofNainHepraisesJohntheBaptistasmor';
+	//const badSite = 'Fromthesoleofthefootevenuntotheheadthereisnosoundnessinitbutwoundsandbruisesandputrifyingsorestheyha';
 	const jsonString = fs.readFileSync(file).toString();
 	const obj = JSON.parse(jsonString);
 	let count = 0;
 	Object.keys(obj).forEach((key) => {
-		//console.log(key);
 		if (obj[key]) {
 			Object.keys(obj[key]).forEach((key2) => {
-				//if (obj[key][key2] && key2.length === 6 && obj[key][key2].s.indexOf('.') === -1) {
-				if (obj[key][key2] && key2.indexOf(badSite) > -1) {
+				//if (obj[key][key2] && obj[key][key2].s && obj[key][key2].s.indexOf('.') === -1) {
+				//if (obj[key][key2] && key2.indexOf(badSite) > -1) {
+				//if (obj[key][key2] && key2.length > 60 && key2.length < 80 && key2.split(/(b|a|e|l)/g).length > 40) {
+				if (obj[key][key2] && obj[key][key2].h === 0 && obj[key][key2].a === 0 && obj[key][key2].c === 0) {
 					count += 1;
 					setTimeout(function(k,k2) {
-						JSE.jseDataIO.hardDeleteVariable('siteIDs/'+k+'/'+k2);
+						JSE.jseDataIO.hardDeleteVariable(cleanWhat+'/'+k+'/'+k2);
 						console.log(k +' '+k2);
-					},(count * 200),key,key2);
+					},(count * 100),key,key2);
 				}
 			});
 		}
 	});
+	console.log('Done');
+	*/
 
 	/*
 	const pubs = [1,2,3];

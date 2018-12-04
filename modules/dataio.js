@@ -168,6 +168,28 @@ const jseDB = {
 		return false;
 	},
 
+		/**
+	 * @method <h2>asyncSetVar</h2>
+	 * @description Async await version of setVariableThen
+	 */
+	asyncSetVar(key,value) {
+		if (dataStore1.authorized > 8) {
+			if (JSE.jseTestNet) console.log('async setting keyPath: '+key);
+			return new Promise((resolve) => {
+				if (key.substring(0,10) === 'blockChain') {
+					blockStore1.emit('setVariableThen', key, value, function(){
+						resolve(true);
+					});
+				} else {
+					dataStore1.emit('setVariableThen', key, value, function(){
+						resolve(true);
+					});
+				}
+			});
+		}
+		return false;
+	},
+
 
 	/**
 	 * @method <h2>setVariableThen</h2>
