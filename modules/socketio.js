@@ -228,10 +228,10 @@ const jseSocketIO = {
 								const ipCount2 = JSE.publisherIPsValidated.reduce(function(n, val) { return n + (val === socket.realIP); }, 0);
 								if (ipCount2 === 3) { // can adjust this depending on iphub quota, lower = more queries
 									JSE.jseFunctions.realityCheck(socket.realIP, function(goodIPTrue) {
-										if (goodIPTrue === true) {
-											if (typeof JSE.socketConnections[socket.id] !== 'undefined') JSE.socketConnections[socket.id].goodIP = true;
-										} else {
-											if (typeof JSE.socketConnections[socket.id] !== 'undefined') JSE.socketConnections[socket.id].goodIP = false;
+										if (goodIPTrue === true && typeof JSE.socketConnections[socket.id] !== 'undefined') {
+											JSE.socketConnections[socket.id].goodIP = true;
+										} else if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+											JSE.socketConnections[socket.id].goodIP = false;
 										}
 									});
 								}
