@@ -78,7 +78,7 @@ async function runTxt() {
 
 	// Remove siteID
 	/*
-	const cleanWhat = 'siteIDs'; // subIDs or siteIDs
+	const cleanWhat = 'subIDs'; // subIDs or siteIDs
 	const file = './logs/cli-'+cleanWhat+'.json';
 	console.log('Starting JSON Import');
 	//const badSite = 'Fromthesoleofthefootevenuntotheheadthereisnosoundnessinitbutwoundsandbruisesandputrifyingsorestheyha';
@@ -103,6 +103,34 @@ async function runTxt() {
 	});
 	console.log('Done');
 	*/
+
+	function cleanUpSpecificSiteData(subIDsOrSiteIDs, targetUID) {
+		let targetWhat = 'siteIDs';
+		if (subIDsOrSiteIDs === 'subIDs') targetWhat = 'subIDs';
+		JSE.jseDataIO.getVariable(targetWhat+'/'+targetUID,function(subIDs) {
+			if (subIDs) {
+				if (Object.keys(subIDs).length > 10000) {
+					console.log('Too many IDs '+targetUID+' '+Object.keys(subIDs).length);
+					JSE.jseDataIO.deleteVariable(targetWhat+'/'+targetUID);
+				} else {
+					let count = 0;
+					Object.keys(subIDs).forEach((subID) => {
+						if (subIDs[subID] && subIDs[subID].h === 0 && subIDs[subID].a === 0 && subIDs[subID].c === 0) {
+							//console.log(targetUID+' '+subID);
+							JSE.jseDataIO.hardDeleteVariable(targetWhat+'/'+targetUID+'/'+subID);
+							count += 1;
+						}
+					});
+					console.log(targetUID+' '+count);
+				}
+			}
+			setTimeout(function() {
+				cleanUpSpecificSiteData(targetWhat, targetUID + 1);
+			}, 500);
+		});
+	}
+	cleanUpSpecificSiteData('subIDs',0);
+	//cleanUpSpecificSiteData('siteIDs',0);
 
 	/*
 	const pubs = [1,2,3];

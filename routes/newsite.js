@@ -26,7 +26,7 @@ router.post('/*', function (req, res) {
 		res.status(400).send('{"fail":1,"notification":"Site ID / Domain invalid"}');
 	} else {
 		const advertising = req.body.advertising;
-		JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials){
+		JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
 			const newSiteID = {};
 			newSiteID.s = newSite; // siteID
 			newSiteID.h = 0; // hit

@@ -33,6 +33,11 @@ router.get('/:uid/:siteid/:subid/:spare/*', function(req, res) {
 	let visitorIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
 	if (visitorIP.indexOf(',') > -1) { visitorIP = visitorIP.split(',')[0]; }
 	if (visitorIP.indexOf(':') > -1) { visitorIP = visitorIP.split(':').slice(-1)[0]; }
+	if (!JSE.apiLimits[visitorIP]) {
+		JSE.apiLimits[visitorIP] = 1;
+	} else {
+		JSE.apiLimits[visitorIP] += 1;
+	}
 	const geoObject = geoDB.get(visitorIP);
 	let geo = 'XX';
 	if (geoObject && geoObject.country) {
@@ -55,7 +60,10 @@ router.get('/:uid/:siteid/:subid/:spare/*', function(req, res) {
 		} else {
 			uniqueSiteIDsPerUser[siteid] = uid;
 		}
-		jseLottery.credit(uid,siteid,subid,'hit');
+
+		if (JSE.apiLimits[visitorIP] < 30) {
+			jseLottery.credit(uid,siteid,subid,'hit');
+		}
 	} catch (ex) {
 		console.log('Load error routes/load.js 33 '+ex);
 	}
@@ -76,6 +84,11 @@ router.get('/:uid/:siteid/*', function(req, res) {
 	let visitorIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
 	if (visitorIP.indexOf(',') > -1) { visitorIP = visitorIP.split(',')[0]; }
 	if (visitorIP.indexOf(':') > -1) { visitorIP = visitorIP.split(':').slice(-1)[0]; }
+	if (!JSE.apiLimits[visitorIP]) {
+		JSE.apiLimits[visitorIP] = 1;
+	} else {
+		JSE.apiLimits[visitorIP] += 1;
+	}
 	const geoObject = geoDB.get(visitorIP);
 	let geo = 'XX';
 	if (geoObject && geoObject.country) {
@@ -98,7 +111,9 @@ router.get('/:uid/:siteid/*', function(req, res) {
 		} else {
 			uniqueSiteIDsPerUser[siteid] = uid;
 		}
-		jseLottery.credit(uid,siteid,'0','hit');
+		if (JSE.apiLimits[visitorIP] < 30) {
+			jseLottery.credit(uid,siteid,'0','hit');
+		}
 	} catch (ex) {
 		console.log('Load error routes/load.js 52 '+ex);
 	}
