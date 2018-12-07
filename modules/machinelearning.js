@@ -34,8 +34,9 @@ const jseMachineLearning = {
 						,initialRating,variation,sameBrowser,sameIPGeo,sameScreen,sameHardware,sameWebGL,sameInteraction
 	* @param {array} visitorTensor Two diemnsional array created in calculateInitialRating function
 	*/
-	recordPublisherMLData(pubID,visitorTensor) {
-		if (parseInt(pubID,10) !== pubID || !pubID > 0) return false;
+	recordPublisherMLData(rawPubID,visitorTensor) {
+		const pubID = parseInt(rawPubID,10);
+		if (rawPubID != pubID || !pubID > 0) return false; // eslint-disable-line
 		JSE.jseDataIO.getVariable('publisherMLData/'+pubID,function(publisherMLData) {
 			let pubData = publisherMLData;
 			if (!pubData) {
@@ -106,8 +107,9 @@ const jseMachineLearning = {
 						variation,sameBrowser,sameIPGeo,sameScreen,sameHardware,sameWebGL,sameInteraction
 	* @param {array} visitorTensor Two diemnsional array created in calculateInitialRating function
 	*/
-	recordReferralMLData(affID,visitorTensor) {
-		if (parseInt(affID,10) !== affID || !affID > 0) return false;
+	recordReferralMLData(rawAffID,visitorTensor) {
+		const affID = parseInt(rawAffID,10);
+		if (rawAffID != affID || !affID > 0) return false; // eslint-disable-line
 		JSE.jseDataIO.getVariable('publisherMLData/'+affID,function(affMLData) {
 			let affData = affMLData;
 			if (!affData) {
@@ -228,8 +230,69 @@ const jseMachineLearning = {
 		visitorTensor.push(browserCheck);
 
 		const geo = jseTrack.geo || 'XX';
-		const numericGEO = Number(geo.charCodeAt(0)+''+geo.charCodeAt(1));
-		visitorTensor.push(numericGEO);
+		let numericGeo = 0;
+		if (geo === 'US') numericGeo = 60;
+		if (geo === 'CA') numericGeo = 59;
+		if (geo === 'GB') numericGeo = 58;
+		if (geo === 'AU') numericGeo = 57;
+		if (geo === 'NZ') numericGeo = 56;
+		if (geo === 'DE') numericGeo = 55;
+		if (geo === 'IE') numericGeo = 54;
+		if (geo === 'SG') numericGeo = 53;
+		if (geo === 'HK') numericGeo = 52;
+		if (geo === 'CH') numericGeo = 51;
+		if (geo === 'NO') numericGeo = 50;
+		if (geo === 'FR') numericGeo = 49;
+		if (geo === 'JP') numericGeo = 48;
+		if (geo === 'KR') numericGeo = 47;
+		if (geo === 'CZ') numericGeo = 46;
+		if (geo === 'IT') numericGeo = 45;
+		if (geo === 'ES') numericGeo = 44;
+		if (geo === 'LT') numericGeo = 43;
+		if (geo === 'FI') numericGeo = 42;
+		if (geo === 'AT') numericGeo = 41;
+		if (geo === 'BE') numericGeo = 40;
+		if (geo === 'IL') numericGeo = 39;
+		if (geo === 'DK') numericGeo = 38;
+		if (geo === 'SK') numericGeo = 37;
+		if (geo === 'SI') numericGeo = 36;
+		if (geo === 'TW') numericGeo = 35;
+		if (geo === 'PT') numericGeo = 34;
+		if (geo === 'PL') numericGeo = 33;
+		if (geo === 'BR') numericGeo = 32;
+		if (geo === 'BG') numericGeo = 31;
+		if (geo === 'RO') numericGeo = 30;
+		if (geo === 'TH') numericGeo = 29;
+		if (geo === 'MY') numericGeo = 28;
+		if (geo === 'HU') numericGeo = 27;
+		if (geo === 'ZA') numericGeo = 26;
+		if (geo === 'TR') numericGeo = 25;
+		if (geo === 'GR') numericGeo = 24;
+		if (geo === 'CO') numericGeo = 23;
+		if (geo === 'PE') numericGeo = 22;
+		if (geo === 'VE') numericGeo = 21;
+		if (geo === 'MX') numericGeo = 20;
+		if (geo === 'AR') numericGeo = 19;
+		if (geo === 'LV') numericGeo = 18;
+		if (geo === 'PH') numericGeo = 17;
+		if (geo === 'IN') numericGeo = 16;
+		if (geo === 'PK') numericGeo = 15;
+		if (geo === 'ET') numericGeo = 14;
+		if (geo === 'VN') numericGeo = 13;
+		if (geo === 'NL') numericGeo = 12;
+		if (geo === 'SE') numericGeo = 11;
+		if (geo === 'NG') numericGeo = 10;
+		if (geo === 'CN') numericGeo = 9;
+		if (geo === 'RU') numericGeo = 8;
+		if (geo === 'UA') numericGeo = 7;
+		if (geo === 'ID') numericGeo = 6;
+		if (geo === 'XX') numericGeo = 5;
+		if (geo === 'A1') numericGeo = 4;
+		if (geo === 'A2') numericGeo = 3;
+		if (geo === 'SPARE') numericGeo = 2;
+		if (geo === 'SPARE') numericGeo = 1;
+		//const numericGeo = Number(geo.charCodeAt(0)+''+geo.charCodeAt(1));
+		visitorTensor.push(numericGeo);
 
 		let numericSubnet = 0;
 		const ipSplit = jseTrack.userIP.split('.');
