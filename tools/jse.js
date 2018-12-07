@@ -104,6 +104,7 @@ async function runTxt() {
 	console.log('Done');
 	*/
 
+	/*
 	function cleanUpSpecificSiteData(subIDsOrSiteIDs, targetUID) {
 		let targetWhat = 'siteIDs';
 		if (subIDsOrSiteIDs === 'subIDs') targetWhat = 'subIDs';
@@ -121,16 +122,19 @@ async function runTxt() {
 							count += 1;
 						}
 					});
-					console.log(targetUID+' '+count);
+					if (count) console.log(targetUID+' '+count);
 				}
 			}
-			setTimeout(function() {
+			//setTimeout(function() {
+			if (targetUID < 141100) {
 				cleanUpSpecificSiteData(targetWhat, targetUID + 1);
-			}, 500);
+			}
+			//}, 100);
 		});
 	}
-	cleanUpSpecificSiteData('subIDs',0);
-	//cleanUpSpecificSiteData('siteIDs',0);
+	//cleanUpSpecificSiteData('siteIDs',36519);
+	cleanUpSpecificSiteData('siteIDs',0);
+	*/
 
 	/*
 	const pubs = [1,2,3];

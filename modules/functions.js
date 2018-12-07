@@ -351,9 +351,9 @@ function exportNotificationEmail(fromUID,transactionValue) {
 			if (noEmailTransaction === null && fromUID > 0) {
 				if (jseEmails.suppression.indexOf(emailAddress) > -1) return;
 				const toEmail = new helper.Email(emailAddress);
-				const fromEmail = new helper.Email('admin@jsecoin.com');
+				const fromEmail = new helper.Email('noreply@jsecoin.com');
 				const subject = 'JSEcoin Export Confirmation';
-				const htmlContent = 'This is to confirm a coincode has been exported from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Thank you for using JSEcoin. If you did not make this transaction please contact us by replying to this email as soon as possible.';
+				const htmlContent = 'This is to confirm a coincode has been exported from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Thank you for using JSEcoin. If you did not make this transaction please reset your password and setup two factor authentication as soon as possible.';
 				const emailHTML = jseEmails.template.split('$heading').join(subject).split('$content').join(htmlContent);
 				const content = new helper.Content('text/html', emailHTML);
 				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
@@ -379,9 +379,9 @@ function withdrawalNotificationEmail(fromUID,transactionValue,withdrawalAddress,
 			if (noEmailTransaction === null && fromUID > 0) {
 				if (jseEmails.suppression.indexOf(emailAddress) > -1) return;
 				const toEmail = new helper.Email(emailAddress);
-				const fromEmail = new helper.Email('admin@jsecoin.com');
+				const fromEmail = new helper.Email('noreply@jsecoin.com');
 				const subject = 'JSEcoin Withdrawal Confirmation';
-				const htmlContent = 'This is to confirm JSE tokens have been withdrawn from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Withdrawn to address: '+withdrawalAddress+'<br><br>Transaction Details: <a href="https://etherscan.io/tx/'+txHash+'">'+txHash+'</a><br><br>If you did not make this transaction please contact us by replying to this email as soon as possible.<br><br>Thank you for using JSEcoin.';
+				const htmlContent = 'This is to confirm JSE tokens have been withdrawn from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Withdrawn to address: '+withdrawalAddress+'<br><br>Transaction Details: <a href="https://etherscan.io/tx/'+txHash+'">'+txHash+'</a><br><br>If you did not make this transaction please reset your password and setup two factor authentication as soon as possible.<br><br>Thank you for using JSEcoin.';
 				const emailHTML = jseEmails.template.split('$heading').join(subject).split('$content').join(htmlContent);
 				const content = new helper.Content('text/html', emailHTML);
 				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
@@ -408,7 +408,7 @@ function depositNotificationEmail(fromUID,txValue,txHash) {
 			if (noEmailTransaction === null && fromUID > 0) {
 				if (jseEmails.suppression.indexOf(emailAddress) > -1) return;
 				const toEmail = new helper.Email(emailAddress);
-				const fromEmail = new helper.Email('admin@jsecoin.com');
+				const fromEmail = new helper.Email('noreply@jsecoin.com');
 				const subject = 'JSEcoin Deposit Confirmation';
 				const htmlContent = 'This is to confirm JSE tokens have been deposited to your account for the value of:<br><br><b>'+txValue+'JSE</b><br><br>Transaction Details: <a href="https://etherscan.io/tx/'+txHash+'">'+txHash+'</a><br><br>Thank you for using JSEcoin.';
 				const emailHTML = jseEmails.template.split('$heading').join(subject).split('$content').join(htmlContent);
@@ -437,9 +437,9 @@ function transferNotificationEmails(fromUID,toUID,transactionValue) {
 			if (noEmailTransaction === null && fromUID > 0) {
 				if (jseEmails.suppression.indexOf(emailAddress) > -1) return;
 				const toEmail = new helper.Email(emailAddress);
-				const fromEmail = new helper.Email('admin@jsecoin.com');
+				const fromEmail = new helper.Email('noreply@jsecoin.com');
 				const subject = 'JSEcoin Transfer Confirmation';
-				const htmlContent = 'This is to confirm a transfer has been made from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Thank you for using JSEcoin. If you did not make this transaction please contact us by replying to this email as soon as possible.';
+				const htmlContent = 'This is to confirm a transfer has been made from your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>Thank you for using JSEcoin. If you did not make this transaction please reset your password and setup two factor authentication as soon as possible.';
 				const emailHTML = jseEmails.template.split('$heading').join(subject).split('$content').join(htmlContent);
 				const content = new helper.Content('text/html', emailHTML);
 				const mail = new helper.Mail(fromEmail, subject, toEmail, content);
@@ -456,7 +456,7 @@ function transferNotificationEmails(fromUID,toUID,transactionValue) {
 			if (noEmailTransaction2 === null && toUID > 0) {
 				if (jseEmails.suppression.indexOf(emailAddress2) > -1) return;
 				const toEmail = new helper.Email(emailAddress2);
-				const fromEmail = new helper.Email('admin@jsecoin.com');
+				const fromEmail = new helper.Email('noreply@jsecoin.com');
 				const subject = 'JSEcoin Funds Received';
 				const htmlContent = 'This is to confirm you have received a transfer to your account for the value of:<br><br><b>'+transactionValue+'JSE</b><br><br>For more details please log in to your account at <a href="https://platform.jsecoin.com">https://platform.jsecoin.com</a><br><br>Thank you for using JSEcoin.';
 				const emailHTML = jseEmails.template.split('$heading').join(subject).split('$content').join(htmlContent);
