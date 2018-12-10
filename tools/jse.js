@@ -105,38 +105,6 @@ async function runTxt() {
 	*/
 
 	/*
-	function cleanUpSpecificSiteData(subIDsOrSiteIDs, targetUID) {
-		let targetWhat = 'siteIDs';
-		if (subIDsOrSiteIDs === 'subIDs') targetWhat = 'subIDs';
-		JSE.jseDataIO.getVariable(targetWhat+'/'+targetUID,function(subIDs) {
-			if (subIDs) {
-				if (Object.keys(subIDs).length > 10000) {
-					console.log('Too many IDs '+targetUID+' '+Object.keys(subIDs).length);
-					JSE.jseDataIO.deleteVariable(targetWhat+'/'+targetUID);
-				} else {
-					let count = 0;
-					Object.keys(subIDs).forEach((subID) => {
-						if (subIDs[subID] && subIDs[subID].h === 0 && subIDs[subID].a === 0 && subIDs[subID].c === 0) {
-							//console.log(targetUID+' '+subID);
-							JSE.jseDataIO.hardDeleteVariable(targetWhat+'/'+targetUID+'/'+subID);
-							count += 1;
-						}
-					});
-					if (count) console.log(targetUID+' '+count);
-				}
-			}
-			//setTimeout(function() {
-			if (targetUID < 141100) {
-				cleanUpSpecificSiteData(targetWhat, targetUID + 1);
-			}
-			//}, 100);
-		});
-	}
-	//cleanUpSpecificSiteData('siteIDs',36519);
-	cleanUpSpecificSiteData('siteIDs',0);
-	*/
-
-	/*
 	const pubs = [1,2,3];
 	function checkPub() {
 		const pub = pubs.pop();
@@ -240,6 +208,7 @@ function help() {
 	console.log('  badstats - find bad data in stats    		- badstats');
 	console.log('  repairstats - find bad data in stats    	- repairstats');
 	console.log('  miningmaintenance - reduce miningdb			- miningmaintenance');
+	console.log('  cleanup - clean up siteIDs & subIDs			- cleanup');
 	console.log('  badledger - find bad data in ledger    	- badledger');
 	console.log('  rewards - manually process rewrads   		- rewards 180914');
 	console.log('  checkip - realityCheck on IP             - checkip 13.2.3.5');
@@ -316,6 +285,47 @@ function repairBadSiteStats() {
 				JSE.jseDataIO.setVariable('statsToday/'+key+'/o',0);
 			}
 		});
+	});
+}
+
+function cleanUpSpecificSiteData(subIDsOrSiteIDs, targetUID, finalUserID) {
+	let targetWhat = 'siteIDs';
+	if (subIDsOrSiteIDs === 'subIDs') targetWhat = 'subIDs';
+	JSE.jseDataIO.getVariable(targetWhat+'/'+targetUID,function(subIDs) {
+		if (subIDs) {
+			if (Object.keys(subIDs).length > 10000) {
+				console.log('Too many IDs '+targetUID+' '+Object.keys(subIDs).length);
+				JSE.jseDataIO.deleteVariable(targetWhat+'/'+targetUID);
+			} else {
+				let count = 0;
+				Object.keys(subIDs).forEach((subID) => {
+					if (subIDs[subID] && subIDs[subID].h === 0 && subIDs[subID].a === 0 && subIDs[subID].c === 0) {
+						//console.log(targetUID+' '+subID);
+						JSE.jseDataIO.hardDeleteVariable(targetWhat+'/'+targetUID+'/'+subID);
+						count += 1;
+					}
+					if (subID.indexOf('badsiteid2com') > -1) {
+						console.log(subID);
+						JSE.jseDataIO.hardDeleteVariable(targetWhat+'/'+targetUID+'/'+subID);
+						count += 1;
+					}
+				});
+				if (count) console.log(targetUID+' '+count);
+			}
+		}
+		//setTimeout(function() {
+		if (targetUID < finalUserID) {
+			cleanUpSpecificSiteData(targetWhat, targetUID + 1,finalUserID);
+		}
+		//}, 100);
+	});
+}
+
+// Clean up siteID and subID stats
+function cleanUp() {
+	JSE.jseDataIO.getVariable('nextUserID',function(nextUserID) {
+		cleanUpSpecificSiteData('siteIDs',0,nextUserID);
+		cleanUpSpecificSiteData('subIDs',0,nextUserID);
 	});
 }
 
@@ -412,6 +422,8 @@ function checkAuthenticated() {
 			} else if (cleanKey === 'badstats')	{
 				findBadSiteStats();
 				setTimeout(function() { process.stdout.write("\n> "); }, 2000);
+			} else if (cleanKey === 'cleanup')	{
+				cleanUp();
 			} else if (cleanKey === 'repairstats')	{
 				repairBadSiteStats();
 				setTimeout(function() { process.stdout.write("\n> "); }, 2000);
