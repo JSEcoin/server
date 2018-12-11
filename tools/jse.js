@@ -30,6 +30,7 @@ async function runTxt() {
 	//cleanRewards();
 	//resetDailyStatsManually();
 
+	cleanUp(135000);
 	//jseSchedule.startAutoresponder();
 	//importJSONFile('ledger','./../../../bkup/2018/February/180207/ledger.json');
 	//importBigJSONFile('history','./../../../bkup/2018/February/180202/history180202A.json');
@@ -322,10 +323,10 @@ function cleanUpSpecificSiteData(subIDsOrSiteIDs, targetUID, finalUserID) {
 }
 
 // Clean up siteID and subID stats
-function cleanUp() {
+function cleanUp(startNo) {
 	JSE.jseDataIO.getVariable('nextUserID',function(nextUserID) {
-		cleanUpSpecificSiteData('siteIDs',0,nextUserID);
-		cleanUpSpecificSiteData('subIDs',0,nextUserID);
+		cleanUpSpecificSiteData('siteIDs',startNo,nextUserID);
+		cleanUpSpecificSiteData('subIDs',startNo,nextUserID);
 	});
 }
 
@@ -423,7 +424,7 @@ function checkAuthenticated() {
 				findBadSiteStats();
 				setTimeout(function() { process.stdout.write("\n> "); }, 2000);
 			} else if (cleanKey === 'cleanup')	{
-				cleanUp();
+				cleanUp(0);
 			} else if (cleanKey === 'repairstats')	{
 				repairBadSiteStats();
 				setTimeout(function() { process.stdout.write("\n> "); }, 2000);
