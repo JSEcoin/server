@@ -411,6 +411,28 @@ function processRewards(howManyDaysBack=7) {
 	});
 }
 
+/**
+ * @method <h2>pushPending</h2>
+ * @description Automatically approve pending txLimits and Withdrawals
+ */
+function pushPending() {
+	const oneTransactionPerUser = [];
+	JSE.jseDataIO.getVariable('txPending/',function(txPending) {
+		Object.keys(txPending).forEach(function(uid) {
+			Object.keys(txPending[uid]).forEach(function(pushRef) {
+				const tx = txPending[uid][pushRef];
+				if (typeof tx.complete === 'undefined' && tx.requireAdmin === true && tx.emailApproved === true && oneTransactionPerUser.indexOf(tx.uid) === -1) {
+					oneTransactionPerUser.push(uid);
+					setTimeout(() => {
+						console.log(`Approved: ${uid} ${tx.command} ${pushRef}`); 
+						JSE.jseFunctions.txApprove(tx.uid,pushRef,'admin');
+					},Math.round(oneTransactionPerUser - 0.9 * 35000)); // slightly more than 30 seconds every time.
+				}
+			});
+		});
+	});
+}
+
 module.exports = {
-	runAtMidnight, runAtMidday, runAt5pm, cleanNulls, backupLedger, startAutoresponder, resetBlockChainFile, storeLogs,
+	runAtMidnight, runAtMidday, runAt5pm, cleanNulls, backupLedger, startAutoresponder, resetBlockChainFile, storeLogs, pushPending
 };

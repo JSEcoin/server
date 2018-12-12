@@ -30,8 +30,10 @@ async function runTxt() {
 	//cleanRewards();
 	//resetDailyStatsManually();
 
-	cleanUp(135000);
-	//jseSchedule.startAutoresponder();
+	//cleanUp(135000);
+
+	//jseSchedule.pushPending();
+	
 	//importJSONFile('ledger','./../../../bkup/2018/February/180207/ledger.json');
 	//importBigJSONFile('history','./../../../bkup/2018/February/180202/history180202A.json');
 	//importEntireDB(); // warning this will overwrite entire database
