@@ -27,7 +27,7 @@ router.get('/tx/:uid/:pushref/:confirmkey', function(req, res) {
 		} else if (txObject.confirmKey === confirmKey) {
 			JSE.jseFunctions.txApprove(cleanUID,pushRef,'email');
 			if (txObject.requireAdmin === true && txObject.adminApproved === false) {
-				returnMsg = 'Thank you for confirming the transaction. Manual checks are required which can take up to 24 hours';
+				returnMsg = 'Thank you for confirming the transaction. Please note withdrawals can take anything from a few minutes up to 24 hours';
 			} else {
 				returnMsg = 'Thank you for confirming the transaction.';
 			}

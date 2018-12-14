@@ -108,7 +108,7 @@ const jseCommands = {
 							} else {
 								callback('{"fail":1,"notification":"Withdraw Failed during eth sending"}');
 								console.log('ETH sendFunds Failed '+dataObject.withdrawalAddress+'/'+dataObject.withdrawalAmount+'JSE');
-								JSE.jseFunctions.sendStandardEmail('james@jsecoin.com','JSE ETH ERROR','ERC20 Withdrawal Failed '+dataObject.user1+' / '+dataObject.withdrawalAddress+' / '+dataObject.withdrawalAmount+' JSE');
+								JSE.jseFunctions.sendStandardEmail('james@jsecoin.com','JSE ETH ERROR','ERC20 Withdrawal Failed '+dataObject.user1+'/'+dataObject.withdrawalAddress+'/'+dataObject.withdrawalAmount+' JSE');
 							}
 						});
 					}
