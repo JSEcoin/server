@@ -48,6 +48,7 @@ router.post('/*', function (req, res) {
 			if (req.body.timeOffset) { newUser.timeOffset = JSE.jseFunctions.cleanString(req.body.timeOffset); } else { newUser.timeOffset = 'unknown'; }
 			newUser.regip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
 			if (newUser.regip.indexOf(',') > -1) { newUser.regip = newUser.regip.split(',')[0]; }
+			newUser.regip = JSE.jseFunctions.cleanString(newUser.regip);
 			newUser.lastip = newUser.regip;
 			if (req.body.regTime && req.body.regTime < 5000) {
 				console.log('Bot registration detected via regTime of '+req.body.regTime+'ms from '+newUser.regip);
