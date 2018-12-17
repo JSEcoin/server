@@ -82,7 +82,7 @@ setTimeout(function() {
 setInterval(function() {
 	jseEthIntegration.checkQueryPoolDeposits();
 	JSE.jseDataIO.updatePublicStats();
-	//jseSchedule.pushPending();
+	jseSchedule.pushPending();
 }, 600000); // every 10 mins
 
 setInterval(function() {

@@ -423,10 +423,11 @@ function pushPending() {
 				const tx = txPending[uid][pushRef];
 				if (typeof tx.complete === 'undefined' && tx.requireAdmin === true && tx.emailApproved === true && oneTransactionPerUser.indexOf(tx.uid) === -1) {
 					oneTransactionPerUser.push(uid);
+					const timeGap = Math.round((oneTransactionPerUser.length - 0.9) * 35000); // slightly more than 30 seconds every time.
 					setTimeout(() => {
 						console.log(`Approved: ${uid} ${tx.command} ${pushRef}`); 
 						JSE.jseFunctions.txApprove(tx.uid,pushRef,'admin');
-					},Math.round(oneTransactionPerUser - 0.9 * 35000)); // slightly more than 30 seconds every time.
+					},timeGap);
 				}
 			});
 		});
