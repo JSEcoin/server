@@ -30,6 +30,7 @@ const jseExchanges = {
 					resolve(JSE.jseFunctions.round(avgPrice));
 				} else {
 					console.log('LATOKEN API ERROR exchanges.js 32');
+					//console.log(result);
 					resolve(false);
 				}
 			});
@@ -56,6 +57,7 @@ const jseExchanges = {
 					resolve(JSE.jseFunctions.round(avgPrice));
 				} else {
 					console.log('IDEX API ERROR exchanges.js 57');
+					//console.log(result);
 					resolve(false);
 				}
 			});
@@ -78,7 +80,7 @@ const jseExchanges = {
 				if (typeof result === 'object') {
 					resolve(result);
 				} else {
-					console.log('LATOKEN API ERROR exchanges.js 32');
+					console.log('CoinGecko API ERROR exchanges.js 83');
 					resolve(false);
 				}
 			});
@@ -136,8 +138,8 @@ const jseExchanges = {
  */
 	getExchangeRates: async () => {
 		const exchangeRates = {};
-		exchangeRates.ETHJSE = await jseExchanges.latokenAPI('ETH/JSE');
-		exchangeRates.ETHJSE2 = await jseExchanges.idexAPI('ETH/JSE');
+		//exchangeRates.ETHJSE = await jseExchanges.latokenAPI('ETH/JSE');
+		//exchangeRates.ETHJSE2 = await jseExchanges.idexAPI('ETH/JSE');
 		if (!exchangeRates.ETHJSE) { // if LATOKEN isn't working try coingecko
 			const coinGeckoData = await jseExchanges.coingeckoAPI();
 			if (!coinGeckoData) return false; // quit if LATOKEN and CoinGecko API aren't working
