@@ -26,8 +26,9 @@ Object.keys(pubMLData).forEach(function(uid) {
 });
 
 let totalHits = 0;
-var sortable = [];
-for (var numericGeo in geos) {
+const sortable = [];
+Object.keys(geos).forEach((numericGeo) => {
+//for (let numericGeo in geos) {
   let geo = 'Unknown';
   if (parseInt(numericGeo,10) === 60) geo = 'US';
   if (parseInt(numericGeo,10) === 59) geo = 'CA';
@@ -92,11 +93,12 @@ for (var numericGeo in geos) {
 
   sortable.push([geo, geos[numericGeo]]);
   totalHits += geos[numericGeo];
-}
+});
 
 let totalHitsDevices = 0;
-let sortableDevices = [];
-for (var deviceCode in devices) {
+const sortableDevices = [];
+Object.keys(devices).forEach((deviceCode) => {
+//for (let deviceCode in devices) {
   let dev = 'Unknown';
   //if (parseInt(deviceCode,10) === 0) dev = 'Unknown';
   if (parseInt(deviceCode,10) === 1) dev = 'Bot';
@@ -104,7 +106,7 @@ for (var deviceCode in devices) {
   if (parseInt(deviceCode,10) === 3) dev = 'Desktop';
   sortableDevices.push([dev, devices[deviceCode]]);
   totalHitsDevices += devices[deviceCode];
-}
+});
 
 sortable.sort(function(a, b) {
     return a[1] - b[1];

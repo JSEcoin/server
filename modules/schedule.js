@@ -425,7 +425,7 @@ function pushPending() {
 					oneTransactionPerUser.push(uid);
 					const timeGap = Math.round((oneTransactionPerUser.length - 0.9) * 35000); // slightly more than 30 seconds every time.
 					setTimeout(() => {
-						console.log(`Approved: ${uid} ${tx.command} ${pushRef}`); 
+						console.log(`Approved: ${uid} ${tx.command} ${pushRef}`);
 						JSE.jseFunctions.txApprove(tx.uid,pushRef,'admin');
 					},timeGap);
 				}
@@ -435,5 +435,5 @@ function pushPending() {
 }
 
 module.exports = {
-	runAtMidnight, runAtMidday, runAt5pm, cleanNulls, backupLedger, startAutoresponder, resetBlockChainFile, storeLogs, pushPending
+	runAtMidnight, runAtMidday, runAt5pm, cleanNulls, backupLedger, startAutoresponder, resetBlockChainFile, storeLogs, pushPending,
 };

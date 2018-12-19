@@ -17,6 +17,7 @@
 const JSE = global.JSE;
 
 const Web3 = require('web3');
+
 const web3 = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/v3/'+JSE.credentials.infuraAPIKey));
 const jseTokenContractAddress = '0x2d184014b5658C453443AA87c8e9C4D57285620b';
 
