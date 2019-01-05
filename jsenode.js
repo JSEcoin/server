@@ -2,7 +2,7 @@
  * @file jsenode.js
  * @name JSE Node (jsenode.js)
  * @example forever start -c "node --max-old-space-size=3000" jsenode.js -s load.jsecoin.com -n load4 -m 0 &
- * @example node jsenode.js -t local -s localhost -p 81 -n jimv18 -d http://localhost:82 -e http://localhost:83 -m 0
+ * @example node jsenode.js -t local -s localhost -p 81 -n jimv18 -d http://localhost:82 -e http://localhost:83 -a http://localhost:84 -m 0
  * @version 1.8.2
  * @description JSE nodes run the JSEcoin network. Each node can be used as a load server or as part of the p2p chain.<br><br>
 		Command Line Options:<br>
@@ -13,6 +13,7 @@
 		-c, --credentials [value], Credentials file location<br>
 		-d, --datastore [value], Authenticated datastore<br>
 		-e, --blockstore [value], Authenticated blockstore<br>
+		-a, --adxstore [value], Authenticated adxstore<br>
 		-b, --backup, Backup blockchain to logs/currentChain.json<br>
 		-u, --unauth, Run as P2P node no authentication required<br>
 		-m, --maxpeers [value], Set maximum outgoing peer connections<br>
@@ -51,6 +52,7 @@ commandLine
   .option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
 	.option('-d, --datastore [value]', 'Authenticated datastore','http://10.128.0.5')
 	.option('-e, --blockstore [value]', 'Authenticated blockstore','http://10.128.0.6')
+	.option('-a, --adxstore [value]', 'Authenticated adxstore','http://10.128.0.7')
   .option('-b, --backup', 'Backup blockchain to logs/currentChain.json')
   .option('-u, --unauth', 'Run as P2P node no authentication or datastore required')
   .option('-m, --maxpeers [value]', 'Set maximum outgoing peer connections', 3)
@@ -79,6 +81,7 @@ JSE.port = commandLine.port; // 80 behind load balancer on 443
 
 JSE.dataStore1 = commandLine.datastore; // use local ip address to avoid network fees
 JSE.blockStore1 = commandLine.blockstore;
+JSE.adxStore1 = commandLine.adxstore;
 
 const seedPeerSplit = commandLine.peerlist.split('/')[2].split(':'); // requires http and : port
 JSE.peerList  =  {
@@ -104,7 +107,7 @@ if (commandLine.unauth) {
 	JSE.authenticatedNode = false;
 }
 
-if (JSE.authenticatedNode === true) console.log('Running as authenticated node via @ '+JSE.dataStore1+' & '+JSE.blockStore1);
+if (JSE.authenticatedNode === true) console.log('Running as authenticated node via @ '+JSE.dataStore1+' & '+JSE.blockStore1+' & '+JSE.adxStore1);
 if (JSE.authenticatedNode === false) console.log('Running in P2P Node Mode');
 
 if (JSE.jseTestNet === 'local') {
