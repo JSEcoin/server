@@ -9,6 +9,7 @@
  * <li>pushVariable</li>
  * <li>deleteVariable</li>
  * <li>plusX</li>
+ * <li>storeFile</li>
  * <li>backup</li>
  * <li>closeConnection</li>
  * <li>genSafeKey</li>
@@ -195,7 +196,7 @@ const jseDB = {
 		return false;
 	},
 
-		/**
+	/**
 	 * @method <h2>asyncSetVar</h2>
 	 * @description Async await version of setVariableThen
 	 */
@@ -350,6 +351,20 @@ const jseDB = {
 				dataStore1.emit('plusX', key, x);
 			}
 		}
+	},
+
+	/**
+	 * @method <h2>storeFile</h2>
+	 * @description Async await version of setVariableThen
+	 */
+	storeFile(key,fileName,data,encoding) {
+		if (dataStore1.authorized > 8) {
+			if (JSE.jseTestNet) console.log('storingFile: '+key+'-'+fileName);
+			if (key.substring(0,3) === 'adx') {
+				adxStore1.emit('storeFile', key,fileName,data,encoding);
+			}
+		}
+		return false;
 	},
 
 	/**

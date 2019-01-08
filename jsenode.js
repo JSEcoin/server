@@ -198,8 +198,8 @@ const routes = require('./routes/routes.js');
 const app = express();
 
 app.use(compression({ threshold: 0 }));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: '2mb', extended: true }));
+app.use(bodyParser.urlencoded({ limit: '2mb', extended: true }));
 app.use(cookieParser());
 app.set('trust proxy', true);
 

@@ -513,6 +513,22 @@ function onConnection(socket){
 		}
 	});
 
+	socket.on('storeFile', function(key,fileName,dataValue,encoding) {
+		if (socket.authorized > 9) {
+			if (JSE.jseTestNet) console.log('Storing File: '+key+' : '+fileName);
+			const cleanFileName = fileName.split(/[^a-zA-Z0-9_.]/).join('').split('..').join('.');
+			const extension = cleanFileName.substr(cleanFileName.length - 3).toLowerCase();
+			// Only for adx datastore and images
+			if (key.substring(0,3) === 'adx' && (extension === 'gif' || extension === 'png' || extension === 'jpg')) {
+				fs.writeFile('static/'+cleanFileName, dataValue, encoding, function(err) {
+					if (err) console.log('Error writing image file ref. 35 '+err);
+				});
+			} else {
+				console.log('Datastore error 527 storeFile bad key or file type: '+extension);
+			}
+		}
+	});
+
 	socket.on('backup', function() {
 		if (socket.authorized > 8) {
 			if (JSE.jseTestNet) console.log('running backup...');

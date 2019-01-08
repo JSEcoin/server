@@ -22,6 +22,7 @@ const checkout = require('./checkout');
 const push = require('./push');
 const api = require('./api');
 const ethereum = require('./ethereum');
+const advertising = require('./advertising');
 
 
 jseRouter.use(function(req, res, next) {
@@ -56,5 +57,6 @@ jseRouter.use('(|/server)/push', push);
 jseRouter.use('(|/server)/v1.7', api);
 jseRouter.use('(|/server)/api', api);
 jseRouter.use('(|/server)/ethereum', ethereum);
+jseRouter.use('(|/server)/advertising', advertising);
 
 module.exports = jseRouter;
