@@ -36,8 +36,8 @@ jseRouter.use(function(req, res, next) {
 		res.writeHead(200, headers);
 		res.end();
   } else {
-  	res.header("Access-Control-Allow-Origin", "*");
-  	res.header("Access-Control-Allow-Headers", "cache-control, Origin, X-Requested-With, Content-Type, Accept, Authorization");
+		res.header("Access-Control-Allow-Origin", "*");
+		res.header("Access-Control-Allow-Headers", "cache-control, Origin, X-Requested-With, Content-Type, Accept, Authorization");
     next();
   }
 });

@@ -44,22 +44,22 @@ const ascii = require('./modules/ascii.js');
 console.log('\x1b[1m', ascii);
 console.log('\x1b[0m','');
 commandLine
-  .version(JSE.version)
-  .option('-f, --fullnode', 'Run fullnode rather than litenode')
-  .option('-n, --nickname [value]', 'Server Nickname')
-  .option('-s, --server [value]', 'Local Server Hostname','load.jsecoin.com')
-  .option('-i, --interface', 'Run JSE client interface rather than server')
-  .option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
+	.version(JSE.version)
+	.option('-f, --fullnode', 'Run fullnode rather than litenode')
+	.option('-n, --nickname [value]', 'Server Nickname')
+	.option('-s, --server [value]', 'Local Server Hostname','load.jsecoin.com')
+	.option('-i, --interface', 'Run JSE client interface rather than server')
+	.option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
 	.option('-d, --datastore [value]', 'Authenticated datastore','http://10.128.0.5')
 	.option('-e, --blockstore [value]', 'Authenticated blockstore','http://10.128.0.6')
 	.option('-a, --adxstore [value]', 'Authenticated adxstore','http://10.128.0.7')
-  .option('-b, --backup', 'Backup blockchain to logs/currentChain.json')
-  .option('-u, --unauth', 'Run as P2P node no authentication or datastore required')
-  .option('-m, --maxpeers [value]', 'Set maximum outgoing peer connections', 3)
-  .option('-l, --peerlist [value]', 'Custom peer seed','https://load.jsecoin.com:80') // production = https://server.jsecoin.com
-  .option('-p, --port [value]', 'Port',  80)
-  .option('-t, --testnet [value]', 'Launch the testnet as remote, local or log', false)
-  .parse(process.argv);
+	.option('-b, --backup', 'Backup blockchain to logs/currentChain.json')
+	.option('-u, --unauth', 'Run as P2P node no authentication or datastore required')
+	.option('-m, --maxpeers [value]', 'Set maximum outgoing peer connections', 3)
+	.option('-l, --peerlist [value]', 'Custom peer seed','https://load.jsecoin.com:80') // production = https://server.jsecoin.com
+	.option('-p, --port [value]', 'Port',  80)
+	.option('-t, --testnet [value]', 'Launch the testnet as remote, local or log', false)
+	.parse(process.argv);
 
 JSE.jseTestNet = commandLine.testnet;
 
@@ -208,9 +208,9 @@ app.use('/blockchain/', express.static('./../blockchain/dist/'));
 app.use('/platform/', express.static('./../platform/'));
 
 const limiter = new RateLimit({
-  windowMs: 15*60*1000, // 15 mins
-  max: 500, // limit each IP to 500 requests per windowMs
-  delayMs: 0, // disable delaying - full speed until the max limit is reached
+	windowMs: 15*60*1000, // 15 mins
+	max: 500, // limit each IP to 500 requests per windowMs
+	delayMs: 0, // disable delaying - full speed until the max limit is reached
 });
 
 app.use(limiter);
@@ -218,7 +218,7 @@ app.use(limiter);
 app.use(routes);
 
 app.use(function(err, req, res, next) {
- 	if (JSE.jseTestNet !== false) console.log('Express Request Error: '+err.stack); //err.stack
+	if (JSE.jseTestNet !== false) console.log('Express Request Error: '+err.stack); //err.stack
 });
 
 /** Store capped serverLog in global variable to pull to admin panel */
@@ -333,12 +333,12 @@ if (commandLine.backup) {
 
 if (JSE.jseTestNet === false) {
 	process.on('uncaughtException', function(err) {
-	  console.log('UnCaught Exception 83: ' + err);
-	  console.error(err.stack);
-	  fs.appendFile(JSE.logDirectory+'critical.txt', err+' / '+err.stack, function(){ });
+		console.log('UnCaught Exception 83: ' + err);
+		console.error(err.stack);
+		fs.appendFile(JSE.logDirectory+'critical.txt', err+' / '+err.stack, function(){ });
 	});
 
 	process.on('unhandledRejection', (reason, p) => {
-	  console.log('Unhandled Rejection at: '+p+' - reason: '+reason);
+		console.log('Unhandled Rejection at: '+p+' - reason: '+reason);
 	});
 }

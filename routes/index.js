@@ -5,7 +5,7 @@ const ascii = require('./../modules/ascii.js');
 const express = require('express');
 const request = require('request');
 
-const multer  = require('multer');
+const multer = require('multer');
 
 const upload = multer({ storage: multer.memoryStorage({}) });
 
@@ -34,17 +34,17 @@ router.get('/', function (req, res) {
 		var t = 'THE FUTURE OF BLOCKCHAIN, ECOMMERCE AND DIGITAL ADVERTISING';
 		var i = 0;
 		function typeWriter() {
-		  i++;
-		  if (i <= t.length) {
-		    document.getElementById("tw").innerHTML = t.substring(0,i)+' <span id="blink">|</span>';
-		    setTimeout(typeWriter, 50);
-		  }
-	    if (i % 2 == 0) {
-	      document.getElementById("blink").style.color = '#111111';
-	    } else {
-	      document.getElementById("blink").style.color = '#41FF00';
-	    }
-	    if (i > t.length) { setTimeout(typeWriter, 500); }
+			i++;
+			if (i <= t.length) {
+				document.getElementById("tw").innerHTML = t.substring(0,i)+' <span id="blink">|</span>';
+				setTimeout(typeWriter, 50);
+			}
+			if (i % 2 == 0) {
+				document.getElementById("blink").style.color = '#111111';
+			} else {
+				document.getElementById("blink").style.color = '#41FF00';
+			}
+			if (i > t.length) { setTimeout(typeWriter, 500); }
 		}
 		typeWriter();
 		</script>
@@ -208,12 +208,12 @@ router.post('/myexports/*', function (req, res) {
 		if (goodCredentials !== null) {
 			const myExports = [];
 			JSE.jseDataIO.getMyExportedCoins(goodCredentials.uid, function(exportedCoins) {
-		 		res.send(JSON.stringify(exportedCoins)); // need to check for null value?
+				res.send(JSON.stringify(exportedCoins)); // need to check for null value?
 			});
-	 	} else {
-	 		res.status(401).send('{"fail":1,"notification":"Error index.js 64. Session Variable not recognized"}');
-	 	}
-	 	return false;
+		} else {
+			res.status(401).send('{"fail":1,"notification":"Error index.js 64. Session Variable not recognized"}');
+		}
+		return false;
 	}, function() {
 		res.status(401).send('{"fail":1,"notification":"Error index.js 67. Session Variable not recognized"}');
 	});
@@ -237,10 +237,10 @@ router.post('/removecoincode/*', function (req, res) {
 					res.send('{"success":1,"notification":"Coincode has been removed"}');
 				}
 			});
-	 	} else {
-	 		res.status(401).send('{"fail":1,"notification":"Error index.js 64. Session Variable not recognized"}');
-	 	}
-	 	return false;
+		} else {
+			res.status(401).send('{"fail":1,"notification":"Error index.js 64. Session Variable not recognized"}');
+		}
+		return false;
 	}, function() {
 		res.status(401).send('{"fail":1,"notification":"Error index.js 67. Session Variable not recognized"}');
 	});
@@ -271,9 +271,9 @@ router.post('/updateapilevel/*', function (req, res) {
 			JSE.jseDataIO.setVariable('credentials/'+goodCredentials.uid+'/apiLevel',parseFloat(req.body.newAPILevel));
 			res.send('1');
 		} else {
-	 		res.send('0');
-	 	}
-	 	return false;
+			res.send('0');
+		}
+		return false;
 	}, function() {
 		res.send('0');
 	});
@@ -366,9 +366,9 @@ router.post('/updatedetails/*', function (req, res) {
 			JSE.jseDataIO.setVariable('account/'+goodCredentials.uid+'/address',JSE.jseFunctions.cleanString(req.body.newAddress));
 			res.send('1');
 		} else {
-	 		res.send('0');
-	 	}
-	 	return false;
+			res.send('0');
+		}
+		return false;
 	}, function() {
 		res.send('0');
 	});
@@ -461,7 +461,7 @@ router.post('/adminemail/*', function (req, res) {
 		mail.setReplyTo(replyToHeader);
 		const emailRequest = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
 		sg.API(emailRequest, function (error, response) {
-		  if (error) { console.log('Sendgrid Error response received, admin email '+JSON.stringify(response)); }
+			if (error) { console.log('Sendgrid Error response received, admin email '+JSON.stringify(response)); }
 		});
 		res.send('{"success":1,"notification":"Email sent"}');
 	} else {
@@ -492,16 +492,16 @@ router.post('/attachmentemail/*', upload.single('file'), function (req, res) {
 		const replyToHeader = new helper.Email(replyEmail);
 		const attachment = new helper.Attachment();
 		const fileInfo = req.file;
-	  attachment.setFilename(fileInfo.originalname);
-	  attachment.setType(fileInfo.mimetype);
-	  attachment.setContent(fileInfo.buffer.toString('base64'));
-	  attachment.setDisposition('attachment');
+		attachment.setFilename(fileInfo.originalname);
+		attachment.setType(fileInfo.mimetype);
+		attachment.setContent(fileInfo.buffer.toString('base64'));
+		attachment.setDisposition('attachment');
 		const mail = new helper.Mail(fromEmail, subject, toEmail, content);
 		mail.setReplyTo(replyToHeader);
 		mail.addAttachment(attachment);
 		const emailRequest = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
 		sg.API(emailRequest, function (error, response) {
-		  if (error) { console.log('Sendgrid Error response received: '+JSON.stringify(response)); }
+			if (error) { console.log('Sendgrid Error response received: '+JSON.stringify(response)); }
 		});
 		res.send('{"success":1,"notification":"Email sent"}');
 	} else {
@@ -522,12 +522,12 @@ router.post('/pubstats/*', function (req, res) {
 		if (goodCredentials !== null) {
 			JSE.jseDataIO.getPubStats(goodCredentials.uid, function(pubStats) { // pubStats.statsDaily pubStats.subIDs pubStats.siteIDs
 				JSON.stringify(pubStats);
-		 		res.send(JSON.stringify(pubStats)); // need to check for null value?
+				res.send(JSON.stringify(pubStats)); // need to check for null value?
 			});
-	 	} else {
-	 		res.status(401).send('{"fail":1,"notification":"Error index.js 139. Session Variable not recognized"}');
-	 	}
-	 	return false;
+		} else {
+			res.status(401).send('{"fail":1,"notification":"Error index.js 139. Session Variable not recognized"}');
+		}
+		return false;
 	}, function() {
 		res.status(401).send('{"fail":1,"notification":"Error index.js 142. Session Variable not recognized"}');
 	});
@@ -545,12 +545,12 @@ router.post('/referrals/*', function (req, res) {
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
 		if (goodCredentials !== null) {
 			JSE.jseDataIO.getVariable('referrals/'+goodCredentials.uid, function(referrals) {
-		 		res.send(JSON.stringify(referrals)); // null is checked for clientside
+				res.send(JSON.stringify(referrals)); // null is checked for clientside
 			});
-	 	} else {
-	 		res.status(401).send('{"fail":1,"notification":"Error index.js 139. Session Variable not recognized"}');
-	 	}
-	 	return false;
+		} else {
+			res.status(401).send('{"fail":1,"notification":"Error index.js 139. Session Variable not recognized"}');
+		}
+		return false;
 	}, function() {
 		res.status(401).send('{"fail":1,"notification":"Error index.js 142. Session Variable not recognized"}');
 	});
@@ -563,10 +563,10 @@ router.post('/referrals/*', function (req, res) {
  * @memberof module:jseRouter
  */
 router.post('/logout/*', function (req, res) {
-  if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"No session provided"}'); return false; }
-  const session = JSE.jseFunctions.cleanString(req.body.session);
-  JSE.jseDataIO.getCredentialsBySession(session,function(credentials) {
-  	const newCredentials = credentials;
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"No session provided"}'); return false; }
+	const session = JSE.jseFunctions.cleanString(req.body.session);
+	JSE.jseDataIO.getCredentialsBySession(session,function(credentials) {
+		const newCredentials = credentials;
 		let previousSessionVar = credentials.session || null;
 		newCredentials.session = JSE.jseFunctions.randString(32); // issue new session const on log out, to prevent anything happening afterwards
 		if (req.body.app) {
@@ -582,15 +582,15 @@ router.post('/logout/*', function (req, res) {
 		} else {
 			JSE.jseDataIO.setVariable('credentials/'+newCredentials.uid+'/session', newCredentials.session);
 		}
-    JSE.jseDataIO.setVariable('lookupSession/'+newCredentials.session,newCredentials.uid);
-    if (previousSessionVar) {
-      JSE.jseDataIO.hardDeleteVariable('lookupSession/'+previousSessionVar);
-    }
-    res.send('1');
-  },function() {
-  	res.send('1');
-  });
-  return false;
+		JSE.jseDataIO.setVariable('lookupSession/'+newCredentials.session,newCredentials.uid);
+		if (previousSessionVar) {
+			JSE.jseDataIO.hardDeleteVariable('lookupSession/'+previousSessionVar);
+		}
+		res.send('1');
+	},function() {
+		res.send('1');
+	});
+	return false;
 });
 
 /**
@@ -614,10 +614,10 @@ router.post('/setpin/*', function (req, res) {
 					res.status(400).send('{"fail":1,"notification":"Error index.js 531. Pin number not secure, must be 4-12 digits"}');
 				}
 			}
-	 	} else {
-	 		res.status(401).send('{"fail":1,"notification":"Error index.js 526. Session Variable not recognized"}');
-	 	}
-	 	return false;
+		} else {
+			res.status(401).send('{"fail":1,"notification":"Error index.js 526. Session Variable not recognized"}');
+		}
+		return false;
 	}, function() {
 		res.status(401).send('{"fail":1,"notification":"Error index.js 530. Session Variable not recognized"}');
 	});
@@ -662,17 +662,17 @@ router.post('/toggleemail/:type/*', function (req, res) {
 					url: apiURL,
 					json: objectSend,
 					headers: {
-        		Authorization: 'Bearer ' +JSE.credentials.sendgridAPIKey,
+						Authorization: 'Bearer ' +JSE.credentials.sendgridAPIKey,
 					},
 				}, (err, res2, result) => {
 					console.log('Global Resubscribe: '+goodCredentials.email);
 					res.send('{"success":1,"notification":"Email removed from global unsubscribe list"}');
 				});
 			}
-	 	} else {
-	 		res.status(401).send('{"fail":1,"notification":"Error index.js 573. Session Variable not recognized"}');
-	 	}
-	 	return false;
+		} else {
+			res.status(401).send('{"fail":1,"notification":"Error index.js 573. Session Variable not recognized"}');
+		}
+		return false;
 	}, function() {
 		res.status(401).send('{"fail":1,"notification":"Error index.js 577. Session Variable not recognized"}');
 	});
@@ -781,10 +781,10 @@ router.post('/txtoday/*', function (req, res) {
 				returnObject.txLimit = goodCredentials.txLimit || JSE.jseSettings.txLimit || 2000;
 				res.send(JSON.stringify(returnObject));
 			});
-	 	} else {
-	 		res.status(401).send('{"fail":1,"notification":"Error index.js 716. Session Variable not recognized"}');
-	 	}
-	 	return false;
+		} else {
+			res.status(401).send('{"fail":1,"notification":"Error index.js 716. Session Variable not recognized"}');
+		}
+		return false;
 	}, function() {
 		res.status(401).send('{"fail":1,"notification":"Error index.js 720. Session Variable not recognized"}');
 	});
@@ -802,12 +802,12 @@ router.post('/lastlogins/*', function (req, res) {
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
 		if (goodCredentials !== null) {
 			JSE.jseDataIO.getVariable('logins/'+goodCredentials.uid, function(logins) {
-		 		res.send(JSON.stringify(logins));
+				res.send(JSON.stringify(logins));
 			});
-	 	} else {
-	 		res.status(401).send('{"fail":1,"notification":"Error index.js 716. Session Variable not recognized"}');
-	 	}
-	 	return false;
+		} else {
+			res.status(401).send('{"fail":1,"notification":"Error index.js 716. Session Variable not recognized"}');
+		}
+		return false;
 	}, function() {
 		res.status(401).send('{"fail":1,"notification":"Error index.js 720. Session Variable not recognized"}');
 	});

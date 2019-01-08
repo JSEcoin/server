@@ -23,7 +23,7 @@ const jseEmails = require("./emails.js");
  */
 function runAtMidnight() {
 	const now = new Date();
-	 // ...at 00:10:00 hours, 10 minutes extra in case of timing fault
+	// ...at 00:10:00 hours, 10 minutes extra in case of timing fault
 	const night = new Date( now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 10, 0 ); // eslint-disable-line
 	const msToMidnight = night.getTime() - now.getTime();
 	console.log('runAtMidnight set for '+(Math.floor(msToMidnight /60000))+' mins');

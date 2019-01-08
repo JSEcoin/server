@@ -13,13 +13,13 @@ global.JSE = JSE;
 const commandLine = require('commander');
 
 commandLine
-  .option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
+	.option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
 	.option('-d, --datastore [value]', 'Authenticated datastore','http://10.128.0.5')
 	.option('-e, --blockstore [value]', 'Authenticated blockstore','http://10.128.0.6')
 	.option('-a, --adxstore [value]', 'Authenticated adxstore','http://10.128.0.7')
-  .option('-t, --testnet [value]', 'Launch the testnet as remote, local or log', false)
-  .option('-g, --genesis', 'Create a new genesis block', true)
-  .parse(process.argv);
+	.option('-t, --testnet [value]', 'Launch the testnet as remote, local or log', false)
+	.option('-g, --genesis', 'Create a new genesis block', true)
+	.parse(process.argv);
 
 JSE.jseTestNet = commandLine.testnet;
 
@@ -102,9 +102,9 @@ jseSchedule.runAt5pm(); // best time to send emails
 // Production use to prevent and log any crashes
 if (JSE.jseTestNet === false) {
 	process.on('uncaughtException', function(err) {
-	  console.log('UnCaught Exception 83: ' + err);
-	  console.error(err.stack);
-	  fs.appendFile(JSE.logDirectory+'critical.txt', err+' / '+err.stack, function(){ });
+		console.log('UnCaught Exception 83: ' + err);
+		console.error(err.stack);
+		fs.appendFile(JSE.logDirectory+'critical.txt', err+' / '+err.stack, function(){ });
 	});
 }
 console.log(JSE.jseVersion);

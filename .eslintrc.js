@@ -53,12 +53,12 @@ module.exports = {
 	"no-tabs": 0,
 	"spaced-comment": 0,
 	"max-len": 0,
-	"no-mixed-spaces-and-tabs": 0,
 	"linebreak-style": 0,
   "global-require": 0,
   "prefer-destructuring": 0,
   "quotes": 0,
   "newline-per-chained-call": 0,
-  "no-use-before-define": 0
+  "no-use-before-define": 0,
+  "object-curly-newline": 0
   }
 }

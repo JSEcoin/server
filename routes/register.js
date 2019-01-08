@@ -52,7 +52,7 @@ router.post('/*', function (req, res) {
 			newUser.lastip = newUser.regip;
 			if (req.body.regTime && req.body.regTime < 5000) {
 				console.log('Bot registration detected via regTime of '+req.body.regTime+'ms from '+newUser.regip);
-		    const failed = {};
+				const failed = {};
 				failed.fail = 1;
 				failed.notification = 'Bot detected and blocked from registration attempt';
 				res.status(400).send(JSON.stringify(failed));
@@ -61,7 +61,7 @@ router.post('/*', function (req, res) {
 			// check for anonymous IP address
 			if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(newUser.regip) && JSE.anonymousIPs[newUser.regip] === true) {
 				console.log('Bot registration detected via anonymousIP from '+newUser.regip);
-		    const failed = {};
+				const failed = {};
 				failed.fail = 1;
 				failed.notification = 'Anonymous IP address blocked from registration attempt, please disconnect from VPN, Proxy or Tor';
 				res.status(400).send(JSON.stringify(failed));
@@ -149,7 +149,7 @@ router.post('/*', function (req, res) {
 				res.status(400).send(returnObject);
 			});
     } else {
-	    const failed = {};
+			const failed = {};
 			failed.fail = 1;
 			failed.notification = 'Recaptcha Error 468, Please Try Again';
 			res.status(400).send(JSON.stringify(failed));

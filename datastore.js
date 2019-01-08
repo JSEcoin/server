@@ -14,8 +14,8 @@ const commandLine = require('commander');
 commandLine
 	.option('-p, --port [value]', 'Port',  80)
 	.option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
-  .option('-t, --testnet [value]', 'Launch the testnet as remote, local or log', false)
-  .parse(process.argv);
+	.option('-t, --testnet [value]', 'Launch the testnet as remote, local or log', false)
+	.parse(process.argv);
 
 JSE.jseTestNet = commandLine.testnet;
 
@@ -406,15 +406,15 @@ function runPurge() {
 				const binFilename = toBin3hrs[i];
 				if (JSE.jseTestNet) console.log('Deleting file: '+binFilename);
 				fs.unlink(bkupDir+binFilename,function(err5){
-	        if (err5) console.log('DB.js ERROR DELETING FILE: '+binFilename+' - Error: '+err5);
-	   		});
+					if (err5) console.log('DB.js ERROR DELETING FILE: '+binFilename+' - Error: '+err5);
+			});
 			}
 			for (let i = 0; i < toBin48hrs.length; i+=1) {
 				const binFilename = toBin48hrs[i];
 				if (JSE.jseTestNet) console.log('Deleting file: '+binFilename);
 				fs.unlink(bkupDir+binFilename,function(err6){
-	        if (err6) console.log('DB.js ERROR DELETING FILE: '+binFilename+' - Error: '+err6);
-	   		});
+					if (err6) console.log('DB.js ERROR DELETING FILE: '+binFilename+' - Error: '+err6);
+				});
 			}
 		}
 	});
@@ -546,12 +546,12 @@ console.log(JSE.jseVersion+' Datastore Server running on port: '+port);
 
 if (JSE.jseTestNet === false) {
 	process.on('uncaughtException', function(err) {
-	  console.log('UnCaught Exception 83: ' + err);
-	  console.error(err.stack);
-	  fs.appendFile(bkupDir+'critical.txt', err+' / '+err.stack, function(){ });
+		console.log('UnCaught Exception 83: ' + err);
+		console.error(err.stack);
+		fs.appendFile(bkupDir+'critical.txt', err+' / '+err.stack, function(){ });
 	});
 
 	process.on('unhandledRejection', (reason, p) => {
-	  console.log('Unhandled Rejection at: '+p+' - reason: '+reason);
+		console.log('Unhandled Rejection at: '+p+' - reason: '+reason);
 	});
 }
