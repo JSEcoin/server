@@ -18,6 +18,7 @@ const request = require('request');
 
 const jseLottery = require("./lottery.js");
 const jseMachineLearning = require("./machinelearning.js");
+const jseAds = require("./ads.js");
 
 JSE.socketConnections = {}; // incoming connections to the server, includes miners and peers
 
@@ -208,6 +209,18 @@ const jseSocketIO = {
 				}
 				return false;
 			});
+
+			socket.on('adRequest', function(adRequest,callback) {
+				try {
+					jseAds.requestCode(adRequest,function(adCode) {
+						callback(adCode);
+					});
+				} catch (ex) {
+					console.log('SaveUnique - Error Caught 381: '+ex);
+				}
+				return false;
+			});
+
 
 			socket.on('validate', function(jseTrack) {
 				try {

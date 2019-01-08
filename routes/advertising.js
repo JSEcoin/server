@@ -6,11 +6,11 @@ const router = express.Router();
 const fs = require('fs');
 
 /**
- * @name /advertising/newampaign/*
- * @description Setup a new advertising campaign
+ * @name /advertising/uploadcampaign/*
+ * @description Setup a new advertising campaign or edit an existing one
  * @memberof module:jseRouter
  */
-router.post('/newcampaign/*', function (req, res) {
+router.post('/uploadcampaign/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error advertising.js 12. No Session Variable Supplied"}'); return false; }
 	const session = req.body.session; // No need to cleanString because it's only used for comparison
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
@@ -22,12 +22,16 @@ router.post('/newcampaign/*', function (req, res) {
 				name, geos, devices, windowsDesktop, macDesktop, androidTablet, ipad, androidPhone, iphone, other, browsers, chrome, firefox, safari, ucbrowser, opera, edge, ie, general, crypto, streaming, adult, domains, domainWhitelist, domainBlacklist, publishers, publisherWhitelist, publisherBlacklist, url, currencyJse, currencyUsd, dailyBudget, lifetimeBudget, start, end, frequencyCap,
 			}))(req.body);
 
-			const newDate = new Date().getTime();
-			const random = Math.floor((Math.random() * 999999) + 1); // setting up a firebase style push variable, timestamp+random
-			campaign.cid = String(newDate) +''+ String(random); // Campaign ID
-			campaign.paused = false; // user paused
-			campaign.disabled = false; // admin disabled (budgets etc)
-			campaign.archived = false;
+			if (campaign.cid) {
+				// modify existing campaign
+			} else {
+				const newDate = new Date().getTime();
+				const random = Math.floor((Math.random() * 999999) + 1); // setting up a firebase style push variable, timestamp+random
+				campaign.cid = String(newDate) +''+ String(random); // Campaign ID
+				campaign.paused = false; // user paused
+				campaign.disabled = false; // admin disabled (budgets etc)
+				campaign.archived = false;
+			}
 
 			campaign.banners = [];
 			Object.keys(req.body.creatives).forEach((imgRef) => {
@@ -67,6 +71,46 @@ router.post('/newcampaign/*', function (req, res) {
 		}
 	}, function() {
 		res.status(401).send('{"fail":1,"notification":"Error advertising.js 19. Invalid Session Variable"}'); return false;
+	});
+	return false;
+});
+
+/**
+ * @name /advertising/getcampaigns/*
+ * @description Get campaign data
+ * @memberof module:jseRouter
+ */
+router.post('/getcampaigns/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error advertising.js 12. No Session Variable Supplied"}'); return false; }
+	const session = req.body.session; // No need to cleanString because it's only used for comparison
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials) {
+			JSE.jseDataIO.getVariable('adxCampaigns/'+goodCredentials.uid+'/', function(campaigns) {
+				res.send(JSON.stringify(campaigns));
+			});
+		}
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error advertising.js 89. Invalid Session Variable"}'); return false;
+	});
+	return false;
+});
+
+/**
+ * @name /advertising/getadvstats/*
+ * @description Get basic advertising stats data
+ * @memberof module:jseRouter
+ */
+router.post('/getadvstats/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error advertising.js 12. No Session Variable Supplied"}'); return false; }
+	const session = req.body.session; // No need to cleanString because it's only used for comparison
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials) {
+			JSE.jseDataIO.getVariable('adxAdvStats/'+goodCredentials.uid+'/', function(result) {
+				res.send(JSON.stringify(result));
+			});
+		}
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error advertising.js 109. Invalid Session Variable"}'); return false;
 	});
 	return false;
 });
