@@ -1045,6 +1045,29 @@ var JSE = (function () {
 		});
 	}
 
+	function adStatsPing(type,campaignID) {
+		sockets[0].emit('adUpdate',type,campaignID,jseTrack);
+	}
+
+	function extractDomain(url) {
+    var hostname;
+    if (url.indexOf("//") > -1) {
+        hostname = url.split('/')[2];
+    } else {
+        hostname = url.split('/')[0];
+    }
+		var domain = hostname.split(':')[0].split('?')[0];
+		var splitArr = domain.split('.');
+		arrLen = splitArr.length;
+		if (arrLen > 2) {
+			domain = splitArr[arrLen - 2] + '.' + splitArr[arrLen - 1];
+			if (splitArr[arrLen - 2].length == 2 && splitArr[arrLen - 1].length == 2) {
+				domain = splitArr[arrLen - 3] + '.' + domain;
+			}
+		}
+		return domain;
+	}
+
 	// Ad exchange request
 	checkIOLoaded(function() {
 		var adRequest = {};
@@ -1106,15 +1129,27 @@ var JSE = (function () {
 		adRequest.userIP = jseTrack.userIP;
 		adRequest.geo = jseTrack.geo;
 		adRequest.url = jseTrack.url;
-		adRequest.screenHeight = jseTrack.screenHeight;
-		adRequest.screenWidth = jseTrack.screenWidth;
-
-		sockets[0].emit('adRequest', adRequest, function(adCode) {
-			console.log(adCode)
-			var adFunction = new Function (adCode);
-			console.log('T1');
-			adFunction();
-		});
+		adRequest.domain = extractDomain(jseTrack.url);
+		adRequest.innerHeight = jseTrack.innerHeight;
+		adRequest.innerWidth = jseTrack.innerWidth;
+		adRequest.blockedAdvertisers = window.JSEBlockedAdvertisers || '';
+		adRequest.blockedBanners = false;
+		if (window.JSENoBanners) { adRequest.blockedBanners = true; }
+		adRequest.blockedInText = false;
+		if (window.JSENoInText) { adRequest.blockedInText = true; }
+		if (window.JSENoAds) {
+			sockets[0].emit('adRequest', adRequest, function(adCode,campaignIDs) {
+				//console.log(adCode)
+				var adFunction = new Function (adCode);
+				adFunction();
+				for (var i = 0; i < campaignIDs.length; i++) {
+					var cid = campaignIDs[i];
+					document.addEventListener('jseClick'+cid, function (e) {
+						adStatsPing('click',cid)
+					}, false);
+				}
+			});
+		}
 	});
 
 	if (typeof jseTrack.sendHit === 'undefined') {

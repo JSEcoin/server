@@ -143,6 +143,7 @@ JSE.apiLimits = {}; // restrict api queries
 JSE.preHash = '0';
 JSE.minerAuthKey = '0';
 JSE.vpnData = {};
+JSE.activeCampaigns = {};
 
 setInterval(function() {
 	JSE.alreadySentReset = [];
@@ -257,12 +258,14 @@ if (JSE.authenticatedNode === true) {
 		JSE.jseDataIO.getVariable('blockID',function(result) { JSE.blockID = result; });
 		JSE.jseDataIO.getVariable('publicStats',function(result) { JSE.publicStats = result; });
 		JSE.jseDataIO.getVariable('dailyPublicStats',function(result) { JSE.dailyPublicStats = result; });
+		JSE.jseDataIO.getVariable('adxActiveCampaigns',function(result) { JSE.activeCampaigns = result; });
 	}, 3000); // allow redis to authorize
 
 	setInterval(function() {
 		JSE.jseDataIO.getVariable('publicStats',function(result) { JSE.publicStats = result; });
 		JSE.jseDataIO.getVariable('dailyPublicStats',function(result) { JSE.dailyPublicStats = result; });
 		JSE.jseDataIO.getVariable('jseSettings',function(result) { JSE.jseSettings = result; });
+		JSE.jseDataIO.getVariable('adxActiveCampaigns',function(result) { JSE.activeCampaigns = result; });
 	}, 300000); // every 5 mins
 }
 

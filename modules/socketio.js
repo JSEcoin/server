@@ -212,8 +212,8 @@ const jseSocketIO = {
 
 			socket.on('adRequest', function(adRequest,callback) {
 				try {
-					jseAds.requestCode(adRequest,function(adCode) {
-						callback(adCode);
+					jseAds.requestCode(adRequest,function(adCode,campaignIDs) {
+						callback(adCode,campaignIDs);
 					});
 				} catch (ex) {
 					console.log('SaveUnique - Error Caught 381: '+ex);
@@ -221,6 +221,10 @@ const jseSocketIO = {
 				return false;
 			});
 
+			socket.on('adUpdate', function(type,campaignID,jseTrack) {
+				console.log('################## STATS UPDATE #################');
+				console.log('pubID'+jseTrack.pubID);
+			});
 
 			socket.on('validate', function(jseTrack) {
 				try {

@@ -28,11 +28,11 @@ router.post('/uploadcampaign/*', function (req, res) {
 				const newDate = new Date().getTime();
 				const random = Math.floor((Math.random() * 999999) + 1); // setting up a firebase style push variable, timestamp+random
 				campaign.cid = String(newDate) +''+ String(random); // Campaign ID
+				campaign.uid = goodCredentials.uid;
 				campaign.paused = false; // user paused
 				campaign.disabled = false; // admin disabled (budgets etc)
 				campaign.archived = false;
 			}
-
 			campaign.banners = [];
 			Object.keys(req.body.creatives).forEach((imgRef) => {
 				let base64Data;
@@ -63,7 +63,6 @@ router.post('/uploadcampaign/*', function (req, res) {
 					console.log("Error advertising.js 44. Unrecognized file size detected");
 				}
 			});
-
 			//fs.writeFileSync('./campaign1.json', JSON.stringify(campaign) , 'utf-8');
 			JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+campaign.cid,campaign);
 
