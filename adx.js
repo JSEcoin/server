@@ -44,57 +44,94 @@ JSE.jseFunctions = require('./modules/functions.js'); // round robin bug means h
 JSE.jseDataIO = require('./modules/dataio.js'); // can't call initialiseApp twice from modules
 
 const findActiveCampaigns = async() => {
-	JSE.jseDataIO.getVariable('adxCampaigns/', async(adxCampaigns) => {
-		const activeCampaigns = [];
-		const rightNow = new Date();
-		const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,"");
-		const intYYMMDD = parseInt(yymmdd,10);
-		const exchangeRate = await JSE.jseDataIO.asyncGetVar(`publicStats/exchangeRates/USDJSE`);
-		const t1MinBid = 0.1 / exchangeRate; // work out min/max bids in JSE
-		const t2MinBid = 0.02 / exchangeRate;
-		const maxBid = 10 / exchangeRate;
-		Object.keys(adxCampaigns).forEach(async(uid) => {
-			Object.keys(adxCampaigns[uid]).forEach(async(cid) => {
-				const campaign = adxCampaigns[uid][cid];
-				if (!campaign.disabled && !campaign.paused) {
-					campaign.active = {};
-					if (campaign.currencyUsd) {
-						campaign.active.bidPrice = campaign.bidPrice * exchangeRate;
-						campaign.active.dailyBudget = campaign.dailyBudget * exchangeRate;
-					} else {
-						campaign.active.bidPrice = campaign.bidPrice;
-						campaign.active.dailyBudget = campaign.dailyBudget;
-					}
-					const todaySpend = await JSE.jseDataIO.asyncGetVar(`adxAdvStats/${uid}/${yymmdd}/${cid}/j`);
-					const accountBalance = await JSE.jseDataIO.asyncGetVar(`ledger/${uid}`);
-					if (campaign.active.dailyBudget < todaySpend && accountBalance > campaign.active.bidPrice) {
-						campaign.active.budgetLeft = campaign.active.dailyBudget - todaySpend; // might be useful for tapering out campaigns when approaching budget
-						if ((intYYMMDD > parseInt(campaign.start,10) || !campaign.start) && (intYYMMDD < parseInt(campaign.end,10) || !campaign.end)) {
-							campaign.geos.forEach((geo) => {
-								if ('US,CA,UK,GB,AU,NZ'.indexOf(geo) && campaign.active.bidPrice > t1MinBid && campaign.active.bidPrice < maxBid) {
-									campaign.active[geo] = true;
-								} else if (campaign.active.bidPrice > t2MinBid && campaign.active.bidPrice < maxBid) {
-									campaign.active[geo] = true;
-								}
-							});
-							campaign.banners.forEach((banner) => {
-								if (campaign.banners.active) {
-									campaign.active[campaign.banners[banner].size] = true;
-								}
-							});
-							activeCampaigns.push(campaign);
+	return new Promise((resolve) => {
+		JSE.jseDataIO.getVariable('adxCampaigns/', async(adxCampaigns) => {
+			const activeCampaigns = [];
+			const rightNow = new Date();
+			const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,"");
+			const intYYMMDD = parseInt(yymmdd,10);
+			const exchangeRate = await JSE.jseDataIO.asyncGetVar(`publicStats/exchangeRates/USDJSE`);
+			const t1MinBid = 0.1 / exchangeRate; // work out min/max bids in JSE
+			const t2MinBid = 0.02 / exchangeRate;
+			const maxBid = 10 / exchangeRate;
+			Object.keys(adxCampaigns).forEach(async(uid) => {
+				Object.keys(adxCampaigns[uid]).forEach(async(cid) => {
+					const campaign = adxCampaigns[uid][cid];
+					if (!campaign.disabled && !campaign.paused) {
+						campaign.active = {};
+						if (campaign.currencyUsd) {
+							campaign.active.bidPrice = campaign.bidPrice * exchangeRate;
+							campaign.active.dailyBudget = campaign.dailyBudget * exchangeRate;
+						} else {
+							campaign.active.bidPrice = campaign.bidPrice;
+							campaign.active.dailyBudget = campaign.dailyBudget;
+						}
+						const todaySpend = await JSE.jseDataIO.asyncGetVar(`adxAdvStats/${uid}/${yymmdd}/${cid}/j`);
+						const accountBalance = await JSE.jseDataIO.asyncGetVar(`ledger/${uid}`);
+						if (campaign.active.dailyBudget < todaySpend && accountBalance > campaign.active.bidPrice) {
+							campaign.active.budgetLeft = campaign.active.dailyBudget - todaySpend; // might be useful for tapering out campaigns when approaching budget
+							if ((intYYMMDD > parseInt(campaign.start,10) || !campaign.start) && (intYYMMDD < parseInt(campaign.end,10) || !campaign.end)) {
+								campaign.geos.forEach((geo) => {
+									if ('US,CA,UK,GB,AU,NZ'.indexOf(geo) && campaign.active.bidPrice > t1MinBid && campaign.active.bidPrice < maxBid) {
+										campaign.active[geo] = true;
+									} else if (campaign.active.bidPrice > t2MinBid && campaign.active.bidPrice < maxBid) {
+										campaign.active[geo] = true;
+									}
+								});
+								campaign.banners.forEach((banner) => {
+									if (campaign.banners.active) {
+										campaign.active[campaign.banners[banner].size] = true;
+									}
+								});
+								activeCampaigns.push(campaign);
+							}
 						}
 					}
-				}
+				});
 			});
+			JSE.jseDataIO.setVariable('adxActiveCampaigns/', activeCampaigns);
+			resolve(true);
 		});
-		JSE.jseDataIO.getVariable('adxActiveCampaigns/', activeCampaigns);
 	});
 };
 
-setInterval(function() {
+const mergeStatsPools = async() => {
+	return new Promise((resolve) => {
+		JSE.jseDataIO.getVariable('adxPools/', async(adxPools) => {
+			JSE.jseDataIO.deleteVariable('adxPools/');
+			Object.keys(adxPools).forEach(async(pushRef) => {
+				const adxPool = adxPools[pushRef];
+				Object.keys(adxPool).forEach(async(table) => {
+					Object.keys(adxPool[table]).forEach(async(advID) => {
+						Object.keys(adxPool[table][advID]).forEach(async(ymd) => {
+							Object.keys(adxPool[table][advID][ymd]).forEach(async(cid) => {
+								Object.keys(adxPool[table][advID][ymd][cid]).forEach(async(field) => {
+									if (table === 'adxAdvStats' || table === 'adxPubStats') {
+										JSE.jseDataIO.plusX(`${table}/${advID}/${ymd}/${cid}/${field}`, adxPool[table][advID][ymd][cid][field]);
+									} else if (table === 'adxAdvDomains' || table === 'adxAdvPubIDs' || table === 'adxAdvCreatives' || table === 'adxAdvGeos' || table === 'adxAdvDevices' || table === 'adxAdvBrowsers' || table === 'adxPubDomains' || table === 'adxPubSubIDs' || table === 'adxPubAdvIDs' || table === 'adxPubGeos' || table === 'adxPubDevices' || table === 'adxPubPlacements') { // safety check, only modify adx stats data
+										Object.keys(adxPool[table][advID][ymd][cid]).forEach(async(field2) => {
+											JSE.jseDataIO.plusX(`${table}/${advID}/${ymd}/${cid}/${field}/${field2}`, adxPool[table][advID][ymd][cid][field][field2]);
+										});
+									}
+								});
+							});
+						});
+					});
+				});
+			});
+			resolve(true);
+		});
+	});
+};
+
+setInterval(async() => {
+	const startTime = new Date().getTime();
 	JSE.jseDataIO.getVariable('jseSettings',function(result) { JSE.jseSettings = result; });
-	findActiveCampaigns();
+	const waitFor1 = await mergeStatsPools();
+	const waitFor2 = await findActiveCampaigns();
+	const finishTime = new Date().getTime();
+	const timeTaken = Math.round((finishTime - startTime) / 1000);
+	console.log(`adX Refresh: ${timeTaken} secs`);
 },  300000); // every 5 mins
 
 setTimeout(function() {

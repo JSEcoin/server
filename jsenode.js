@@ -144,6 +144,7 @@ JSE.preHash = '0';
 JSE.minerAuthKey = '0';
 JSE.vpnData = {};
 JSE.activeCampaigns = {};
+JSE.adxPool = {};
 
 setInterval(function() {
 	JSE.alreadySentReset = [];
@@ -265,6 +266,7 @@ if (JSE.authenticatedNode === true) {
 		JSE.jseDataIO.getVariable('publicStats',function(result) { JSE.publicStats = result; });
 		JSE.jseDataIO.getVariable('dailyPublicStats',function(result) { JSE.dailyPublicStats = result; });
 		JSE.jseDataIO.getVariable('jseSettings',function(result) { JSE.jseSettings = result; });
+		JSE.jseDataIO.pushVariable('adxPools/',JSE.adxPool,function(pushRef) { JSE.adxPool = {}; });
 		JSE.jseDataIO.getVariable('adxActiveCampaigns',function(result) { JSE.activeCampaigns = result; });
 	}, 300000); // every 5 mins
 }

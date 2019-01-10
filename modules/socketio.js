@@ -212,8 +212,8 @@ const jseSocketIO = {
 
 			socket.on('adRequest', function(adRequest,callback) {
 				try {
-					jseAds.requestCode(adRequest,function(adCode,campaignIDs) {
-						callback(adCode,campaignIDs);
+					jseAds.requestCode(adRequest,function(adCode,topAd,bottomAd) {
+						callback(adCode,topAd,bottomAd);
 					});
 				} catch (ex) {
 					console.log('SaveUnique - Error Caught 381: '+ex);

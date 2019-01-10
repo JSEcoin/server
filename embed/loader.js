@@ -1138,16 +1138,27 @@ var JSE = (function () {
 		adRequest.blockedInText = false;
 		if (window.JSENoInText) { adRequest.blockedInText = true; }
 		if (window.JSENoAds) {
-			sockets[0].emit('adRequest', adRequest, function(adCode,campaignIDs) {
-				//console.log(adCode)
+			sockets[0].emit('adRequest', adRequest, function(adCode,topAd,bottomAd) {
 				var adFunction = new Function (adCode);
 				adFunction();
+				if (topAd) {
+					document.getElementById(topAd.id).addEventListener("click", function() {
+						adStatsPing('click',topAd.cid)
+					});
+				}
+				if (bottomAd) {
+					document.getElementById(bottomAd.id).addEventListener("click", function() {
+						adStatsPing('click',bottomAd.cid)
+					});
+				}
+				/*
 				for (var i = 0; i < campaignIDs.length; i++) {
 					var cid = campaignIDs[i];
 					document.addEventListener('jseClick'+cid, function (e) {
 						adStatsPing('click',cid)
 					}, false);
 				}
+				*/
 			});
 		}
 	});
