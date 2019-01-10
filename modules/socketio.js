@@ -221,9 +221,8 @@ const jseSocketIO = {
 				return false;
 			});
 
-			socket.on('adUpdate', function(type,campaignID,jseTrack) {
-				console.log('################## STATS UPDATE #################');
-				console.log('pubID'+jseTrack.pubID);
+			socket.on('adClick', function(adImpression) {
+				jseAds.logAdStat(adImpression,'c');
 			});
 
 			socket.on('validate', function(jseTrack) {

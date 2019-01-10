@@ -1045,10 +1045,6 @@ var JSE = (function () {
 		});
 	}
 
-	function adStatsPing(type,campaignID) {
-		sockets[0].emit('adUpdate',type,campaignID,jseTrack);
-	}
-
 	function extractDomain(url) {
     var hostname;
     if (url.indexOf("//") > -1) {
@@ -1137,28 +1133,17 @@ var JSE = (function () {
 		if (window.JSENoBanners) { adRequest.blockedBanners = true; }
 		adRequest.blockedInText = false;
 		if (window.JSENoInText) { adRequest.blockedInText = true; }
-		if (window.JSENoAds) {
-			sockets[0].emit('adRequest', adRequest, function(adCode,topAd,bottomAd) {
+		if (!window.JSENoAds) {
+			sockets[0].emit('adRequest', adRequest, function(adCode,selectedAds) {
 				var adFunction = new Function (adCode);
 				adFunction();
-				if (topAd) {
-					document.getElementById(topAd.id).addEventListener("click", function() {
-						adStatsPing('click',topAd.cid)
+				for (var i = 0; i < selectedAds.length; i++) {
+					var adImpression = selectedAds[i];
+					document.getElementById(adImpression.id).addEventListener("click", function() {
+						adStatsPing('c',adImpression);
+						sockets[0].emit('adClick', adImpression);
 					});
 				}
-				if (bottomAd) {
-					document.getElementById(bottomAd.id).addEventListener("click", function() {
-						adStatsPing('click',bottomAd.cid)
-					});
-				}
-				/*
-				for (var i = 0; i < campaignIDs.length; i++) {
-					var cid = campaignIDs[i];
-					document.addEventListener('jseClick'+cid, function (e) {
-						adStatsPing('click',cid)
-					}, false);
-				}
-				*/
 			});
 		}
 	});

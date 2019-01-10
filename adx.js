@@ -102,21 +102,27 @@ const mergeStatsPools = async() => {
 			Object.keys(adxPools).forEach(async(pushRef) => {
 				const adxPool = adxPools[pushRef];
 				Object.keys(adxPool).forEach(async(table) => {
-					Object.keys(adxPool[table]).forEach(async(advID) => {
-						Object.keys(adxPool[table][advID]).forEach(async(ymd) => {
-							Object.keys(adxPool[table][advID][ymd]).forEach(async(cid) => {
-								Object.keys(adxPool[table][advID][ymd][cid]).forEach(async(field) => {
-									if (table === 'adxAdvStats' || table === 'adxPubStats') {
-										JSE.jseDataIO.plusX(`${table}/${advID}/${ymd}/${cid}/${field}`, adxPool[table][advID][ymd][cid][field]);
-									} else if (table === 'adxAdvDomains' || table === 'adxAdvPubIDs' || table === 'adxAdvCreatives' || table === 'adxAdvGeos' || table === 'adxAdvDevices' || table === 'adxAdvBrowsers' || table === 'adxPubDomains' || table === 'adxPubSubIDs' || table === 'adxPubAdvIDs' || table === 'adxPubGeos' || table === 'adxPubDevices' || table === 'adxPubPlacements') { // safety check, only modify adx stats data
-										Object.keys(adxPool[table][advID][ymd][cid]).forEach(async(field2) => {
-											JSE.jseDataIO.plusX(`${table}/${advID}/${ymd}/${cid}/${field}/${field2}`, adxPool[table][advID][ymd][cid][field][field2]);
-										});
-									}
+					if (table === 'adxClicks') {
+						Object.keys(adxPool[table]).forEach(async(impressionID) => {
+							JSE.jseDataIO.setVariable('adxClicks/'+impressionID, adxPool.adxClicks[impressionID]); // this may need optimizing
+						});
+					} else {
+						Object.keys(adxPool[table]).forEach(async(advID) => {
+							Object.keys(adxPool[table][advID]).forEach(async(ymd) => {
+								Object.keys(adxPool[table][advID][ymd]).forEach(async(cid) => {
+									Object.keys(adxPool[table][advID][ymd][cid]).forEach(async(field) => {
+										if (table === 'adxAdvStats' || table === 'adxPubStats') {
+											JSE.jseDataIO.plusX(`${table}/${advID}/${ymd}/${cid}/${field}`, adxPool[table][advID][ymd][cid][field]);
+										} else if (table === 'adxAdvDomains' || table === 'adxAdvPubIDs' || table === 'adxAdvCreatives' || table === 'adxAdvGeos' || table === 'adxAdvDevices' || table === 'adxAdvBrowsers' || table === 'adxPubDomains' || table === 'adxPubSubIDs' || table === 'adxPubAdvIDs' || table === 'adxPubGeos' || table === 'adxPubDevices' || table === 'adxPubPlacements') { // safety check, only modify adx stats data
+											Object.keys(adxPool[table][advID][ymd][cid]).forEach(async(field2) => {
+												JSE.jseDataIO.plusX(`${table}/${advID}/${ymd}/${cid}/${field}/${field2}`, adxPool[table][advID][ymd][cid][field][field2]);
+											});
+										}
+									});
 								});
 							});
 						});
-					});
+					}
 				});
 			});
 			resolve(true);
