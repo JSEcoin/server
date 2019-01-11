@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 
 const fs = require('fs');
+const jseAds = require("./../modules/ads.js");
 
 /**
  * @name /advertising/uploadcampaign/*
@@ -63,6 +64,7 @@ router.post('/uploadcampaign/*', function (req, res) {
 					console.log("Error advertising.js 44. Unrecognized file size detected");
 				}
 			});
+
 			//fs.writeFileSync('./campaign1.json', JSON.stringify(campaign) , 'utf-8');
 			JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+campaign.cid,campaign);
 
@@ -110,6 +112,84 @@ router.post('/getadvstats/*', function (req, res) {
 		}
 	}, function() {
 		res.status(401).send('{"fail":1,"notification":"Error advertising.js 109. Invalid Session Variable"}'); return false;
+	});
+	return false;
+});
+
+/**
+ * @name /storeclick/:postback/*
+ * @description Store a click in localStorage for global tracking pixel
+ * @memberof module:jseRouter
+ */
+router.get('/storeclick/:advid/:postback/*', function(req, res) {
+	const js = `<script>
+		localStorage.setItem('postback'+${req.params.advid}, ${req.params.postback});
+	</script>`;
+	res.send(js);
+});
+
+/**
+ * @name /globalpixel/*
+ * @description Global pixel url <img src="https://load.jsecoin.com/advertising/globalpixel/?aid=145&value=1" />
+ * @memberof module:jseRouter
+ */
+router.get('/globalpixel/*', function(req, res) {
+	const js = `<script>
+		if (localStorage && localStorage.postback${req.query.aid}) {
+			var postback = localStorage.postback${req.query.aid};
+			var value = ${req.query.value || 1};
+			(new Image()).src = 'https://load.jsecoin.com/advertising/s2spixel/?aid=${req.query.aid}&value='+value+'&postback='+postback;
+		}
+	</script>`;
+	res.send(js);
+});
+
+/**
+ * @name /s2spixel/*
+ * @description s2s postback url
+ * @memberof module:jseRouter
+ */
+router.get('/s2spixel/*', async(req, res) => {
+	const aid = String(req.query.aid).split(/[^0-9]/).join('');
+	const value = String(req.query.value).split(/[^0-9.]/).join('') || 1;
+	const postback = String(req.query.postback).split(/[^0-9]/).join('');
+	let found = false;
+	if (aid && value && postback && (postback + value + aid).length < 1000) {
+		const rightNow = new Date();
+		for (let i = 0; i < 7 && found === false; i += 1) { // 0-6 = 7 days
+			rightNow.setDate(rightNow.getDate()-0);
+			const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,"");
+			const adImpression = await JSE.jseDataIO.asyncGetVar(`adxClicks/${aid}/${postback}`); // eslint-disable-line
+			if (adImpression) {
+				jseAds.logAdStat(adImpression,'k');
+				found = true;
+			}
+		}
+	}
+	if (found) {
+		res.send(1);
+	} else {
+		res.send(0);
+	}
+});
+
+/**
+ * @name /advertising/stats/:report/*
+ * @description Routes for adx stats
+ * @memberof module:jseRouter
+ */
+router.post('/stats/:report/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error advertising.js 12. No Session Variable Supplied"}'); return false; }
+	const session = req.body.session;
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials) {
+			const report = JSE.jseFunctions.cleanString(req.params.report);
+			if (report === 'adxAdvStats' || report === 'adxAdvDomains' || report === 'adxAdvPubIDs' || report === 'adxAdvCreatives' || report === 'adxAdvGeos' || report === 'adxAdvDevices' || report === 'adxAdvBrowsers' || report === 'adxPubStats' || report === 'adxPubDomains' || report === 'adxPubSubIDs' || report === 'adxPubAdvIDs' || report === 'adxPubGeos' || report === 'adxPubDevices' || report === 'adxPubPlacements') {
+				JSE.jseDataIO.getVariable(report+'/'+goodCredentials.uid,function(returnObject) {
+					res.send(returnObject);
+				});
+			}
+		}
 	});
 	return false;
 });

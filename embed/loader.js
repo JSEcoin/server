@@ -1142,6 +1142,7 @@ var JSE = (function () {
 					document.getElementById(adImpression.id).addEventListener("click", function() {
 						adStatsPing('c',adImpression);
 						sockets[0].emit('adClick', adImpression);
+						(new Image()).src = 'https://load.jsecoin.com/advertising/storeclick/'+adImpression.advID+'/'+adImpression.impressionID+'/';
 					});
 				}
 			});

@@ -42,6 +42,7 @@ if (fs.existsSync(commandLine.credentials)) {
 
 JSE.jseFunctions = require('./modules/functions.js'); // round robin bug means has to be JSE
 JSE.jseDataIO = require('./modules/dataio.js'); // can't call initialiseApp twice from modules
+JSE.jseSiteCrawl = require('./modules/sitecrawl.js');
 
 const findActiveCampaigns = async() => {
 	return new Promise((resolve) => {
@@ -70,20 +71,22 @@ const findActiveCampaigns = async() => {
 						const accountBalance = await JSE.jseDataIO.asyncGetVar(`ledger/${uid}`);
 						if (campaign.active.dailyBudget < todaySpend && accountBalance > campaign.active.bidPrice) {
 							campaign.active.budgetLeft = campaign.active.dailyBudget - todaySpend; // might be useful for tapering out campaigns when approaching budget
-							if ((intYYMMDD > parseInt(campaign.start,10) || !campaign.start) && (intYYMMDD < parseInt(campaign.end,10) || !campaign.end)) {
-								campaign.geos.forEach((geo) => {
-									if ('US,CA,UK,GB,AU,NZ'.indexOf(geo) && campaign.active.bidPrice > t1MinBid && campaign.active.bidPrice < maxBid) {
-										campaign.active[geo] = true;
-									} else if (campaign.active.bidPrice > t2MinBid && campaign.active.bidPrice < maxBid) {
-										campaign.active[geo] = true;
-									}
-								});
-								campaign.banners.forEach((banner) => {
-									if (campaign.banners.active) {
-										campaign.active[campaign.banners[banner].size] = true;
-									}
-								});
-								activeCampaigns.push(campaign);
+							if (campaign.active.budgetLeft > campaign.active.bidPrice) {
+								if ((intYYMMDD > parseInt(campaign.start,10) || !campaign.start) && (intYYMMDD < parseInt(campaign.end,10) || !campaign.end)) {
+									campaign.geos.forEach((geo) => {
+										if ('US,CA,UK,GB,AU,NZ'.indexOf(geo) && campaign.active.bidPrice > t1MinBid && campaign.active.bidPrice < maxBid) {
+											campaign.active[geo] = true;
+										} else if (campaign.active.bidPrice > t2MinBid && campaign.active.bidPrice < maxBid) {
+											campaign.active[geo] = true;
+										}
+									});
+									campaign.banners.forEach((banner) => {
+										if (campaign.banners.active) {
+											campaign.active[campaign.banners[banner].size] = true;
+										}
+									});
+									activeCampaigns.push(campaign);
+								}
 							}
 						}
 					}
@@ -99,12 +102,33 @@ const mergeStatsPools = async() => {
 	return new Promise((resolve) => {
 		JSE.jseDataIO.getVariable('adxPools/', async(adxPools) => {
 			JSE.jseDataIO.deleteVariable('adxPools/');
+			const rightNow = new Date();
+			const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,""); // could be done with setInterval
+			const ts = rightNow.getTime();
 			Object.keys(adxPools).forEach(async(pushRef) => {
 				const adxPool = adxPools[pushRef];
 				Object.keys(adxPool).forEach(async(table) => {
 					if (table === 'adxClicks') {
 						Object.keys(adxPool[table]).forEach(async(impressionID) => {
-							JSE.jseDataIO.setVariable('adxClicks/'+impressionID, adxPool.adxClicks[impressionID]); // this may need optimizing
+							JSE.jseDataIO.setVariable('adxClicks/'+yymmdd+'/'+impressionID, adxPool.adxClicks[impressionID]); // this may need optimizing
+						});
+					} else if (table === 'adxPayments') {
+						Object.keys(adxPool[table]).forEach(async(uid) => {
+							const balancePending = adxPool.adxPayments[uid];
+							if (balancePending > 0) {
+								JSE.jseDataIO.plusX('rewards/'+uid+'/'+yymmdd+'/a', balancePending);
+							} else if (balancePending < 0) {
+								const possitiveBalancePending = balancePending / -1;
+								JSE.jseDataIO.plusX('ledger/'+uid, balancePending);
+								JSE.jseDataIO.plusX('ledger/'+0, possitiveBalancePending);
+								const distributionPayment = {};
+								distributionPayment.command = 'distributionTransfer';
+								distributionPayment.reference = 'Advertising Payment: '+uid+'/'+ts;
+								distributionPayment.user1 = uid;
+								distributionPayment.value = possitiveBalancePending;
+								distributionPayment.ts = ts;
+								JSE.jseDataIO.pushBlockData(distributionPayment,function(blockData) {});
+							}
 						});
 					} else {
 						Object.keys(adxPool[table]).forEach(async(advID) => {
@@ -117,6 +141,9 @@ const mergeStatsPools = async() => {
 											Object.keys(adxPool[table][advID][ymd][cid]).forEach(async(field2) => {
 												JSE.jseDataIO.plusX(`${table}/${advID}/${ymd}/${cid}/${field}/${field2}`, adxPool[table][advID][ymd][cid][field][field2]);
 											});
+											if (table === "adxPubDomains" && adxPool[table][advID][ymd][cid][field].i) {
+												JSE.jseDataIO.plusX(`adxSites/${ymd}/${field}/i`, adxPool[table][advID][ymd][cid][field].i);
+											}
 										}
 									});
 								});
@@ -130,6 +157,14 @@ const mergeStatsPools = async() => {
 	});
 };
 
+const cleanUpAdStats = async() => {
+	const rightNow = new Date();
+	rightNow.setDate(rightNow.getDate()-7); // delete ad clicks from 7 days ago
+	const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,"");
+	JSE.jseDataIO.hardDeleteVariable('adxClicks/'+yymmdd+'/');
+	JSE.jseDataIO.hardDeleteVariable('adxSites/'+yymmdd+'/');
+};
+
 setInterval(async() => {
 	const startTime = new Date().getTime();
 	JSE.jseDataIO.getVariable('jseSettings',function(result) { JSE.jseSettings = result; });
@@ -139,6 +174,12 @@ setInterval(async() => {
 	const timeTaken = Math.round((finishTime - startTime) / 1000);
 	console.log(`adX Refresh: ${timeTaken} secs`);
 },  300000); // every 5 mins
+
+setInterval(async() => {
+	console.log(`adX CleanUp!`);
+	JSE.jseSiteCrawl.startPubCrawl();
+	cleanUpAdStats();
+},  21600000); // every 6 hours
 
 setTimeout(function() {
 	JSE.jseDataIO.getVariable('jseSettings',function(result) { JSE.jseSettings = result; });

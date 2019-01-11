@@ -163,7 +163,7 @@ const jseCommands = {
 						callback2('{"fail":1,"notification":"Transfer Failed: Insufficient Funds"}');
 					} else if (txLeft < value) {
 						callback2('{"fail":1,"notification":"Transfer Failed: Value greater than current transaction limit left, '+txLeft+' JSE"}');
-					} else if (goodCredentials.locked && goodCredentials.uid !== 0) {
+					} else if (goodCredentials.locked && goodCredentials.uid !== 0 && toUser.uid !== 0) {
 						callback2('{"fail":1,"notification":"Transfer Failed: Account locked pending recent transaction, please try again in 20 seconds"}');
 					} else if (goodCredentials.suspended && goodCredentials.suspended !== 0) {
 						callback2('{"fail":1,"notification":"Transfer Failed: This user account has been suspended. Please contact investigations@jsecoin.com"}');

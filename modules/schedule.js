@@ -402,6 +402,18 @@ function processRewards(howManyDaysBack=7) {
 					JSE.jseDataIO.pushBlockData(newReferralData,function(blockData) {});
 					JSE.jseDataIO.pushVariable('history/'+uid,newReferralData,function(pushRef) {});
 				}
+				if (rewards[uid][lastWeekYYMMDD].a) { // a = advertising
+					const jseReferralReward = rewards[uid][lastWeekYYMMDD].a;
+					JSE.jseDataIO.plusX('ledger/'+uid, jseReferralReward);
+					const newReferralData = {};
+					newReferralData.command = 'advertisingReward';
+					newReferralData.reference = 'Advertising Payment '+lastWeekYYMMDD;
+					newReferralData.user1 = uid;
+					newReferralData.value = jseReferralReward;
+					newReferralData.ts = new Date().getTime();
+					JSE.jseDataIO.pushBlockData(newReferralData,function(blockData) {});
+					JSE.jseDataIO.pushVariable('history/'+uid,newReferralData,function(pushRef) {});
+				}
 				JSE.jseDataIO.setVariable('rewards/'+uid+'/'+lastWeekYYMMDD+'/d',true); // d = done
 			}
 			if (rewards[uid][lastMonthYYMMDD]) {
