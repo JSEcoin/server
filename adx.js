@@ -80,12 +80,14 @@ const findActiveCampaigns = async() => {
 											campaign.active[geo] = true;
 										}
 									});
+									let creativeCount = 0;
 									campaign.banners.forEach((banner) => {
-										if (campaign.banners.active) {
+										if (!campaign.banners.disabled && !campaign.banners.paused) {
 											campaign.active[campaign.banners[banner].size] = true;
+											creativeCount += 1;
 										}
 									});
-									activeCampaigns.push(campaign);
+									if (creativeCount > 0) activeCampaigns.push(campaign);
 								}
 							}
 						}

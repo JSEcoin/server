@@ -31,7 +31,7 @@ router.post('/uploadcampaign/*', function (req, res) {
 				campaign.cid = String(newDate) +''+ String(random); // Campaign ID
 				campaign.uid = goodCredentials.uid;
 				campaign.paused = false; // user paused
-				campaign.disabled = false; // admin disabled (budgets etc)
+				campaign.disabled = 'pending'; // admin disabled (budgets etc)
 				campaign.archived = false;
 			}
 			campaign.banners = [];
@@ -54,7 +54,7 @@ router.post('/uploadcampaign/*', function (req, res) {
 					if (fileName) {
 						if (base64Data.length < 250000) {
 							JSE.jseDataIO.storeFile('adx',fileName,base64Data,'base64');
-							campaign.banners.push({ fileName, size, originalFileName, active: true });
+							campaign.banners.push({ fileName, size, originalFileName, paused: false, disabled: 'pending' });
 						} else {
 							console.log("Error advertising.js 40. File size too large");
 						}
