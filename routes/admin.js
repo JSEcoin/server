@@ -659,17 +659,24 @@ router.get('/adxcampaignapproval/:advid/:campaignid/:fileName/:status/:adminpass
 	const advID = JSE.jseFunctions.cleanString(req.params.advid);
 	const campaignID = JSE.jseFunctions.cleanString(req.params.campaignid);
 	const fileName = JSE.jseFunctions.cleanString(req.params.fileName);
-	JSE.jseDataIO.getVariable(`adxCampaigns/${advID}/${campaignID}/banners`, (bannersRaw) => {
-		const banners = bannersRaw;
-		for (let i = 0; i < banners.length; i+=1) {
-			if (banners[i].fileName === fileName) {
-				if (status === 'approved') banners[i].disabled = false;
-				if (status === 'declined') banners[i].disabled = 'declined';
+	if (fileName === 'campaign') {
+		// campaign approval
+		if (status === 'approved') JSE.jseDataIO.setVariable(`adxCampaigns/${advID}/${campaignID}/disabled`,false);
+		if (status === 'declined') JSE.jseDataIO.setVariable(`adxCampaigns/${advID}/${campaignID}/disabled`,'declined');
+	} else {
+		// individual banner approval
+		JSE.jseDataIO.getVariable(`adxCampaigns/${advID}/${campaignID}/banners`, (bannersRaw) => {
+			const banners = bannersRaw;
+			for (let i = 0; i < banners.length; i+=1) {
+				if (banners[i].fileName === fileName) {
+					if (status === 'approved') banners[i].disabled = false;
+					if (status === 'declined') banners[i].disabled = 'declined';
+				}
 			}
-		}
-		JSE.jseDataIO.setVariable(`adxCampaigns/${advID}/${campaignID}/banners`,banners);
-		res.send('{"success":1,"notification":"Banner status updated"}');
-	});
+			JSE.jseDataIO.setVariable(`adxCampaigns/${advID}/${campaignID}/banners`,banners);
+			res.send('{"success":1,"notification":"Banner status updated"}');
+		});
+	}
 	return false;
 });
 
