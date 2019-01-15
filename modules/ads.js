@@ -120,15 +120,32 @@ const jseAds = {
 	 */
 	addProperty: (key, value) => {
 		const keys = key.split('/');
-		while (keys.length > 1) {
-			const k = keys.shift();
-			if (!JSE.adxPool.hasOwnProperty(k)) { // eslint-disable-line
-				JSE.adxPool[k] = {};
-			}
-			JSE.adxPool = JSE.adxPool[k];
+		let keyCount = 0;
+		for (let i = 0; i < keys.length; i+=1) {
+			if (i === 0 && !JSE.adxPool[keys[0]]) JSE.adxPool[keys[0]] = {};
+			if (i === 1 && !JSE.adxPool[keys[0]][keys[1]]) JSE.adxPool[keys[0]][keys[1]] = {};
+			if (i === 2 && !JSE.adxPool[keys[0]][keys[1]][keys[2]]) JSE.adxPool[keys[0]][keys[1]][keys[2]] = {};
+			if (i === 3 && !JSE.adxPool[keys[0]][keys[1]][keys[2]][keys[3]]) JSE.adxPool[keys[0]][keys[1]][keys[2]][keys[3]] = {};
+			if (i === 4 && !JSE.adxPool[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]]) JSE.adxPool[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]] = {};
+			if (i === 5 && !JSE.adxPool[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]][keys[5]]) JSE.adxPool[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]][keys[5]] = {};
+			keyCount = i;
 		}
-		JSE.adxPool[keys[0]] = (JSE.adxPool[keys[0]] || 0) + value;
+		if (keyCount === 4) {
+			if (typeof JSE.adxPool[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]] === 'object') {
+				JSE.adxPool[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]] = value;
+			} else {
+				JSE.adxPool[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]] += value;
+			}
+		}
+		if (keyCount === 5) {
+			if (typeof JSE.adxPool[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]][keys[5]] === 'object') {
+				JSE.adxPool[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]][keys[5]] = value;
+			} else {
+				JSE.adxPool[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]][keys[5]] += value;
+			}
+		}
 	},
+
 
 	/**
 	 * @method <h2>logAdImpression</h2>
