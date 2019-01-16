@@ -16,7 +16,7 @@ commandLine
 	.option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
 	.option('-d, --datastore [value]', 'Authenticated datastore','http://10.128.0.5')
 	.option('-e, --blockstore [value]', 'Authenticated blockstore','http://10.128.0.6')
-	.option('-a, --adxstore [value]', 'Authenticated adxstore','http://10.128.0.7')
+	.option('-a, --adxstore [value]', 'Authenticated adxstore','http://localhost:84')
 	.option('-t, --testnet [value]', 'Launch the testnet as remote, local or log', false)
 	.parse(process.argv);
 
@@ -61,8 +61,14 @@ const findActiveCampaigns = async() => {
 			const t1MinBid = 0.1 / exchangeRate; // work out min/max bids in JSE
 			const t2MinBid = 0.02 / exchangeRate;
 			const maxBid = 10 / exchangeRate;
-			Object.keys(adxCampaigns).forEach(async(uid) => {
-				Object.keys(adxCampaigns[uid]).forEach(async(cid) => {
+			const ledger = await JSE.jseDataIO.asyncGetVar(`ledger`);
+			Object.keys(adxCampaigns).forEach((uid,k1,a1) => {
+				Object.keys(adxCampaigns[uid]).forEach((cid,k2,a2) => {
+					if (k1 === a1.length - 1 && k2 === a2.length - 1) {
+						setTimeout(() => {
+							JSE.jseDataIO.setVariable('adxActiveCampaigns/', activeCampaigns);
+						},5000);
+					}
 					const campaign = adxCampaigns[uid][cid];
 					if (!campaign.disabled && !campaign.paused) {
 						campaign.active = {};
@@ -73,34 +79,36 @@ const findActiveCampaigns = async() => {
 							campaign.active.bidPrice = campaign.bidPrice;
 							campaign.active.dailyBudget = campaign.dailyBudget;
 						}
-						const todaySpend = await JSE.jseDataIO.asyncGetVar(`adxAdvStats/${uid}/${yymmdd}/${cid}/j`);
-						const accountBalance = await JSE.jseDataIO.asyncGetVar(`ledger/${uid}`);
-						if (campaign.active.dailyBudget < todaySpend && accountBalance > campaign.active.bidPrice) {
-							campaign.active.budgetLeft = campaign.active.dailyBudget - todaySpend; // might be useful for tapering out campaigns when approaching budget
-							if (campaign.active.budgetLeft > campaign.active.bidPrice) {
-								if ((intYYMMDD > parseInt(campaign.start,10) || !campaign.start) && (intYYMMDD < parseInt(campaign.end,10) || !campaign.end)) {
-									campaign.geos.forEach((geo) => {
-										if ('US,CA,UK,GB,AU,NZ'.indexOf(geo) && campaign.active.bidPrice > t1MinBid && campaign.active.bidPrice < maxBid) {
-											campaign.active[geo] = true;
-										} else if (campaign.active.bidPrice > t2MinBid && campaign.active.bidPrice < maxBid) {
-											campaign.active[geo] = true;
-										}
-									});
-									let creativeCount = 0;
-									campaign.banners.forEach((banner) => {
-										if (!campaign.banners.disabled && !campaign.banners.paused) {
-											campaign.active[campaign.banners[banner].size] = true;
-											creativeCount += 1;
-										}
-									});
-									if (creativeCount > 0) activeCampaigns.push(campaign);
+						JSE.jseDataIO.getVariable(`adxAdvStats/${uid}/${yymmdd}/${cid}/j`, (todaySpend) => {
+							if (todaySpend === null) todaySpend = 0;
+							const accountBalance = ledger[uid];
+							if (campaign.active.dailyBudget > todaySpend && accountBalance > campaign.active.bidPrice) {
+								campaign.active.budgetLeft = campaign.active.dailyBudget - todaySpend; // might be useful for tapering out campaigns when approaching budget
+								console.log('##'+campaign.active.budgetLeft)
+								if (campaign.active.budgetLeft > campaign.active.bidPrice) {
+									if ((intYYMMDD > parseInt(campaign.start,10) || !campaign.start) && (intYYMMDD < parseInt(campaign.end,10) || !campaign.end)) {
+										campaign.geos.forEach((geo) => {
+											if ('US,CA,UK,GB,AU,NZ'.indexOf(geo) && campaign.active.bidPrice > t1MinBid && campaign.active.bidPrice < maxBid) {
+												campaign.active[geo] = true;
+											} else if (campaign.active.bidPrice > t2MinBid && campaign.active.bidPrice < maxBid) {
+												campaign.active[geo] = true;
+											}
+										});
+										let creativeCount = 0;
+										campaign.banners.forEach((banner) => {
+											if (!campaign.banners.disabled && !campaign.banners.paused) {
+												campaign.active[banner.size] = true;
+												creativeCount += 1;
+											}
+										});
+										if (creativeCount > 0) activeCampaigns.push(campaign);
+									}
 								}
 							}
-						}
+						});
 					}
 				});
 			});
-			JSE.jseDataIO.setVariable('adxActiveCampaigns/', activeCampaigns);
 			resolve(true);
 		});
 	});
