@@ -79,12 +79,12 @@ const findActiveCampaigns = async() => {
 							campaign.active.bidPrice = campaign.bidPrice;
 							campaign.active.dailyBudget = campaign.dailyBudget;
 						}
-						JSE.jseDataIO.getVariable(`adxAdvStats/${uid}/${yymmdd}/${cid}/j`, (todaySpend) => {
-							if (todaySpend === null) todaySpend = 0;
+						JSE.jseDataIO.getVariable(`adxAdvStats/${uid}/${yymmdd}/${cid}/j`, (todaySpendRaw) => {
+							let todaySpend = 0;
+							if (todaySpendRaw !== null) todaySpend = todaySpendRaw;
 							const accountBalance = ledger[uid];
 							if (campaign.active.dailyBudget > todaySpend && accountBalance > campaign.active.bidPrice) {
 								campaign.active.budgetLeft = campaign.active.dailyBudget - todaySpend; // might be useful for tapering out campaigns when approaching budget
-								console.log('##'+campaign.active.budgetLeft)
 								if (campaign.active.budgetLeft > campaign.active.bidPrice) {
 									if ((intYYMMDD > parseInt(campaign.start,10) || !campaign.start) && (intYYMMDD < parseInt(campaign.end,10) || !campaign.end)) {
 										campaign.geos.forEach((geo) => {

@@ -8,7 +8,9 @@
  */
 
 const JSE = global.JSE;
-
+process.on('unhandledRejection', (reason, p) => {
+	console.log(reason.stack);
+});
 const jseAds = {
 	/**
 	 * @method <h2>getAdOptions</h2>
@@ -34,6 +36,7 @@ const jseAds = {
 						const adOption = {};
 						adOption.fileName = banner.fileName;
 						adOption.size = banner.size;
+						adOption.url = campaign.url;
 						adOption.cid = campaign.cid;
 						adOption.id = 'JSE-ad-header-'+adOption.cid;
 						adOption.bidPrice = campaign.active.bidPrice;
@@ -41,7 +44,7 @@ const jseAds = {
 						adOption.device = adRequest.device;
 						adOption.browser = adRequest.browser;
 						adOption.geo = adRequest.geo;
-						adOption.pubID = adRequest.adRequest.pubID;
+						adOption.pubID = adRequest.pubID;
 						adOption.siteID = adRequest.siteID;
 						adOption.subID = adRequest.subID;
 						adOptions.topBanner.push(adOption);
@@ -50,6 +53,7 @@ const jseAds = {
 						const adOption = {};
 						adOption.fileName = banner.fileName;
 						adOption.size = banner.size;
+						adOption.url = campaign.url;
 						adOption.cid = campaign.cid;
 						adOption.id = 'JSE-ad-float-'+adOption.cid;
 						adOption.bidPrice = campaign.active.bidPrice;
@@ -57,7 +61,7 @@ const jseAds = {
 						adOption.device = adRequest.device;
 						adOption.browser = adRequest.browser;
 						adOption.geo = adRequest.geo;
-						adOption.pubID = adRequest.adRequest.pubID;
+						adOption.pubID = adRequest.pubID;
 						adOption.siteID = adRequest.siteID;
 						adOption.subID = adRequest.subID;
 						adOptions.bottomBanner.push(adOption);
@@ -109,7 +113,7 @@ const jseAds = {
 	 * @description adds subproperties to JSE.adxPool object if they don't exist, eventually adds value
 	 */
 	poolPayment: (advID, pubID, perImpressionCost) => {
-		if (!JSE.adxPool.payments) JSE.adxPool.payments = {};
+		if (!JSE.adxPool.adxPayments) JSE.adxPool.adxPayments = {};
 		JSE.adxPool.adxPayments[advID] = (JSE.adxPool.adxPayments[advID] || 0) - perImpressionCost;
 		JSE.adxPool.adxPayments[pubID] = (JSE.adxPool.adxPayments[pubID] || 0) + perImpressionCost;
 	},
@@ -218,7 +222,7 @@ const jseAds = {
 				elemDiv.id = '${bestTopAd.id}';
 				var closePosition = (document.body.clientWidth / 2) - ${parseInt(bestTopAd.size.split('x')[0],10) / 2} + 12;
 				var closeButton = '<img style="position: absolute; right: '+closePosition+'px; top: 12px; height: 12px; width: 12px; cursor: pointer;" onclick="document.getElementById(\\'${bestTopAd.id}\\').style.display = \\'none\\';" src="'+JSECloseButtonSrc+'" alt="x" />';
-				elemDiv.innerHTML = '<a href="${bestTopAd.outlink}" target="_blank"><img src="${bestTopAd.banner}" alt="${bestTopAd.outlink}" /></a>'+closeButton;
+				elemDiv.innerHTML = '<a href="${bestTopAd.url}" target="_blank"><img src="http://localhost/jsecoin/github/server/static/${bestTopAd.fileName}" alt="${bestTopAd.url}" /></a>'+closeButton;
 				document.body.insertBefore(elemDiv, document.body.firstChild);
 			}
 			JSEinjectTopAd();
@@ -226,7 +230,7 @@ const jseAds = {
 		}
 
 		if (adOptions.bottomBanner[0]) {
-			const bestBottomAd = await jseAds.pickAd(adOptions,'bottomBanner');
+			const bestBottomAd = await jseAds.pickAd(adOptions, adRequest, 'bottomBanner');
 			const random2 = Math.floor((Math.random() * 999999) + 1);
 			const selectedAd2 = {
 				advID: bestBottomAd.advID,
@@ -252,7 +256,7 @@ const jseAds = {
 				elemDiv.style.cssText = 'height: ${bestBottomAd.size.split('x')[1]}px; width: ${bestBottomAd.size.split('x')[0]}px; position: fixed; bottom: 0px; right: 0px; z-index: 999998;';
 				elemDiv.id = '${bestBottomAd.id}';
 				var closeButton = '<img style="position: absolute; right: '+closePosition+'px; top: 12px; height: 12px; width: 12px; cursor: pointer;" onclick="document.getElementById(\\'${bestBottomAd.id}\\').style.display = \\'none\\';" src="'+JSECloseButtonSrc+'" alt="x" />';
-				elemDiv.innerHTML = '<a href="${bestBottomAd.outlink}" target="_blank"><img src="${bestBottomAd.banner}" alt="${bestBottomAd.outlink}" /></a>'+closeButton;
+				elemDiv.innerHTML = '<a href="${bestBottomAd.url}" target="_blank"><img src="http://localhost/jsecoin/github/server/static/${bestBottomAd.fileName}" alt="${bestBottomAd.url}" /></a>'+closeButton;
 				document.body.appendChild(elemDiv);
 				setTimeout(function() {
 					riseUp(0);
@@ -291,7 +295,6 @@ const jseAds = {
 			JSEinjectBottomAd();
 			`;
 		}
-
 		callback(injectCode,selectedAds);
 	},
 

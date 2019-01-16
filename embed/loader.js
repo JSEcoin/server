@@ -1123,7 +1123,7 @@ var JSE = (function () {
 		adRequest.siteID = jseTrack.siteID;
 		adRequest.subID = jseTrack.subID;
 		adRequest.userIP = jseTrack.userIP;
-		adRequest.geo = jseTrack.geo;
+		adRequest.geo = 'GB'; //jseTrack.geo;
 		adRequest.url = jseTrack.url;
 		adRequest.domain = extractDomain(jseTrack.url);
 		adRequest.innerHeight = jseTrack.innerHeight;
@@ -1142,7 +1142,7 @@ var JSE = (function () {
 					document.getElementById(adImpression.id).addEventListener("click", function() {
 						adStatsPing('c',adImpression);
 						sockets[0].emit('adClick', adImpression);
-						(new Image()).src = 'https://load.jsecoin.com/advertising/storeclick/'+adImpression.advID+'/'+adImpression.impressionID+'/';
+						(new Image()).src = jseLoadServer+'/advertising/storeclick/'+adImpression.advID+'/'+adImpression.impressionID+'/';
 					});
 				}
 			});

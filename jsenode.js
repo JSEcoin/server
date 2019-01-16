@@ -259,7 +259,7 @@ if (JSE.authenticatedNode === true) {
 		JSE.jseDataIO.getVariable('blockID',function(result) { JSE.blockID = result; });
 		JSE.jseDataIO.getVariable('publicStats',function(result) { JSE.publicStats = result; });
 		JSE.jseDataIO.getVariable('dailyPublicStats',function(result) { JSE.dailyPublicStats = result; });
-		JSE.jseDataIO.getVariable('adxActiveCampaigns',function(result) { JSE.activeCampaigns = result; });
+		JSE.jseDataIO.getVariable('adxActiveCampaigns',function(result) { JSE.adxActiveCampaigns = result; });
 	}, 3000); // allow redis to authorize
 
 	setInterval(function() {
@@ -267,7 +267,7 @@ if (JSE.authenticatedNode === true) {
 		JSE.jseDataIO.getVariable('dailyPublicStats',function(result) { JSE.dailyPublicStats = result; });
 		JSE.jseDataIO.getVariable('jseSettings',function(result) { JSE.jseSettings = result; });
 		JSE.jseDataIO.pushVariable('adxPools/',JSE.adxPool,function(pushRef) { JSE.adxPool = {}; });
-		JSE.jseDataIO.getVariable('adxActiveCampaigns',function(result) { JSE.activeCampaigns = result; });
+		JSE.jseDataIO.getVariable('adxActiveCampaigns',function(result) { JSE.adxActiveCampaigns = result; });
 	}, 300000); // every 5 mins
 }
 
