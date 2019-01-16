@@ -46,7 +46,7 @@ const jseSiteCrawl = {
 
 	iabCategories: require('./../misc/iab-keywords.json'),
 	commonWordsFile: require('./../misc/common-words.json'), // big 225kb file with all the languages
-	iabKeywords: JSE.jseSiteCrawl.getIABKeywords(),
+	iabKeywords: function () { return this.getIABKeywords(); },
 
 	findLanguage: (wordArray) => {
 		let thisLang = 'en';

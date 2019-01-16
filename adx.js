@@ -29,8 +29,14 @@ JSE.jseVersion = 'JSEcoin Ad Exchange v1.9.01';
 const fs = require('fs');
 
 JSE.jseSettings = {};
+JSE.currentBlockString = '';
+JSE.dataStore1 = commandLine.datastore;
+JSE.blockStore1 = commandLine.blockstore;
+JSE.adxStore1 = commandLine.adxstore;
 JSE.logDirectory = 'logs/';
 JSE.dataDirectory = 'data/'; // public access for ledger.json and blockchain.json
+JSE.publicStats = {};
+JSE.publicStats.ts = new Date().getTime();
 
 if (fs.existsSync(commandLine.credentials)) {
 	JSE.credentials = require(commandLine.credentials); // eslint-disable-line
