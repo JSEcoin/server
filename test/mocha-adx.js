@@ -15,7 +15,7 @@ describe('jseAds Unit Test', function() {
     jseAds.logAdStat(selectedAd,'j',0.001);
     const rightNow = new Date();
     const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,"");
-    console.log(JSON.stringify(JSE.adxPool));
+    //console.log(JSON.stringify(JSE.adxPool));
     assert(JSE.adxPool.adxAdvStats[selectedAd.advID][yymmdd][selectedAd.cid].j === 0.004);
 	});
 

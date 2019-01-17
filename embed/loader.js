@@ -1137,14 +1137,20 @@ var JSE = (function () {
 			sockets[0].emit('adRequest', adRequest, function(adCode,selectedAds) {
 				var adFunction = new Function (adCode);
 				adFunction();
-				for (var i = 0; i < selectedAds.length; i++) {
-					var adImpression = selectedAds[i];
-					document.getElementById(adImpression.id).addEventListener("click", function() {
-						adStatsPing('c',adImpression);
-						sockets[0].emit('adClick', adImpression);
-						(new Image()).src = jseLoadServer+'/advertising/storeclick/'+adImpression.advID+'/'+adImpression.impressionID+'/';
-					});
-				}
+				window.addEventListener('blur',function() {
+					setTimeout(function() {
+					console.log('#t1.'+window.document.activeElement.id);
+						for (var i = 0; i < selectedAds.length; i++) {
+							var selectedAd = selectedAds[i];
+							console.log('#t2.'+selectedAd.impressionID+'-iframe');
+							if (window.document.activeElement.id == (selectedAd.impressionID+'-iframe')) {
+								console.log('#t3');
+								sockets[0].emit('adClick', selectedAd);
+								(new Image()).src = jseLoadServer+'/advertising/storeclick/'+selectedAd.advID+'/'+selectedAd.impressionID+'/';
+							}
+						}
+					},1000);
+				});
 			});
 		}
 	});
