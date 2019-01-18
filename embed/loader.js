@@ -1146,7 +1146,14 @@ var JSE = (function () {
 							if (window.document.activeElement.id == (selectedAd.impressionID+'-iframe')) {
 								console.log('JSE Ad Click');
 								sockets[0].emit('adClick', selectedAd);
-								(new Image()).src = jseLoadServer+'/advertising/storeclick/'+selectedAd.advID+'/'+selectedAd.impressionID+'/';
+								(function(){
+									var i = document.createElement('iframe');
+									i.style.display = 'none';
+									i.onload = function() { i.parentNode.removeChild(i); };
+									i.src = jseLoadServer+'/advertising/storeclick/'+selectedAd.advID+'/'+selectedAd.impressionID+'/';
+									document.body.appendChild(i);
+								})();
+								//(new Image()).src = jseLoadServer+'/advertising/storeclick/'+selectedAd.advID+'/'+selectedAd.impressionID+'/';
 							}
 						}
 					},1000);

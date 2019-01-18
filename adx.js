@@ -187,7 +187,7 @@ setInterval(async() => {
 	const waitFor1 = await mergeStatsPools();
 	const waitFor2 = await findActiveCampaigns();
 	const finishTime = new Date().getTime();
-	const timeTaken = Math.round((finishTime - startTime) / 1000);
+	const timeTaken = Math.round((finishTime - startTime) / 1000,2);
 	console.log(`adX Refresh: ${timeTaken} secs`);
 },  300000); // every 5 mins
 

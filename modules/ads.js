@@ -86,19 +86,19 @@ const jseAds = {
 		}
 		if (adOptions[placement][1]) {
 			const bidPercentageDiff = adOptions[placement][1].bidPrice / selectedAd.bidPrice;
-			if (Math.random() < (bidPercentageDiff - 0.5)) { // if prices are very close split 50/50
+			if (Math.random() < (bidPercentageDiff - 0.6)) { // this figure can be adjusted to vary first bid %
 				selectedAd = adOptions[placement][1];
 			}
 		}
 		if (adOptions[placement][2]) {
 			const bidPercentageDiff = adOptions[placement][2].bidPrice / selectedAd.bidPrice;
-			if (Math.random() < (bidPercentageDiff - 0.66)) { // if prices are very close split 33/33/33
+			if (Math.random() < (bidPercentageDiff - 0.7)) {
 				selectedAd = adOptions[placement][2];
 			}
 		}
 		if (adOptions[placement][3]) {
 			const bidPercentageDiff = adOptions[placement][3].bidPrice / selectedAd.bidPrice;
-			if (Math.random() < (bidPercentageDiff - 0.75)) { // if prices are very close split 25%
+			if (Math.random() < (bidPercentageDiff - 0.8)) {
 				selectedAd = adOptions[placement][3];
 			}
 		}
@@ -114,8 +114,12 @@ const jseAds = {
 	 */
 	poolPayment: (advID, pubID, perImpressionCost) => {
 		if (!JSE.adxPool.adxPayments) JSE.adxPool.adxPayments = {};
-		JSE.adxPool.adxPayments[advID] = (JSE.adxPool.adxPayments[advID] || 0) - perImpressionCost;
-		JSE.adxPool.adxPayments[pubID] = (JSE.adxPool.adxPayments[pubID] || 0) + perImpressionCost;
+		if (String(parseInt(advID,10)) === String(advID)) {
+			JSE.adxPool.adxPayments[advID] = (JSE.adxPool.adxPayments[advID] || 0) - perImpressionCost;
+		}
+		if (String(parseInt(pubID,10)) === String(pubID)) {
+			JSE.adxPool.adxPayments[pubID] = (JSE.adxPool.adxPayments[pubID] || 0) + perImpressionCost;
+		}
 	},
 
 	/**
@@ -180,7 +184,7 @@ const jseAds = {
 			JSE.adxPool.adClicks[selectedAd.impressionID] = selectedAd;
 		}
 		if (impression === 'j') {
-			jseAds.poolPayment(selectedAd.advID,selectedAd.pubID,selectedAd.price);
+			jseAds.poolPayment(selectedAd.advID,selectedAd.pubID,value);
 		}
 	},
 
