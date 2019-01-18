@@ -85,19 +85,19 @@ const jseAds = {
 			selectedAd = adOptions[placement][0];
 		}
 		if (adOptions[placement][1]) {
-			const bidPercentageDiff = adOptions[placement][1] / selectedAd.bidPrice;
+			const bidPercentageDiff = adOptions[placement][1].bidPrice / selectedAd.bidPrice;
 			if (Math.random() < (bidPercentageDiff - 0.5)) { // if prices are very close split 50/50
 				selectedAd = adOptions[placement][1];
 			}
 		}
 		if (adOptions[placement][2]) {
-			const bidPercentageDiff = adOptions[placement][2] / selectedAd.bidPrice;
+			const bidPercentageDiff = adOptions[placement][2].bidPrice / selectedAd.bidPrice;
 			if (Math.random() < (bidPercentageDiff - 0.66)) { // if prices are very close split 33/33/33
 				selectedAd = adOptions[placement][2];
 			}
 		}
 		if (adOptions[placement][3]) {
-			const bidPercentageDiff = adOptions[placement][3] / selectedAd.bidPrice;
+			const bidPercentageDiff = adOptions[placement][3].bidPrice / selectedAd.bidPrice;
 			if (Math.random() < (bidPercentageDiff - 0.75)) { // if prices are very close split 25%
 				selectedAd = adOptions[placement][3];
 			}

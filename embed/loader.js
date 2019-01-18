@@ -1097,24 +1097,24 @@ var JSE = (function () {
 		if (botRegEx.test(userAgentLC)) {
 			adRequest.device = 'bot'; // don't send ad request?
 		} else if (userAgentLC.indexOf('sm-g') > -1) {
-			adRequest.device = 'androidphone';
+			adRequest.device = 'androidPhone';
 		} else if (userAgentLC.indexOf('iphone') > -1) {
 			adRequest.device = 'iphone';
 		} else if (userAgentLC.indexOf('ipad') > -1) {
 			adRequest.device = 'ipad';
 		} else if (userAgentLC.indexOf('tablet') > -1) {
-			adRequest.device = 'androidtablet';
+			adRequest.device = 'androidTablet';
 		} else if (userAgentLC.indexOf('sm-t') > -1) {
-			adRequest.device = 'androidtablet';
+			adRequest.device = 'androidTablet';
 		} else if (userAgentLC.indexOf('win64') > -1) {
-			adRequest.device = 'windowsdesktop';
+			adRequest.device = 'windowsDesktop';
 		} else if (userAgentLC.indexOf('macintosh') > -1) {
-			adRequest.device = 'macdesktop';
+			adRequest.device = 'macDesktop';
 		} else if (windowsRegEx.test(userAgentLC)) {
-			adRequest.device = 'windowsdesktop';
+			adRequest.device = 'windowsDesktop';
 		} else if (mobileRegEx.test(userAgentLC)) {
 			if (userAgentLC.indexOf('android') > -1) {
-				adRequest.device = 'androidphone';
+				adRequest.device = 'androidPhone';
 			} else {
 				adRequest.device = 'unknownmobile';
 			}
@@ -1139,12 +1139,12 @@ var JSE = (function () {
 				adFunction();
 				window.addEventListener('blur',function() {
 					setTimeout(function() {
-					console.log('#t1.'+window.document.activeElement.id);
+					//console.log('#t1.'+window.document.activeElement.id);
 						for (var i = 0; i < selectedAds.length; i++) {
 							var selectedAd = selectedAds[i];
-							console.log('#t2.'+selectedAd.impressionID+'-iframe');
+							//console.log('#t2.'+selectedAd.impressionID+'-iframe');
 							if (window.document.activeElement.id == (selectedAd.impressionID+'-iframe')) {
-								console.log('#t3');
+								console.log('JSE Ad Click');
 								sockets[0].emit('adClick', selectedAd);
 								(new Image()).src = jseLoadServer+'/advertising/storeclick/'+selectedAd.advID+'/'+selectedAd.impressionID+'/';
 							}
