@@ -15,9 +15,13 @@ commandLine
 	.option('-p, --port [value]', 'Port',  80)
 	.option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
 	.option('-t, --testnet [value]', 'Launch the testnet as remote, local or log', false)
+	.option('-f, --filter [value]', 'Filter for primary key start i.e. -f adx', false)
+	.option('-n, --negfilter [value]', 'Negative filters for primary key start i.e. -n adx,blockChain', false)
 	.parse(process.argv);
 
 JSE.jseTestNet = commandLine.testnet;
+const keyFilter = commandLine.filter;
+const negFilter = commandLine.negfilter;
 
 if (JSE.jseTestNet !== false) console.log('WARNING: RUNNING IN TESTNET MODE - '+JSE.jseTestNet); // idiot check
 
@@ -219,7 +223,23 @@ fs.readdir(dataDir, function(err, fileNames) {
 	if (fileNames) {
 		for (let i=0; i<fileNames.length; i+=1) {
 			const fileName = fileNames[i];
-			if (fileName.indexOf('.json') > -1 && fileName.indexOf('_tmp.json') === -1) {
+			let skipFile = false;
+			if (keyFilter) {
+				if (fileName.substr(0,keyFilter.length) !== keyFilter) {
+					console.log('Key Filter Skip: '+fileName);
+					skipFile = true;
+				}
+			}
+			if (negFilter) {
+				const negFilterArr = negFilter.split(',');
+				negFilterArr.forEach((neg) => {
+					if (fileName.substr(0,neg.length) === neg) {
+						console.log('Neg Filter Skip: '+fileName);
+						skipFile = true;
+					}
+				});
+			}
+			if (!skipFile && fileName.indexOf('.json') > -1 && fileName.indexOf('_tmp.json') === -1) {
 				if (fs.existsSync(dataDir+fileName)) {
 					const rootKey = fileName.split('.json')[0];
 					let jsonData = fs.readFileSync(dataDir+fileName, 'utf8');

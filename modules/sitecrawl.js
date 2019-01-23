@@ -10,7 +10,6 @@
 const JSE = global.JSE;
 
 const puppeteer = require('puppeteer'); // eslint-disable-line
-const fs = require('fs');
 const Jimp = require('jimp');
 
 const showcaseImageDirectory = './static/showcase/';
