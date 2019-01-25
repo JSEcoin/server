@@ -18,9 +18,9 @@ router.post('/uploadcampaign/*', function (req, res) {
 		if (goodCredentials) {
 			// Object destructuring, new fields need to be added before and after the =>
 			const campaign = (({
-				name, geos, devices, windowsDesktop, macDesktop, androidTablet, ipad, androidPhone, iphone, other, browsers, chrome, firefox, safari, ucbrowser, opera, edge, ie, general, crypto, streaming, adult, domains, domainWhitelist, domainBlacklist, publishers, publisherWhitelist, publisherBlacklist, url, currencyJse, currencyUsd, dailyBudget, lifetimeBudget, bidPrice, start, end, frequencyCap,
+				name, geos, devices, windowsDesktop, macDesktop, androidTablet, ipad, androidPhone, iphone, other, browsers, chrome, firefox, safari, ucbrowser, opera, edge, ie, category, general, crypto, streaming, adult, domains, domainWhitelist, domainBlacklist, publishers, publisherWhitelist, publisherBlacklist, url, currencyJse, currencyUsd, dailyBudget, lifetimeBudget, bidPrice, start, end, frequencyCap,
 			}) => ({
-				name, geos, devices, windowsDesktop, macDesktop, androidTablet, ipad, androidPhone, iphone, other, browsers, chrome, firefox, safari, ucbrowser, opera, edge, ie, general, crypto, streaming, adult, domains, domainWhitelist, domainBlacklist, publishers, publisherWhitelist, publisherBlacklist, url, currencyJse, currencyUsd, dailyBudget, lifetimeBudget, bidPrice, start, end, frequencyCap,
+				name, geos, devices, windowsDesktop, macDesktop, androidTablet, ipad, androidPhone, iphone, other, browsers, chrome, firefox, safari, ucbrowser, opera, edge, ie, category, general, crypto, streaming, adult, domains, domainWhitelist, domainBlacklist, publishers, publisherWhitelist, publisherBlacklist, url, currencyJse, currencyUsd, dailyBudget, lifetimeBudget, bidPrice, start, end, frequencyCap,
 			}))(req.body);
 
 			if (campaign.cid) {

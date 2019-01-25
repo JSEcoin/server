@@ -212,9 +212,12 @@ const jseSocketIO = {
 
 			socket.on('adRequest', function(adRequest,callback) {
 				try {
-					jseAds.requestCode(adRequest,function(adCode,topAd,bottomAd) {
-						callback(adCode,topAd,bottomAd);
-					});
+					const ipCount = JSE.publisherIPs.reduce(function(n, val) { return n + (val === socket.realIP); }, 0);
+					if (ipCount <= 8000 && !adRequest.iFrame && JSE.socketConnections[socket.id].goodIP) {
+						jseAds.requestCode(adRequest,function(adCode,topAd,bottomAd) {
+							callback(adCode,topAd,bottomAd);
+						});
+					}
 				} catch (ex) {
 					console.log('SaveUnique - Error Caught 381: '+ex);
 				}
@@ -230,7 +233,10 @@ const jseSocketIO = {
 					const pubID = JSE.jseFunctions.cleanString(jseTrack.pubID) || 1; // jseTrack.pubID = uid
 					const siteID = JSE.jseFunctions.cleanString(jseTrack.siteID) || 1;
 					const subID = JSE.jseFunctions.cleanString(jseTrack.subID) || 1;
-					if (jseTrack.iFrame && jseTrack.iFrame === true) { return false; }
+					if (jseTrack.iFrame && jseTrack.iFrame === true) {
+						JSE.socketConnections[socket.id].goodIP = false;
+						return false;
+					}
 					const ipCount = JSE.publisherIPs.reduce(function(n, val) { return n + (val === socket.realIP); }, 0); // count ips could be one from unique already
 					if (socket.goodIP && socket.goodIP === true) {
 						if (ipCount <= 8 || (ipCount <= 25  && JSE.publisherIPsValidated.indexOf(socket.realIP) === -1)) { // Change to 5 & 20 as volume increases
@@ -242,7 +248,7 @@ const jseSocketIO = {
 							// Full reality check after x validations
 							if (JSE.publisherIPsValidated.indexOf(socket.realIP) > -1) {
 								const ipCount2 = JSE.publisherIPsValidated.reduce(function(n, val) { return n + (val === socket.realIP); }, 0);
-								if (ipCount2 === 3) { // can adjust this depending on iphub quota, lower = more queries
+								if (ipCount2 === 2) { // can adjust this depending on iphub quota, lower = more queries
 									JSE.jseFunctions.realityCheck(socket.realIP, function(goodIPTrue) {
 										if (goodIPTrue === true && typeof JSE.socketConnections[socket.id] !== 'undefined') {
 											JSE.socketConnections[socket.id].goodIP = true;

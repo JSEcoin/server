@@ -181,14 +181,20 @@ const cleanUpAdStats = async() => {
 	JSE.jseDataIO.hardDeleteVariable('adxSites/'+yymmdd+'/');
 };
 
-setInterval(async() => {
+
+const adxRoutine = async() => {
 	const startTime = new Date().getTime();
 	JSE.jseDataIO.getVariable('jseSettings',function(result) { JSE.jseSettings = result; });
 	const waitFor1 = await mergeStatsPools();
 	const waitFor2 = await findActiveCampaigns();
+	JSE.jseSiteCrawl.startPubCrawl(); // remove for production
 	const finishTime = new Date().getTime();
 	const timeTaken = Math.round((finishTime - startTime) / 1000,2);
 	console.log(`adX Refresh: ${timeTaken} secs`);
+};
+
+setInterval(async() => {
+	adxRoutine();
 },  300000); // every 5 mins
 
 setInterval(async() => {
@@ -199,7 +205,7 @@ setInterval(async() => {
 
 setTimeout(function() {
 	JSE.jseDataIO.getVariable('jseSettings',function(result) { JSE.jseSettings = result; });
-	findActiveCampaigns();
+	adxRoutine();
 }, 5000); // wait for db authentication
 
 

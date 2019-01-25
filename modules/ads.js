@@ -21,10 +21,21 @@ const jseAds = {
 		const adOptions = {};
 		adOptions.topBanner = [];
 		adOptions.bottomBanner = [];
+		// category selection
+		let category = adRequest.category;
+		if (JSE.adxCategories[adRequest.domain]) {
+			category = JSE.adxCategories[adRequest.domain];
+		}
 		JSE.adxActiveCampaigns.forEach((campaign) => {
 			if (!campaign.active[adRequest.geo]) return;
 			if (!campaign.devices && !campaign[adRequest.device]) return;
 			if (!campaign.browsers && !campaign[adRequest.browser]) return;
+			if (!campaign.category) {
+				if (category === 0 && !campaign.general) return;
+				if (category === 1 && !campaign.crypto) return;
+				if (category === 2 && !campaign.streaming) return;
+				if (category === 3 && !campaign.adult) return;
+			}
 			if (campaign.domainBlacklist.indexOf(adRequest.domain) > -1) return;
 			if (campaign.domainWhitelist.indexOf('.') > -1 && campaign.domainWhitelist.indexOf(adRequest.domain) === -1) return;
 			if (campaign.publisherBlacklist.indexOf(adRequest.pubID) > -1) return;
@@ -43,6 +54,7 @@ const jseAds = {
 						adOption.advID = campaign.uid;
 						adOption.device = adRequest.device;
 						adOption.browser = adRequest.browser;
+						adOption.domain = adRequest.domain;
 						adOption.geo = adRequest.geo;
 						adOption.pubID = adRequest.pubID;
 						adOption.siteID = adRequest.siteID;
@@ -60,6 +72,7 @@ const jseAds = {
 						adOption.advID = campaign.uid;
 						adOption.device = adRequest.device;
 						adOption.browser = adRequest.browser;
+						adOption.domain = adRequest.domain;
 						adOption.geo = adRequest.geo;
 						adOption.pubID = adRequest.pubID;
 						adOption.siteID = adRequest.siteID;

@@ -25,9 +25,9 @@ const jseSiteCrawl = {
 		const pubSites = await JSE.jseDataIO.asyncGetVar(`adxSites/${yymmdd}/`);
 		Object.keys(pubSites).forEach(async(domain) => {
 			const showcaseData = await JSE.jseDataIO.asyncGetVar(`adxShowcase/${domain}/`);
-			if (pubSites[domain].i > 100 && !showcaseData) { // only for sites greater than 100 impressions, that haven't been recorded yet
+			if (pubSites[domain].i > 0 && showcaseData && !showcaseData.category) { // only for sites greater than 100 impressions, that haven't been recorded yet
 				const url = 'http://'+domain;
-				const siteData = jseSiteCrawl.crawlPage(url);
+				const siteData = await jseSiteCrawl.crawlPage(url);
 				JSE.jseDataIO.setVariable(`adxShowcase/${domain}/`,siteData);
 			} else {
 				JSE.jseDataIO.setVariable(`adxShowcase/${domain}/dailyImpressions`,pubSites[domain].i * 4); // take into account this is run at six hour intervals
@@ -45,7 +45,7 @@ const jseSiteCrawl = {
 
 	iabCategories: require('./../misc/iab-keywords.json'),
 	commonWordsFile: require('./../misc/common-words.json'), // big 225kb file with all the languages
-	iabKeywords: () => { return this.getIABKeywords(); },
+	//iabKeywords: () => { return this.getIABKeywords(); },
 
 	findLanguage: (wordArray) => {
 		let thisLang = 'en';
@@ -70,13 +70,14 @@ const jseSiteCrawl = {
 		siteData.keywordCount = siteData.keywordArray.length;
 		siteData.language = JSE.jseSiteCrawl.findLanguage(siteData.keywordArray);
 		const categorySearch = JSE.jseSiteCrawl.iabCategories;
-		siteData.category = categorySearch.JSE4; // general/uncategorized
+		siteData.category = categorySearch[0]; // general/uncategorized
 		siteData.category.count = 0;
+		const keywords = JSE.jseSiteCrawl.getIABKeywords();
 		siteData.keywordArray.forEach((keyword,i) => {
 			if (keyword && keyword.length >= 3) {
 				const word = keyword.toLowerCase();
-				if (JSE.jseSiteCrawl.iabKeywords.indexOf(word) > -1) {
-					//console.log('Found: '+word);
+				if (keywords.indexOf(word) > -1) {
+					console.log('Found: '+word);
 					Object.keys(categorySearch).forEach((catIndex) => {
 						if (categorySearch[catIndex].keywords && categorySearch[catIndex].keywords.indexOf(word) > -1) {
 							categorySearch[catIndex].count = (categorySearch[catIndex].count || 0) + 1;
@@ -88,6 +89,7 @@ const jseSiteCrawl = {
 				}
 			}
 		});
+		JSE.jseDataIO.setVariable(`adxCategories/${siteData.domain}/`,siteData.category.index);
 		return siteData;
 	},
 
@@ -230,6 +232,8 @@ const jseSiteCrawl = {
 			return siteData;
 		});
 
+		result.domain = url.split('https://').join('').split('http://').join('').split('/')[0].toLowerCase().split(/[^.\-a-z0-9]/).join('');
+
 		const siteData = JSE.jseSiteCrawl.iabFindCategory(result);
 		siteData.bestKeywords = JSE.jseSiteCrawl.getBestKeywords(siteData.keywordArray,siteData.language);
 		/*
@@ -239,7 +243,6 @@ const jseSiteCrawl = {
 		console.log('Category: '+JSON.stringify(siteData.category));
 		*/
 		/* Get Screenshot */
-		siteData.domain = url.split('https://').join('').split('http://').join('').split('/')[0].toLowerCase().split(/[^.\-a-z0-9]/).join('');
 		siteData.images = {};
 		siteData.images.desktop = siteData.domain+'_desktop.png';
 		siteData.images.thumbnail = siteData.domain+'_thumbnail.png';
@@ -264,6 +267,8 @@ const jseSiteCrawl = {
 		siteData.keywords = siteData.bestKeywords;
 		delete siteData.bestKeywords;
 		delete siteData.category.keywords;
+		delete siteData.thumbnail;
+		delete siteData.showCase;
 		return siteData;
 	},
 };

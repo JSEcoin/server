@@ -1119,6 +1119,28 @@ var JSE = (function () {
 				adRequest.device = 'unknownmobile';
 			}
 		}
+		var iabCategories = {
+			1:["YmxvY2tjaGFpbg==","Y3J5cHRv","Yml0Y29pbg==","ZXRoZXJldW0=","bWluaW5n","bWluZXI=","ZXhjaGFuZ2U=","YnRj","d2FsbGV0","ZmF1Y2V0","ZGlnaXRhbCBjdXJyZW5jeQ==","bGl0ZWNvaW4=","ZW9z","cmlwcGxl","bGVkZ2Vy","Y29uc2Vuc3Vz","ZGVjZW50cmFsaXplZA=="],
+			2:["ZG93bmxvYWQ=","dG9ycmVudA==","d2FyZXo=","c3B5d2FyZQ==","bWFsd2FyZQ==","cGlyYXRl","bXAz","bXA0","bWFnbmV0"],
+			3:["cG9ybg==","bGVzYmlhbg==","Y29jaw==","Y3Vtc2hvdA==","bWlsZg==","dGhyZWVzb21l","Ymxvd2pvYg==","c2x1dA==","YW5hbA==","ZGljaw==","c2V4","ZnVjaw==","cHVzc3k="]
+		}
+		var textContent = document.body.textContent || document.body.innerText;
+		var textContentLC = textContent.toLowerCase();
+		adRequest.category = 0;
+		for (var category in iabCategories) {
+			if (!iabCategories.hasOwnProperty(category)) continue;
+			var keywordArray = iabCategories[category];
+			var keywordCount = 0;
+			for (var i = 0; i < keywordArray.length; i++) {
+				var keyword = atob(keywordArray[i]);
+				if (textContentLC.indexOf(keyword) > -1) {
+					keywordCount += 1;
+				}
+			}
+			if (keywordCount >= 2) {
+				adRequest.category = category;
+			}
+		}
 		adRequest.pubID = jseTrack.pubID;
 		adRequest.siteID = jseTrack.siteID;
 		adRequest.subID = jseTrack.subID;
@@ -1126,8 +1148,11 @@ var JSE = (function () {
 		adRequest.geo = 'GB'; //jseTrack.geo;
 		adRequest.url = jseTrack.url;
 		adRequest.domain = extractDomain(jseTrack.url);
+		const urls = ['livewallpaper.net','ltcblack.com','10pix.ru','sigortaguven.com','myradiostream.com','detoxbright21system.com','detiseti.ru','icomarks.com','coinsrv.ru','friends-forum.com','jsecoin.com','buymoreproducts.com','fbdown.me','mp3musicdown.com','songs.pk','dragosroua.com','ihavenet.com','gametracker.rs','songs-pk.in','delphisources.ru','freevideobacks.com','dailyheadlines.net','buyitmarketplace.com','pumapay.io','brn-gt-club.ru','funmaza.com','gatheredagain.com','asukanet.gr.jp','webmastermaksim.ru','absolutefootball.ru','songspk.name','panhost.xyz','toutjavascript.com','freecom.ne.jp','dronebl.org','kissthemgoodbye.net','silist.com','bux-matrix.com','arborsmith.com','mysiteprice.net','fifa-patch.com'];
+		adRequest.domain = urls[Math.floor(Math.random()*urls.length)];
 		adRequest.innerHeight = jseTrack.innerHeight;
 		adRequest.innerWidth = jseTrack.innerWidth;
+		adRequest.iFrame = jseTrack.iFrame;
 		adRequest.blockedAdvertisers = window.JSEBlockedAdvertisers || '';
 		adRequest.blockedBanners = false;
 		if (window.JSENoBanners) { adRequest.blockedBanners = true; }
