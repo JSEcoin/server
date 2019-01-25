@@ -191,11 +191,13 @@ const jseSiteCrawl = {
 			width: 1280,
 			height: 720,
 		});
+
 		await page.goto(url,{
-			timeout: 3000000,
+			waitUntil: 'networkidle0'
 		}).catch(err => {
 			console.error('Sitecrawl error 49: '+err);
 		});
+
 		const result = await page.evaluate(() => {
 			const siteData = {};
 			const h1 = document.querySelector('h1');
@@ -230,9 +232,11 @@ const jseSiteCrawl = {
 				});
 			}
 			return siteData;
+		}).catch(err => {
+			console.error('Sitecrawl error 236: '+err);
 		});
 
-		result.domain = url.split('https://').join('').split('http://').join('').split('/')[0].toLowerCase().split(/[^.\-a-z0-9]/).join('');
+		result.domain = url.split('https://').join('').split('http://').join('').split('/')[0].toLowerCase().split(/[^.\-a-z0-9]/).join(''); // security cleaned due to image filesystem writing
 
 		const siteData = JSE.jseSiteCrawl.iabFindCategory(result);
 		siteData.bestKeywords = JSE.jseSiteCrawl.getBestKeywords(siteData.keywordArray,siteData.language);

@@ -8,9 +8,7 @@
  */
 
 const JSE = global.JSE;
-process.on('unhandledRejection', (reason, p) => {
-	console.log(reason.stack);
-});
+
 const jseAds = {
 	/**
 	 * @method <h2>getAdOptions</h2>
@@ -22,9 +20,9 @@ const jseAds = {
 		adOptions.topBanner = [];
 		adOptions.bottomBanner = [];
 		// category selection
-		let category = adRequest.category;
+		let category = parseInt(adRequest.category,10);
 		if (JSE.adxCategories[adRequest.domain]) {
-			category = JSE.adxCategories[adRequest.domain];
+			category = parseInt(JSE.adxCategories[adRequest.domain],10);
 		}
 		JSE.adxActiveCampaigns.forEach((campaign) => {
 			if (!campaign.active[adRequest.geo]) return;
