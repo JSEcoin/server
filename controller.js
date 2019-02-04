@@ -82,9 +82,9 @@ setTimeout(function() {
 }, 10000); // give time for firebase to return initial queries
 
 setInterval(function() {
-	jseEthIntegration.checkQueryPoolDeposits();
-	JSE.jseDataIO.updatePublicStats();
-	jseSchedule.pushPending();
+	if (JSE.jseTestNet === false) jseEthIntegration.checkQueryPoolDeposits();
+	if (JSE.jseTestNet === false) JSE.jseDataIO.updatePublicStats();
+	if (JSE.jseTestNet === false) jseSchedule.pushPending();
 }, 600000); // every 10 mins
 
 setInterval(function() {
@@ -95,9 +95,9 @@ if (JSE.jseTestNet === false) {
 	jseBlockChain.verifyLedger();
 }
 
-jseSchedule.runAtMidnight(); // reset stats
-jseSchedule.runAtMidday(); // do merchant subsriptions
-jseSchedule.runAt5pm(); // best time to send emails
+if (JSE.jseTestNet === false) jseSchedule.runAtMidnight(); // reset stats
+if (JSE.jseTestNet === false) jseSchedule.runAtMidday(); // do merchant subsriptions
+if (JSE.jseTestNet === false) jseSchedule.runAt5pm(); // best time to send emails
 
 // Production use to prevent and log any crashes
 if (JSE.jseTestNet === false) {

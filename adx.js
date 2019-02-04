@@ -155,7 +155,7 @@ const mergeStatsPools = async() => {
 											JSE.jseDataIO.plusX(`${table}/${advID}/${ymd}/${cid}/${field}`, adxPool[table][advID][ymd][cid][field]);
 										} else if (table === 'adxAdvDomains' || table === 'adxAdvPubIDs' || table === 'adxAdvCreatives' || table === 'adxAdvGeos' || table === 'adxAdvDevices' || table === 'adxAdvBrowsers' || table === 'adxPubDomains' || table === 'adxPubSubIDs' || table === 'adxPubAdvIDs' || table === 'adxPubGeos' || table === 'adxPubDevices' || table === 'adxPubPlacements') { // safety check, only modify adx stats data
 											Object.keys(adxPool[table][advID][ymd][cid][field]).forEach(async(field2) => {
-												console.log(`### Fields ${field}/${field2}/${adxPool[table][advID][ymd][cid][field][field2]}`);
+												//console.log(`### Fields ${field}/${field2}/${adxPool[table][advID][ymd][cid][field][field2]}`);
 												JSE.jseDataIO.plusX(`${table}/${advID}/${ymd}/${cid}/${field}/${field2}`, adxPool[table][advID][ymd][cid][field][field2]);
 												if (table === "adxPubDomains" && field2 === 'i') {
 													JSE.jseDataIO.plusX(`adxSites/${ymd}/${field}/i`, adxPool[table][advID][ymd][cid][field].i);
@@ -212,11 +212,15 @@ setTimeout(function() {
 
 // Production use to prevent and log any crashes
 //if (JSE.jseTestNet === false) {
-	process.on('uncaughtException', function(err) {
-		console.log('UnCaught Exception 83: ' + err);
-		console.error(err.stack);
-		fs.appendFile(JSE.logDirectory+'critical.txt', err+' / '+err.stack, function(){ });
-	});
+process.on('uncaughtException', function(err) {
+	console.log('UnCaught Exception 83: ' + err);
+	console.error(err.stack);
+	fs.appendFile(JSE.logDirectory+'critical.txt', err+' / '+err.stack, function(){ });
+});
 //}
+
+process.on('unhandledRejection', (reason, p) => {
+	console.log('Unhandled Rejection 223: '+reason.stack);
+});
 
 console.log(JSE.jseVersion);

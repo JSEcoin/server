@@ -94,7 +94,7 @@ function round(value) {
 function cleanString(stringRaw) {
 	let stringClean = stringRaw;
 	stringClean = String(stringClean);
-	stringClean = stringClean.split(/[^ .$*+?\\\-_:/&=,@a-zA-Z0-9\s]/).join('');
+	stringClean = stringClean.split(/[^ .$*+?\\\-_:/&=,{}@a-zA-Z0-9\s]/).join('');
 	stringClean = stringClean.substr(0, 255);
 	return stringClean;
 }

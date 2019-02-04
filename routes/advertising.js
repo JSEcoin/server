@@ -16,20 +16,56 @@ router.post('/uploadcampaign/*', function (req, res) {
 	const session = req.body.session; // No need to cleanString because it's only used for comparison
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
 		if (goodCredentials) {
-			// Object destructuring, new fields need to be added before and after the =>
-			const campaign = (({
-				name, geos, devices, windowsDesktop, macDesktop, androidTablet, ipad, androidPhone, iphone, other, browsers, chrome, firefox, safari, ucbrowser, opera, edge, ie, category, general, crypto, streaming, adult, domains, domainWhitelist, domainBlacklist, publishers, publisherWhitelist, publisherBlacklist, url, currencyJse, currencyUsd, dailyBudget, lifetimeBudget, bidPrice, start, end, frequencyCap,
-			}) => ({
-				name, geos, devices, windowsDesktop, macDesktop, androidTablet, ipad, androidPhone, iphone, other, browsers, chrome, firefox, safari, ucbrowser, opera, edge, ie, category, general, crypto, streaming, adult, domains, domainWhitelist, domainBlacklist, publishers, publisherWhitelist, publisherBlacklist, url, currencyJse, currencyUsd, dailyBudget, lifetimeBudget, bidPrice, start, end, frequencyCap,
-			}))(req.body);
-
-			if (campaign.cid) {
+			const campaign = {};
+			campaign.name = JSE.jseFunctions.cleanString(req.body.name);
+			campaign.geos = req.body.geos.map((geo) => { return JSE.jseFunctions.cleanString(geo); });
+			campaign.devices = Boolean(req.body.devices);
+			campaign.windowsDesktop = Boolean(req.body.windowsDesktop);
+			campaign.macDesktop = Boolean(req.body.macDesktop);
+			campaign.androidTablet = Boolean(req.body.androidTablet);
+			campaign.ipad = Boolean(req.body.ipad);
+			campaign.androidPhone = Boolean(req.body.androidPhone);
+			campaign.iphone = Boolean(req.body.iphone);
+			campaign.other = Boolean(req.body.other);
+			campaign.browsers = Boolean(req.body.browsers);
+			campaign.chrome = Boolean(req.body.chrome);
+			campaign.firefox = Boolean(req.body.firefox);
+			campaign.safari = Boolean(req.body.safari);
+			campaign.ucbrowser = Boolean(req.body.ucbrowser);
+			campaign.opera = Boolean(req.body.opera);
+			campaign.edge = Boolean(req.body.edge);
+			campaign.ie = Boolean(req.body.ie);
+			campaign.category = Boolean(req.body.category);
+			campaign.general = Boolean(req.body.general);
+			campaign.crypto = Boolean(req.body.crypto);
+			campaign.streaming = Boolean(req.body.streaming);
+			campaign.adult = Boolean(req.body.adult);
+			campaign.domains = Boolean(req.body.domains);
+			campaign.domainWhitelist = JSE.jseFunctions.cleanString(req.body.domainWhitelist);
+			campaign.domainBlacklist = JSE.jseFunctions.cleanString(req.body.domainBlacklist);
+			campaign.publishers = Boolean(req.body.publishers);
+			campaign.publisherWhitelist = JSE.jseFunctions.cleanString(req.body.publisherWhitelist);
+			campaign.publisherBlacklist = JSE.jseFunctions.cleanString(req.body.publisherBlacklist);
+			campaign.url = JSE.jseFunctions.cleanString(req.body.url);
+			campaign.currencyJse = Boolean(req.body.currencyJse);
+			campaign.currencyUsd = Boolean(req.body.currencyUsd);
+			campaign.dailyBudget = JSE.jseFunctions.cleanString(req.body.dailyBudget);
+			//campaign.lifetimeBudget = JSE.jseFunctions.cleanString(req.body.lifetimeBudget);
+			campaign.bidPrice = JSE.jseFunctions.cleanString(req.body.bidPrice);
+			campaign.start = JSE.jseFunctions.cleanString(req.body.start);
+			campaign.end = JSE.jseFunctions.cleanString(req.body.end);
+			//campaign.frequencyCap = JSE.jseFunctions.cleanString(req.body.frequencyCap);
+			campaign.uid = goodCredentials.uid;
+			if (req.body.cid && JSE.jseFunctions.cleanString(req.body.cid) !== '0') {
 				// modify existing campaign
+				campaign.cid = JSE.jseFunctions.cleanString(req.body.cid);
+				campaign.paused = false;
+				campaign.disabled = 'pending'; // may need an async lookup here
+				campaign.archived = false;
 			} else {
 				const newDate = new Date().getTime();
 				const random = Math.floor((Math.random() * 999999) + 1); // setting up a firebase style push variable, timestamp+random
 				campaign.cid = String(newDate) +''+ String(random); // Campaign ID
-				campaign.uid = goodCredentials.uid;
 				campaign.paused = false; // user paused
 				campaign.disabled = 'pending'; // admin disabled (budgets etc)
 				campaign.archived = false;
@@ -37,7 +73,7 @@ router.post('/uploadcampaign/*', function (req, res) {
 			campaign.banners = [];
 			Object.keys(req.body.creatives).forEach((imgRef) => {
 				let base64Data;
-				let fileName;
+				let fileName = false;
 				const size = req.body.creatives[imgRef].size;
 				const originalFileName = JSE.jseFunctions.cleanString(req.body.creatives[imgRef].originalFileName);
 				if (size === '300x100' || size === '728x90' || size === '300x250') {
@@ -58,6 +94,10 @@ router.post('/uploadcampaign/*', function (req, res) {
 						} else {
 							console.log("Error advertising.js 40. File size too large");
 						}
+					} else	if (/(adx.jsecoin.com|localhost)/.test(req.body.creatives[imgRef].src)) {
+						const fileNameSplit = req.body.creatives[imgRef].src.split('/');
+						fileName = fileNameSplit[fileNameSplit.length - 1];
+						campaign.banners.push({ fileName, size, originalFileName, paused: false, disabled: 'pending' });
 					}
 				} else {
 					// inText creatives here?
@@ -72,6 +112,67 @@ router.post('/uploadcampaign/*', function (req, res) {
 		}
 	}, function() {
 		res.status(401).send('{"fail":1,"notification":"Error advertising.js 19. Invalid Session Variable"}'); return false;
+	});
+	return false;
+});
+
+/**
+ * @name /advertising/pausecampaign/*
+ * @description Pause Campaign
+ * @memberof module:jseRouter
+ */
+router.post('/pausecampaign/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error advertising.js 118. No Session Variable Supplied"}'); return false; }
+	const session = req.body.session; // No need to cleanString because it's only used for comparison
+	const cid = JSE.jseFunctions.cleanString(req.body.cid);
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials) {
+			JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/paused', true);
+			res.send('{"success":1,"notification":"Campaign has been successfully paused"}');
+		}
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error advertising.js 89. Invalid Session Variable"}'); return false;
+	});
+	return false;
+});
+
+/**
+ * @name /advertising/restartcampaign/*
+ * @description Pause Campaign
+ * @memberof module:jseRouter
+ */
+router.post('/restartcampaign/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error advertising.js 137. No Session Variable Supplied"}'); return false; }
+	const session = req.body.session; // No need to cleanString because it's only used for comparison
+	const cid = JSE.jseFunctions.cleanString(req.body.cid);
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials) {
+			JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/paused', false);
+			res.send('{"success":1,"notification":"Campaign has been successfully restarted"}');
+		}
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error advertising.js 89. Invalid Session Variable"}'); return false;
+	});
+	return false;
+});
+
+/**
+ * @name /advertising/archivecampaign/*
+ * @description Pause Campaign
+ * @memberof module:jseRouter
+ */
+router.post('/archivecampaign/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error advertising.js 157. No Session Variable Supplied"}'); return false; }
+	const session = req.body.session; // No need to cleanString because it's only used for comparison
+	const cid = JSE.jseFunctions.cleanString(req.body.cid);
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials) {
+			JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/paused', true);
+			JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/archived', true);
+			res.send('{"success":1,"notification":"Campaign has been successfully restarted"}');
+		}
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error advertising.js 89. Invalid Session Variable"}'); return false;
 	});
 	return false;
 });
@@ -171,6 +272,26 @@ router.get('/s2spixel/*', async(req, res) => {
 	} else {
 		res.send(0);
 	}
+});
+
+/**
+ * @name /showcase/*
+ * @description get adxShowcase for ad catalog
+ * @memberof module:jseRouter
+ */
+router.post('/showcase/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error advertising.js 12. No Session Variable Supplied"}'); return false; }
+	const session = req.body.session; // No need to cleanString because it's only used for comparison
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials) {
+			JSE.jseDataIO.getVariable('adxShowcase/', function(adxShowcase) {
+				res.send(JSON.stringify(adxShowcase));
+			});
+		}
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error advertising.js 191. Invalid Session Variable"}'); return false;
+	});
+	return false;
 });
 
 /**
