@@ -124,11 +124,7 @@ const mergeStatsPools = async() => {
 			Object.keys(adxPools).forEach(async(pushRef) => {
 				const adxPool = adxPools[pushRef];
 				Object.keys(adxPool).forEach(async(table) => {
-					if (table === 'adxClicks') {
-						Object.keys(adxPool[table]).forEach(async(impressionID) => {
-							JSE.jseDataIO.setVariable('adxClicks/'+yymmdd+'/'+impressionID, adxPool.adxClicks[impressionID]); // this may need optimizing
-						});
-					} else if (table === 'adxPayments') {
+					if (table === 'adxPayments') {
 						Object.keys(adxPool[table]).forEach(async(uid) => {
 							const balancePending = adxPool.adxPayments[uid];
 							if (balancePending > 0) {

@@ -330,11 +330,11 @@ router.get('/s2spixel/*', async(req, res) => {
 	const postback = String(req.query.postback).split(/[^0-9]/).join('');
 	let found = false;
 	if (aid && value && postback && (postback + value + aid).length < 1000) {
-		const rightNow = new Date();
 		for (let i = 0; i < 7 && found === false; i += 1) { // 0-6 = 7 days
-			rightNow.setDate(rightNow.getDate()-0);
+			const rightNow = new Date();
+			rightNow.setDate(rightNow.getDate()-i);
 			const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,"");
-			const adImpression = await JSE.jseDataIO.asyncGetVar(`adxClicks/${aid}/${postback}`); // eslint-disable-line
+			const adImpression = await JSE.jseDataIO.asyncGetVar(`adxClicks/${yymmdd}/${postback}`); // eslint-disable-line
 			if (adImpression) {
 				jseAds.logAdStat(adImpression,'k');
 				found = true;
@@ -342,9 +342,9 @@ router.get('/s2spixel/*', async(req, res) => {
 		}
 	}
 	if (found) {
-		res.send(1);
+		res.send('{"success":1,"notification":"Impression ID updated with conversion data"}');
 	} else {
-		res.send(0);
+		res.send('{"fail":1,"notification":"Impression ID not found"}');
 	}
 });
 

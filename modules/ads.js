@@ -191,8 +191,7 @@ const jseAds = {
 		jseAds.addProperty(`adxPubPlacements/${selectedAd.pubID}/${yymmdd}/${selectedAd.siteID}/${selectedAd.browser}/${impression}`,value);
 
 		if (impression === 'c') {
-			if (!JSE.adxPool.adClicks) JSE.adxPool.adClicks = {};
-			JSE.adxPool.adClicks[selectedAd.impressionID] = selectedAd;
+			JSE.jseDataIO.setVariable('adxClicks/'+yymmdd+'/'+selectedAd.impressionID, selectedAd);
 		}
 		if (impression === 'j') {
 			jseAds.poolPayment(selectedAd.advID,selectedAd.pubID,value);
