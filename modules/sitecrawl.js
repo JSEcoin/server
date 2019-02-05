@@ -23,16 +23,18 @@ const jseSiteCrawl = {
 		const rightNow = new Date();
 		const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,""); // could be done with setInterval
 		const pubSites = await JSE.jseDataIO.asyncGetVar(`adxSites/${yymmdd}/`);
-		Object.keys(pubSites).forEach(async(domain) => {
-			const showcaseData = await JSE.jseDataIO.asyncGetVar(`adxShowcase/${domain}/`);
-			if (pubSites[domain].i > 0 && showcaseData && !showcaseData.category) { // only for sites greater than 100 impressions, that haven't been recorded yet
-				const url = 'http://'+domain;
-				const siteData = await jseSiteCrawl.crawlPage(url);
-				JSE.jseDataIO.setVariable(`adxShowcase/${domain}/`,siteData);
-			} else {
-				JSE.jseDataIO.setVariable(`adxShowcase/${domain}/dailyImpressions`,pubSites[domain].i * 4); // take into account this is run at six hour intervals
-			}
-		});
+		if (pubSites) {
+			Object.keys(pubSites).forEach(async(domain) => {
+				const showcaseData = await JSE.jseDataIO.asyncGetVar(`adxShowcase/${domain}/`);
+				if (pubSites[domain].i > 0 && showcaseData && !showcaseData.category) { // only for sites greater than 100 impressions, that haven't been recorded yet
+					const url = 'http://'+domain;
+					const siteData = await jseSiteCrawl.crawlPage(url);
+					JSE.jseDataIO.setVariable(`adxShowcase/${domain}/`,siteData);
+				} else {
+					JSE.jseDataIO.setVariable(`adxShowcase/${domain}/dailyImpressions`,pubSites[domain].i * 4); // take into account this is run at six hour intervals
+				}
+			});
+		}
 	},
 
 	getIABKeywords: () => {
@@ -193,7 +195,7 @@ const jseSiteCrawl = {
 		});
 
 		await page.goto(url,{
-			waitUntil: 'networkidle0'
+			waitUntil: 'networkidle0',
 		}).catch(err => {
 			console.error('Sitecrawl error 49: '+err);
 		});

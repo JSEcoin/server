@@ -64,7 +64,7 @@ router.post('/uploadcampaign/*', function (req, res) {
 				campaign.archived = false;
 			} else {
 				const newDate = new Date().getTime();
-				const random = Math.floor((Math.random() * 999999) + 1); // setting up a firebase style push variable, timestamp+random
+				const random = Math.floor((Math.random() * 9999) + 1); // setting up a firebase style push variable, timestamp+random
 				campaign.cid = String(newDate) +''+ String(random); // Campaign ID
 				campaign.paused = false; // user paused
 				campaign.disabled = 'pending'; // admin disabled (budgets etc)
@@ -170,6 +170,80 @@ router.post('/archivecampaign/*', function (req, res) {
 			JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/paused', true);
 			JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/archived', true);
 			res.send('{"success":1,"notification":"Campaign has been successfully restarted"}');
+		}
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error advertising.js 89. Invalid Session Variable"}'); return false;
+	});
+	return false;
+});
+
+/**
+ * @name /advertising/duplicatecampaign/*
+ * @description Duplicate Campaign
+ * @memberof module:jseRouter
+ */
+router.post('/duplicatecampaign/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error advertising.js 157. No Session Variable Supplied"}'); return false; }
+	const session = req.body.session; // No need to cleanString because it's only used for comparison
+	const cid = JSE.jseFunctions.cleanString(req.body.cid);
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials) {
+			JSE.jseDataIO.getVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/', function(campaign) {
+				const newCampaign = campaign;
+				newCampaign.name += ' Copy';
+				const newDate = new Date().getTime();
+				const random = Math.floor((Math.random() * 9999) + 1); // setting up a firebase style push variable, timestamp+random
+				newCampaign.cid = String(newDate) +''+ String(random); // Campaign ID
+				// Note banner filenames will still include old campaign ID.
+				JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+newCampaign.cid+'/',newCampaign);
+				res.send('{"success":1,"notification":"Campaign has been successfully duplicated"}');
+			});
+		}
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error advertising.js 89. Invalid Session Variable"}'); return false;
+	});
+	return false;
+});
+
+/**
+ * @name /advertising/blacklist/*
+ * @description Modify domain and publisher blacklists
+ * @memberof module:jseRouter
+ */
+router.post('/blacklist/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error advertising.js 185. No Session Variable Supplied"}'); return false; }
+	const session = req.body.session; // No need to cleanString because it's only used for comparison
+	const cid = JSE.jseFunctions.cleanString(req.body.cid);
+	const addSubtract = JSE.jseFunctions.cleanString(req.body.addSubtract);
+	const blacklist = JSE.jseFunctions.cleanString(req.body.blacklist);
+	const field = JSE.jseFunctions.cleanString(req.body.field);
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials) {
+			if (blacklist === 'domainBlacklist' || blacklist === 'publisherBlacklist') {
+				JSE.jseDataIO.getVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/', function(campaign) {
+					let blNew = campaign[blacklist] || '';
+					if (addSubtract === 'add') {
+						blNew += field+"\n";
+						JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/'+blacklist,blNew);
+						if (blacklist === 'domainBlacklist' && campaign.domains) {
+							JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/domains',false);
+						} else if (blacklist === 'publisherBlacklist' && campaign.publishers) {
+							JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/publishers',false);
+						}
+					} else if (addSubtract === 'remove') {
+						blNew = blNew.split(field+"\n").join('');
+						JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/'+blacklist,blNew);
+						if (blNew === '') {
+							if (blacklist === 'domainBlacklist' && !campaign.domains) {
+								JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/domains',true);
+							} else if (blacklist === 'publisherBlacklist' && !campaign.publishers) {
+								JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/publishers',true);
+							}
+						}
+					}
+					res.send('{"success":1,"notification":"Blacklist Updated"}');
+				});
+			}
 		}
 	}, function() {
 		res.status(401).send('{"fail":1,"notification":"Error advertising.js 89. Invalid Session Variable"}'); return false;

@@ -238,12 +238,14 @@ const jseAds = {
 				elemDiv.style.cssText = 'height: ${selectedAd.size.split('x')[1]}px; width: 100%; text-align: center;  z-index: 999999;';
 				elemDiv.id = '${selectedAd.impressionID}';
 				var closePosition = (document.body.clientWidth / 2) - ${parseInt(selectedAd.size.split('x')[0],10) / 2} + 12;
+				console.log('a1'+${parseInt(selectedAd.size.split('x')[0],10) / 2});
+				console.log('a2'+closePosition);
 				var closeButton = '<img style="position: absolute; right: '+closePosition+'px; top: 12px; height: 12px; width: 12px; cursor: pointer;" onclick="document.getElementById(\\'${selectedAd.impressionID}\\').style.display = \\'none\\';" src="'+JSECloseButtonSrc+'" alt="x" />';
-				elemDiv.innerHTML = '<iframe id="${selectedAd.impressionID}-iframe" FRAMEBORDER="0" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0" TOPMARGIN="0" LEFTMARGIN="0" ALLOWTRANSPARENCY="true" WIDTH="${selectedAd.size.split('x')[0]}" HEIGHT="${selectedAd.size.split('x')[0]}"></iframe>';
+				elemDiv.innerHTML = '<iframe id="${selectedAd.impressionID}-iframe" FRAMEBORDER="0" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0" TOPMARGIN="0" LEFTMARGIN="0" ALLOWTRANSPARENCY="true" WIDTH="${selectedAd.size.split('x')[0]}" HEIGHT="${selectedAd.size.split('x')[0]}"></iframe>'+closeButton;
 				document.body.insertBefore(elemDiv, document.body.firstChild);
 				var iframe = document.getElementById('${selectedAd.impressionID}-iframe');
 				var iframeDoc = iframe.contentWindow.document;
-				iframeDoc.write('<head></head><body><a href="${selectedAd.url}" target="_blank"><img src="http://localhost/jsecoin/github/server/static/${selectedAd.fileName}" alt="${selectedAd.url}" /></a>'+closeButton+'</body>');
+				iframeDoc.write('<head></head><body><a href="${selectedAd.url}" target="_blank"><img src="http://localhost/jsecoin/github/server/static/${selectedAd.fileName}" alt="${selectedAd.url}" /></a></body>');
 			}
 
 			JSEinjectTopAd();
@@ -279,11 +281,11 @@ const jseAds = {
 				elemDiv.style.cssText = 'height: ${selectedAd2.size.split('x')[1]}px; width: ${selectedAd2.size.split('x')[0]}px; position: fixed; bottom: 0px; right: 0px; z-index: 999998;';
 				elemDiv.id = '${selectedAd2.impressionID}';
 				var closeButton = '<img style="position: absolute; right: 3px; top: 3px; height: 12px; width: 12px; cursor: pointer;" onclick="document.getElementById(\\'${selectedAd2.impressionID}\\').style.display = \\'none\\';" src="'+JSECloseButtonSrc+'" alt="x" />';
-				elemDiv.innerHTML = '<iframe id="${selectedAd2.impressionID}-iframe" FRAMEBORDER="0" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0" TOPMARGIN="0" LEFTMARGIN="0" ALLOWTRANSPARENCY="true" WIDTH="${selectedAd2.size.split('x')[0]}" HEIGHT="${selectedAd2.size.split('x')[0]}"></iframe>';
+				elemDiv.innerHTML = '<iframe id="${selectedAd2.impressionID}-iframe" FRAMEBORDER="0" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0" TOPMARGIN="0" LEFTMARGIN="0" ALLOWTRANSPARENCY="true" WIDTH="${selectedAd2.size.split('x')[0]}" HEIGHT="${selectedAd2.size.split('x')[0]}"></iframe>'+closeButton;
 				document.body.appendChild(elemDiv);
 				var iframe = document.getElementById('${selectedAd2.impressionID}-iframe');
 				var iframeDoc = iframe.contentWindow.document;
-				iframeDoc.write('<head></head><body><a href="${selectedAd2.url}" target="_blank"><img src="http://localhost/jsecoin/github/server/static/${selectedAd2.fileName}" id="${selectedAd2.impressionID}-banner" alt="${selectedAd2.url}" /></a>'+closeButton+'</body>');
+				iframeDoc.write('<head></head><body><a href="${selectedAd2.url}" target="_blank"><img src="http://localhost/jsecoin/github/server/static/${selectedAd2.fileName}" id="${selectedAd2.impressionID}-banner" alt="${selectedAd2.url}" /></a></body>');
 				setTimeout(function() {
 					riseUp(0);
 				},2000);
