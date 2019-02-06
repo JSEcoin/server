@@ -336,7 +336,7 @@ router.get('/s2spixel/*', async(req, res) => {
 			const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,"");
 			const adImpression = await JSE.jseDataIO.asyncGetVar(`adxClicks/${yymmdd}/${postback}`); // eslint-disable-line
 			if (adImpression) {
-				jseAds.logAdStat(adImpression,'k');
+				jseAds.logAdStat(adImpression,'k',value);
 				found = true;
 			}
 		}
