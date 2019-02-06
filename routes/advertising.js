@@ -74,18 +74,19 @@ router.post('/uploadcampaign/*', function (req, res) {
 			Object.keys(req.body.creatives).forEach((imgRef) => {
 				let base64Data;
 				let fileName = false;
-				const size = req.body.creatives[imgRef].size;
+				const size = JSE.jseFunctions.cleanString(req.body.creatives[imgRef].size);
 				const originalFileName = JSE.jseFunctions.cleanString(req.body.creatives[imgRef].originalFileName);
+				const imgRefClean = JSE.jseFunctions.cleanString(imgRef);
 				if (size === '300x100' || size === '728x90' || size === '300x250') {
 					if (/^data:image\/png;base64,/.test(req.body.creatives[imgRef].src)) {
 						base64Data = req.body.creatives[imgRef].src.replace(/^data:image\/png;base64,/, "");
-						fileName = goodCredentials.uid+'_'+campaign.cid+'_'+imgRef+'.png';
+						fileName = goodCredentials.uid+'_'+campaign.cid+'_'+imgRefClean+'.png';
 					} else if (/^data:image\/gif;base64,/.test(req.body.creatives[imgRef].src)) {
 						base64Data = req.body.creatives[imgRef].src.replace(/^data:image\/gif;base64,/, "");
-						fileName = goodCredentials.uid+'_'+campaign.cid+'_'+imgRef+'.gif';
+						fileName = goodCredentials.uid+'_'+campaign.cid+'_'+imgRefClean+'.gif';
 					} else if (/^data:image\/jpeg;base64,/.test(req.body.creatives[imgRef].src)) {
 						base64Data = req.body.creatives[imgRef].src.replace(/^data:image\/jpeg;base64,/, "");
-						fileName = goodCredentials.uid+'_'+campaign.cid+'_'+imgRef+'.jpg';
+						fileName = goodCredentials.uid+'_'+campaign.cid+'_'+imgRefClean+'.jpg';
 					}
 					if (fileName) {
 						if (base64Data.length < 250000) {
@@ -326,7 +327,7 @@ router.get('/globalpixel/*', function(req, res) {
  */
 router.get('/s2spixel/*', async(req, res) => {
 	const aid = String(req.query.aid).split(/[^0-9]/).join('');
-	const value = String(req.query.value).split(/[^0-9.]/).join('') || 1;
+	const value = parseFloat(String(req.query.value).split(/[^0-9.]/).join('')) || 1;
 	const postback = String(req.query.postback).split(/[^0-9]/).join('');
 	let found = false;
 	if (aid && value && postback && (postback + value + aid).length < 1000) {

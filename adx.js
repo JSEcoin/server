@@ -178,7 +178,6 @@ const cleanUpAdStats = async() => {
 	JSE.jseDataIO.hardDeleteVariable('adxSites/'+yymmdd+'/');
 };
 
-
 const adxRoutine = async() => {
 	const startTime = new Date().getTime();
 	JSE.jseDataIO.getVariable('jseSettings',function(result) { JSE.jseSettings = result; });
