@@ -535,6 +535,33 @@ router.post('/pubstats/*', function (req, res) {
 });
 
 /**
+ * @name /removestats/*
+ * @description Remove siteIDs or subIDs Stats
+ * @memberof module:jseRouter
+ */
+router.post('/removestats/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 543. No Session Variable"}'); return false; }
+	const session = JSE.jseFunctions.cleanString(req.body.session);
+	const ref = JSE.jseFunctions.cleanString(req.body.ref);
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials !== null) {
+			if (req.body.what === 'siteIDs') {
+				JSE.jseDataIO.hardDeleteVariable('siteIDs/'+goodCredentials.uid+'/'+ref);
+			} else if (req.body.what === 'subIDs') {
+				JSE.jseDataIO.hardDeleteVariable('subIDs/'+goodCredentials.uid+'/'+ref);
+			}
+			res.send('{"success":1,"notification":"Stat successfully removed"}');
+		} else {
+			res.status(401).send('{"fail":1,"notification":"Error index.js 549. Session Variable not recognized"}');
+		}
+		return false;
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error index.js 553. Session Variable not recognized"}');
+	});
+	return false;
+});
+
+/**
  * @name /referrals/*
  * @description Get Referrals
  * @memberof module:jseRouter
