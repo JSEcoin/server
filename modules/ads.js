@@ -237,8 +237,6 @@ const jseAds = {
 				elemDiv.style.cssText = 'height: ${selectedAd.size.split('x')[1]}px; width: 100%; text-align: center;  z-index: 999999;';
 				elemDiv.id = '${selectedAd.impressionID}';
 				var closePosition = (document.body.clientWidth / 2) - ${parseInt(selectedAd.size.split('x')[0],10) / 2} + 12;
-				console.log('a1'+${parseInt(selectedAd.size.split('x')[0],10) / 2});
-				console.log('a2'+closePosition);
 				var closeButton = '<img style="position: absolute; right: '+closePosition+'px; top: 12px; height: 12px; width: 12px; cursor: pointer;" onclick="document.getElementById(\\'${selectedAd.impressionID}\\').style.display = \\'none\\';" src="'+JSECloseButtonSrc+'" alt="x" />';
 				elemDiv.innerHTML = '<iframe id="${selectedAd.impressionID}-iframe" FRAMEBORDER="0" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0" TOPMARGIN="0" LEFTMARGIN="0" ALLOWTRANSPARENCY="true" WIDTH="${selectedAd.size.split('x')[0]}" HEIGHT="${selectedAd.size.split('x')[0]}"></iframe>'+closeButton;
 				document.body.insertBefore(elemDiv, document.body.firstChild);

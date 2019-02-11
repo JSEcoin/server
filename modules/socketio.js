@@ -214,8 +214,8 @@ const jseSocketIO = {
 				try {
 					const ipCount = JSE.publisherIPs.reduce(function(n, val) { return n + (val === socket.realIP); }, 0);
 					if (ipCount <= 8000 && !adRequest.iFrame && JSE.socketConnections[socket.id].goodIP) {
-						jseAds.requestCode(adRequest,function(adCode,topAd,bottomAd) {
-							callback(adCode,topAd,bottomAd);
+						jseAds.requestCode(adRequest,function(adCode,selectedAds) {
+							callback(adCode,selectedAds);
 						});
 					}
 				} catch (ex) {
@@ -228,7 +228,7 @@ const jseSocketIO = {
 				jseAds.logAdStat(adImpression,'c');
 			});
 
-			socket.on('validate', function(jseTrack,adRequest) {
+			socket.on('validate', function(jseTrack,selectedAds) {
 				try {
 					const pubID = JSE.jseFunctions.cleanString(jseTrack.pubID) || 1; // jseTrack.pubID = uid
 					const siteID = JSE.jseFunctions.cleanString(jseTrack.siteID) || 1;
@@ -245,7 +245,9 @@ const jseSocketIO = {
 							// double check currentRating (last var in visitorTensorArray) > 50 server-side once enough volume
 							jseMachineLearning.recordPublisherMLData(pubID,visitorTensor);
 							jseLottery.credit(pubID,siteID,subID,'validate');
-							jseAds.logAdStat(adRequest,'v');
+							for (var i = 0; i < selectedAds.length; i++) {
+								jseAds.logAdStat(selectedAds[i],'v');
+							}
 							// Full reality check after x validations
 							if (JSE.publisherIPsValidated.indexOf(socket.realIP) > -1) {
 								const ipCount2 = JSE.publisherIPsValidated.reduce(function(n, val) { return n + (val === socket.realIP); }, 0);

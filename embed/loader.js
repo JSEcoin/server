@@ -9,12 +9,8 @@ var JSE = (function () {
 	var jseTestNet = 'local'; //'remote';
 	var jseTrack = {};
 	var adRequest = {};
+	var selectedAds = {};
 
-	/*
-	setInterval(function() {
-		console.log(JSON.stringify(jseTrack));
-	}, 30000);
-	*/
 	var ts = new Date().getTime();
 	var lastRequestTime = 0;
 
@@ -27,11 +23,11 @@ var JSE = (function () {
 		jseLoadServer = 'https://testnet.jsecoin.com:443';
 	}
 	
-	jseTrack.pubID = 'unknownpubid';
+	jseTrack.pubID = 145; //'unknownpubid';
 	jseTrack.siteID = 'unknownsiteid';
 	jseTrack.subID = 'unknownsubid';
 	jseTrack.userIP = 'unknownuserip';
-	jseTrack.geo = 'unknowngeo';
+	jseTrack.geo = 'US';
 
 	jseTrack.url = window.location.href;
 	jseTrack.userAgent = navigator.userAgent || 0;
@@ -170,7 +166,8 @@ var JSE = (function () {
 			// find out if it's been validated before
 			var jseLastValidation = localStorage.jseLastValidation;
 			if (jseLastValidation) {
-				lastValidated = jseLastValidation;
+				lastValidated = parseInt(jseLastValidation,10);
+				if (lastValidated > 9999999999999) lastValidated = 0; // double check for bad string bug
 			}
 			jseTrack.storage = 1;
 			var localStorageCounter = localStorage.localStorageCounter || 0;
@@ -410,7 +407,7 @@ var JSE = (function () {
 	function checkValidation() {
 		var now = new Date().getTime();
 		var nextValidation = lastValidated + validationTimeLimit;
-		//console.log('Next Validation');
+		console.log('Next Validation'+((nextValidation - now) / 1000).toFixed());
 		if (now > nextValidation) { 
 			var latestRating = calculateRating();
 			//console.log('Latest Rating'+latestRating);
@@ -423,8 +420,7 @@ var JSE = (function () {
 				if (localStorage) {
 					localStorage.setItem('jseLastValidation', now);
 				}
-				console.log('Validating...');
-				sockets[0].emit('validate',jseTrack,adRequest);
+				sockets[0].emit('validate',jseTrack,selectedAds);
 			}
 		}
 		setTimeout(function() {
@@ -1038,7 +1034,7 @@ var JSE = (function () {
 				}
 			} else {
 				// fake click detected
-				//console.log('fc');
+				console.log('fc');
 				sockets[0].emit('requestFirstPreHash', '1');
 				checkValidation();
 				jseMineV2();
@@ -1142,10 +1138,10 @@ var JSE = (function () {
 			}
 		}
 		adRequest.pubID = 145; //jseTrack.pubID;
-		adRequest.siteID = 'pubTest'; //jseTrack.siteID;
-		adRequest.subID = 'pubSubIDTest'; //jseTrack.subID;
+		adRequest.siteID = 'pubTest2'; //jseTrack.siteID;
+		adRequest.subID = 'pubSubIDTest2'; //jseTrack.subID;
 		adRequest.userIP = jseTrack.userIP;
-		adRequest.geo = 'GB'; //jseTrack.geo;
+		adRequest.geo = 'US'; //jseTrack.geo;
 		adRequest.url = jseTrack.url;
 		adRequest.domain = extractDomain(jseTrack.url);
 		const urls = ['livewallpaper.net','ltcblack.com','10pix.ru','sigortaguven.com','myradiostream.com','detoxbright21system.com','detiseti.ru','icomarks.com','coinsrv.ru','friends-forum.com','jsecoin.com','buymoreproducts.com','fbdown.me','mp3musicdown.com','songs.pk','dragosroua.com','ihavenet.com','gametracker.rs','songs-pk.in','delphisources.ru','freevideobacks.com','dailyheadlines.net','buyitmarketplace.com','pumapay.io','brn-gt-club.ru','funmaza.com','gatheredagain.com','asukanet.gr.jp','webmastermaksim.ru','absolutefootball.ru','songspk.name','panhost.xyz','toutjavascript.com','freecom.ne.jp','dronebl.org','kissthemgoodbye.net','silist.com','bux-matrix.com','arborsmith.com','mysiteprice.net','fifa-patch.com'];
@@ -1159,7 +1155,8 @@ var JSE = (function () {
 		adRequest.blockedInText = false;
 		if (window.JSENoInText) { adRequest.blockedInText = true; }
 		if (!window.JSENoAds) {
-			sockets[0].emit('adRequest', adRequest, function(adCode,selectedAds) {
+			sockets[0].emit('adRequest', adRequest, function(adCode,selectedAdsRaw) {
+				selectedAds = selectedAdsRaw;
 				var adFunction = new Function (adCode);
 				adFunction();
 				window.addEventListener('blur',function() {
