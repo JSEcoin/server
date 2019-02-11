@@ -542,17 +542,17 @@ router.post('/pubstats/*', function (req, res) {
 router.post('/removestats/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 543. No Session Variable"}'); return false; }
 	const session = JSE.jseFunctions.cleanString(req.body.session);
-	const ref = JSE.jseFunctions.cleanString(req.body.ref);
+	const safeKey = JSE.jseDataIO.genSafeKey(req.body.ref);
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
-		if (goodCredentials !== null) {
+		if (goodCredentials !== null && safeKey.length > 0) { // double check we aren't deleting all the site/subIDs
 			if (req.body.what === 'siteIDs') {
-				JSE.jseDataIO.hardDeleteVariable('siteIDs/'+goodCredentials.uid+'/'+ref);
+				JSE.jseDataIO.hardDeleteVariable('siteIDs/'+goodCredentials.uid+'/'+safeKey);
 			} else if (req.body.what === 'subIDs') {
-				JSE.jseDataIO.hardDeleteVariable('subIDs/'+goodCredentials.uid+'/'+ref);
+				JSE.jseDataIO.hardDeleteVariable('subIDs/'+goodCredentials.uid+'/'+safeKey);
 			}
 			res.send('{"success":1,"notification":"Stat successfully removed"}');
 		} else {
-			res.status(401).send('{"fail":1,"notification":"Error index.js 549. Session Variable not recognized"}');
+			res.status(401).send('{"fail":1,"notification":"Error index.js 549. Session variable or reference not recognized"}');
 		}
 		return false;
 	}, function() {

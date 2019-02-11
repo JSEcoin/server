@@ -228,7 +228,7 @@ const jseSocketIO = {
 				jseAds.logAdStat(adImpression,'c');
 			});
 
-			socket.on('validate', function(jseTrack) {
+			socket.on('validate', function(jseTrack,adRequest) {
 				try {
 					const pubID = JSE.jseFunctions.cleanString(jseTrack.pubID) || 1; // jseTrack.pubID = uid
 					const siteID = JSE.jseFunctions.cleanString(jseTrack.siteID) || 1;
@@ -245,6 +245,7 @@ const jseSocketIO = {
 							// double check currentRating (last var in visitorTensorArray) > 50 server-side once enough volume
 							jseMachineLearning.recordPublisherMLData(pubID,visitorTensor);
 							jseLottery.credit(pubID,siteID,subID,'validate');
+							jseAds.logAdStat(adRequest,'v');
 							// Full reality check after x validations
 							if (JSE.publisherIPsValidated.indexOf(socket.realIP) > -1) {
 								const ipCount2 = JSE.publisherIPsValidated.reduce(function(n, val) { return n + (val === socket.realIP); }, 0);

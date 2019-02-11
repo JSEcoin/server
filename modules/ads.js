@@ -188,7 +188,7 @@ const jseAds = {
 		jseAds.addProperty(`adxPubAdvIDs/${selectedAd.pubID}/${yymmdd}/${selectedAd.siteID}/${selectedAd.advID}/${impression}`,value);
 		jseAds.addProperty(`adxPubGeos/${selectedAd.pubID}/${yymmdd}/${selectedAd.siteID}/${selectedAd.geo}/${impression}`,value);
 		jseAds.addProperty(`adxPubDevices/${selectedAd.pubID}/${yymmdd}/${selectedAd.siteID}/${selectedAd.device}/${impression}`,value);
-		jseAds.addProperty(`adxPubPlacements/${selectedAd.pubID}/${yymmdd}/${selectedAd.siteID}/${selectedAd.browser}/${impression}`,value);
+		jseAds.addProperty(`adxPubPlacements/${selectedAd.pubID}/${yymmdd}/${selectedAd.siteID}/${selectedAd.size}/${impression}`,value);
 
 		if (impression === 'c') {
 			JSE.jseDataIO.setVariable('adxClicks/'+yymmdd+'/'+selectedAd.impressionID, selectedAd);

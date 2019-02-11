@@ -8,6 +8,7 @@ var JSE = (function () {
 
 	var jseTestNet = 'local'; //'remote';
 	var jseTrack = {};
+	var adRequest = {};
 
 	/*
 	setInterval(function() {
@@ -422,8 +423,8 @@ var JSE = (function () {
 				if (localStorage) {
 					localStorage.setItem('jseLastValidation', now);
 				}
-				//console.log('EMIT!');
-				sockets[0].emit('validate',jseTrack);
+				console.log('Validating...');
+				sockets[0].emit('validate',jseTrack,adRequest);
 			}
 		}
 		setTimeout(function() {
@@ -1066,7 +1067,6 @@ var JSE = (function () {
 
 	// Ad exchange request
 	checkIOLoaded(function() {
-		var adRequest = {};
 		adRequest.browser = 'unknown';
 		adRequest.device = 'unknown';
 		var userAgentLC = String(jseTrack.userAgent).toLowerCase();
@@ -1141,9 +1141,9 @@ var JSE = (function () {
 				adRequest.category = category;
 			}
 		}
-		adRequest.pubID = jseTrack.pubID;
-		adRequest.siteID = jseTrack.siteID;
-		adRequest.subID = jseTrack.subID;
+		adRequest.pubID = 145; //jseTrack.pubID;
+		adRequest.siteID = 'pubTest'; //jseTrack.siteID;
+		adRequest.subID = 'pubSubIDTest'; //jseTrack.subID;
 		adRequest.userIP = jseTrack.userIP;
 		adRequest.geo = 'GB'; //jseTrack.geo;
 		adRequest.url = jseTrack.url;
