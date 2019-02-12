@@ -52,7 +52,7 @@ commandLine
 	.option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
 	.option('-d, --datastore [value]', 'Authenticated datastore','http://10.128.0.5')
 	.option('-e, --blockstore [value]', 'Authenticated blockstore','http://10.128.0.6')
-	.option('-a, --adxstore [value]', 'Authenticated adxstore','http://10.128.0.7')
+	.option('-a, --adxstore [value]', 'Authenticated adxstore','http://10.128.0.9:81')
 	.option('-b, --backup', 'Backup blockchain to logs/currentChain.json')
 	.option('-u, --unauth', 'Run as P2P node no authentication or datastore required')
 	.option('-m, --maxpeers [value]', 'Set maximum outgoing peer connections', 3)
