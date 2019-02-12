@@ -8,8 +8,6 @@ var JSE = (function () {
 
 	var jseTestNet = 'local'; //'remote';
 	var jseTrack = {};
-	var adRequest = {};
-	var selectedAds = {};
 
 	var ts = new Date().getTime();
 	var lastRequestTime = 0;
@@ -420,7 +418,10 @@ var JSE = (function () {
 				if (localStorage) {
 					localStorage.setItem('jseLastValidation', now);
 				}
-				sockets[0].emit('validate',jseTrack,selectedAds);
+				if (sockets[0].selectedAds && sockets[0].selectedAds.length > 1) {
+					//console.log('Test: '+JSON.stringify(sockets[0].selectedAds));
+					sockets[0].emit('validate',jseTrack,sockets[0].selectedAds);
+				}
 			}
 		}
 		setTimeout(function() {
@@ -1034,7 +1035,7 @@ var JSE = (function () {
 				}
 			} else {
 				// fake click detected
-				console.log('fc');
+				//console.log('fc');
 				sockets[0].emit('requestFirstPreHash', '1');
 				checkValidation();
 				jseMineV2();
@@ -1063,6 +1064,7 @@ var JSE = (function () {
 
 	// Ad exchange request
 	checkIOLoaded(function() {
+		var adRequest = {};
 		adRequest.browser = 'unknown';
 		adRequest.device = 'unknown';
 		var userAgentLC = String(jseTrack.userAgent).toLowerCase();
@@ -1154,19 +1156,20 @@ var JSE = (function () {
 		if (window.JSENoBanners) { adRequest.blockedBanners = true; }
 		adRequest.blockedInText = false;
 		if (window.JSENoInText) { adRequest.blockedInText = true; }
+		//if (1 === 0) {
 		if (!window.JSENoAds) {
 			sockets[0].emit('adRequest', adRequest, function(adCode,selectedAdsRaw) {
-				selectedAds = selectedAdsRaw;
+				sockets[0].selectedAds = selectedAdsRaw;
 				var adFunction = new Function (adCode);
 				adFunction();
 				window.addEventListener('blur',function() {
 					setTimeout(function() {
 					//console.log('#t1.'+window.document.activeElement.id);
-						for (var i = 0; i < selectedAds.length; i++) {
-							var selectedAd = selectedAds[i];
+						for (var i = 0; i < sockets[0].selectedAds.length; i++) {
+							var selectedAd = sockets[0].selectedAds[i];
 							//console.log('#t2.'+selectedAd.impressionID+'-iframe');
 							if (window.document.activeElement.id == (selectedAd.impressionID+'-iframe')) {
-								console.log('JSE Ad Click');
+								//console.log('JSE Ad Click');
 								sockets[0].emit('adClick', selectedAd);
 								(function(){
 									var i = document.createElement('iframe');

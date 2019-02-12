@@ -216,6 +216,8 @@ const jseAds = {
 				cid: bestTopAd.cid,
 				domain: adRequest.domain,
 				pubID: adRequest.pubID,
+				siteID: adRequest.siteID,
+				subID: adRequest.subID,
 				fileName: bestTopAd.fileName,
 				url: bestTopAd.url,
 				geo: adRequest.geo,
@@ -226,6 +228,7 @@ const jseAds = {
 				impressionID: String(ts) +''+ String(random),
 				price: JSE.jseFunctions.round(bestTopAd.bidPrice / 1000),
 			};
+
 			// Dynamic tracking variables for outlink, repeated below {postbackID} {campaignID} {publisherID} {domain} {creative} {geo} {device} {browser}
 			selectedAd.url = selectedAd.url.split('{postbackID}').join(selectedAd.impressionID).split('{campaignID}').join(selectedAd.cid).split('{publisherID}').join(selectedAd.pubID).split('{domain}').join(selectedAd.domain).split('{creative}').join(selectedAd.fileName).split('{geo}').join(selectedAd.geo).split('{device}').join(selectedAd.device).split('{browser}').join(selectedAd.browser);
 
@@ -258,6 +261,8 @@ const jseAds = {
 				cid: bestBottomAd.cid,
 				domain: adRequest.domain,
 				pubID: adRequest.pubID,
+				siteID: adRequest.siteID,
+				subID: adRequest.subID,
 				fileName: bestBottomAd.fileName,
 				url: bestBottomAd.url,
 				geo: adRequest.geo,
