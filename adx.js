@@ -53,6 +53,7 @@ JSE.jseSiteCrawl = require('./modules/sitecrawl.js');
 const findActiveCampaigns = async() => {
 	return new Promise((resolve) => {
 		JSE.jseDataIO.getVariable('adxCampaigns/', async(adxCampaigns) => {
+			if (!adxCampaigns) return false;
 			const activeCampaigns = [];
 			const rightNow = new Date();
 			const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,"");

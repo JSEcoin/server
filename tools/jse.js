@@ -4,7 +4,7 @@ const fs = require('fs');
 //const debug = require('debug')('*')
 const jseSchedule = require('./../modules/schedule.js');
 //const jseEthIntegration = require("./../modules/ethintegration.js");
-//JSE.jseSiteCrawl = require('./modules/sitecrawl.js');
+//JSE.jseSiteCrawl = require('./../modules/sitecrawl.js');
 const now = new Date().getTime();
 
 /*
@@ -61,12 +61,12 @@ async function runTxt() {
 	});
 	*/
 
-	/*
-	['jsecoin.com','jamesbachini.com'].forEach(async(domain) => {
+/*
+	['jsecoin.com'].forEach(async(domain) => {
 		const url = 'http://'+domain;
-		const siteData = await jseSiteCrawl.crawlPage(url);
+		const siteData = await JSE.jseSiteCrawl.crawlPage(url);
 	});
-	*/
+*/
 
 	/*
 	JSE.jseDataIO.getVariable('publicStats',function(reply) {

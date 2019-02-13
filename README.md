@@ -99,7 +99,13 @@ ES Lint Continuous:-
 
 **Datastore**
 ```console
-@reboot cd /root && /usr/local/bin/forever -c "node --max-old-space-size=10000" start datastore.js &
+@reboot cd /root && /usr/local/bin/forever -c "node --max-old-space-size=10000" start datastore.js -f blockChain &
+```
+
+**AdX**
+```console
+@reboot cd /root && /usr/local/bin/forever -c "node --max-old-space-size=8000" start datastore.js -p 81 -f adx &
+@reboot cd /root && /usr/local/bin/forever -c "node --max-old-space-size=3000" start adx.js &
 ```
 
 
