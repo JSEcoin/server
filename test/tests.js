@@ -8,6 +8,7 @@ JSE.dbServer = 'http://35.188.209.171';
 JSE.testServer = 'http://localhost:81'; // node jsenode.js -t local -s localhost -p 81 -n jimv18 -d http://localhost:82 -e http://localhost:83 -m 0
 JSE.dataStore1 = 'http://localhost:82'; // node datastore.js -p 82 -t local
 JSE.blockStore1 = 'http://localhost:83'; // node datastore.js -p 83 -t local
+JSE.adxStore1 = 'http://localhost:84'; // node datastore.js -p 84 -t local
 
 console.log('Starting Test For: '+JSE.testServer);
 
@@ -23,6 +24,7 @@ JSE.credentials = require('./../credentials.json');
 // Unit Tests - Modules
 // Test modules/functions.js
 const functionsTest = require('./mocha-functionstest.js');
+const adxTest = require('./mocha-adx.js');
 
 // Load functions now they've been tested.
 JSE.jseFunctions = require('./../modules/functions.js');

@@ -94,7 +94,7 @@ function round(value) {
 function cleanString(stringRaw) {
 	let stringClean = stringRaw;
 	stringClean = String(stringClean);
-	stringClean = stringClean.split(/[^ .$*+?\\\-_:/&=,@a-zA-Z0-9\s]/).join('');
+	stringClean = stringClean.split(/[^ .$*+?\\\-_:/&=,{}@a-zA-Z0-9\s]/).join('');
 	stringClean = stringClean.substr(0, 255);
 	return stringClean;
 }
@@ -129,7 +129,7 @@ function sha256(data) {
  * @returns {string} returns a hex string
  */
 function buf2hex(buffer) { // buffer is an ArrayBuffer
-  return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
+	return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
 }
 
 /**
@@ -179,7 +179,7 @@ function signData(stringData, keyPair, callback) {
 		return false;
 	}
 	const shaBuffer = crypto.createHash("sha256").update(stringData).digest();
- 	const privateKey = hex2buf(keyPair.privateKey);
+	const privateKey = hex2buf(keyPair.privateKey);
 	eccrypto.sign(privateKey, shaBuffer).then(function(signatureArrayBuffer) {
 		const signatureString = buf2hex(signatureArrayBuffer);
 		const signed = {};
@@ -220,7 +220,7 @@ function verifyData(signed, successCallback, failCallback) {
  */
 function signHash(hash, privateKeyHex ,callback) {
 	const shaBuffer = hex2buf(hash);
- 	const privateKey = hex2buf(privateKeyHex);
+	const privateKey = hex2buf(privateKeyHex);
 	eccrypto.sign(privateKey, shaBuffer).then(function(signatureArrayBuffer) {
 		const signatureString = buf2hex(signatureArrayBuffer);
 		callback(signatureString);
@@ -267,7 +267,7 @@ function sendWelcomeEmail(newUser) {
 	mail.categories = ["nodeserver","welcomeemail",template];
 	const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
 	sg.API(requestSG, function (error, response) {
-	  if (error) { console.log('Sendgrid Error response received, welcome email '+newUser.email); }
+		if (error) { console.log('Sendgrid Error response received, welcome email '+newUser.email); }
 	});
 }
 
@@ -335,7 +335,7 @@ function sendStandardEmail(toEmailRaw,subject,htmlContent) {
 	mail.categories = ["nodeserver","standardemail"];
 	const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
 	sg.API(requestSG, function (error, response) {
-	  if (error) { console.log('Sendgrid Error response received, sendStandardEmail email '+toEmailRaw); }
+		if (error) { console.log('Sendgrid Error response received, sendStandardEmail email '+toEmailRaw); }
 	});
 }
 
@@ -490,7 +490,7 @@ function banEmail(banUID) {
 		mail.categories = ["nodeserver","banemail"];
 		const requestSG = sg.emptyRequest({ method: 'POST',path: '/v3/mail/send',body: mail.toJSON() });
 		sg.API(requestSG, function (error, response) {
-		  if (error) { console.log('Sendgrid Error response received, welcome email '+emailAddress); }
+			if (error) { console.log('Sendgrid Error response received, welcome email '+emailAddress); }
 		});
 	});
 }
@@ -561,14 +561,14 @@ function genSafeUser(userObject) {
 function sendSMS(toPhoneNo,txtMsg) {
 	twilio.messages.create(
 		{
-	    from: '+441633530269',
-	    to: toPhoneNo,
-	    body: txtMsg,
-	  },
-	  (err, response) => {
-	  	if (err) console.log('Twilio ERROR'+err);
-	    //if (response && response.sid) console.log(response.sid);
-	  } // eslint-disable-line
+			from: '+441633530269',
+			to: toPhoneNo,
+			body: txtMsg,
+		},
+		(err, response) => {
+			if (err) console.log('Twilio ERROR'+err);
+			//if (response && response.sid) console.log(response.sid);
+		} // eslint-disable-line
 	);
 }
 
@@ -585,10 +585,10 @@ function realityCheck(rawIP,callback) {
 		callback(true);
 		return false;
 	}
-  if (ip in JSE.vpnData) {
-    if (JSE.jseTestNet) console.log('Result found in JSE.vpnData: '+JSE.vpnData[ip]);
-    callback(JSE.vpnData[ip]);
-  } else {
+	if (ip in JSE.vpnData) {
+		if (JSE.jseTestNet) console.log('Result found in JSE.vpnData: '+JSE.vpnData[ip]);
+		callback(JSE.vpnData[ip]);
+	} else {
 		JSE.jseDataIO.getVariable('ipCheck/'+ip, function(ipCheck) {
 			if (ipCheck === null) { // not found in db, lets check now
 				const apiURL = 'http://v2.api.iphub.info/ip/'+ip;

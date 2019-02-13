@@ -2,7 +2,7 @@
  * @file controller.js
  * @name JSE Controller (controller.js)
  * @example forever start -c "node --max-old-space-size=3000" controller.js &
- * @example "node controller.js -t local -d http://localhost:82 -e http://localhost:83
+ * @example node controller.js -t local -d http://localhost:82 -e http://localhost:83 -a http://localhost:84
  * @version 1.8.2
  * @description The controller carries out maintenance tasks for the JSE platform and blockchain.
  */
@@ -13,12 +13,13 @@ global.JSE = JSE;
 const commandLine = require('commander');
 
 commandLine
-  .option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
+	.option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
 	.option('-d, --datastore [value]', 'Authenticated datastore','http://10.128.0.5')
 	.option('-e, --blockstore [value]', 'Authenticated blockstore','http://10.128.0.6')
-  .option('-t, --testnet [value]', 'Launch the testnet as remote, local or log', false)
-  .option('-g, --genesis', 'Create a new genesis block', true)
-  .parse(process.argv);
+	.option('-a, --adxstore [value]', 'Authenticated adxstore','http://10.128.0.9:81')
+	.option('-t, --testnet [value]', 'Launch the testnet as remote, local or log', false)
+	.option('-g, --genesis', 'Create a new genesis block', true)
+	.parse(process.argv);
 
 JSE.jseTestNet = commandLine.testnet;
 
@@ -42,6 +43,7 @@ JSE.blockID = 0;
 JSE.currentBlockString = '';
 JSE.dataStore1 = commandLine.datastore;
 JSE.blockStore1 = commandLine.blockstore;
+JSE.adxStore1 = commandLine.adxstore;
 JSE.host = 'jsecoin.com'; // only used for logging in controller.js
 JSE.port = '443'; // only used for logging in controller.js
 JSE.logDirectory = 'logs/';
@@ -80,9 +82,9 @@ setTimeout(function() {
 }, 10000); // give time for firebase to return initial queries
 
 setInterval(function() {
-	jseEthIntegration.checkQueryPoolDeposits();
-	JSE.jseDataIO.updatePublicStats();
-	jseSchedule.pushPending();
+	if (JSE.jseTestNet === false) jseEthIntegration.checkQueryPoolDeposits();
+	if (JSE.jseTestNet === false) JSE.jseDataIO.updatePublicStats();
+	if (JSE.jseTestNet === false) jseSchedule.pushPending();
 }, 600000); // every 10 mins
 
 setInterval(function() {
@@ -93,16 +95,16 @@ if (JSE.jseTestNet === false) {
 	jseBlockChain.verifyLedger();
 }
 
-jseSchedule.runAtMidnight(); // reset stats
-jseSchedule.runAtMidday(); // do merchant subsriptions
-jseSchedule.runAt5pm(); // best time to send emails
+if (JSE.jseTestNet === false) jseSchedule.runAtMidnight(); // reset stats
+if (JSE.jseTestNet === false) jseSchedule.runAtMidday(); // do merchant subsriptions
+if (JSE.jseTestNet === false) jseSchedule.runAt5pm(); // best time to send emails
 
 // Production use to prevent and log any crashes
 if (JSE.jseTestNet === false) {
 	process.on('uncaughtException', function(err) {
-	  console.log('UnCaught Exception 83: ' + err);
-	  console.error(err.stack);
-	  fs.appendFile(JSE.logDirectory+'critical.txt', err+' / '+err.stack, function(){ });
+		console.log('UnCaught Exception 83: ' + err);
+		console.error(err.stack);
+		fs.appendFile(JSE.logDirectory+'critical.txt', err+' / '+err.stack, function(){ });
 	});
 }
 console.log(JSE.jseVersion);

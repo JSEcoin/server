@@ -295,7 +295,7 @@ function connectToPeers() {
 	}, 10000); // enough time to download blocks? 30 secs/10mb, should be fine. Could improve this.
 	if (typeof JSE.jseFullNode !== 'undefined' && JSE.jseFullNode === true) {
 		setTimeout(function() {
-			 fullNodeSync(); // sync full blockchain if set to JSE.jseFullNode = true; in ../server.js
+			fullNodeSync(); // sync full blockchain if set to JSE.jseFullNode = true; in ../server.js
 		}, 90000); // start fullsync after 90 seconds, adjust this figure and adjust the trust figure on line 210
 	}
 	return false;

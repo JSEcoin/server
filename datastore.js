@@ -14,10 +14,14 @@ const commandLine = require('commander');
 commandLine
 	.option('-p, --port [value]', 'Port',  80)
 	.option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
-  .option('-t, --testnet [value]', 'Launch the testnet as remote, local or log', false)
-  .parse(process.argv);
+	.option('-t, --testnet [value]', 'Launch the testnet as remote, local or log', false)
+	.option('-f, --filter [value]', 'Filter for primary key start i.e. -f adx', false)
+	.option('-n, --negfilter [value]', 'Negative filters for primary key start i.e. -n adx,blockChain', false)
+	.parse(process.argv);
 
 JSE.jseTestNet = commandLine.testnet;
+const keyFilter = commandLine.filter;
+const negFilter = commandLine.negfilter;
 
 if (JSE.jseTestNet !== false) console.log('WARNING: RUNNING IN TESTNET MODE - '+JSE.jseTestNet); // idiot check
 
@@ -219,7 +223,23 @@ fs.readdir(dataDir, function(err, fileNames) {
 	if (fileNames) {
 		for (let i=0; i<fileNames.length; i+=1) {
 			const fileName = fileNames[i];
-			if (fileName.indexOf('.json') > -1 && fileName.indexOf('_tmp.json') === -1) {
+			let skipFile = false;
+			if (keyFilter) {
+				if (fileName.substr(0,keyFilter.length) !== keyFilter) {
+					console.log('Key Filter Skip: '+fileName);
+					skipFile = true;
+				}
+			}
+			if (negFilter) {
+				const negFilterArr = negFilter.split(',');
+				negFilterArr.forEach((neg) => {
+					if (fileName.substr(0,neg.length) === neg) {
+						console.log('Neg Filter Skip: '+fileName);
+						skipFile = true;
+					}
+				});
+			}
+			if (!skipFile && fileName.indexOf('.json') > -1 && fileName.indexOf('_tmp.json') === -1) {
 				if (fs.existsSync(dataDir+fileName)) {
 					const rootKey = fileName.split('.json')[0];
 					let jsonData = fs.readFileSync(dataDir+fileName, 'utf8');
@@ -264,7 +284,11 @@ function transferBackupFile() {
 
 			// send file to controller for 2nd backup
 			if (JSE.jseTestNet) console.log('Sending backup file to controller via scp');
-			exec('scp -o StrictHostKeyChecking=no -i ./.p '+bkupDir+yymmddhhmm+'.tar.gz root@10.128.0.11:/root/logs/datastore'+yymmddhhmm+'.tar.gz', (err3, stdout3, stderr3) => { // store together as .tar.gz
+			let outputFilename = 'datastore'+yymmddhhmm+'.tar.gz';
+			if (keyFilter) {
+				outputFilename = keyFilter+yymmddhhmm+'.tar.gz';
+			}
+			exec('scp -o StrictHostKeyChecking=no -i ./.p '+bkupDir+yymmddhhmm+'.tar.gz root@10.128.0.11:/root/logs/'+outputFilename, (err3, stdout3, stderr3) => { // store together as .tar.gz
 				if (err3) { console.log('ERROR URGENT db.js 214: Error gzipping backup file'); }
 				if (stderr3) console.log(`stderr: ${stderr3}`);
 			});
@@ -406,15 +430,15 @@ function runPurge() {
 				const binFilename = toBin3hrs[i];
 				if (JSE.jseTestNet) console.log('Deleting file: '+binFilename);
 				fs.unlink(bkupDir+binFilename,function(err5){
-	        if (err5) console.log('DB.js ERROR DELETING FILE: '+binFilename+' - Error: '+err5);
-	   		});
+					if (err5) console.log('DB.js ERROR DELETING FILE: '+binFilename+' - Error: '+err5);
+			});
 			}
 			for (let i = 0; i < toBin48hrs.length; i+=1) {
 				const binFilename = toBin48hrs[i];
 				if (JSE.jseTestNet) console.log('Deleting file: '+binFilename);
 				fs.unlink(bkupDir+binFilename,function(err6){
-	        if (err6) console.log('DB.js ERROR DELETING FILE: '+binFilename+' - Error: '+err6);
-	   		});
+					if (err6) console.log('DB.js ERROR DELETING FILE: '+binFilename+' - Error: '+err6);
+				});
 			}
 		}
 	});
@@ -513,6 +537,22 @@ function onConnection(socket){
 		}
 	});
 
+	socket.on('storeFile', function(key,fileName,dataValue,encoding) {
+		if (socket.authorized > 9) {
+			if (JSE.jseTestNet) console.log('Storing File: '+key+' : '+fileName);
+			const cleanFileName = fileName.split(/[^a-zA-Z0-9_.]/).join('').split('..').join('.');
+			const extension = cleanFileName.substr(cleanFileName.length - 3).toLowerCase();
+			// Only for adx datastore and images
+			if (key.substring(0,3) === 'adx' && (extension === 'gif' || extension === 'png' || extension === 'jpg')) {
+				fs.writeFile('static/'+cleanFileName, dataValue, encoding, function(err) {
+					if (err) console.log('Error writing image file ref. 35 '+err);
+				});
+			} else {
+				console.log('Datastore error 527 storeFile bad key or file type: '+extension);
+			}
+		}
+	});
+
 	socket.on('backup', function() {
 		if (socket.authorized > 8) {
 			if (JSE.jseTestNet) console.log('running backup...');
@@ -530,12 +570,12 @@ console.log(JSE.jseVersion+' Datastore Server running on port: '+port);
 
 if (JSE.jseTestNet === false) {
 	process.on('uncaughtException', function(err) {
-	  console.log('UnCaught Exception 83: ' + err);
-	  console.error(err.stack);
-	  fs.appendFile(bkupDir+'critical.txt', err+' / '+err.stack, function(){ });
+		console.log('UnCaught Exception 83: ' + err);
+		console.error(err.stack);
+		fs.appendFile(bkupDir+'critical.txt', err+' / '+err.stack, function(){ });
 	});
 
 	process.on('unhandledRejection', (reason, p) => {
-	  console.log('Unhandled Rejection at: '+p+' - reason: '+reason);
+		console.log('Unhandled Rejection at: '+p+' - reason: '+reason);
 	});
 }

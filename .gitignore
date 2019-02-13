@@ -1,5 +1,6 @@
 logs/*
 data/*
+static/*
 tools/localbackup/
 credentials\.json
 \.testcredentials\.json

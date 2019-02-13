@@ -18,6 +18,7 @@ const request = require('request');
 
 const jseLottery = require("./lottery.js");
 const jseMachineLearning = require("./machinelearning.js");
+const jseAds = require("./ads.js");
 
 JSE.socketConnections = {}; // incoming connections to the server, includes miners and peers
 
@@ -209,12 +210,33 @@ const jseSocketIO = {
 				return false;
 			});
 
-			socket.on('validate', function(jseTrack) {
+			socket.on('adRequest', function(adRequest,callback) {
+				try {
+					const ipCount = JSE.publisherIPs.reduce(function(n, val) { return n + (val === socket.realIP); }, 0);
+					if (ipCount <= 5 && !adRequest.iFrame && JSE.socketConnections[socket.id].goodIP) { // 5 impressions per day
+						jseAds.requestCode(adRequest,function(adCode,selectedAds) {
+							callback(adCode,selectedAds);
+						});
+					}
+				} catch (ex) {
+					console.log('SaveUnique - Error Caught 381: '+ex);
+				}
+				return false;
+			});
+
+			socket.on('adClick', function(adImpression) {
+				jseAds.logAdStat(adImpression,'c');
+			});
+
+			socket.on('validate', function(jseTrack,selectedAds) {
 				try {
 					const pubID = JSE.jseFunctions.cleanString(jseTrack.pubID) || 1; // jseTrack.pubID = uid
 					const siteID = JSE.jseFunctions.cleanString(jseTrack.siteID) || 1;
 					const subID = JSE.jseFunctions.cleanString(jseTrack.subID) || 1;
-					if (jseTrack.iFrame && jseTrack.iFrame === true) { return false; }
+					if (jseTrack.iFrame && jseTrack.iFrame === true) {
+						JSE.socketConnections[socket.id].goodIP = false;
+						return false;
+					}
 					const ipCount = JSE.publisherIPs.reduce(function(n, val) { return n + (val === socket.realIP); }, 0); // count ips could be one from unique already
 					if (socket.goodIP && socket.goodIP === true) {
 						if (ipCount <= 8 || (ipCount <= 25  && JSE.publisherIPsValidated.indexOf(socket.realIP) === -1)) { // Change to 5 & 20 as volume increases
@@ -223,10 +245,16 @@ const jseSocketIO = {
 							// double check currentRating (last var in visitorTensorArray) > 50 server-side once enough volume
 							jseMachineLearning.recordPublisherMLData(pubID,visitorTensor);
 							jseLottery.credit(pubID,siteID,subID,'validate');
+							if (ipCount === 0) {
+								for (let i = 0; i < selectedAds.length; i+=1) {
+									console.log('### LogAdStat V ### '+selectedAds[i].size);
+									jseAds.logAdStat(selectedAds[i],'v');
+								}
+							}
 							// Full reality check after x validations
 							if (JSE.publisherIPsValidated.indexOf(socket.realIP) > -1) {
 								const ipCount2 = JSE.publisherIPsValidated.reduce(function(n, val) { return n + (val === socket.realIP); }, 0);
-								if (ipCount2 === 3) { // can adjust this depending on iphub quota, lower = more queries
+								if (ipCount2 === 2) { // can adjust this depending on iphub quota, lower = more queries
 									JSE.jseFunctions.realityCheck(socket.realIP, function(goodIPTrue) {
 										if (goodIPTrue === true && typeof JSE.socketConnections[socket.id] !== 'undefined') {
 											JSE.socketConnections[socket.id].goodIP = true;

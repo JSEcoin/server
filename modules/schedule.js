@@ -23,7 +23,7 @@ const jseEmails = require("./emails.js");
  */
 function runAtMidnight() {
 	const now = new Date();
-	 // ...at 00:10:00 hours, 10 minutes extra in case of timing fault
+	// ...at 00:10:00 hours, 10 minutes extra in case of timing fault
 	const night = new Date( now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 10, 0 ); // eslint-disable-line
 	const msToMidnight = night.getTime() - now.getTime();
 	console.log('runAtMidnight set for '+(Math.floor(msToMidnight /60000))+' mins');
@@ -396,6 +396,18 @@ function processRewards(howManyDaysBack=7) {
 					const newReferralData = {};
 					newReferralData.command = 'referralReward';
 					newReferralData.reference = 'Referral Reward '+lastWeekYYMMDD;
+					newReferralData.user1 = uid;
+					newReferralData.value = jseReferralReward;
+					newReferralData.ts = new Date().getTime();
+					JSE.jseDataIO.pushBlockData(newReferralData,function(blockData) {});
+					JSE.jseDataIO.pushVariable('history/'+uid,newReferralData,function(pushRef) {});
+				}
+				if (rewards[uid][lastWeekYYMMDD].a) { // a = advertising
+					const jseReferralReward = rewards[uid][lastWeekYYMMDD].a;
+					JSE.jseDataIO.plusX('ledger/'+uid, jseReferralReward);
+					const newReferralData = {};
+					newReferralData.command = 'advertisingReward';
+					newReferralData.reference = 'Advertising Payment '+lastWeekYYMMDD;
 					newReferralData.user1 = uid;
 					newReferralData.value = jseReferralReward;
 					newReferralData.ts = new Date().getTime();

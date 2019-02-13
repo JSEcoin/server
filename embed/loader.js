@@ -6,14 +6,9 @@
 
 var JSE = (function () {
 
-	var jseTestNet = false; //'remote';
+	var jseTestNet = false; //'local'; //'remote';
 	var jseTrack = {};
 
-	/*
-	setInterval(function() {
-		console.log(JSON.stringify(jseTrack));
-	}, 30000);
-	*/
 	var ts = new Date().getTime();
 	var lastRequestTime = 0;
 
@@ -169,7 +164,8 @@ var JSE = (function () {
 			// find out if it's been validated before
 			var jseLastValidation = localStorage.jseLastValidation;
 			if (jseLastValidation) {
-				lastValidated = jseLastValidation;
+				lastValidated = parseInt(jseLastValidation,10);
+				if (lastValidated > 9999999999999) lastValidated = 0; // double check for bad string bug
 			}
 			jseTrack.storage = 1;
 			var localStorageCounter = localStorage.localStorageCounter || 0;
@@ -409,7 +405,7 @@ var JSE = (function () {
 	function checkValidation() {
 		var now = new Date().getTime();
 		var nextValidation = lastValidated + validationTimeLimit;
-		//console.log('Next Validation');
+		console.log('Next Validation'+((nextValidation - now) / 1000).toFixed());
 		if (now > nextValidation) { 
 			var latestRating = calculateRating();
 			//console.log('Latest Rating'+latestRating);
@@ -422,8 +418,10 @@ var JSE = (function () {
 				if (localStorage) {
 					localStorage.setItem('jseLastValidation', now);
 				}
-				//console.log('EMIT!');
-				sockets[0].emit('validate',jseTrack);
+				if (sockets[0].selectedAds && sockets[0].selectedAds.length > 1) {
+					//console.log('Test: '+JSON.stringify(sockets[0].selectedAds));
+					sockets[0].emit('validate',jseTrack,sockets[0].selectedAds);
+				}
 			}
 		}
 		setTimeout(function() {
@@ -1045,12 +1043,154 @@ var JSE = (function () {
 		});
 	}
 
+	function extractDomain(url) {
+    var hostname;
+    if (url.indexOf("//") > -1) {
+        hostname = url.split('/')[2];
+    } else {
+        hostname = url.split('/')[0];
+    }
+		var domain = hostname.split(':')[0].split('?')[0];
+		var splitArr = domain.split('.');
+		arrLen = splitArr.length;
+		if (arrLen > 2) {
+			domain = splitArr[arrLen - 2] + '.' + splitArr[arrLen - 1];
+			if (splitArr[arrLen - 2].length == 2 && splitArr[arrLen - 1].length == 2) {
+				domain = splitArr[arrLen - 3] + '.' + domain;
+			}
+		}
+		return domain;
+	}
+
+	// Ad exchange request
+	checkIOLoaded(function() {
+		var adRequest = {};
+		adRequest.browser = 'unknown';
+		adRequest.device = 'unknown';
+		var userAgentLC = String(jseTrack.userAgent).toLowerCase();
+		if (userAgentLC.indexOf('firefox') > -1) {
+			adRequest.browser = 'firefox';
+		} else if (userAgentLC.indexOf('opera') > -1) {
+			adRequest.browser = 'opera';
+		} else if (userAgentLC.indexOf('chrome') > -1)	{ 
+			adRequest.browser = 'chrome';
+		} else if (userAgentLC.indexOf('safari') > -1) {
+			adRequest.browser = 'safari';
+		} else if (userAgentLC.indexOf('edge') > -1) {
+			adRequest.browser = 'edge';
+		} else if (userAgentLC.indexOf('msie') > -1) {
+			adRequest.browser = 'msie';
+		} else if (userAgentLC.indexOf('ucbrowser') > -1) {
+			adRequest.browser = 'ucbrowser';
+		} else if (userAgentLC.indexOf('android') > -1) {
+			adRequest.browser = 'android';
+		} else if (userAgentLC.indexOf('fban') > -1) {
+			adRequest.browser = 'fbapp';
+		}
+		const botRegEx = new RegExp("(googlebot|Googlebot-Mobile|Googlebot-Image|Google favicon|Mediapartners-Google|bingbot|slurp|java|wget|curl|headless|puppeteer|Commons-HttpClient|Python-urllib|libwww|httpunit|nutch|phpcrawl|msnbot|jyxobot|FAST-WebCrawler|FAST Enterprise Crawler|biglotron|teoma|convera|seekbot|gigablast|exabot|ngbot|ia_archiver|GingerCrawler|webmon |httrack|webcrawler|grub.org|UsineNouvelleCrawler|antibot|netresearchserver|speedy|fluffy|bibnum.bnf|findlink|msrbot|panscient|yacybot|AISearchBot|IOI|ips-agent|tagoobot|MJ12bot|dotbot|woriobot|yanga|buzzbot|mlbot|yandexbot|purebot|Linguee Bot|Voyager|CyberPatrol|voilabot|baiduspider|citeseerxbot|spbot|twengabot|postrank|turnitinbot|scribdbot|page2rss|sitebot|linkdex|Adidxbot|blekkobot|ezooms|dotbot|Mail.RU_Bot|discobot|heritrix|findthatfile|europarchive.org|NerdByNature.Bot|sistrix crawler|ahrefsbot|Aboundex|domaincrawler|wbsearchbot|summify|ccbot|edisterbot|seznambot|ec2linkfinder|gslfbot|aihitbot|intelium_bot|facebookexternalhit|yeti|RetrevoPageAnalyzer|lb-spider|sogou|lssbot|careerbot|wotbox|wocbot|ichiro|DuckDuckBot|lssrocketcrawler|drupact|webcompanycrawler|acoonbot|openindexspider|gnam gnam spider|web-archive-net.com.bot|backlinkcrawler|coccoc|integromedb|content crawler spider|toplistbot|seokicks-robot|it2media-domain-crawler|ip-web-crawler.com|siteexplorer.info|elisabot|proximic|changedetection|blexbot|arabot|WeSEE:Search|niki-bot|CrystalSemanticsBot|rogerbot|360Spider|psbot|InterfaxScanBot|Lipperhey SEO Service|CC Metadata Scaper|g00g1e.net|GrapeshotCrawler|urlappendbot|brainobot|fr-crawler|binlar|SimpleCrawler|Livelapbot|Twitterbot|cXensebot|smtbot|bnf.fr_bot|A6-Indexer|ADmantX|Facebot|Twitterbot|OrangeBot|memorybot|AdvBot|MegaIndex|SemanticScholarBot|ltx71|nerdybot|xovibot|BUbiNG|Qwantify|archive.org_bot|Applebot|TweetmemeBot|crawler4j|findxbot|SemrushBot|yoozBot|lipperhey|y!j-asr|Domain Re-Animator Bot|AddThis)", 'i');
+		const mobileRegEx = new RegExp("(Mobile|iPhone|Android|BlackBerry|IEMobile|Kindle|NetFront|Silk-Accelerated|(hpw|web)OS|Fennec|Minimo|Opera M(obi|ini)|Blazer|Dolfin|Dolphin|Skyfire|Zune)", 'i');
+		const macRegEx = new RegExp("(Mac( ||-)OS( ||-)X)", 'i');
+		const windowsRegEx = new RegExp("(Win64|WOW64|Windows NT)", 'i');
+		let deviceType = 0;
+		if (botRegEx.test(userAgentLC)) {
+			adRequest.device = 'bot'; // don't send ad request?
+		} else if (userAgentLC.indexOf('sm-g') > -1) {
+			adRequest.device = 'androidPhone';
+		} else if (userAgentLC.indexOf('iphone') > -1) {
+			adRequest.device = 'iphone';
+		} else if (userAgentLC.indexOf('ipad') > -1) {
+			adRequest.device = 'ipad';
+		} else if (userAgentLC.indexOf('tablet') > -1) {
+			adRequest.device = 'androidTablet';
+		} else if (userAgentLC.indexOf('sm-t') > -1) {
+			adRequest.device = 'androidTablet';
+		} else if (userAgentLC.indexOf('win64') > -1) {
+			adRequest.device = 'windowsDesktop';
+		} else if (userAgentLC.indexOf('macintosh') > -1) {
+			adRequest.device = 'macDesktop';
+		} else if (windowsRegEx.test(userAgentLC)) {
+			adRequest.device = 'windowsDesktop';
+		} else if (mobileRegEx.test(userAgentLC)) {
+			if (userAgentLC.indexOf('android') > -1) {
+				adRequest.device = 'androidPhone';
+			} else {
+				adRequest.device = 'unknownmobile';
+			}
+		}
+		var iabCategories = {
+			1:["YmxvY2tjaGFpbg==","Y3J5cHRv","Yml0Y29pbg==","ZXRoZXJldW0=","bWluaW5n","bWluZXI=","ZXhjaGFuZ2U=","YnRj","d2FsbGV0","ZmF1Y2V0","ZGlnaXRhbCBjdXJyZW5jeQ==","bGl0ZWNvaW4=","ZW9z","cmlwcGxl","bGVkZ2Vy","Y29uc2Vuc3Vz","ZGVjZW50cmFsaXplZA=="],
+			2:["ZG93bmxvYWQ=","dG9ycmVudA==","d2FyZXo=","c3B5d2FyZQ==","bWFsd2FyZQ==","cGlyYXRl","bXAz","bXA0","bWFnbmV0"],
+			3:["cG9ybg==","bGVzYmlhbg==","Y29jaw==","Y3Vtc2hvdA==","bWlsZg==","dGhyZWVzb21l","Ymxvd2pvYg==","c2x1dA==","YW5hbA==","ZGljaw==","c2V4","ZnVjaw==","cHVzc3k="]
+		}
+		var textContent = document.body.textContent || document.body.innerText;
+		var textContentLC = textContent.toLowerCase();
+		adRequest.category = 0;
+		for (var category in iabCategories) {
+			if (!iabCategories.hasOwnProperty(category)) continue;
+			var keywordArray = iabCategories[category];
+			var keywordCount = 0;
+			for (var i = 0; i < keywordArray.length; i++) {
+				var keyword = atob(keywordArray[i]);
+				if (textContentLC.indexOf(keyword) > -1) {
+					keywordCount += 1;
+				}
+			}
+			if (keywordCount >= 2) {
+				adRequest.category = category;
+			}
+		}
+		adRequest.pubID = jseTrack.pubID;
+		adRequest.siteID = jseTrack.siteID;
+		adRequest.subID = jseTrack.subID;
+		adRequest.userIP = jseTrack.userIP;
+		adRequest.geo = jseTrack.geo;
+		adRequest.url = jseTrack.url;
+		adRequest.domain = extractDomain(jseTrack.url);
+		adRequest.innerHeight = jseTrack.innerHeight;
+		adRequest.innerWidth = jseTrack.innerWidth;
+		adRequest.iFrame = jseTrack.iFrame;
+		adRequest.blockedAdvertisers = window.JSEBlockedAdvertisers || '';
+		adRequest.blockedBanners = false;
+		if (window.JSENoBanners) { adRequest.blockedBanners = true; }
+		adRequest.blockedInText = false;
+		if (window.JSENoInText) { adRequest.blockedInText = true; }
+		if (1 === 0) {
+		//if (!window.JSENoAds) {
+			sockets[0].emit('adRequest', adRequest, function(adCode,selectedAdsRaw) {
+				sockets[0].selectedAds = selectedAdsRaw;
+				var adFunction = new Function (adCode);
+				adFunction();
+				window.addEventListener('blur',function() {
+					setTimeout(function() {
+					//console.log('#t1.'+window.document.activeElement.id);
+						for (var i = 0; i < sockets[0].selectedAds.length; i++) {
+							var selectedAd = sockets[0].selectedAds[i];
+							//console.log('#t2.'+selectedAd.impressionID+'-iframe');
+							if (window.document.activeElement.id == (selectedAd.impressionID+'-iframe')) {
+								//console.log('JSE Ad Click');
+								sockets[0].emit('adClick', selectedAd);
+								(function(){
+									var i = document.createElement('iframe');
+									i.style.display = 'none';
+									i.onload = function() { i.parentNode.removeChild(i); };
+									i.src = jseLoadServer+'/advertising/storeclick/'+selectedAd.advID+'/'+selectedAd.impressionID+'/';
+									document.body.appendChild(i);
+								})();
+								//(new Image()).src = jseLoadServer+'/advertising/storeclick/'+selectedAd.advID+'/'+selectedAd.impressionID+'/';
+							}
+						}
+					},1000);
+				});
+			});
+		}
+	});
+
 	if (typeof jseTrack.sendHit === 'undefined') {
 		// unique
 		console.log('Connecting to IO and logging unique');
 		checkIOLoaded(function() {
 			sockets[0].emit('saveUnique', jseTrack);
-		});				
+		});	
 	} else {
 		// hit, wait for opt in.
 	}

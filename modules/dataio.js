@@ -9,6 +9,7 @@
  * <li>pushVariable</li>
  * <li>deleteVariable</li>
  * <li>plusX</li>
+ * <li>storeFile</li>
  * <li>backup</li>
  * <li>closeConnection</li>
  * <li>genSafeKey</li>
@@ -72,6 +73,10 @@ const blockStore1 = io.connect(JSE.blockStore1, {
 	reconnect: true, transports: ["websocket"], heartbeatTimeout: 1800000, maxHttpBufferSize: 1000000000,
 });
 
+const adxStore1 = io.connect(JSE.adxStore1, {
+	reconnect: true, transports: ["websocket"], heartbeatTimeout: 1800000, maxHttpBufferSize: 1000000000,
+});
+
 // Connection and authorization
 dataStore1.on('connect', function(){
 	if (JSE.authenticatedNode) {
@@ -85,6 +90,12 @@ blockStore1.on('connect', function(){
 		blockStore1.emit('authorize',JSE.credentials.dbKey);
 	}
 });
+adxStore1.on('connect', function(){
+	if (JSE.authenticatedNode) {
+		console.log('Connected to adxStore1, sending authorization key');
+		adxStore1.emit('authorize',JSE.credentials.dbKey);
+	}
+});
 
 dataStore1.on('authorized', function(authLevel){
 	console.log('Authorized Level: '+authLevel);
@@ -94,6 +105,11 @@ dataStore1.on('authorized', function(authLevel){
 blockStore1.on('authorized', function(authLevel){
 	console.log('Authorized Level: '+authLevel);
 	blockStore1.authorized = authLevel;
+	JSE.dbAuthenticated = true;
+});
+adxStore1.on('authorized', function(authLevel){
+	console.log('Authorized Level: '+authLevel);
+	adxStore1.authorized = authLevel;
 	JSE.dbAuthenticated = true;
 });
 // dataStore1.on('disconnect', function(){ });
@@ -114,6 +130,8 @@ const jseDB = {
 			if (JSE.jseTestNet) console.log('Setting Variable: '+key);
 			if (key.substring(0,10) === 'blockChain') {
 				blockStore1.emit('setVariable', key, value);
+			} else if (key.substring(0,3) === 'adx') {
+				adxStore1.emit('setVariable', key, value);
 			} else {
 				dataStore1.emit('setVariable', key, value);
 			}
@@ -132,6 +150,12 @@ const jseDB = {
 			if (JSE.jseTestNet) console.log('getting keyPath: '+key);
 			if (key.substring(0,10) === 'blockChain') {
 				blockStore1.emit('getVariable', key, function(reply){
+					if (callback && typeof callback === 'function') {
+						callback(reply);
+					}
+				});
+			} else if (key.substring(0,3) === 'adx') {
+				adxStore1.emit('getVariable', key, function(reply){
 					if (callback && typeof callback === 'function') {
 						callback(reply);
 					}
@@ -158,6 +182,10 @@ const jseDB = {
 					blockStore1.emit('getVariable', key, function(reply){
 						resolve(reply);
 					});
+				} else if (key.substring(0,3) === 'adx') {
+					adxStore1.emit('getVariable', key, function(reply){
+						resolve(reply);
+					});
 				} else {
 					dataStore1.emit('getVariable', key, function(reply){
 						resolve(reply);
@@ -168,7 +196,7 @@ const jseDB = {
 		return false;
 	},
 
-		/**
+	/**
 	 * @method <h2>asyncSetVar</h2>
 	 * @description Async await version of setVariableThen
 	 */
@@ -178,6 +206,10 @@ const jseDB = {
 			return new Promise((resolve) => {
 				if (key.substring(0,10) === 'blockChain') {
 					blockStore1.emit('setVariableThen', key, value, function(){
+						resolve(true);
+					});
+				} else if (key.substring(0,3) === 'adx') {
+					adxStore1.emit('setVariableThen', key, value, function(){
 						resolve(true);
 					});
 				} else {
@@ -204,6 +236,12 @@ const jseDB = {
 			if (JSE.jseTestNet) console.log('SetVariableThening : '+key);
 			if (key.substring(0,10) === 'blockChain') {
 				blockStore1.emit('setVariableThen', key, value, function(){
+					if (callback && typeof callback === 'function') {
+						callback();
+					}
+				});
+			} else if (key.substring(0,3) === 'adx') {
+				adxStore1.emit('setVariableThen', key, value, function(){
 					if (callback && typeof callback === 'function') {
 						callback();
 					}
@@ -241,6 +279,12 @@ const jseDB = {
 						callback(pushRef);
 					}
 				});
+			} else if (key.substring(0,3) === 'adx') {
+				adxStore1.emit('setVariableThen', key, value, function(){
+					if (callback && typeof callback === 'function') {
+						callback(pushRef);
+					}
+				});
 			} else {
 				dataStore1.emit('setVariableThen', key, value, function(){
 					if (callback && typeof callback === 'function') {
@@ -262,6 +306,8 @@ const jseDB = {
 			if (JSE.jseTestNet) console.log('Deleting : '+key);
 			if (key.substring(0,10) === 'blockChain') {
 				blockStore1.emit('deleteVariable', key);
+			} else if (key.substring(0,3) === 'adx') {
+				adxStore1.emit('deleteVariable', key);
 			} else {
 				dataStore1.emit('deleteVariable', key);
 			}
@@ -279,6 +325,8 @@ const jseDB = {
 			if (JSE.jseTestNet) console.log('Deleting : '+key);
 			if (key.substring(0,10) === 'blockChain') {
 				blockStore1.emit('hardDeleteVariable', key);
+			} else if (key.substring(0,3) === 'adx') {
+				adxStore1.emit('hardDeleteVariable', key);
 			} else {
 				dataStore1.emit('hardDeleteVariable', key);
 			}
@@ -297,10 +345,26 @@ const jseDB = {
 			if (JSE.jseTestNet) console.log('Plus Xing : '+key+' : '+x);
 			if (key.substring(0,10) === 'blockChain') {
 				blockStore1.emit('plusX', key, x);
+			} else if (key.substring(0,3) === 'adx') {
+				adxStore1.emit('plusX', key, x);
 			} else {
 				dataStore1.emit('plusX', key, x);
 			}
 		}
+	},
+
+	/**
+	 * @method <h2>storeFile</h2>
+	 * @description Async await version of setVariableThen
+	 */
+	storeFile(key,fileName,data,encoding) {
+		if (dataStore1.authorized > 8) {
+			if (JSE.jseTestNet) console.log('storingFile: '+key+'-'+fileName);
+			if (key.substring(0,3) === 'adx') {
+				adxStore1.emit('storeFile', key,fileName,data,encoding);
+			}
+		}
+		return false;
 	},
 
 	/**
@@ -312,6 +376,7 @@ const jseDB = {
 			if (JSE.jseTestNet) console.log('Sending Backup Command');
 			blockStore1.emit('backup');
 			dataStore1.emit('backup');
+			adxStore1.emit('backup');
 		}
 	},
 
@@ -324,6 +389,7 @@ const jseDB = {
 			if (JSE.jseTestNet) console.log('Closing Datastore Connection');
 			blockStore1.close();
 			dataStore1.close();
+			adxStore1.close();
 		}
 	},
 

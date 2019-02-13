@@ -632,5 +632,59 @@ router.get('/ipblacklist/:ip/:adminpass', function(req, res) {
 	return false;
 });
 
+router.get('/adxcampaigns/:adminpass', function(req, res) {
+	let adminPass;
+	if (typeof req.get('Authorization') !== 'undefined') {
+		adminPass = JSE.jseFunctions.cleanString(req.get('Authorization'));
+	} else {
+		adminPass = JSE.jseFunctions.cleanString(req.params.adminpass);
+	}
+	if (adminPass !== JSE.credentials.jseAdminKey) { return false; }
+	JSE.jseDataIO.getVariable('adxCampaigns/', async(adxCampaigns) => {
+		res.send(JSON.stringify(adxCampaigns));
+	});
+	return false;
+});
+
+router.get('/adxcampaignapproval/:advid/:campaignid/:filename/:status/:adminpass', function(req, res) {
+	let adminPass;
+	if (typeof req.get('Authorization') !== 'undefined') {
+		adminPass = JSE.jseFunctions.cleanString(req.get('Authorization'));
+	} else {
+		adminPass = JSE.jseFunctions.cleanString(req.params.adminpass);
+	}
+	if (adminPass !== JSE.credentials.jseAdminKey) { return false; }
+
+	const status = JSE.jseFunctions.cleanString(req.params.status);
+	const advID = JSE.jseFunctions.cleanString(req.params.advid);
+	const campaignID = JSE.jseFunctions.cleanString(req.params.campaignid);
+	const fileName = JSE.jseFunctions.cleanString(req.params.filename);
+	if (fileName === 'campaign') {
+		// campaign approval
+		if (status === 'approved') JSE.jseDataIO.setVariable(`adxCampaigns/${advID}/${campaignID}/disabled`,false);
+		if (status === 'declined') JSE.jseDataIO.setVariable(`adxCampaigns/${advID}/${campaignID}/disabled`,'declined');
+		res.send('{"success":1,"notification":"Campaign status updated"}');
+	} else {
+		// individual banner approval
+		JSE.jseDataIO.getVariable(`adxCampaigns/${advID}/${campaignID}/banners`, (bannersRaw) => {
+			if (!bannersRaw) {
+				res.status(400).send('{"fail":1,"notification":"No banners found"}');
+				return false;
+			}
+			const banners = bannersRaw;
+			for (let i = 0; i < banners.length; i+=1) {
+				if (banners[i].fileName === fileName) {
+					console.log('### '+banners[i].fileName+'/'+fileName);
+					if (status === 'approved') banners[i].disabled = false;
+					if (status === 'declined') banners[i].disabled = 'declined';
+				}
+			}
+			JSE.jseDataIO.setVariable(`adxCampaigns/${advID}/${campaignID}/banners`,banners);
+			res.send('{"success":1,"notification":"Banner status updated"}');
+			return false;
+		});
+	}
+	return false;
+});
 
 module.exports = router;

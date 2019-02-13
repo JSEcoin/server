@@ -17,9 +17,9 @@ router.post('/setup2fa/*', function (req, res) {
 			res.status(400).send('{"fail":1,"notification":"Two factor authentication is already setup on this account"}');
 			return false;
 		}
- 		const authuri = authenticator.generateTotpUri(goodCredentials.authKey, goodCredentials.email, "JSEcoin", 'SHA1', 6, 30);
- 		res.send('{"authuri":"'+authuri+'"}');
- 		return false;
+		const authuri = authenticator.generateTotpUri(goodCredentials.authKey, goodCredentials.email, "JSEcoin", 'SHA1', 6, 30);
+		res.send('{"authuri":"'+authuri+'"}');
+		return false;
 	}, function() {
 		res.status(401).send('{"fail":1,"notification":"Error twofa.js 20. No Session Variable Supplied For 2fa Setup"}'); return false;
 	});
@@ -39,7 +39,7 @@ router.post('/test2fa/*', function (req, res) {
 			res.status(400).send('{"fail":1,"notification":"Two factor authentication is already setup on this account"}');
 			return false;
 		}
- 		if (req.body.authCode && authenticator.verifyToken(goodCredentials.authKey, JSE.jseFunctions.cleanString(req.body.authCode))) {
+		if (req.body.authCode && authenticator.verifyToken(goodCredentials.authKey, JSE.jseFunctions.cleanString(req.body.authCode))) {
 			console.log('New 2fa setup for '+goodCredentials.email);
 			JSE.jseDataIO.setVariable('credentials/'+goodCredentials.uid+'/twoFactorAuth',true);
 			res.send('{"success":1,"notification":"You have successfully setup two factor authentication"}');

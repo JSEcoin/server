@@ -420,6 +420,13 @@ const jseBlockChain = {
 							if (vCommand === 'referralReward') {
 								vLedger[user1] = JSE.jseFunctions.round(vLedger[user1] - tValue);
 							}
+							if (vCommand === 'advertisingReward') {
+								vLedger[user1] = JSE.jseFunctions.round(vLedger[user1] - tValue);
+							}
+							if (vCommand === 'distributionTransfer') {
+								vLedger[user1] = JSE.jseFunctions.round(vLedger[user1] + tValue);
+								vLedger[0] = JSE.jseFunctions.round(vLedger[0] - tValue);
+							}
 							if (vCommand === 'export') {
 								vLedger[user1] = JSE.jseFunctions.round(vLedger[user1] + tValue);
 							}

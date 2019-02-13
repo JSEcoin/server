@@ -4,6 +4,7 @@ const fs = require('fs');
 //const debug = require('debug')('*')
 const jseSchedule = require('./../modules/schedule.js');
 //const jseEthIntegration = require("./../modules/ethintegration.js");
+//JSE.jseSiteCrawl = require('./modules/sitecrawl.js');
 const now = new Date().getTime();
 
 /*
@@ -49,6 +50,23 @@ async function runTxt() {
 	}
 	*/
 
+	/*
+	// email lookups
+	const uids = [1,2];
+	uids.forEach(async (uid) => {
+		const acc = await JSE.jseDataIO.asyncGetVar('account/'+uid+'/');
+		if (!acc.suspended) {
+			console.log(acc.email);
+		}
+	});
+	*/
+
+	/*
+	['jsecoin.com','jamesbachini.com'].forEach(async(domain) => {
+		const url = 'http://'+domain;
+		const siteData = await jseSiteCrawl.crawlPage(url);
+	});
+	*/
 
 	/*
 	JSE.jseDataIO.getVariable('publicStats',function(reply) {
@@ -352,71 +370,71 @@ function checkAuthenticated() {
 		stdin.resume();
 		stdin.setEncoding('utf8');
 		stdin.on('data', function(key){
-		  //if ( key === '\u0003' ) process.exit();
-		  const cleanKey = key.split('\r\n').join('');
-		  const keySplit = cleanKey.split(' ');
-		  //console.log(keySplit);
-		  //console.log("\n");
-		  if (keySplit[0] === 'get' && keySplit[1]) {
-			  JSE.jseDataIO.getVariable(keySplit[1],function(reply) {
-			  	if (typeof reply === 'object') {
-			  		console.log(JSON.stringify(reply));
-			  	} else {
+			//if ( key === '\u0003' ) process.exit();
+			const cleanKey = key.split('\r\n').join('');
+			const keySplit = cleanKey.split(' ');
+			//console.log(keySplit);
+			//console.log("\n");
+			if (keySplit[0] === 'get' && keySplit[1]) {
+				JSE.jseDataIO.getVariable(keySplit[1],function(reply) {
+					if (typeof reply === 'object') {
+						console.log(JSON.stringify(reply));
+					} else {
 						console.log(reply);
 					}
 					process.stdout.write("\n> ");
 				});
 			} else if (keySplit[0] === 'set' && keySplit[1] && keySplit[2]) {
-		  	const setString = keySplit.slice(2,99).join(' ');
-			  JSE.jseDataIO.setVariableThen(keySplit[1],setString, function() {
+				const setString = keySplit.slice(2,99).join(' ');
+				JSE.jseDataIO.setVariableThen(keySplit[1],setString, function() {
 					console.log('Set '+keySplit[1]+' to '+setString);
 					process.stdout.write("\n> ");
 				});
 			} else if (keySplit[0] === 'setnum' && keySplit[1] && keySplit[2]) {
-		  	const setNum = parseFloat(keySplit.slice(2,99).join(' '));
-			  JSE.jseDataIO.setVariableThen(keySplit[1],setNum, function() {
+				const setNum = parseFloat(keySplit.slice(2,99).join(' '));
+				JSE.jseDataIO.setVariableThen(keySplit[1],setNum, function() {
 					console.log('Setnum '+keySplit[1]+' to '+setNum);
 					process.stdout.write("\n> ");
 				});
 			} else if (keySplit[0] === 'true' && keySplit[1]) {
-		  	JSE.jseDataIO.setVariableThen(keySplit[1],true, function() {
+				JSE.jseDataIO.setVariableThen(keySplit[1],true, function() {
 					console.log('Set '+keySplit[1]+' to boolean true');
 					process.stdout.write("\n> ");
 				});
 			} else if (keySplit[0] === 'false' && keySplit[1]) {
-		  	JSE.jseDataIO.setVariableThen(keySplit[1],false, function() {
+				JSE.jseDataIO.setVariableThen(keySplit[1],false, function() {
 					console.log('Set '+keySplit[1]+' to boolean false');
 					process.stdout.write("\n> ");
 				});
 			} else if (keySplit[0] === 'keys' && keySplit[1]) {
 				JSE.jseDataIO.getVariable(keySplit[1],function(reply) {
 					Object.keys(reply).forEach(function(key2) {
-			 			console.log(key2);
-			 		});
+						console.log(key2);
+					});
 					process.stdout.write("\n> ");
-			 	});
+				});
 			} else if (keySplit[0] === 'del' && keySplit[1]) {
-			  JSE.jseDataIO.deleteVariable(keySplit[1]);
+				JSE.jseDataIO.deleteVariable(keySplit[1]);
 				console.log('Deleted '+keySplit[1]);
 				process.stdout.write("\n> ");
 			} else if (keySplit[0] === 'harddel' && keySplit[1]) {
-			  JSE.jseDataIO.hardDeleteVariable(keySplit[1]);
+				JSE.jseDataIO.hardDeleteVariable(keySplit[1]);
 				console.log('Hard Deleted '+keySplit[1]);
 				process.stdout.write("\n> ");
 			} else if (keySplit[0] === 'typeof' && keySplit[1]) {
-			  JSE.jseDataIO.getVariable(keySplit[1],function(reply) {
+				JSE.jseDataIO.getVariable(keySplit[1],function(reply) {
 					console.log(keySplit[1]+' = '+typeof reply);
 					process.stdout.write("\n> ");
 				});
 			} else if (keySplit[0] === 'json' && keySplit[1]) {
-			  JSE.jseDataIO.getVariable(keySplit[1],function(reply) {
-			  	const jsonFile = './logs/cli-'+keySplit[1].split('/').join('-')+'.json';
+				JSE.jseDataIO.getVariable(keySplit[1],function(reply) {
+					const jsonFile = './logs/cli-'+keySplit[1].split('/').join('-')+'.json';
 					console.log('JSON saved to '+jsonFile);
 					fs.writeFileSync(jsonFile, JSON.stringify(reply));
 					process.stdout.write("\n> ");
 				});
 			} else if (cleanKey === 'bkuplocal') {
-			  bkupAll();
+				bkupAll();
 			} else if (cleanKey === 'bkupremote') {
 				JSE.jseDataIO.backup();
 			} else if (cleanKey === 'updateloader')	{

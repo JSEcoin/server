@@ -2,7 +2,7 @@
  * @file jsenode.js
  * @name JSE Node (jsenode.js)
  * @example forever start -c "node --max-old-space-size=3000" jsenode.js -s load.jsecoin.com -n load4 -m 0 &
- * @example node jsenode.js -t local -s localhost -p 81 -n jimv18 -d http://localhost:82 -e http://localhost:83 -m 0
+ * @example node jsenode.js -t local -s localhost -p 81 -n jimv18 -d http://localhost:82 -e http://localhost:83 -a http://localhost:84 -m 0
  * @version 1.8.2
  * @description JSE nodes run the JSEcoin network. Each node can be used as a load server or as part of the p2p chain.<br><br>
 		Command Line Options:<br>
@@ -13,6 +13,7 @@
 		-c, --credentials [value], Credentials file location<br>
 		-d, --datastore [value], Authenticated datastore<br>
 		-e, --blockstore [value], Authenticated blockstore<br>
+		-a, --adxstore [value], Authenticated adxstore<br>
 		-b, --backup, Backup blockchain to logs/currentChain.json<br>
 		-u, --unauth, Run as P2P node no authentication required<br>
 		-m, --maxpeers [value], Set maximum outgoing peer connections<br>
@@ -43,21 +44,22 @@ const ascii = require('./modules/ascii.js');
 console.log('\x1b[1m', ascii);
 console.log('\x1b[0m','');
 commandLine
-  .version(JSE.version)
-  .option('-f, --fullnode', 'Run fullnode rather than litenode')
-  .option('-n, --nickname [value]', 'Server Nickname')
-  .option('-s, --server [value]', 'Local Server Hostname','load.jsecoin.com')
-  .option('-i, --interface', 'Run JSE client interface rather than server')
-  .option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
+	.version(JSE.version)
+	.option('-f, --fullnode', 'Run fullnode rather than litenode')
+	.option('-n, --nickname [value]', 'Server Nickname')
+	.option('-s, --server [value]', 'Local Server Hostname','load.jsecoin.com')
+	.option('-i, --interface', 'Run JSE client interface rather than server')
+	.option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
 	.option('-d, --datastore [value]', 'Authenticated datastore','http://10.128.0.5')
 	.option('-e, --blockstore [value]', 'Authenticated blockstore','http://10.128.0.6')
-  .option('-b, --backup', 'Backup blockchain to logs/currentChain.json')
-  .option('-u, --unauth', 'Run as P2P node no authentication or datastore required')
-  .option('-m, --maxpeers [value]', 'Set maximum outgoing peer connections', 3)
-  .option('-l, --peerlist [value]', 'Custom peer seed','https://load.jsecoin.com:80') // production = https://server.jsecoin.com
-  .option('-p, --port [value]', 'Port',  80)
-  .option('-t, --testnet [value]', 'Launch the testnet as remote, local or log', false)
-  .parse(process.argv);
+	.option('-a, --adxstore [value]', 'Authenticated adxstore','http://10.128.0.9:81')
+	.option('-b, --backup', 'Backup blockchain to logs/currentChain.json')
+	.option('-u, --unauth', 'Run as P2P node no authentication or datastore required')
+	.option('-m, --maxpeers [value]', 'Set maximum outgoing peer connections', 3)
+	.option('-l, --peerlist [value]', 'Custom peer seed','https://load.jsecoin.com:80') // production = https://server.jsecoin.com
+	.option('-p, --port [value]', 'Port',  80)
+	.option('-t, --testnet [value]', 'Launch the testnet as remote, local or log', false)
+	.parse(process.argv);
 
 JSE.jseTestNet = commandLine.testnet;
 
@@ -79,6 +81,7 @@ JSE.port = commandLine.port; // 80 behind load balancer on 443
 
 JSE.dataStore1 = commandLine.datastore; // use local ip address to avoid network fees
 JSE.blockStore1 = commandLine.blockstore;
+JSE.adxStore1 = commandLine.adxstore;
 
 const seedPeerSplit = commandLine.peerlist.split('/')[2].split(':'); // requires http and : port
 JSE.peerList  =  {
@@ -104,7 +107,7 @@ if (commandLine.unauth) {
 	JSE.authenticatedNode = false;
 }
 
-if (JSE.authenticatedNode === true) console.log('Running as authenticated node via @ '+JSE.dataStore1+' & '+JSE.blockStore1);
+if (JSE.authenticatedNode === true) console.log('Running as authenticated node via @ '+JSE.dataStore1+' & '+JSE.blockStore1+' & '+JSE.adxStore1);
 if (JSE.authenticatedNode === false) console.log('Running in P2P Node Mode');
 
 if (JSE.jseTestNet === 'local') {
@@ -140,6 +143,9 @@ JSE.apiLimits = {}; // restrict api queries
 JSE.preHash = '0';
 JSE.minerAuthKey = '0';
 JSE.vpnData = {};
+JSE.activeCampaigns = {};
+JSE.adxPool = {};
+JSE.adxCategories = {};
 
 setInterval(function() {
 	JSE.alreadySentReset = [];
@@ -195,8 +201,8 @@ const routes = require('./routes/routes.js');
 const app = express();
 
 app.use(compression({ threshold: 0 }));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: '2mb', extended: true }));
+app.use(bodyParser.urlencoded({ limit: '2mb', extended: true }));
 app.use(cookieParser());
 app.set('trust proxy', true);
 
@@ -205,9 +211,9 @@ app.use('/blockchain/', express.static('./../blockchain/dist/'));
 app.use('/platform/', express.static('./../platform/'));
 
 const limiter = new RateLimit({
-  windowMs: 15*60*1000, // 15 mins
-  max: 500, // limit each IP to 500 requests per windowMs
-  delayMs: 0, // disable delaying - full speed until the max limit is reached
+	windowMs: 15*60*1000, // 15 mins
+	max: 500, // limit each IP to 500 requests per windowMs
+	delayMs: 0, // disable delaying - full speed until the max limit is reached
 });
 
 app.use(limiter);
@@ -215,7 +221,7 @@ app.use(limiter);
 app.use(routes);
 
 app.use(function(err, req, res, next) {
- 	if (JSE.jseTestNet !== false) console.log('Express Request Error: '+err.stack); //err.stack
+	if (JSE.jseTestNet !== false) console.log('Express Request Error: '+err.stack); //err.stack
 });
 
 /** Store capped serverLog in global variable to pull to admin panel */
@@ -254,12 +260,16 @@ if (JSE.authenticatedNode === true) {
 		JSE.jseDataIO.getVariable('blockID',function(result) { JSE.blockID = result; });
 		JSE.jseDataIO.getVariable('publicStats',function(result) { JSE.publicStats = result; });
 		JSE.jseDataIO.getVariable('dailyPublicStats',function(result) { JSE.dailyPublicStats = result; });
+		JSE.jseDataIO.getVariable('adxActiveCampaigns',function(result) { JSE.adxActiveCampaigns = result; });
+		JSE.jseDataIO.getVariable('adxCategories',function(result) { JSE.adxCategories = result; });
 	}, 3000); // allow redis to authorize
 
 	setInterval(function() {
 		JSE.jseDataIO.getVariable('publicStats',function(result) { JSE.publicStats = result; });
 		JSE.jseDataIO.getVariable('dailyPublicStats',function(result) { JSE.dailyPublicStats = result; });
 		JSE.jseDataIO.getVariable('jseSettings',function(result) { JSE.jseSettings = result; });
+		JSE.jseDataIO.pushVariable('adxPools/',JSE.adxPool,function(pushRef) { JSE.adxPool = {}; });
+		JSE.jseDataIO.getVariable('adxActiveCampaigns',function(result) { JSE.adxActiveCampaigns = result; });
 	}, 300000); // every 5 mins
 }
 
@@ -285,6 +295,7 @@ function fairResetLong() {
 	JSE.pinAttempts = [];
 	setTimeout(function() {
 		fairResetLong();
+		JSE.jseDataIO.getVariable('adxCategories',function(result) { JSE.adxCategories = result; });
 	}, 21600000); // 6 hours
 }
 fairResetLong();
@@ -330,12 +341,12 @@ if (commandLine.backup) {
 
 if (JSE.jseTestNet === false) {
 	process.on('uncaughtException', function(err) {
-	  console.log('UnCaught Exception 83: ' + err);
-	  console.error(err.stack);
-	  fs.appendFile(JSE.logDirectory+'critical.txt', err+' / '+err.stack, function(){ });
+		console.log('UnCaught Exception 83: ' + err);
+		console.error(err.stack);
+		fs.appendFile(JSE.logDirectory+'critical.txt', err+' / '+err.stack, function(){ });
 	});
 
 	process.on('unhandledRejection', (reason, p) => {
-	  console.log('Unhandled Rejection at: '+p+' - reason: '+reason);
+		console.log('Unhandled Rejection at: '+p+' - reason: '+reason);
 	});
 }
