@@ -186,7 +186,7 @@ const adxRoutine = async() => {
 	const waitFor2 = await findActiveCampaigns();
 	//JSE.jseSiteCrawl.startPubCrawl(); // remove for production
 	const finishTime = new Date().getTime();
-	const timeTaken = Math.round((finishTime - startTime) / 1000,2);
+	const timeTaken = ((finishTime - startTime) / 1000).toFixed(2);
 	console.log(`adX Refresh: ${timeTaken} secs`);
 };
 
@@ -215,8 +215,10 @@ process.on('uncaughtException', function(err) {
 });
 //}
 
+/*
 process.on('unhandledRejection', (reason, p) => {
 	console.log('Unhandled Rejection 223: '+reason.stack);
 });
+*/
 
 console.log(JSE.jseVersion);

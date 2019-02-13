@@ -213,7 +213,7 @@ const jseSocketIO = {
 			socket.on('adRequest', function(adRequest,callback) {
 				try {
 					const ipCount = JSE.publisherIPs.reduce(function(n, val) { return n + (val === socket.realIP); }, 0);
-					if (ipCount <= 8000 && !adRequest.iFrame && JSE.socketConnections[socket.id].goodIP) {
+					if (ipCount <= 5 && !adRequest.iFrame && JSE.socketConnections[socket.id].goodIP) { // 5 impressions per day
 						jseAds.requestCode(adRequest,function(adCode,selectedAds) {
 							callback(adCode,selectedAds);
 						});

@@ -248,7 +248,7 @@ const jseAds = {
 				document.body.insertBefore(elemDiv, document.body.firstChild);
 				var iframe = document.getElementById('${selectedAd.impressionID}-iframe');
 				var iframeDoc = iframe.contentWindow.document;
-				iframeDoc.write('<head></head><body><a href="${selectedAd.url}" target="_blank"><img src="http://localhost/jsecoin/github/server/static/${selectedAd.fileName}" alt="${selectedAd.url}" /></a></body>');
+				iframeDoc.write('<head></head><body><a href="${selectedAd.url}" target="_blank"><img src="https://adx.jsecoin.com/${selectedAd.fileName}" alt="${selectedAd.url}" /></a></body>');
 			}
 
 			JSEinjectTopAd();
@@ -290,7 +290,7 @@ const jseAds = {
 				document.body.appendChild(elemDiv);
 				var iframe = document.getElementById('${selectedAd2.impressionID}-iframe');
 				var iframeDoc = iframe.contentWindow.document;
-				iframeDoc.write('<head></head><body><a href="${selectedAd2.url}" target="_blank"><img src="http://localhost/jsecoin/github/server/static/${selectedAd2.fileName}" id="${selectedAd2.impressionID}-banner" alt="${selectedAd2.url}" /></a></body>');
+				iframeDoc.write('<head></head><body><a href="${selectedAd2.url}" target="_blank"><img src="https://adx.jsecoin.com/${selectedAd2.fileName}" id="${selectedAd2.impressionID}-banner" alt="${selectedAd2.url}" /></a></body>');
 				setTimeout(function() {
 					riseUp(0);
 				},2000);

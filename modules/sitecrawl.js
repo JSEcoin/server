@@ -26,7 +26,7 @@ const jseSiteCrawl = {
 		if (pubSites) {
 			Object.keys(pubSites).forEach(async(domain) => {
 				const showcaseData = await JSE.jseDataIO.asyncGetVar(`adxShowcase/${domain}/`);
-				if (pubSites[domain].i > 0 && showcaseData && !showcaseData.category && domain.indexOf('.') > -1) { // only for sites greater than 100 impressions, that haven't been recorded yet
+				if (pubSites[domain].i > 1000 && showcaseData && !showcaseData.category && domain.indexOf('.') > -1) { // only for sites greater than 1000 impressions, that haven't been recorded yet
 					const url = 'http://'+domain;
 					const siteData = await jseSiteCrawl.crawlPage(url);
 					JSE.jseDataIO.setVariable(`adxShowcase/${domain}/`,siteData);

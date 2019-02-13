@@ -6,7 +6,7 @@
 
 var JSE = (function () {
 
-	var jseTestNet = 'local'; //'remote';
+	var jseTestNet = false; //'local'; //'remote';
 	var jseTrack = {};
 
 	var ts = new Date().getTime();
@@ -21,11 +21,11 @@ var JSE = (function () {
 		jseLoadServer = 'https://testnet.jsecoin.com:443';
 	}
 	
-	jseTrack.pubID = 145; //'unknownpubid';
+	jseTrack.pubID = 'unknownpubid';
 	jseTrack.siteID = 'unknownsiteid';
 	jseTrack.subID = 'unknownsubid';
 	jseTrack.userIP = 'unknownuserip';
-	jseTrack.geo = 'US';
+	jseTrack.geo = 'unknowngeo';
 
 	jseTrack.url = window.location.href;
 	jseTrack.userAgent = navigator.userAgent || 0;
@@ -1139,15 +1139,13 @@ var JSE = (function () {
 				adRequest.category = category;
 			}
 		}
-		adRequest.pubID = 145; //jseTrack.pubID;
-		adRequest.siteID = 'pubTest2'; //jseTrack.siteID;
-		adRequest.subID = 'pubSubIDTest2'; //jseTrack.subID;
+		adRequest.pubID = jseTrack.pubID;
+		adRequest.siteID = jseTrack.siteID;
+		adRequest.subID = jseTrack.subID;
 		adRequest.userIP = jseTrack.userIP;
-		adRequest.geo = 'US'; //jseTrack.geo;
+		adRequest.geo = jseTrack.geo;
 		adRequest.url = jseTrack.url;
 		adRequest.domain = extractDomain(jseTrack.url);
-		const urls = ['livewallpaper.net','ltcblack.com','10pix.ru','sigortaguven.com','myradiostream.com','detoxbright21system.com','detiseti.ru','icomarks.com','coinsrv.ru','friends-forum.com','jsecoin.com','buymoreproducts.com','fbdown.me','mp3musicdown.com','songs.pk','dragosroua.com','ihavenet.com','gametracker.rs','songs-pk.in','delphisources.ru','freevideobacks.com','dailyheadlines.net','buyitmarketplace.com','pumapay.io','brn-gt-club.ru','funmaza.com','gatheredagain.com','asukanet.gr.jp','webmastermaksim.ru','absolutefootball.ru','songspk.name','panhost.xyz','toutjavascript.com','freecom.ne.jp','dronebl.org','kissthemgoodbye.net','silist.com','bux-matrix.com','arborsmith.com','mysiteprice.net','fifa-patch.com'];
-		adRequest.domain = urls[Math.floor(Math.random()*urls.length)];
 		adRequest.innerHeight = jseTrack.innerHeight;
 		adRequest.innerWidth = jseTrack.innerWidth;
 		adRequest.iFrame = jseTrack.iFrame;
@@ -1156,8 +1154,8 @@ var JSE = (function () {
 		if (window.JSENoBanners) { adRequest.blockedBanners = true; }
 		adRequest.blockedInText = false;
 		if (window.JSENoInText) { adRequest.blockedInText = true; }
-		//if (1 === 0) {
-		if (!window.JSENoAds) {
+		if (1 === 0) {
+		//if (!window.JSENoAds) {
 			sockets[0].emit('adRequest', adRequest, function(adCode,selectedAdsRaw) {
 				sockets[0].selectedAds = selectedAdsRaw;
 				var adFunction = new Function (adCode);
