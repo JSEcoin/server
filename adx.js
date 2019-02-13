@@ -117,6 +117,7 @@ const findActiveCampaigns = async() => {
 const mergeStatsPools = async() => {
 	return new Promise((resolve) => {
 		JSE.jseDataIO.getVariable('adxPools/', async(adxPools) => {
+			if (!adxPools) return false;
 			JSE.jseDataIO.deleteVariable('adxPools/');
 			const rightNow = new Date();
 			const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,""); // could be done with setInterval
