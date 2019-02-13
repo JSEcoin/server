@@ -16,7 +16,7 @@ commandLine
 	.option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
 	.option('-d, --datastore [value]', 'Authenticated datastore','http://10.128.0.5')
 	.option('-e, --blockstore [value]', 'Authenticated blockstore','http://10.128.0.6')
-	.option('-a, --adxstore [value]', 'Authenticated adxstore','http://10.128.0.9:81')
+	.option('-a, --adxstore [value]', 'Authenticated adxstore','http://10.128.0.10:81')
 	.option('-t, --testnet [value]', 'Launch the testnet as remote, local or log', false)
 	.option('-g, --genesis', 'Create a new genesis block', true)
 	.parse(process.argv);
