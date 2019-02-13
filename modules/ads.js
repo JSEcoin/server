@@ -124,12 +124,15 @@ const jseAds = {
 	 * @description adds subproperties to JSE.adxPool object if they don't exist, eventually adds value
 	 */
 	poolPayment: (advID, pubID, perImpressionCost) => {
-		if (!JSE.adxPool.adxPayments) JSE.adxPool.adxPayments = {};
-		if (String(parseInt(advID,10)) === String(advID)) {
-			JSE.adxPool.adxPayments[advID] = (JSE.adxPool.adxPayments[advID] || 0) - perImpressionCost;
-		}
-		if (String(parseInt(pubID,10)) === String(pubID)) {
-			JSE.adxPool.adxPayments[pubID] = (JSE.adxPool.adxPayments[pubID] || 0) + perImpressionCost;
+		//console.log('### Pool Payment ### '+advID+'/'+pubID+'/'+perImpressionCost)
+		if (perImpressionCost > 0) {
+			if (!JSE.adxPool.adxPayments) JSE.adxPool.adxPayments = {};
+			if (String(parseInt(advID,10)) === String(advID)) {
+				JSE.adxPool.adxPayments[advID] = (JSE.adxPool.adxPayments[advID] || 0) - perImpressionCost;
+			}
+			if (String(parseInt(pubID,10)) === String(pubID)) {
+				JSE.adxPool.adxPayments[pubID] = (JSE.adxPool.adxPayments[pubID] || 0) + perImpressionCost;
+			}
 		}
 	},
 

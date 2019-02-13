@@ -73,8 +73,8 @@ const findActiveCampaigns = async() => {
 					if (!campaign.disabled && !campaign.paused) {
 						campaign.active = {};
 						if (campaign.currencyUsd) {
-							campaign.active.bidPrice = campaign.bidPrice * exchangeRate;
-							campaign.active.dailyBudget = campaign.dailyBudget * exchangeRate;
+							campaign.active.bidPrice = JSE.jseFunctions.round(campaign.bidPrice / exchangeRate);
+							campaign.active.dailyBudget = JSE.jseFunctions.round(campaign.dailyBudget / exchangeRate);
 						} else {
 							campaign.active.bidPrice = campaign.bidPrice;
 							campaign.active.dailyBudget = campaign.dailyBudget;
@@ -125,8 +125,9 @@ const mergeStatsPools = async() => {
 				const adxPool = adxPools[pushRef];
 				Object.keys(adxPool).forEach(async(table) => {
 					if (table === 'adxPayments') {
-						Object.keys(adxPool[table]).forEach(async(uid) => {
+						Object.keys(adxPool.adxPayments).forEach(async(uid) => {
 							const balancePending = adxPool.adxPayments[uid];
+							console.log('### Balance Transfer: '+uid+' - '+balancePending+' ###');
 							if (balancePending > 0) {
 								JSE.jseDataIO.plusX('rewards/'+uid+'/'+yymmdd+'/a', balancePending);
 							} else if (balancePending < 0) {
@@ -183,7 +184,7 @@ const adxRoutine = async() => {
 	JSE.jseDataIO.getVariable('jseSettings',function(result) { JSE.jseSettings = result; });
 	const waitFor1 = await mergeStatsPools();
 	const waitFor2 = await findActiveCampaigns();
-	JSE.jseSiteCrawl.startPubCrawl(); // remove for production
+	//JSE.jseSiteCrawl.startPubCrawl(); // remove for production
 	const finishTime = new Date().getTime();
 	const timeTaken = Math.round((finishTime - startTime) / 1000,2);
 	console.log(`adX Refresh: ${timeTaken} secs`);

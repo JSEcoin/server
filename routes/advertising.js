@@ -207,6 +207,27 @@ router.post('/duplicatecampaign/*', function (req, res) {
 });
 
 /**
+ * @name /advertising/bidprice/*
+ * @description Update the bid price for a campaign
+ * @memberof module:jseRouter
+ */
+router.post('/bidprice/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error advertising.js 215. No Session Variable Supplied"}'); return false; }
+	const session = req.body.session; // No need to cleanString because it's only used for comparison
+	const cid = JSE.jseFunctions.cleanString(req.body.cid);
+	const bidPrice = JSE.jseFunctions.round(parseFloat(req.body.bidPrice));
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials) {
+			JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/bidPrice', bidPrice);
+			res.send('{"success":1,"notification":"Bid price updated successfully"}');
+		}
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error advertising.js 233. Invalid Session Variable"}'); return false;
+	});
+	return false;
+});
+
+/**
  * @name /advertising/blacklist/*
  * @description Modify domain and publisher blacklists
  * @memberof module:jseRouter
