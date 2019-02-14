@@ -12,6 +12,7 @@ JSE.logDirectory = './../logs/';
 
 JSE.dataStore1 ='http://10.128.0.5:80';
 JSE.blockStore1 = 'http://10.128.0.6:80';
+JSE.adxStore1 = 'http://10.128.0.10:81';
 
 JSE.credentials = require('./../credentials.json');
 
