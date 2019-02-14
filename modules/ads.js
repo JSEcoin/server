@@ -39,7 +39,7 @@ const jseAds = {
 			if (campaign.publisherBlacklist.indexOf(adRequest.pubID) > -1) return;
 			if (campaign.publisherWhitelist.length > 1 && campaign.publisherWhitelist.indexOf(adRequest.pubID) === -1) return;
 			if (adRequest.blockedAdvertisers.indexOf(campaign.uid) > -1) return;
-			if (!adRequest.blockedBanners) {
+			if (!adRequest.blockedAutoBanners) {
 				campaign.banners.forEach((banner) => {
 					if ((banner.size === '300x100' && adRequest.innerWidth < 800) || (banner.size === '728x90' && adRequest.innerWidth >= 800)) {
 						const adOption = {};

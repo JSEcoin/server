@@ -1153,8 +1153,8 @@ var JSE = (function () {
 		adRequest.innerWidth = jseTrack.innerWidth;
 		adRequest.iFrame = jseTrack.iFrame;
 		adRequest.blockedAdvertisers = window.JSEBlockedAdvertisers || '';
-		adRequest.blockedBanners = false;
-		if (window.JSENoBanners) { adRequest.blockedBanners = true; }
+		adRequest.blockedAutoBanners = false;
+		if (window.JSENoAutoBanners) { adRequest.blockedAutoBanners = true; }
 		adRequest.blockedInText = false;
 		if (window.JSENoInText) { adRequest.blockedInText = true; }
 		if (1 === 0) {
