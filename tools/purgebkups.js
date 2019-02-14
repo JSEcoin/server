@@ -1,7 +1,7 @@
 // designed to be run on any server that is handling 15 min backups
 // forever start purgebkup.js &
 
-const jseTestNet = 'remote'; // 'remote', 'local' or false for production
+const jseTestNet = false; // 'remote', 'local' or false for production
 
 const fs = require('fs');
 
@@ -13,7 +13,20 @@ date.utc = date.toUTCString();
 function startPurge() {
 	// keep every file for 3 hours, then remove all but one per hour for 24 hours, then remove all but one per day for longer than that
 	if (jseTestNet) console.log('Starting bkup file purge...');
-	fs.readdir(bkupDir, function(err, fileNames) {
+	fs.readdir(bkupDir, function(err, files) {
+		// sort by date modified
+		const fileNames = files.map(function (fileName) {
+			return {
+				name: fileName,
+				time: fs.statSync(bkupDir + fileName).mtime.getTime(),
+			};
+		})
+		.sort(function (a, b) {
+			return a.time - b.time;
+		})
+		.map(function (v) {
+			return v.name;
+		});
 		if (fileNames) {
 			const toBin = [];
 			for (let i=0; i<fileNames.length; i+=1) {

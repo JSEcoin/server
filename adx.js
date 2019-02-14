@@ -111,6 +111,7 @@ const findActiveCampaigns = async() => {
 				});
 			});
 			resolve(true);
+			return true;
 		});
 	});
 };
@@ -169,6 +170,7 @@ const mergeStatsPools = async() => {
 				});
 			});
 			resolve(true);
+			return true;
 		});
 	});
 };
