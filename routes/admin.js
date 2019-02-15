@@ -674,7 +674,7 @@ router.get('/adxcampaignapproval/:advid/:campaignid/:filename/:status/:adminpass
 			const banners = bannersRaw;
 			for (let i = 0; i < banners.length; i+=1) {
 				if (banners[i].fileName === fileName) {
-					console.log('### '+banners[i].fileName+'/'+fileName);
+					//console.log('### '+banners[i].fileName+'/'+fileName);
 					if (status === 'approved') banners[i].disabled = false;
 					if (status === 'declined') banners[i].disabled = 'declined';
 				}

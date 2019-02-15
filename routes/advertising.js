@@ -89,7 +89,7 @@ router.post('/uploadcampaign/*', function (req, res) {
 						fileName = goodCredentials.uid+'_'+campaign.cid+'_'+imgRefClean+'.jpg';
 					}
 					if (fileName) {
-						if (base64Data.length < 250000) {
+						if (base64Data.length < 350000) {
 							JSE.jseDataIO.storeFile('adx',fileName,base64Data,'base64');
 							campaign.banners.push({ fileName, size, originalFileName, paused: false, disabled: 'pending' });
 						} else {
