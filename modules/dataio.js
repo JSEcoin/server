@@ -64,55 +64,77 @@ const io = require('socket.io-client');
 const jseEthIntegration = require("./ethintegration.js");
 const jseExchanges = require('./exchanges.js');
 
+let dataStore1 = {};
+let blockStore1 = {};
+let adxStore1 = {};
 
-const dataStore1 = io.connect(JSE.dataStore1, {
-	reconnect: true, transports: ["websocket"], heartbeatTimeout: 1800000, maxHttpBufferSize: 1000000000,
-});
+function connectSockets() {
+	dataStore1 = io.connect(JSE.dataStore1, {
+		reconnect: true, transports: ["websocket"], heartbeatTimeout: 1800000, maxHttpBufferSize: 1000000000,
+	});
 
-const blockStore1 = io.connect(JSE.blockStore1, {
-	reconnect: true, transports: ["websocket"], heartbeatTimeout: 1800000, maxHttpBufferSize: 1000000000,
-});
+	blockStore1 = io.connect(JSE.blockStore1, {
+		reconnect: true, transports: ["websocket"], heartbeatTimeout: 1800000, maxHttpBufferSize: 1000000000,
+	});
 
-const adxStore1 = io.connect(JSE.adxStore1, {
-	reconnect: true, transports: ["websocket"], heartbeatTimeout: 1800000, maxHttpBufferSize: 1000000000,
-});
+	adxStore1 = io.connect(JSE.adxStore1, {
+		reconnect: true, transports: ["websocket"], heartbeatTimeout: 1800000, maxHttpBufferSize: 1000000000,
+	});
 
-// Connection and authorization
-dataStore1.on('connect', function(){
-	if (JSE.authenticatedNode) {
-		console.log('Connected to dataStore1, sending authorization key');
-		dataStore1.emit('authorize',JSE.credentials.dbKey);
-	}
-});
-blockStore1.on('connect', function(){
-	if (JSE.authenticatedNode) {
-		console.log('Connected to blockStore1, sending authorization key');
-		blockStore1.emit('authorize',JSE.credentials.dbKey);
-	}
-});
-adxStore1.on('connect', function(){
-	if (JSE.authenticatedNode) {
-		console.log('Connected to adxStore1, sending authorization key');
-		adxStore1.emit('authorize',JSE.credentials.dbKey);
-	}
-});
+	// Connection and authorization
+	dataStore1.on('connect', function(){
+		if (JSE.authenticatedNode) {
+			console.log('Connected to dataStore1, sending authorization key');
+			dataStore1.emit('authorize',JSE.credentials.dbKey);
+		}
+	});
+	blockStore1.on('connect', function(){
+		if (JSE.authenticatedNode) {
+			console.log('Connected to blockStore1, sending authorization key');
+			blockStore1.emit('authorize',JSE.credentials.dbKey);
+		}
+	});
+	adxStore1.on('connect', function(){
+		if (JSE.authenticatedNode) {
+			console.log('Connected to adxStore1, sending authorization key');
+			adxStore1.emit('authorize',JSE.credentials.dbKey);
+		}
+	});
 
-dataStore1.on('authorized', function(authLevel){
-	console.log('Authorized Level: '+authLevel);
-	dataStore1.authorized = authLevel;
-	JSE.dbAuthenticated = true;
-});
-blockStore1.on('authorized', function(authLevel){
-	console.log('Authorized Level: '+authLevel);
-	blockStore1.authorized = authLevel;
-	JSE.dbAuthenticated = true;
-});
-adxStore1.on('authorized', function(authLevel){
-	console.log('Authorized Level: '+authLevel);
-	adxStore1.authorized = authLevel;
-	JSE.dbAuthenticated = true;
-});
-// dataStore1.on('disconnect', function(){ });
+	dataStore1.on('authorized', function(authLevel){
+		console.log('Authorized Level: '+authLevel);
+		dataStore1.authorized = authLevel;
+		JSE.dbAuthenticated = true;
+	});
+	blockStore1.on('authorized', function(authLevel){
+		console.log('Authorized Level: '+authLevel);
+		blockStore1.authorized = authLevel;
+		JSE.dbAuthenticated = true;
+	});
+	adxStore1.on('authorized', function(authLevel){
+		console.log('Authorized Level: '+authLevel);
+		adxStore1.authorized = authLevel;
+		JSE.dbAuthenticated = true;
+	});
+}
+connectSockets();
+
+function resetSockets() {
+	console.log('Resetting socket connections');
+	dataStore1.disconnect();
+	dataStore1.destroy();
+	blockStore1.disconnect();
+	blockStore1.destroy();
+	adxStore1.disconnect();
+	adxStore1.destroy();
+	connectSockets();
+}
+
+if (JSE.serverNickName && JSE.serverNickName.indexOf('load') > -1) {
+	setInterval(function() {
+		resetSockets();
+	}, 10800000); // 3hrs for load servers
+}
 
 const jseDB = {
 
