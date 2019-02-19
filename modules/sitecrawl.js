@@ -29,7 +29,7 @@ const jseSiteCrawl = {
 				if (pubSites[domain].i > 1000 && showcaseData && !showcaseData.category && domain.indexOf('.') > -1) { // only for sites greater than 1000 impressions, that haven't been recorded yet
 					const url = 'http://'+domain;
 					const siteData = await jseSiteCrawl.crawlPage(url);
-					JSE.jseDataIO.setVariable(`adxShowcase/${domain}/`,siteData);
+					if (siteData.ads) JSE.jseDataIO.setVariable(`adxShowcase/${domain}/`,siteData);
 				} else {
 					JSE.jseDataIO.setVariable(`adxShowcase/${domain}/dailyImpressions`,pubSites[domain].i * 4); // take into account this is run at six hour intervals
 				}
@@ -39,8 +39,8 @@ const jseSiteCrawl = {
 
 	getIABKeywords: () => {
 		let keywords = [];
-		Object.keys(JSE.jseSiteCrawl.iabCategories).forEach((iabRef) => {
-			keywords = keywords.concat(JSE.jseSiteCrawl.iabCategories[iabRef].keywords);
+		Object.keys(module.exports.iabCategories).forEach((iabRef) => {
+			keywords = keywords.concat(module.exports.iabCategories[iabRef].keywords);
 		});
 		return keywords;
 	},
@@ -52,8 +52,8 @@ const jseSiteCrawl = {
 	findLanguage: (wordArray) => {
 		let thisLang = 'en';
 		let thisLangCount = 0;
-		Object.keys(JSE.jseSiteCrawl.commonWordsFile).forEach((lang) => {
-			const langWords = JSE.jseSiteCrawl.commonWordsFile[lang];
+		Object.keys(module.exports.commonWordsFile).forEach((lang) => {
+			const langWords = module.exports.commonWordsFile[lang];
 			const wordTest = wordArray.filter((word) => langWords.indexOf(word) > -1);
 			if (wordTest.length > thisLangCount) {
 				thisLangCount = wordTest.length;
@@ -70,11 +70,11 @@ const jseSiteCrawl = {
 		const keywordArrayRaw = siteData.keywordSearch.split(/(\s|\n|,|\.|\?|!)/); // /(\s|\n|,|\.|\?|!)/
 		siteData.keywordArray = keywordArrayRaw.filter(Boolean);
 		siteData.keywordCount = siteData.keywordArray.length;
-		siteData.language = JSE.jseSiteCrawl.findLanguage(siteData.keywordArray);
-		const categorySearch = JSE.jseSiteCrawl.iabCategories;
+		siteData.language = module.exports.findLanguage(siteData.keywordArray);
+		const categorySearch = module.exports.iabCategories;
 		siteData.category = categorySearch[0]; // general/uncategorized
 		siteData.category.count = 0;
-		const keywords = JSE.jseSiteCrawl.getIABKeywords();
+		const keywords = module.exports.getIABKeywords();
 		siteData.keywordArray.forEach((keyword,i) => {
 			if (keyword && keyword.length >= 3) {
 				const word = keyword.toLowerCase();
@@ -99,7 +99,7 @@ const jseSiteCrawl = {
 		const keywordsArrayLC = keywordsArray.map((word) => word.toLowerCase());
 		const uniqueKeywords = Array.from(new Set(keywordsArrayLC));
 		const specificKeywords = ["supported","jsecoin","continuing","agree","donate","surplus","resources","impact","browsing","experience","privacy","webmasters","learn","visitor","wallet"];
-		const commonWordsRaw = JSE.jseSiteCrawl.commonWordsFile[lang];
+		const commonWordsRaw = module.exports.commonWordsFile[lang];
 		const commonWords = specificKeywords.concat(commonWordsRaw);
 		const cleanWords = uniqueKeywords.filter(word => {
 			if (word.length < 5) return false;
@@ -213,6 +213,12 @@ const jseSiteCrawl = {
 			} else {
 				siteData.jsecoin = false;
 			}
+			if (html && html.indexOf('window.JSENoAds=1') > -1) {
+				siteData.ads = false;
+			} else {
+				siteData.ads = true;
+			}
+			
 			const meta = document.querySelectorAll('meta');
 			if (meta) {
 				meta.forEach((m) => {
@@ -240,8 +246,8 @@ const jseSiteCrawl = {
 
 		result.domain = url.split('https://').join('').split('http://').join('').split('/')[0].toLowerCase().split(/[^.\-a-z0-9]/).join(''); // security cleaned due to image filesystem writing
 
-		const siteData = JSE.jseSiteCrawl.iabFindCategory(result);
-		siteData.bestKeywords = JSE.jseSiteCrawl.getBestKeywords(siteData.keywordArray,siteData.language);
+		const siteData = module.exports.iabFindCategory(result);
+		siteData.bestKeywords = module.exports.getBestKeywords(siteData.keywordArray,siteData.language);
 		/*
 		console.log('Keyword Array: '+siteData.keywordArray.length);
 		console.log('Keyword Search: '+siteData.keywordSearch.length);
@@ -260,8 +266,8 @@ const jseSiteCrawl = {
 			height: 640,
 		});
 		await page.screenshot({ path: showcaseImageDirectory+siteData.images.mobile });
-		siteData.thumbnail = await JSE.jseSiteCrawl.createThumbnail(showcaseImageDirectory+siteData.images.desktop,showcaseImageDirectory+siteData.images.thumbnail);
-		siteData.showCase = await JSE.jseSiteCrawl.createShowCase(showcaseImageDirectory+siteData.images.desktop,showcaseImageDirectory+siteData.images.mobile,showcaseImageDirectory+siteData.images.showCase);
+		siteData.thumbnail = await module.exports.createThumbnail(showcaseImageDirectory+siteData.images.desktop,showcaseImageDirectory+siteData.images.thumbnail);
+		siteData.showCase = await module.exports.createShowCase(showcaseImageDirectory+siteData.images.desktop,showcaseImageDirectory+siteData.images.mobile,showcaseImageDirectory+siteData.images.showCase);
 		await browser.close();
 		siteData.manualReview = false;
 		siteData.ts = new Date().getTime();

@@ -4,7 +4,7 @@ const fs = require('fs');
 //const debug = require('debug')('*')
 const jseSchedule = require('./../modules/schedule.js');
 //const jseEthIntegration = require("./../modules/ethintegration.js");
-//JSE.jseSiteCrawl = require('./../modules/sitecrawl.js');
+const jseSiteCrawl = require('./../modules/sitecrawl.js');
 const now = new Date().getTime();
 
 /*
@@ -62,10 +62,15 @@ async function runTxt() {
 	*/
 
 
-	['jsecoin.com'].forEach(async(domain) => {
+	['jsecoin.com','jamesbachini.com'].forEach(async(domain) => {
 		const url = 'http://'+domain;
-		const siteData = await JSE.jseSiteCrawl.crawlPage(url);
-		JSE.jseDataIO.setVariable(`adxShowcase/${domain}/`,siteData);
+		const siteData = await jseSiteCrawl.crawlPage(url);
+		if (siteData.ads) {
+			console.log(domain+' done!');
+			JSE.jseDataIO.setVariable(`adxShowcase/${domain}/`,siteData);
+		} else {
+			console.log(domain+' no ads');
+		}
 	});
 
 
