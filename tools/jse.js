@@ -5,6 +5,7 @@ const fs = require('fs');
 const jseSchedule = require('./../modules/schedule.js');
 //const jseEthIntegration = require("./../modules/ethintegration.js");
 const jseSiteCrawl = require('./../modules/sitecrawl.js');
+
 const now = new Date().getTime();
 
 /*
@@ -61,19 +62,51 @@ async function runTxt() {
 	});
 	*/
 
-
-	['jsecoin.com','jamesbachini.com'].forEach(async(domain) => {
-		const url = 'http://'+domain;
-		const siteData = await jseSiteCrawl.crawlPage(url);
-		if (siteData.ads) {
-			console.log(domain+' done!');
-			JSE.jseDataIO.setVariable(`adxShowcase/${domain}/`,siteData);
+	/*
+	const domains = [];
+	const nextDomain = async () => {
+		if (domains.length) {
+			const domain = domains.shift();
+			const url = 'http://'+domain;
+			const siteData = await jseSiteCrawl.crawlPage(url);
+			if (siteData.ads) {
+				console.log(domain+' done!');
+				JSE.jseDataIO.setVariable(`adxShowcase/${domain}/`,siteData);
+			} else {
+				console.log(domain+' no ads');
+			}
+			nextDomain();
 		} else {
-			console.log(domain+' no ads');
+			console.log('Done!');
 		}
-	});
-
-
+	}
+	nextDomain();
+	*/
+	const imagemin = require('imagemin');
+	const imageminJpegtran = require('imagemin-jpegtran');
+	const imageminPngquant = require('imagemin-pngquant');
+	const imageminGifsicle = require('imagemin-gifsicle');
+	(async () => {
+		//const compressedFiles = await imagemin(['static/raw/*'], 'static/', {
+		const compressedFiles = await imagemin(['static/raw/showcase/*'], 'static/showcase/', {
+			plugins: [
+				imageminJpegtran(),
+				imageminPngquant({ quality: [0.2, 0.5] }),
+				imageminGifsicle(),
+			],
+			verbose: false,
+		});
+	})();
+	(async () => {
+		const compressedFiles2 = await imagemin(['static/raw/*'], 'static/', {
+			plugins: [
+				imageminJpegtran(),
+				imageminPngquant({ quality: [0.2, 0.5] }),
+				imageminGifsicle(),
+			],
+			verbose: false,
+		});
+	})();
 	/*
 	JSE.jseDataIO.getVariable('publicStats',function(reply) {
 		console.log(reply);

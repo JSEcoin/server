@@ -11,6 +11,11 @@ const JSE = {};
 global.JSE = JSE;
 const commandLine = require('commander');
 
+const imagemin = require('imagemin');
+const imageminJpegtran = require('imagemin-jpegtran');
+const imageminPngquant = require('imagemin-pngquant');
+const imageminGifsicle = require('imagemin-gifsicle');
+
 commandLine
 	.option('-p, --port [value]', 'Port',  80)
 	.option('-c, --credentials [value]', 'Credentials file location','./credentials.json')
@@ -544,8 +549,20 @@ function onConnection(socket){
 			const extension = cleanFileName.substr(cleanFileName.length - 3).toLowerCase();
 			// Only for adx datastore and images
 			if (key.substring(0,3) === 'adx' && (extension === 'gif' || extension === 'png' || extension === 'jpg')) {
-				fs.writeFile('static/'+cleanFileName, dataValue, encoding, function(err) {
+				fs.writeFile('static/raw/'+cleanFileName, dataValue, encoding, function(err) {
 					if (err) console.log('Error writing image file ref. 35 '+err);
+					(async () => {
+						let outdir = 'static/';
+						if (cleanFileName.indexOf('showcase/') > -1) outdir = 'static/showcase/';
+						const compressedFiles = await imagemin(['static/raw/'+cleanFileName], outdir, {
+							plugins: [
+								imageminJpegtran(),
+								imageminPngquant({ quality: [0.2, 0.5] }),
+								imageminGifsicle(),
+							],
+							verbose: false,
+						});
+					})();
 				});
 			} else {
 				console.log('Datastore error 527 storeFile bad key or file type: '+extension);

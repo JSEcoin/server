@@ -24,12 +24,20 @@ const jseSiteCrawl = {
 		const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,""); // could be done with setInterval
 		const pubSites = await JSE.jseDataIO.asyncGetVar(`adxSites/${yymmdd}/`);
 		if (pubSites) {
+			let crawlCount = 0;
 			Object.keys(pubSites).forEach(async(domain) => {
-				const showcaseData = await JSE.jseDataIO.asyncGetVar(`adxShowcase/${domain}/`);
-				if (pubSites[domain].i > 1000 && showcaseData && !showcaseData.category && domain.indexOf('.') > -1) { // only for sites greater than 1000 impressions, that haven't been recorded yet
-					const url = 'http://'+domain;
-					const siteData = await jseSiteCrawl.crawlPage(url);
-					if (siteData.ads) JSE.jseDataIO.setVariable(`adxShowcase/${domain}/`,siteData);
+				if (pubSites[domain].i > 5000 && domain.indexOf('.') > -1) {
+					const showcaseData = await JSE.jseDataIO.asyncGetVar(`adxShowcase/${domain}/`);
+					if (showcaseData && !showcaseData.category) { // only for sites greater than 5000 impressions, that haven't been recorded yet
+						crawlCount += 1;
+						const url = 'http://'+domain;
+						if (crawlCount < 10) {
+							const siteData = await jseSiteCrawl.crawlPage(url);
+							if (pubSites[domain].i > 10000 && siteData.ads) {
+								JSE.jseDataIO.setVariable(`adxShowcase/${domain}/`,siteData);
+							}
+						}
+					}
 				} else {
 					JSE.jseDataIO.setVariable(`adxShowcase/${domain}/dailyImpressions`,pubSites[domain].i * 4); // take into account this is run at six hour intervals
 				}
@@ -197,7 +205,7 @@ const jseSiteCrawl = {
 		await page.goto(url,{
 			waitUntil: 'networkidle0',
 		}).catch(err => {
-			console.error('Sitecrawl error 49: '+err);
+			//console.error('Sitecrawl error 49: '+err);
 		});
 
 		const result = await page.evaluate(() => {
@@ -218,7 +226,6 @@ const jseSiteCrawl = {
 			} else {
 				siteData.ads = true;
 			}
-			
 			const meta = document.querySelectorAll('meta');
 			if (meta) {
 				meta.forEach((m) => {
@@ -243,6 +250,8 @@ const jseSiteCrawl = {
 		}).catch(err => {
 			console.error('Sitecrawl error 236: '+err);
 		});
+
+		if (!result) return false;
 
 		result.domain = url.split('https://').join('').split('http://').join('').split('/')[0].toLowerCase().split(/[^.\-a-z0-9]/).join(''); // security cleaned due to image filesystem writing
 
