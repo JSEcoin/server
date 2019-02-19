@@ -1159,8 +1159,7 @@ var JSE = (function () {
 		if (window.JSENoInText) { adRequest.blockedInText = true; }
 		
 		// tmp domain search
-		sockets[0].emit('domainLogger', adRequest.domain);
-
+		// sockets[0].emit('domainLogger', adRequest.domain);
 		if (1 === 0) {
 		//if (!window.JSENoAds) {
 			sockets[0].emit('adRequest', adRequest, function(adCode,selectedAdsRaw) {

@@ -224,12 +224,13 @@ const jseSocketIO = {
 				return false;
 			});
 
-			// tmp 19/2/19
+			/* tmp 19/2/19
 			socket.on('domainLogger', function(domain) {
 				const cleanDomain = JSE.jseFunctions.cleanString(domain);
 				if (cleanDomain.length > 5)	JSE.jseDataIO.plusX('adxDomains/'+cleanDomain,1);
 				return false;
 			});
+			*/
 
 			socket.on('adClick', function(adImpression) {
 				jseAds.logAdStat(adImpression,'c');
