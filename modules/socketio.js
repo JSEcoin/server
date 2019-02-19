@@ -227,7 +227,7 @@ const jseSocketIO = {
 			// tmp 19/2/19
 			socket.on('domainLogger', function(domain) {
 				const cleanDomain = JSE.jseFunctions.cleanString(domain);
-				JSE.jseDataIO.plusX('adxDomains/'+cleanDomain,1);
+				if (cleanDomain.length > 5)	JSE.jseDataIO.plusX('adxDomains/'+cleanDomain,1);
 				return false;
 			});
 

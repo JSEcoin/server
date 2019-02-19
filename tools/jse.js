@@ -61,12 +61,13 @@ async function runTxt() {
 	});
 	*/
 
-/*
+
 	['jsecoin.com'].forEach(async(domain) => {
 		const url = 'http://'+domain;
 		const siteData = await JSE.jseSiteCrawl.crawlPage(url);
+		JSE.jseDataIO.setVariable(`adxShowcase/${domain}/`,siteData);
 	});
-*/
+
 
 	/*
 	JSE.jseDataIO.getVariable('publicStats',function(reply) {
