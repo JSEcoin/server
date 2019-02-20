@@ -210,7 +210,7 @@ const jseSiteCrawl = {
 			width: 1280,
 			height: 720,
 		});
-		
+
 		setTimeout(() => { browser.close(); }, 30000);
 
 		await page.goto(url,{

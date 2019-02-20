@@ -62,34 +62,39 @@ async function runTxt() {
 	});
 	*/
 
-
-	const domains = ['meghan-markle.org'];
+	/*
+	const domains = [];
 	const nextDomain = async () => {
 		if (domains.length) {
+			const domain = domains.shift();
+			const done = await JSE.jseDataIO.asyncGetVar('adxCategories/'+domain);
+			console.log(done);
+			if (done !== null) {
+				console.log(domain+' '+done);
+				nextDomain();
+				return false;
+			}
 			setTimeout(function() {
 				nextDomain();
 			},5000);
-			const domain = domains.shift();
 			const url = 'http://'+domain;
 			const siteData = await jseSiteCrawl.crawlPage(url,false);
-			if (siteData && siteData.category) console.log(domain+' '+siteData.category.index);
-			/*
-			const siteData = await jseSiteCrawl.crawlPage(url,true);
-			if (siteData.ads) {
-				console.log(domain+' done!');
-				JSE.jseDataIO.setVariable(`adxShowcase/${domain}/`,siteData);
-			} else {
-				console.log(domain+' no ads');
-			}
-			*/
+			if (siteData && siteData.category) console.log('# '+domain+' '+siteData.category.index);
+			//const siteData = await jseSiteCrawl.crawlPage(url,true);
+			//if (siteData.ads) {
+			//	console.log(domain+' done!');
+			//	JSE.jseDataIO.setVariable(`adxShowcase/${domain}/`,siteData);
+			//} else {
+			//	console.log(domain+' no ads');
+			//}
 			delete siteData;
 		} else {
 			console.log('Done!');
 		}
 	}
 	nextDomain();
+	*/
 
-	
 	/*
 	const imagemin = require('imagemin');
 	const imageminJpegtran = require('imagemin-jpegtran');

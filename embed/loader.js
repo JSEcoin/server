@@ -1160,8 +1160,8 @@ var JSE = (function () {
 		
 		// tmp domain search
 		// sockets[0].emit('domainLogger', adRequest.domain);
-		if (1 === 0) {
-		//if (!window.JSENoAds) {
+		//if (1 === 0) {
+		if (!window.JSENoAds) {
 			sockets[0].emit('adRequest', adRequest, function(adCode,selectedAdsRaw) {
 				sockets[0].selectedAds = selectedAdsRaw;
 				var adFunction = new Function (adCode);

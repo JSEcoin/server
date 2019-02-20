@@ -253,7 +253,7 @@ const jseSocketIO = {
 							// double check currentRating (last var in visitorTensorArray) > 50 server-side once enough volume
 							jseMachineLearning.recordPublisherMLData(pubID,visitorTensor);
 							jseLottery.credit(pubID,siteID,subID,'validate');
-							if (ipCount === 0 && selectedAds) {
+							if (selectedAds && JSE.publisherIPsValidated.indexOf(socket.realIP) === -1) {
 								for (let i = 0; i < selectedAds.length; i+=1) {
 									//console.log('### LogAdStat V ### '+selectedAds[i].size);
 									jseAds.logAdStat(selectedAds[i],'v');
