@@ -130,7 +130,7 @@ const mergeStatsPools = async() => {
 					if (table === 'adxPayments') {
 						Object.keys(adxPool.adxPayments).forEach(async(uid) => {
 							const balancePending = adxPool.adxPayments[uid];
-							console.log('### Balance Transfer: '+uid+' - '+balancePending+' ###');
+							//console.log('### Balance Transfer: '+uid+' - '+balancePending+' ###');
 							if (balancePending > 0) {
 								JSE.jseDataIO.plusX('rewards/'+uid+'/'+yymmdd+'/a', balancePending);
 							} else if (balancePending < 0) {
