@@ -62,26 +62,35 @@ async function runTxt() {
 	});
 	*/
 
-	/*
-	const domains = [];
+
+	const domains = ['meghan-markle.org'];
 	const nextDomain = async () => {
 		if (domains.length) {
+			setTimeout(function() {
+				nextDomain();
+			},5000);
 			const domain = domains.shift();
 			const url = 'http://'+domain;
-			const siteData = await jseSiteCrawl.crawlPage(url);
+			const siteData = await jseSiteCrawl.crawlPage(url,false);
+			if (siteData && siteData.category) console.log(domain+' '+siteData.category.index);
+			/*
+			const siteData = await jseSiteCrawl.crawlPage(url,true);
 			if (siteData.ads) {
 				console.log(domain+' done!');
 				JSE.jseDataIO.setVariable(`adxShowcase/${domain}/`,siteData);
 			} else {
 				console.log(domain+' no ads');
 			}
-			nextDomain();
+			*/
+			delete siteData;
 		} else {
 			console.log('Done!');
 		}
 	}
 	nextDomain();
-	*/
+
+	
+	/*
 	const imagemin = require('imagemin');
 	const imageminJpegtran = require('imagemin-jpegtran');
 	const imageminPngquant = require('imagemin-pngquant');
@@ -107,6 +116,8 @@ async function runTxt() {
 			verbose: false,
 		});
 	})();
+	*/
+
 	/*
 	JSE.jseDataIO.getVariable('publicStats',function(reply) {
 		console.log(reply);

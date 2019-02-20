@@ -27,13 +27,13 @@ const jseSiteCrawl = {
 			let crawlCount = 0;
 			Object.keys(pubSites).forEach(async(domain) => {
 				if (pubSites[domain].i > 5000 && domain.indexOf('.') > -1) {
-					const showcaseData = await JSE.jseDataIO.asyncGetVar(`adxShowcase/${domain}/`);
-					if (showcaseData && !showcaseData.category) { // only for sites greater than 5000 impressions, that haven't been recorded yet
+					const category = await JSE.jseDataIO.asyncGetVar(`adxCategories/${domain}/`);
+					if (category === null) { // only for sites greater than 5000 impressions, that haven't been recorded yet
 						crawlCount += 1;
 						const url = 'http://'+domain;
 						if (crawlCount < 10) {
-							const siteData = await jseSiteCrawl.crawlPage(url);
-							if (pubSites[domain].i > 10000 && siteData.ads) {
+							const siteData = await jseSiteCrawl.crawlPage(url,true);
+							if (pubSites[domain].i > 5000 && siteData.ads) {
 								JSE.jseDataIO.setVariable(`adxShowcase/${domain}/`,siteData);
 							}
 						}
@@ -91,9 +91,15 @@ const jseSiteCrawl = {
 					Object.keys(categorySearch).forEach((catIndex) => {
 						if (categorySearch[catIndex].keywords && categorySearch[catIndex].keywords.indexOf(word) > -1) {
 							categorySearch[catIndex].count = (categorySearch[catIndex].count || 0) + 1;
-						}
-						if (categorySearch[catIndex].count >= siteData.category.count) {
-							siteData.category = categorySearch[catIndex];
+							//console.log('t1. '+categorySearch[catIndex].count+'/'+siteData.category.count+'/'+catIndex);
+							if (catIndex === '2') { // double check for final category
+								if (categorySearch[catIndex].count > (siteData.category.count + 1)) {
+									siteData.category = categorySearch[catIndex];
+								}
+							} else if (categorySearch[catIndex].count >= siteData.category.count) {
+								siteData.category = categorySearch[catIndex];
+							}
+							//console.log('t2. '+siteData.category.index);
 						}
 					});
 				}
@@ -192,18 +198,25 @@ const jseSiteCrawl = {
 	 * @method <h2>crawlPage</h2>
 	 * @description Use pupeteer headless browser to crawl the html of the url provided
 	 */
-	crawlPage: async(url) => {
+	crawlPage: async(url,doShowcase) => {
 		const browser = await puppeteer.launch({
 			headless: true,
 		});
 		const page = await browser.newPage();
+		//if (!doShowcase) {
+		//	await page.setJavaScriptEnabled(false);
+		//}
 		await page.setViewport({
 			width: 1280,
 			height: 720,
 		});
+		
+		setTimeout(() => { browser.close(); }, 30000);
 
 		await page.goto(url,{
-			waitUntil: 'networkidle0',
+			//waitUntil: 'networkidle0',
+			waitUntil: 'load',
+			timeout: 15000,
 		}).catch(err => {
 			//console.error('Sitecrawl error 49: '+err);
 		});
@@ -256,6 +269,7 @@ const jseSiteCrawl = {
 		result.domain = url.split('https://').join('').split('http://').join('').split('/')[0].toLowerCase().split(/[^.\-a-z0-9]/).join(''); // security cleaned due to image filesystem writing
 
 		const siteData = module.exports.iabFindCategory(result);
+		if (!doShowcase) return siteData;
 		siteData.bestKeywords = module.exports.getBestKeywords(siteData.keywordArray,siteData.language);
 		/*
 		console.log('Keyword Array: '+siteData.keywordArray.length);
