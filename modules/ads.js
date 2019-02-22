@@ -256,7 +256,7 @@ const jseAds = {
 	 * @returns {string} javascript code to inject on to page
 	 */
 	requestCode: async(adRequest,callback) => {
-		let injectCode = `var JSEInfoButton = '<img style="position: absolute; top: 1px; right: 14px; height: 12px; width: 12px; cursor: pointer; opacity: 0.7;" onmouseover="this.style.opacity = 0.9;" onmouseout="this.style.opacity = 0.7;" onclick="JSEDisplayInfo();" src="'+window.JSEInfoButtonSrc+'" alt="i" />';`;
+		let injectCode = '';
 		const selectedAds = [];
 		const adOptions = await jseAds.getAdOptions(adRequest);
 		if (!adRequest.blockedAutoBanners) {
@@ -293,6 +293,7 @@ const jseAds = {
 					var elemDiv = document.createElement('div');
 					elemDiv.style.cssText = 'position: relative; height: ${selectedAd.size.split('x')[1]}px; width: ${selectedAd.size.split('x')[0]}px; text-align: center;  z-index: 999999; margin: 0px auto;';
 					elemDiv.id = '${selectedAd.impressionID}';
+					var JSEInfoButton = '<img style="position: absolute; top: 1px; right: 14px; height: 12px; width: 12px; cursor: pointer; opacity: 0.7;" onmouseover="this.style.opacity = 0.9;" onmouseout="this.style.opacity = 0.7;" onclick="JSEDisplayInfo(${selectedAd.advID});" src="'+window.JSEInfoButtonSrc+'" alt="i" />';
 					var JSECloseButton = '<img style="position: absolute; top: 1px; right: 1px; height: 12px; width: 12px; cursor: pointer; opacity: 0.7;" onmouseover="this.style.opacity = 0.9;" onmouseout="this.style.opacity = 0.7;" onclick="document.getElementById(\\'${selectedAd.impressionID}\\').style.display = \\'none\\';" src="'+window.JSECloseButtonSrc+'" alt="x" />';
 					elemDiv.innerHTML = JSECloseButton+JSEInfoButton+'<div><iframe id="${selectedAd.impressionID}-iframe" FRAMEBORDER="0" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0" TOPMARGIN="0" LEFTMARGIN="0" ALLOWTRANSPARENCY="true" WIDTH="${selectedAd.size.split('x')[0]}" HEIGHT="${selectedAd.size.split('x')[1]}"></iframe></div>';
 					document.body.insertBefore(elemDiv, document.body.firstChild);
@@ -334,6 +335,7 @@ const jseAds = {
 					var elemDiv = document.createElement('div');
 					elemDiv.style.cssText = 'position: relative; height: ${selectedAd2.size.split('x')[1]}px; width: ${selectedAd2.size.split('x')[0]}px; position: fixed; bottom: 0px; right: 2px; z-index: 999998;';
 					elemDiv.id = '${selectedAd2.impressionID}';
+					var JSEInfoButton = '<img style="position: absolute; top: 1px; right: 14px; height: 12px; width: 12px; cursor: pointer; opacity: 0.7;" onmouseover="this.style.opacity = 0.9;" onmouseout="this.style.opacity = 0.7;" onclick="JSEDisplayInfo(${selectedAd2.advID});" src="'+window.JSEInfoButtonSrc+'" alt="i" />';
 					var JSECloseButton = '<img style="position: absolute; top: 1px; right: 1px; height: 12px; width: 12px; cursor: pointer; opacity: 0.7;" onmouseover="this.style.opacity = 0.9;" onmouseout="this.style.opacity = 0.7;" onclick="document.getElementById(\\'${selectedAd2.impressionID}\\').style.display = \\'none\\';" src="'+window.JSECloseButtonSrc+'" alt="x" />';
 					elemDiv.innerHTML = JSECloseButton+JSEInfoButton+'<iframe id="${selectedAd2.impressionID}-iframe" FRAMEBORDER="0" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0" TOPMARGIN="0" LEFTMARGIN="0" ALLOWTRANSPARENCY="true" WIDTH="${selectedAd2.size.split('x')[0]}" HEIGHT="${selectedAd2.size.split('x')[1]}"></iframe>';
 					document.body.appendChild(elemDiv);
@@ -382,6 +384,7 @@ const jseAds = {
 					function JSEinjectAd${placement.placementID}() {
 						var elemDiv = document.getElementById('JSE-banner-${placement.placementID}');
 						elemDiv.style.cssText = 'position: relative; height: ${selectedAd3.size.split('x')[1]}px; width: ${selectedAd3.size.split('x')[0]}px; text-align: center;  z-index: 999999; margin: 0px auto;';
+						var JSEInfoButton = '<img style="position: absolute; top: 1px; right: 14px; height: 12px; width: 12px; cursor: pointer; opacity: 0.7;" onmouseover="this.style.opacity = 0.9;" onmouseout="this.style.opacity = 0.7;" onclick="JSEDisplayInfo(${selectedAd3.advID});" src="'+window.JSEInfoButtonSrc+'" alt="i" />';
 						var JSECloseButton = '<img style="position: absolute; top: 1px; right: 1px; height: 12px; width: 12px; cursor: pointer; opacity: 0.7;" onmouseover="this.style.opacity = 0.9;" onmouseout="this.style.opacity = 0.7;" onclick="document.getElementById(\\'JSE-banner-${placement.placementID}\\').style.display = \\'none\\';" src="'+window.JSECloseButtonSrc+'" alt="x" />';
 						elemDiv.innerHTML = JSECloseButton+JSEInfoButton+'<iframe id="${selectedAd3.impressionID}-iframe" FRAMEBORDER="0" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0" TOPMARGIN="0" LEFTMARGIN="0" ALLOWTRANSPARENCY="true" WIDTH="${selectedAd3.size.split('x')[0]}" HEIGHT="${selectedAd3.size.split('x')[1]}"></iframe>';
 						var iframe = document.getElementById('${selectedAd3.impressionID}-iframe');
