@@ -1065,6 +1065,47 @@ var JSE = (function () {
 		return domain;
 	}
 
+	// Generic ad functions and images
+	window.JSECloseButtonSrc = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAMAAADWZboaAAAAaVBMVEXu7u4AAAAbGxvOzs7f39/l5eXp6enU1NQmJibY2NjR0dG/v7/U1NTW1tbZ2dnd3d2UlJQ8PDxgYGDb29vW1tba2trb29sxMTF6enrb29uioqJHR0dUVFRsbGzPz8/W1taGhoawsLDb29uBKLmuAAAAI3RSTlPMAPzMzszMvPrMzNXMr3wv3vPqzKVrRffkWdvw7efSpuHYWHFD4uwAAAI5SURBVEjHpZfrlqMgEIR7LJRgVBxvMfeZff+H3Lhxt8FGmU3qT048fILdRdPQR0i2KjVm6bKywUEBdLgDedGqNCPKUtUWOdANP0ArjUJl5ClTOXQVQY+AYc5RaoDjBmq1BHlqA23X0B5FShtKc/Rh9I6WImpxD6ElFEWlUEpU57zYzUXrJVoiox8pQ+mjHc8ZnRedi/ZwyDjbM2pFbCNxtv9QnRPrdm1OYnR9ud74X67/okd3uftdkiTXBdk8nu2YTXGcURhiXZJJ9YKc1PADgydaeXk5J4Ktn4/OboaqP6g25Gh8jtvtl2TyRSyjJ3TwzaA+meWPf+jTT9DwQLuCKMQelE/6Ds+7B+q6Xg5WB36RK4UPsrzeJXsRy3cDZakCCX0nTzV0ZnIhVFQ6nyqCeph/TyRUlKRb2mBlkjk9xFGSBuKESikQMoqwzcrWI9CKDjN5oaCydXQ/YRxdKUZlbpmNzypJtpVEOUzCx4KVYVLr5K6eJz+HkhO0BBv3tJogo0NGbBz71cwKI1YQpGe/ccWMqOSm+5rHXsWb/ChZsdXlCi+h7dNiKjC5h3JMRcXxC4woa9+cScH6ZU0UU8WVSHjLS02ghF/ZtQt2dCet+OBg1eN4o6Vu4+hGqYA8ruLi40oeknFl0M7RbP4HNbAvNgQK/ZttiGx+4mT5Zsv1fqMXby+5r+1ea2pVjv6lVjotoO1mA88zL0H8il8b8nZ5bWjD1wahoQNQmOmykqVpawoA90GOe+OK9BteqBtfhMeu0gAAAABJRU5ErkJggg==';
+	window.JSEInfoButtonSrc = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAMAAADWZboaAAAA8FBMVEXu7u4AAAAaGhrNzc3n5+fPz8/q6uo0NDTR0dHg4ODk5OTU1NTT09PY2Ng2NjZLS0vZ2dne3t7V1dXd3d0cHBwqKipISEheXl6zs7Pb29vW1tYiIiJiYmKrq6sgICDU1NQnJyc+Pj5qampzc3OAgIDZ2dna2trb29vb29tUVFRaWlqLi4uTk5PBwcHW1tY8PDxlZWWPj4+urq64uLgtLS1DQ0NOTk51dXWEhISbm5uYmJi8vLzDw8PHx8fJycnQ0NDOzs7W1tZTU1NXV1dvb2/W1tbc3Nx7e3uUlJSenp7U1NTZ2dkwMDB4eHilpaWtra0UrKNyAAAAUHRSTlPMAPzMzMvN9czNzcy/zPXvfM2vLvz48OvYzaX66tn7uPnz6ObjzGtZRe3s4d/V0fPp39nX9/Lv5eLd3dbV1NPS0qbt7OewMOTe3Ll99uXb2UdLd7AAAAOySURBVEjHnZdrV9pAEIbH3WzIhQQIIAmIUO4UQaRSuahotWrt7f//m242hL0kCKfvBw8c8zA7M+/uTuAkTS/571m8VfZ7vpj6UAo6eCTYsANT0wF0zQxsA5Pq4Ag0n8V2QQdJesHA2fwBtE9wV4MUaQ4m/Q/QYgM7PGASbhT3oT1sa/CBLAP30tFHouaoSg/wYxrqERMOyiReEm0Y6mLHc5TbJDI23lXUI7ryzOIXQiX3IsFiT0araswfGRTpU11lSVVEe9gCUV9OGeayv99ulULjHkeLOABRHYZc1qH+KfxQepPZLi7u0IYBouqIqjyCUFfX4RclrtGI0T6RE31CqNY243a0awg9q0vub1HigCSaaAW4Kgh9BlkOidC82pecjJ4lUQ3nGZrtghL1IApONkQHWM70ZjVMoNNRRw07oGjVVhrz5ymJrtCVUuQqRWXX+2gRLvgMuKbhgm/QWEIL5AResFgkvZxjuX4Frq8s18uMvP/wC/wkIGiBJgAt0brMUDTTO7SUWPITPDFVvRmudFJDVMNboMCQOcsKWyaHtT2QWjNDDzD58rCOrPt8+1wKP5w+3PsT8NG93B7AYpWe3WBao5nWR2UU69fKz1FnTjfXI6lOGKSu3lWaiKnlt1lAdN5ZTxFT8/O97GMQC7x0d7Fqixltb+ls3amhWJmVZArAuy9BLtrZ6xELnZlt/ImfYb/zOj5j/8sFvKICap1u9zdA0GKrHcOYAZWH3cFxaomozv2GrmO73Q7D+PAtfPpLfFy5SHCoJpQpJIVqv9IlgytZUg97JpbJ5KgLXKst+lu2JBKak+1yVPTLxRZty2cAEizh2f+H2h61//+hJM83nYK+bdGb9Fw1XKRbvbA/aoajStSAhAeMAUy08iVu0/DonsOcWrcTd2/SOqeW4QcMP9bG5dDtbXO3v9EFvDFHLllTF6E9y2PxWDvJOtvNyoxevtrub9QCdmBEhvoRmXkmHaYn+bhQm0q0Qc6Z0yP/raM94XIz8yNcujj8OYpU7rQu/PvNnX/V3u36uc9PFxJfV8LturwsUfDGhFzzPFRzCOZvCpcul8p1lbwkC0OUqbOC/nltjWasc3/d0lNB2AbkXbiau3BY6tXMB4KjZeKeOoYcKYtUleEHH8lqxFNHrvfj4mpGI2XQw+YxeXqp4yXuHhovHVzdO9RaH4ZUhlp1lNb2Zmkro3RygLe1PSDpH35tMAKF1oPDrw1MgyrBxHYKlq7rmlVwbPr18dDLCk/6mFekfzD7UJNzYQGgAAAAAElFTkSuQmCC';
+	window.JSEDisplayInfo = function() {
+		alert("Ads displayed via the JSE Ad Exchange\n\nPublisher ID: "+jseTrack.pubID+"\n\nhttps://jsecoin.com");
+	}
+	window.JSEIsBehindOtherElement = function(element) {
+		var boundingRect = element.getBoundingClientRect();
+		var left = boundingRect.left + 1;
+		var right = boundingRect.right - 1;
+		var top = boundingRect.top + 1;
+		var bottom = boundingRect.bottom - 1;
+		if (!document.elementFromPoint(left, top) || !document.elementFromPoint(right, top) || !document.elementFromPoint(left, bottom) || !document.elementFromPoint(right, bottom)) return true
+		if (document.elementFromPoint(left, top) !== element && document.elementFromPoint(left, top).id !== element.id+'-iframe') return true
+		if (document.elementFromPoint(right, top) !== element && document.elementFromPoint(right, top).id !== element.id+'-iframe') return true
+		if (document.elementFromPoint(left, bottom) !== element && document.elementFromPoint(left, bottom).id !== element.id+'-iframe') return true
+		if (document.elementFromPoint(right, bottom) !== element && document.elementFromPoint(right, bottom).id !== element.id+'-iframe') return true
+		return false;
+	}
+	window.JSERiseUp = function(riseUpPixels,elemID) {
+		var floatingDiv = document.getElementById(elemID);
+		if (JSEIsBehindOtherElement(floatingDiv) && riseUpPixels < (window.innerHeight - 350)) { // 250 height + 90px for top banner + 10px for margin
+			if (riseUpPixels > 110 && riseUpPixels <= 120) {
+				riseUpPixels += 5;
+			} else if (riseUpPixels > 120 && riseUpPixels <= 130) {
+				riseUpPixels += 2;
+			} else if (riseUpPixels > 130 && riseUpPixels <= 140) {
+				riseUpPixels += 1;
+			} else {
+				riseUpPixels += 10;
+			}
+			floatingDiv.style.bottom = riseUpPixels + 'px';
+			setTimeout(function() {
+				JSERiseUp(riseUpPixels,elemID);
+			}, 50);
+			//console.log('RiseUp Done! '+riseUpPixels);
+		} else {
+			//console.log('Ad visible no need to raise');
+		}
+	}
+
 	// Ad exchange request
 	checkIOLoaded(function() {
 		var adRequest = {};
@@ -1157,6 +1198,32 @@ var JSE = (function () {
 		if (window.JSENoAutoBanners) { adRequest.blockedAutoBanners = true; }
 		adRequest.blockedInText = false;
 		if (window.JSENoInText) { adRequest.blockedInText = true; }
+		if (window.JSEAdPlacements) {
+			adRequest.placements = window.JSEAdPlacements;
+			for (var i = 0; i < adRequest.placements.length; i+=1) {
+				var placement = adRequest.placements[i];
+				if (placement.size === 'auto') {
+					var elem = document.getElementById('JSE-banner-'+placement.placementID);
+					elem.style.width = '100%';
+					elem.style.height = '100%';
+					var newSize = null;
+					if (elem.clientWidth >= 300 && elem.clientHeight >= 100) newSize = '300x100';
+					if (elem.clientWidth >= 728 && elem.clientHeight >= 90) newSize = '728x90';
+					if (elem.clientWidth >= 300 && elem.clientHeight >= 250) newSize = '300x250';
+					if (newSize) {
+						adRequest.placements[i].size = newSize;
+					} else {
+						console.log('JSE Ads: Not enough space to display an ad');
+						adRequest.placements.splice(i, 1);
+					}
+				}
+			}
+		} else {
+			adRequest.placements = false;
+		}
+		if (window.JSEManualCategory) {
+			adRequest.manualCategory = window.JSEManualCategory;
+		}
 		
 		// tmp domain search
 		// sockets[0].emit('domainLogger', adRequest.domain);
