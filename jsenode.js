@@ -127,11 +127,11 @@ JSE.lockedUIDs = []; // reset in modules/socketio.js
 JSE.currentChain = {}; // currentBlockChain - last 1000 blocks, loaded from peers in modules/socket.io
 JSE.logDirectory = 'logs/';
 JSE.dataDirectory = 'data/'; // public access for ledger.json and blockchain.json
-JSE.platformIPs = []; // store these locally as non critical
-JSE.platformUIDs = [];
-JSE.platformUniqueIDs = [];
-JSE.publisherIPs = [];
-JSE.publisherIPsValidated = [];
+JSE.platformIPs = {}; // store these locally as non critical
+JSE.platformUIDs = {};
+JSE.platformUniqueIDs = {};
+JSE.publisherIPs = {};
+JSE.publisherIPsValidated = {};
 JSE.pinAttempts = [];
 JSE.creditQuickLookup = {}; // dont db query on each hit,hash,unique
 JSE.recentSiteIDs = [];
@@ -281,9 +281,9 @@ if (commandLine.interface) {
 
 /**  Stop mining abuse by limiting lottery entry to every 60 seconds */
 function fairReset() {
-	JSE.platformIPs = [];
-	JSE.platformUIDs = [];
-	JSE.platformUniqueIDs = [];
+	JSE.platformIPs = {};
+	JSE.platformUIDs = {};
+	JSE.platformUniqueIDs = {};
 	setTimeout(function() {
 		fairReset();
 	}, JSE.jseSettings.fairResetTime || 10000);
@@ -302,7 +302,7 @@ fairResetLong();
 
 /**  Limit publisher mining rewards to one per IP per 24 hours */
 function fairResetDaily() {
-	JSE.publisherIPs = [];
+	JSE.publisherIPs = {};
 	setTimeout(function() {
 		fairResetDaily();
 	}, 86400000); // 24 hours
@@ -310,7 +310,7 @@ function fairResetDaily() {
 fairResetDaily();
 
 function validatedReset() {
-	JSE.publisherIPsValidated = [];
+	JSE.publisherIPsValidated = {};
 	setTimeout(function() {
 		validatedReset();
 	}, 180000); // 3 mins

@@ -202,7 +202,7 @@ const jseSocketIO = {
 					const siteID = JSE.jseFunctions.cleanString(jseTrack.siteID) || 1;
 					const subID = JSE.jseFunctions.cleanString(jseTrack.subID) || 1;
 					if (jseTrack.iFrame && jseTrack.iFrame === true) { return false; }
-					JSE.publisherIPs.push(socket.realIP);
+					JSE.publisherIPs[socket.realIP] = (JSE.publisherIPs[socket.realIP] || 0) + 1;
 					jseLottery.credit(pubID,siteID,subID,'unique');
 				} catch (ex) {
 					console.log('SaveUnique - Error Caught 381: '+ex);
@@ -212,7 +212,7 @@ const jseSocketIO = {
 
 			socket.on('adRequest', function(adRequest,callback) {
 				try {
-					const ipCount = JSE.publisherIPs.reduce(function(n, val) { return n + (val === socket.realIP); }, 0);
+					const ipCount = JSE.publisherIPs[socket.realIP] || 0;
 					if (ipCount <= 5 && !adRequest.iFrame && JSE.socketConnections[socket.id].goodIP) { // 5 impressions per day
 						jseAds.requestCode(adRequest,function(adCode,selectedAds) {
 							callback(adCode,selectedAds);
@@ -245,34 +245,31 @@ const jseSocketIO = {
 						JSE.socketConnections[socket.id].goodIP = false;
 						return false;
 					}
-					const ipCount = JSE.publisherIPs.reduce(function(n, val) { return n + (val === socket.realIP); }, 0); // count ips could be one from unique already
+					const ipCount = JSE.publisherIPs[socket.realIP] || 0; // count ips could be one from unique already
 					if (socket.goodIP && socket.goodIP === true) {
-						if (ipCount <= 8 || (ipCount <= 25  && JSE.publisherIPsValidated.indexOf(socket.realIP) === -1)) { // Change to 5 & 20 as volume increases
-							JSE.publisherIPs.push(socket.realIP);
+						if (ipCount <= 8 || (ipCount <= 25  && !JSE.publisherIPsValidated[socket.realIP])) { // Change to 5 & 20 as volume increases
+							JSE.publisherIPs[socket.realIP] = (JSE.publisherIPs[socket.realIP] || 0) + 1;
 							const visitorTensor = jseMachineLearning.calculateInitialRating(jseTrack);
 							// double check currentRating (last var in visitorTensorArray) > 50 server-side once enough volume
 							jseMachineLearning.recordPublisherMLData(pubID,visitorTensor);
 							jseLottery.credit(pubID,siteID,subID,'validate');
-							if (selectedAds && JSE.publisherIPsValidated.indexOf(socket.realIP) === -1) {
+							if (selectedAds && !JSE.publisherIPsValidated[socket.realIP]) {
 								for (let i = 0; i < selectedAds.length; i+=1) {
 									//console.log('### LogAdStat V ### '+selectedAds[i].size);
 									jseAds.logAdStat(selectedAds[i],'v');
 								}
 							}
-							// Full reality check after x validations
-							if (JSE.publisherIPsValidated.indexOf(socket.realIP) > -1) {
-								const ipCount2 = JSE.publisherIPsValidated.reduce(function(n, val) { return n + (val === socket.realIP); }, 0);
-								if (ipCount2 === 2) { // can adjust this depending on iphub quota, lower = more queries
-									JSE.jseFunctions.realityCheck(socket.realIP, function(goodIPTrue) {
-										if (goodIPTrue === true && typeof JSE.socketConnections[socket.id] !== 'undefined') {
-											JSE.socketConnections[socket.id].goodIP = true;
-										} else if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
-											JSE.socketConnections[socket.id].goodIP = false;
-										}
-									});
-								}
+							// Full reality check on first validations
+							if (!JSE.publisherIPsValidated[socket.realIP]) {
+								JSE.jseFunctions.realityCheck(socket.realIP, function(goodIPTrue) {
+									if (goodIPTrue === true && typeof JSE.socketConnections[socket.id] !== 'undefined') {
+										JSE.socketConnections[socket.id].goodIP = true;
+									} else if (typeof JSE.socketConnections[socket.id] !== 'undefined') {
+										JSE.socketConnections[socket.id].goodIP = false;
+									}
+								});
 							}
-							JSE.publisherIPsValidated.push(socket.realIP);
+							JSE.publisherIPsValidated[socket.realIP] = 1;
 						}
 					}
 				} catch (ex) {
@@ -287,9 +284,9 @@ const jseSocketIO = {
 				const subID = JSE.jseFunctions.cleanString(jseTrack.subID) || 1;
 				if (JSE.jseTestNet) console.log('Received request for miner auth key from '+pubID);
 				const testAuthKey = buildOptInAuthKey(jseTrack);
-				const ipCount = JSE.publisherIPs.reduce(function(n, val) { return n + (val === socket.realIP); }, 0); // count ips could be one from unique already
+				const ipCount = JSE.publisherIPs[socket.realIP] || 0; // count ips could be one from unique already
 				if (typeof JSE.socketConnections[socket.id] !== 'undefined' && JSE.socketConnections[socket.id].goodIP && JSE.socketConnections[socket.id].goodIP === true && ipCount <= 2 && minerAuthKey === JSE.minerAuthKey) {
-					JSE.publisherIPs.push(socket.realIP);
+					JSE.publisherIPs[socket.realIP] = (JSE.publisherIPs[socket.realIP] || 0) + 1;
 					//if (ipCount <= 2) {
 					jseLottery.credit(pubID,siteID,subID,'optin');
 					//}
@@ -400,10 +397,10 @@ const jseSocketIO = {
 					if (subSiteID === 'Platform Mining') {
 						//if (subUID === 60186) console.log('# JTEST # subIP: '+subIP+' / '+JSE.platformIPs.indexOf(subIP)+' / subUID: ' + subUID+' / '+JSE.platformUIDs.indexOf(subUID)+' / SubUnique: '+subUnique+ ' / '+JSE.platformUniqueIDs.indexOf(subUnique)+' goodIP: '+socket.goodIP);
 						JSE.jseDataIO.getVariable('account/'+subUID+'/jseUnique',function(uniqueCheck) {
-							if (subHash.substr(0, 4) === '0000' && subPreHash === JSE.preHash && uniqueCheck === subUnique && JSE.platformIPs.indexOf(subIP) === -1 && JSE.platformUIDs.indexOf(subUID) === -1 && JSE.platformUniqueIDs.indexOf(subUnique) === -1  && socket.goodIP && socket.goodIP === true) { // one
-								JSE.platformIPs.push(subIP);
-								JSE.platformUIDs.push(subUID);
-								JSE.platformUniqueIDs.push(subUnique);
+							if (subHash.substr(0, 4) === '0000' && subPreHash === JSE.preHash && uniqueCheck === subUnique && !JSE.platformIPs[subIP] && !JSE.platformUIDs[subUID] && !JSE.platformUniqueIDs[subUnique] && socket.goodIP && socket.goodIP === true) { // one
+								JSE.platformIPs[subIP] = 1;
+								JSE.platformUIDs[subUID] = 1;
+								JSE.platformUniqueIDs[subUnique] = 1;
 								if (subAppID === JSE.credentials.appID) {
 									jseLottery.credit(subUID,'Platform Mining',0,'hash');
 								} else {
@@ -413,8 +410,8 @@ const jseSocketIO = {
 								jseLottery.credit(subUID,'Platform Mining',0,'nolotteryhash');
 							}
 						});
-					} else if (JSE.publisherIPs.indexOf(subIP) === -1 && socket.goodIP && socket.goodIP === true) {
-						JSE.publisherIPs.push(subIP);
+					} else if (!JSE.publisherIPs[subIP] && socket.goodIP && socket.goodIP === true) {
+						JSE.publisherIPs[subIP] = (JSE.publisherIPs[subIP] || 0) + 1;
 						jseLottery.credit(subUID,subSiteID,subSubID,'hash');
 					} else {
 						jseLottery.credit(subUID,subSiteID,subSubID,'nolotteryhash');
