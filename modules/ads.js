@@ -260,94 +260,97 @@ const jseAds = {
 		const selectedAds = [];
 		const adOptions = await jseAds.getAdOptions(adRequest);
 		if (!adRequest.blockedAutoBanners) {
-			let preferredAdSize = '728x90';
-			if (adRequest.innerWidth < 800) preferredAdSize = '300x100';
-			const bestTopAd = jseAds.pickAd(adOptions,adRequest,preferredAdSize,null);
-			if (bestTopAd) {
-				const random = Math.floor((Math.random() * 999999) + 1);
-				const ts = new Date().getTime();
-				const selectedAd = {
-					advID: bestTopAd.advID,
-					cid: bestTopAd.cid,
-					domain: adRequest.domain,
-					pubID: adRequest.pubID,
-					siteID: adRequest.siteID,
-					subID: adRequest.subID,
-					fileName: bestTopAd.fileName,
-					url: bestTopAd.url,
-					geo: adRequest.geo,
-					device: adRequest.device,
-					browser: adRequest.browser,
-					size: bestTopAd.size,
-					impressionTS: ts,
-					impressionID: String(ts) +''+ String(random),
-					price: JSE.jseFunctions.round(bestTopAd.bidPrice / 1000),
-				};
+			if (!adRequest.blockedAutoBannerTop) {
+				let preferredAdSize = '728x90';
+				if (adRequest.innerWidth < 800) preferredAdSize = '300x100';
+				const bestTopAd = jseAds.pickAd(adOptions,adRequest,preferredAdSize,null);
+				if (bestTopAd) {
+					const random = Math.floor((Math.random() * 999999) + 1);
+					const ts = new Date().getTime();
+					const selectedAd = {
+						advID: bestTopAd.advID,
+						cid: bestTopAd.cid,
+						domain: adRequest.domain,
+						pubID: adRequest.pubID,
+						siteID: adRequest.siteID,
+						subID: adRequest.subID,
+						fileName: bestTopAd.fileName,
+						url: bestTopAd.url,
+						geo: adRequest.geo,
+						device: adRequest.device,
+						browser: adRequest.browser,
+						size: bestTopAd.size,
+						impressionTS: ts,
+						impressionID: String(ts) +''+ String(random),
+						price: JSE.jseFunctions.round(bestTopAd.bidPrice / 1000),
+					};
 
-				// Dynamic tracking variables for outlink, repeated below {postbackID} {campaignID} {publisherID} {domain} {creative} {geo} {device} {browser}
-				selectedAd.url = selectedAd.url.split('{postbackID}').join(selectedAd.impressionID).split('{campaignID}').join(selectedAd.cid).split('{publisherID}').join(selectedAd.pubID).split('{domain}').join(selectedAd.domain).split('{creative}').join(selectedAd.fileName).split('{geo}').join(selectedAd.geo).split('{device}').join(selectedAd.device).split('{browser}').join(selectedAd.browser);
+					// Dynamic tracking variables for outlink, repeated below {postbackID} {campaignID} {publisherID} {domain} {creative} {geo} {device} {browser}
+					selectedAd.url = selectedAd.url.split('{postbackID}').join(selectedAd.impressionID).split('{campaignID}').join(selectedAd.cid).split('{publisherID}').join(selectedAd.pubID).split('{domain}').join(selectedAd.domain).split('{creative}').join(selectedAd.fileName).split('{geo}').join(selectedAd.geo).split('{device}').join(selectedAd.device).split('{browser}').join(selectedAd.browser);
 
-				selectedAds.push(selectedAd);
-				injectCode += `
-				function JSEinjectTopAd() {
-					var elemDiv = document.createElement('div');
-					elemDiv.style.cssText = 'position: relative; height: ${selectedAd.size.split('x')[1]}px; width: ${selectedAd.size.split('x')[0]}px; text-align: center;  z-index: 999999; margin: 0px auto;';
-					elemDiv.id = '${selectedAd.impressionID}';
-					var JSEInfoButton = '<img style="position: absolute; top: 1px; right: 14px; height: 12px; width: 12px; cursor: pointer; opacity: 0.7;" onmouseover="this.style.opacity = 0.9;" onmouseout="this.style.opacity = 0.7;" onclick="JSEDisplayInfo(${selectedAd.advID});" src="'+window.JSEInfoButtonSrc+'" alt="i" />';
-					var JSECloseButton = '<img style="position: absolute; top: 1px; right: 1px; height: 12px; width: 12px; cursor: pointer; opacity: 0.7;" onmouseover="this.style.opacity = 0.9;" onmouseout="this.style.opacity = 0.7;" onclick="document.getElementById(\\'${selectedAd.impressionID}\\').style.display = \\'none\\';" src="'+window.JSECloseButtonSrc+'" alt="x" />';
-					elemDiv.innerHTML = JSECloseButton+JSEInfoButton+'<div><iframe id="${selectedAd.impressionID}-iframe" FRAMEBORDER="0" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0" TOPMARGIN="0" LEFTMARGIN="0" ALLOWTRANSPARENCY="true" WIDTH="${selectedAd.size.split('x')[0]}" HEIGHT="${selectedAd.size.split('x')[1]}"></iframe></div>';
-					document.body.insertBefore(elemDiv, document.body.firstChild);
-					var iframe = document.getElementById('${selectedAd.impressionID}-iframe');
-					var iframeDoc = iframe.contentWindow.document;
-					iframeDoc.write('<head></head><body><a href="${selectedAd.url}" target="_blank"><img src="https://adx.jsecoin.com/${selectedAd.fileName}" alt="${selectedAd.url}" /></a></body>');
+					selectedAds.push(selectedAd);
+					injectCode += `
+					function JSEinjectTopAd() {
+						var elemDiv = document.createElement('div');
+						elemDiv.style.cssText = 'position: relative; height: ${selectedAd.size.split('x')[1]}px; width: ${selectedAd.size.split('x')[0]}px; text-align: center;  z-index: 999999; margin: 0px auto;';
+						elemDiv.id = '${selectedAd.impressionID}';
+						var JSEInfoButton = '<img style="position: absolute; top: 1px; right: 14px; height: 12px; width: 12px; cursor: pointer; opacity: 0.7;" onmouseover="this.style.opacity = 0.9;" onmouseout="this.style.opacity = 0.7;" onclick="JSEDisplayInfo(${selectedAd.advID});" src="'+window.JSEInfoButtonSrc+'" alt="i" />';
+						var JSECloseButton = '<img style="position: absolute; top: 1px; right: 1px; height: 12px; width: 12px; cursor: pointer; opacity: 0.7;" onmouseover="this.style.opacity = 0.9;" onmouseout="this.style.opacity = 0.7;" onclick="document.getElementById(\\'${selectedAd.impressionID}\\').style.display = \\'none\\';" src="'+window.JSECloseButtonSrc+'" alt="x" />';
+						elemDiv.innerHTML = JSECloseButton+JSEInfoButton+'<div><iframe id="${selectedAd.impressionID}-iframe" FRAMEBORDER="0" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0" TOPMARGIN="0" LEFTMARGIN="0" ALLOWTRANSPARENCY="true" WIDTH="${selectedAd.size.split('x')[0]}" HEIGHT="${selectedAd.size.split('x')[1]}"></iframe></div>';
+						document.body.insertBefore(elemDiv, document.body.firstChild);
+						var iframe = document.getElementById('${selectedAd.impressionID}-iframe');
+						var iframeDoc = iframe.contentWindow.document;
+						iframeDoc.write('<head></head><body><a href="${selectedAd.url}" target="_blank"><img src="https://adx.jsecoin.com/${selectedAd.fileName}" alt="${selectedAd.url}" /></a></body>');
+					}
+					JSEinjectTopAd();
+					`;
 				}
-				JSEinjectTopAd();
-				`;
 			}
+			if (!adRequest.blockedAutoBannerBottom) {
+				const bestBottomAd = jseAds.pickAd(adOptions, adRequest, '300x250',null);
+				if (bestBottomAd) {
+					const random2 = Math.floor((Math.random() * 999999) + 1);
+					const ts = new Date().getTime();
+					const selectedAd2 = {
+						advID: bestBottomAd.advID,
+						cid: bestBottomAd.cid,
+						domain: adRequest.domain,
+						pubID: adRequest.pubID,
+						siteID: adRequest.siteID,
+						subID: adRequest.subID,
+						fileName: bestBottomAd.fileName,
+						url: bestBottomAd.url,
+						geo: adRequest.geo,
+						device: adRequest.device,
+						browser: adRequest.browser,
+						size: bestBottomAd.size,
+						impressionTS: ts,
+						impressionID: String(ts) +''+ String(random2),
+						price: JSE.jseFunctions.round(bestBottomAd.bidPrice / 1000),
+					};
+					selectedAd2.url = selectedAd2.url.split('{postbackID}').join(selectedAd2.impressionID).split('{campaignID}').join(selectedAd2.cid).split('{publisherID}').join(selectedAd2.pubID).split('{domain}').join(selectedAd2.domain).split('{creative}').join(selectedAd2.fileName).split('{geo}').join(selectedAd2.geo).split('{device}').join(selectedAd2.device).split('{browser}').join(selectedAd2.browser);
 
-			const bestBottomAd = jseAds.pickAd(adOptions, adRequest, '300x250',null);
-			if (bestBottomAd) {
-				const random2 = Math.floor((Math.random() * 999999) + 1);
-				const ts = new Date().getTime();
-				const selectedAd2 = {
-					advID: bestBottomAd.advID,
-					cid: bestBottomAd.cid,
-					domain: adRequest.domain,
-					pubID: adRequest.pubID,
-					siteID: adRequest.siteID,
-					subID: adRequest.subID,
-					fileName: bestBottomAd.fileName,
-					url: bestBottomAd.url,
-					geo: adRequest.geo,
-					device: adRequest.device,
-					browser: adRequest.browser,
-					size: bestBottomAd.size,
-					impressionTS: ts,
-					impressionID: String(ts) +''+ String(random2),
-					price: JSE.jseFunctions.round(bestBottomAd.bidPrice / 1000),
-				};
-				selectedAd2.url = selectedAd2.url.split('{postbackID}').join(selectedAd2.impressionID).split('{campaignID}').join(selectedAd2.cid).split('{publisherID}').join(selectedAd2.pubID).split('{domain}').join(selectedAd2.domain).split('{creative}').join(selectedAd2.fileName).split('{geo}').join(selectedAd2.geo).split('{device}').join(selectedAd2.device).split('{browser}').join(selectedAd2.browser);
+					selectedAds.push(selectedAd2);
 
-				selectedAds.push(selectedAd2);
-
-				injectCode += `
-				function JSEinjectBottomAd() {
-					var elemDiv = document.createElement('div');
-					elemDiv.style.cssText = 'position: relative; height: ${selectedAd2.size.split('x')[1]}px; width: ${selectedAd2.size.split('x')[0]}px; position: fixed; bottom: 0px; right: 2px; z-index: 999998;';
-					elemDiv.id = '${selectedAd2.impressionID}';
-					var JSEInfoButton = '<img style="position: absolute; top: 1px; right: 14px; height: 12px; width: 12px; cursor: pointer; opacity: 0.7;" onmouseover="this.style.opacity = 0.9;" onmouseout="this.style.opacity = 0.7;" onclick="JSEDisplayInfo(${selectedAd2.advID});" src="'+window.JSEInfoButtonSrc+'" alt="i" />';
-					var JSECloseButton = '<img style="position: absolute; top: 1px; right: 1px; height: 12px; width: 12px; cursor: pointer; opacity: 0.7;" onmouseover="this.style.opacity = 0.9;" onmouseout="this.style.opacity = 0.7;" onclick="document.getElementById(\\'${selectedAd2.impressionID}\\').style.display = \\'none\\';" src="'+window.JSECloseButtonSrc+'" alt="x" />';
-					elemDiv.innerHTML = JSECloseButton+JSEInfoButton+'<iframe id="${selectedAd2.impressionID}-iframe" FRAMEBORDER="0" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0" TOPMARGIN="0" LEFTMARGIN="0" ALLOWTRANSPARENCY="true" WIDTH="${selectedAd2.size.split('x')[0]}" HEIGHT="${selectedAd2.size.split('x')[1]}"></iframe>';
-					document.body.appendChild(elemDiv);
-					var iframe = document.getElementById('${selectedAd2.impressionID}-iframe');
-					var iframeDoc = iframe.contentWindow.document;
-					iframeDoc.write('<head></head><body><a href="${selectedAd2.url}" target="_blank"><img src="https://adx.jsecoin.com/${selectedAd2.fileName}" id="${selectedAd2.impressionID}-banner" alt="${selectedAd2.url}" /></a></body>');
-					setTimeout(function() {
-						JSERiseUp(0,'${selectedAd2.impressionID}');
-					},2000);
+					injectCode += `
+					function JSEinjectBottomAd() {
+						var elemDiv = document.createElement('div');
+						elemDiv.style.cssText = 'position: relative; height: ${selectedAd2.size.split('x')[1]}px; width: ${selectedAd2.size.split('x')[0]}px; position: fixed; bottom: 0px; right: 2px; z-index: 999998;';
+						elemDiv.id = '${selectedAd2.impressionID}';
+						var JSEInfoButton = '<img style="position: absolute; top: 1px; right: 14px; height: 12px; width: 12px; cursor: pointer; opacity: 0.7;" onmouseover="this.style.opacity = 0.9;" onmouseout="this.style.opacity = 0.7;" onclick="JSEDisplayInfo(${selectedAd2.advID});" src="'+window.JSEInfoButtonSrc+'" alt="i" />';
+						var JSECloseButton = '<img style="position: absolute; top: 1px; right: 1px; height: 12px; width: 12px; cursor: pointer; opacity: 0.7;" onmouseover="this.style.opacity = 0.9;" onmouseout="this.style.opacity = 0.7;" onclick="document.getElementById(\\'${selectedAd2.impressionID}\\').style.display = \\'none\\';" src="'+window.JSECloseButtonSrc+'" alt="x" />';
+						elemDiv.innerHTML = JSECloseButton+JSEInfoButton+'<iframe id="${selectedAd2.impressionID}-iframe" FRAMEBORDER="0" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0" TOPMARGIN="0" LEFTMARGIN="0" ALLOWTRANSPARENCY="true" WIDTH="${selectedAd2.size.split('x')[0]}" HEIGHT="${selectedAd2.size.split('x')[1]}"></iframe>';
+						document.body.appendChild(elemDiv);
+						var iframe = document.getElementById('${selectedAd2.impressionID}-iframe');
+						var iframeDoc = iframe.contentWindow.document;
+						iframeDoc.write('<head></head><body><a href="${selectedAd2.url}" target="_blank"><img src="https://adx.jsecoin.com/${selectedAd2.fileName}" id="${selectedAd2.impressionID}-banner" alt="${selectedAd2.url}" /></a></body>');
+						setTimeout(function() {
+							JSERiseUp(0,'${selectedAd2.impressionID}');
+						},2000);
+					}
+					JSEinjectBottomAd();
+					`;
 				}
-				JSEinjectBottomAd();
-				`;
 			}
 		}
 		if (adRequest.placements) {

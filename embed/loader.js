@@ -1196,6 +1196,8 @@ var JSE = (function () {
 		adRequest.blockedAdvertisers = window.JSEBlockedAdvertisers || '';
 		adRequest.blockedAutoBanners = false;
 		if (window.JSENoAutoBanners) { adRequest.blockedAutoBanners = true; }
+		if (window.JSENoAutoBannerTop) { adRequest.blockedAutoBannerTop = true; }
+		if (window.JSENoAutoBannerBottom) { adRequest.blockedAutoBannerBottom = true; }
 		adRequest.blockedInText = false;
 		if (window.JSENoInText) { adRequest.blockedInText = true; }
 		if (window.JSEAdPlacements) {
