@@ -1168,6 +1168,7 @@ var JSE = (function () {
 		}
 		var textContent = document.body.textContent || document.body.innerText;
 		var textContentLC = textContent.toLowerCase();
+		var textContentArray = textContentLC.split(/\s/);
 		adRequest.category = 0;
 		for (var category in iabCategories) {
 			if (!iabCategories.hasOwnProperty(category)) continue;
@@ -1175,11 +1176,11 @@ var JSE = (function () {
 			var keywordCount = 0;
 			for (var i = 0; i < keywordArray.length; i++) {
 				var keyword = atob(keywordArray[i]);
-				if (textContentLC.indexOf(keyword) > -1) {
+				if (textContentArray.indexOf(keyword) > -1) {
 					keywordCount += 1;
 				}
 			}
-			if (keywordCount >= 2) {
+			if ((keywordCount >= 2 && category !== 3) || keywordCount >= 4) {
 				adRequest.category = category;
 			}
 		}
@@ -1223,7 +1224,7 @@ var JSE = (function () {
 		} else {
 			adRequest.placements = false;
 		}
-		if (window.JSEManualCategory) {
+		if (typeof window.JSEManualCategory !== 'undefined') {
 			adRequest.manualCategory = window.JSEManualCategory;
 		}
 		
@@ -1270,14 +1271,16 @@ var JSE = (function () {
 		// hit, wait for opt in.
 	}
 
-	if (jseTrack.optInAuthKey == 'unknown'.toLowerCase() + 'OptInAuthKey') { // bit weird but stops uglifyjs putting it together.
-		// No opt in wait for click
-		if (navigator.cookieEnabled) { // don't pop the opt-in for browsers which aren't cookie enabled as it will pop up on every page.
-			create();
+	if (!window.JSENoMining) {
+		if (jseTrack.optInAuthKey == 'unknown'.toLowerCase() + 'OptInAuthKey') { // bit weird but stops uglifyjs putting it together.
+			// No opt in wait for click
+			if (navigator.cookieEnabled) { // don't pop the opt-in for browsers which aren't cookie enabled as it will pop up on every page.
+				create();
+			}
+		} else {
+			// opted in
+			startMining(false);
 		}
-	} else {
-		// opted in
-		startMining(false);
 	}
 
 })();

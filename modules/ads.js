@@ -25,7 +25,7 @@ const jseAds = {
 		if (JSE.adxCategories[adRequest.domain]) {
 			category = parseInt(JSE.adxCategories[adRequest.domain],10);
 		}
-		if (adRequest.manualCategory) {
+		if (typeof adRequest.manualCategory !== 'undefined') {
 			category = parseInt(adRequest.manualCategory,10);
 		}
 		JSE.adxActiveCampaigns.forEach((campaign) => {
