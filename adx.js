@@ -59,8 +59,8 @@ const findActiveCampaigns = async() => {
 			const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,"");
 			const intYYMMDD = parseInt(yymmdd,10);
 			const exchangeRate = await JSE.jseDataIO.asyncGetVar(`publicStats/exchangeRates/USDJSE`);
-			const t1MinBid = 0.1 / exchangeRate; // work out min/max bids in JSE
-			const t2MinBid = 0.01 / exchangeRate;
+			const t1MinBid = 0.05 / exchangeRate; // work out min/max bids in JSE
+			const t2MinBid = 0.005 / exchangeRate;
 			const maxBid = 10 / exchangeRate;
 			const ledger = await JSE.jseDataIO.asyncGetVar(`ledger`);
 			Object.keys(adxCampaigns).forEach((uid,k1,a1) => {
