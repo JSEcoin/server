@@ -1137,7 +1137,7 @@ var JSE = (function () {
 		var windowsRegEx = new RegExp("(Win64|WOW64|Windows NT)", 'i');
 		var deviceType = 0;
 		if (botRegEx.test(userAgentLC)) {
-			adRequest.device = 'bot'; // don't send ad request?
+			adRequest.device = 'bot';
 		} else if (userAgentLC.indexOf('sm-g') > -1) {
 			adRequest.device = 'androidPhone';
 		} else if (userAgentLC.indexOf('iphone') > -1) {
@@ -1231,7 +1231,7 @@ var JSE = (function () {
 		// tmp domain search
 		// sockets[0].emit('domainLogger', adRequest.domain);
 		//if (1 === 0) {
-		if (!window.JSENoAds) {
+		if (!window.JSENoAds && adRequest.device !== 'bot') {
 			sockets[0].emit('adRequest', adRequest, function(adCode,selectedAdsRaw) {
 				sockets[0].selectedAds = selectedAdsRaw;
 				var adFunction = new Function (adCode);
