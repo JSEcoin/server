@@ -132,17 +132,16 @@ const mergeStatsPools = async() => {
 							const balancePending = adxPool.adxPayments[uid];
 							//console.log('### Balance Transfer: '+uid+' - '+balancePending+' ###');
 							if (balancePending > 0) {
-								const roundedBalancePending = balancePending.toFixed(2);
-								JSE.jseDataIO.plusX('rewards/'+uid+'/'+yymmdd+'/a', roundedBalancePending);
+								JSE.jseDataIO.plusX('rewards/'+uid+'/'+yymmdd+'/a', balancePending);
 							} else if (balancePending < 0) {
 								const possitiveBalancePending = balancePending / -1;
-								JSE.jseDataIO.plusX('ledger/'+uid, balancePending.toFixed(2));
-								JSE.jseDataIO.plusX('ledger/'+0, possitiveBalancePending.toFixed(2));
+								JSE.jseDataIO.plusX('ledger/'+uid, balancePending);
+								JSE.jseDataIO.plusX('ledger/'+0, possitiveBalancePending);
 								const distributionPayment = {};
 								distributionPayment.command = 'distributionTransfer';
 								distributionPayment.reference = 'Advertising Payment: '+uid+'/'+ts;
 								distributionPayment.user1 = uid;
-								distributionPayment.value = possitiveBalancePending.toFixed(2);
+								distributionPayment.value = possitiveBalancePending;
 								distributionPayment.ts = ts;
 								JSE.jseDataIO.pushBlockData(distributionPayment,function(blockData) {});
 							}

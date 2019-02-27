@@ -403,7 +403,7 @@ function processRewards(howManyDaysBack=7) {
 					JSE.jseDataIO.pushVariable('history/'+uid,newReferralData,function(pushRef) {});
 				}
 				if (rewards[uid][lastWeekYYMMDD].a) { // a = advertising
-					const jseReferralReward = rewards[uid][lastWeekYYMMDD].a;
+					const jseReferralReward = Number(rewards[uid][lastWeekYYMMDD].a).toFixed(2); // micro payments round to two decimals
 					JSE.jseDataIO.plusX('ledger/'+uid, jseReferralReward);
 					const newReferralData = {};
 					newReferralData.command = 'advertisingReward';
