@@ -62,6 +62,15 @@ const findActiveCampaigns = async() => {
 			const t1MinBid = 0.05 / exchangeRate; // work out min/max bids in JSE
 			const t2MinBid = 0.005 / exchangeRate;
 			const maxBid = 10 / exchangeRate;
+			const geoGroups = {
+				NAM: ['AG','AI','AN','AW','BB','BL','BM','BS','BZ','CA','CR','CU','DM','DO','GD','GL','GP','GT','HN','HT','JM','KN','KY','LC','MF','MQ','MS','MX','NI','PA','PM','PR','SV','TC','TT','US','VC','VG','VI'],
+				SAM: ['AR','BO','BR','CL','CO','EC','FK','GF','GY','PE','PY','SR','UY','VE'],
+				EUR: ['AD','AL','AT','AX','BA','BE','BG','BY','CH','CZ','DE','DK','EE','ES','EU','FI','FO','FR','FX','GB','GG','GI','GR','HR','HU','IE','IM','IS','IT','JE','LI','LT','LU','LV','MC','MD','ME','MK','MT','NL','NO','PL','PT','RO','RS','RU','SE','SI','SJ','SK','SM','TR','UA','VA'],
+				ASI: ['AE','AF','AM','AP','AZ','BD','BH','BN','BT','CC','CN','CX','CY','GE','HK','ID','IL','IN','IO','IQ','IR','JO','JP','KG','KH','KP','KR','KW','KZ','LA','LB','LK','MM','MN','MO','MV','MY','NP','OM','PH','PK','PS','QA','SA','SG','SY','TH','TJ','TL','TM','TW','UZ','VN','YE'],
+				AFR: ['AO','BF','BI','BJ','BW','CD','CF','CG','CI','CM','CV','DJ','DZ','EG','EH','ER','ET','GA','GH','GM','GN','GQ','GW','KE','KM','LR','LS','LY','MA','MG','ML','MR','MU','MW','MZ','NA','NE','NG','RE','RW','SC','SD','SH','SL','SN','SO','ST','SZ','TD','TG','TN','TZ','UG','YT','ZA','ZM','ZW'],
+				OCE: ['AS','AU','CK','FJ','FM','GU','KI','MH','MP','NC','NF','NR','NU','NZ','PF','PG','PN','PW','SB','TK','TO','TV','UM','VU','WF','WS'],
+				ANT: ['AQ','BV','GS','HM','TF'],
+			};
 			const ledger = await JSE.jseDataIO.asyncGetVar(`ledger`);
 			Object.keys(adxCampaigns).forEach((uid,k1,a1) => {
 				Object.keys(adxCampaigns[uid]).forEach((cid,k2,a2) => {
@@ -89,7 +98,11 @@ const findActiveCampaigns = async() => {
 								if (campaign.active.budgetLeft > campaign.active.bidPrice) {
 									if ((intYYMMDD > parseInt(campaign.start,10) || !campaign.start) && (intYYMMDD < parseInt(campaign.end,10) || !campaign.end)) {
 										campaign.geos.forEach((geo) => {
-											if ('US,CA,UK,GB,AU,NZ'.indexOf(geo) && campaign.active.bidPrice > t1MinBid && campaign.active.bidPrice < maxBid) {
+											if (geo.length === 3 && geoGroups[geo]) {
+												geoGroups[geo].forEach((subGeo) => {
+													campaign.active[subGeo] = true;
+												});
+											} else if ('US,CA,UK,GB,AU,NZ'.indexOf(geo) && campaign.active.bidPrice > t1MinBid && campaign.active.bidPrice < maxBid) {
 												campaign.active[geo] = true;
 											} else if (campaign.active.bidPrice > t2MinBid && campaign.active.bidPrice < maxBid) {
 												campaign.active[geo] = true;
