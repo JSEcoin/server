@@ -94,7 +94,7 @@ router.post('/uploadcampaign/*', function (req, res) {
 					} else	if (/(adx.jsecoin.com|localhost)/.test(req.body.creatives[imgRef].src)) {
 						const fileNameSplit = req.body.creatives[imgRef].src.split('/');
 						fileName = fileNameSplit[fileNameSplit.length - 1];
-						campaign.banners.push({ fileName, size, originalFileName, paused: false, disabled: false });
+						campaign.banners.push({ fileName, size, originalFileName, paused: false, disabled: 'pending' });
 					}
 				} else {
 					// inText creatives here?
@@ -111,6 +111,11 @@ router.post('/uploadcampaign/*', function (req, res) {
 					} else {
 						campaign.disabled = 'pending';
 					}
+					existingCampaign.banners.forEach((existingBanner) => {
+						for (let i = 0; i < campaign.banners.length; i+=1) {
+							if (campaign.banners[i].fileName === existingBanner.fileName) campaign.banners[i].disabled = existingBanner.disabled;
+						}
+					});
 					JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+campaign.cid,campaign);
 				});
 			} else {
