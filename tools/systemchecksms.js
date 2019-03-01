@@ -65,8 +65,8 @@ function runChecks() {
 				errorMsg = 'More than 100 user accounts created';
 				sendOnceSMS(JSE.credentials.emergencyNo,errorMsg);
 			}
-			if (newPublicStats.coins > (JSE.publicStats.coins + 500000)) {
-				errorMsg = 'More than 500k coins created';
+			if (newPublicStats.coins > (JSE.publicStats.coins + 999999)) {
+				errorMsg = 'More than 1m coins created';
 				sendOnceSMS(JSE.credentials.emergencyNo,errorMsg);
 			}
 		}

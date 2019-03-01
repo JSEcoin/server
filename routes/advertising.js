@@ -106,7 +106,7 @@ router.post('/uploadcampaign/*', function (req, res) {
 			if (req.body.cid && JSE.jseFunctions.cleanString(req.body.cid) !== '0') {
 				JSE.jseDataIO.getVariable('adxCampaigns/'+goodCredentials.uid+'/'+campaign.cid, function(existingCampaign) {
 					campaign.paused = existingCampaign.paused;
-					if (campaign.url === existingCampaign.url && campaign.category === existingCampaign.category && campaign.general === existingCampaign.general && campaign.crytpo === existingCampaign.crypto && campaign.streaming === existingCampaign.streaming && campaign.adult === existingCampaign.adult) {
+					if (campaign.url === existingCampaign.url && campaign.category === Boolean(existingCampaign.category) && campaign.general === Boolean(existingCampaign.general) && campaign.crytpo === Boolean(existingCampaign.crypto) && campaign.streaming === Boolean(existingCampaign.streaming) && campaign.adult === Boolean(existingCampaign.adult)) {
 						campaign.disabled = existingCampaign.disabled;
 					} else {
 						campaign.disabled = 'pending';
