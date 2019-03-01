@@ -106,7 +106,7 @@ router.post('/uploadcampaign/*', function (req, res) {
 			if (req.body.cid && JSE.jseFunctions.cleanString(req.body.cid) !== '0') {
 				JSE.jseDataIO.getVariable('adxCampaigns/'+goodCredentials.uid+'/'+campaign.cid, function(existingCampaign) {
 					campaign.paused = existingCampaign.paused;
-					if (campaign.url === existingCampaign.url) {
+					if (campaign.url === existingCampaign.url && campaign.category === existingCampaign.category && campaign.adult === existingCampaign.adult) {
 						campaign.disabled = existingCampaign.disabled;
 					} else {
 						campaign.disabled = 'pending';
