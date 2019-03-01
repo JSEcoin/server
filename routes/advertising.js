@@ -106,14 +106,17 @@ router.post('/uploadcampaign/*', function (req, res) {
 			if (req.body.cid && JSE.jseFunctions.cleanString(req.body.cid) !== '0') {
 				JSE.jseDataIO.getVariable('adxCampaigns/'+goodCredentials.uid+'/'+campaign.cid, function(existingCampaign) {
 					campaign.paused = existingCampaign.paused;
-					if (campaign.url === existingCampaign.url && campaign.category === Boolean(existingCampaign.category) && campaign.general === Boolean(existingCampaign.general) && campaign.crytpo === Boolean(existingCampaign.crypto) && campaign.streaming === Boolean(existingCampaign.streaming) && campaign.adult === Boolean(existingCampaign.adult)) {
+					if (campaign.url === existingCampaign.url && campaign.category === existingCampaign.category && campaign.general === existingCampaign.general && campaign.crypto === existingCampaign.crypto && campaign.streaming === existingCampaign.streaming && campaign.adult === existingCampaign.adult) {
 						campaign.disabled = existingCampaign.disabled;
 					} else {
 						campaign.disabled = 'pending';
 					}
 					existingCampaign.banners.forEach((existingBanner) => {
 						for (let i = 0; i < campaign.banners.length; i+=1) {
-							if (campaign.banners[i].fileName === existingBanner.fileName) campaign.banners[i].disabled = existingBanner.disabled;
+							if (campaign.banners[i].fileName === existingBanner.fileName) {
+								campaign.banners[i].disabled = existingBanner.disabled;
+								campaign.banners[i].paused = existingBanner.paused;
+							}
 						}
 					});
 					JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+campaign.cid,campaign);
