@@ -59,15 +59,11 @@ router.post('/uploadcampaign/*', function (req, res) {
 			if (req.body.cid && JSE.jseFunctions.cleanString(req.body.cid) !== '0') {
 				// modify existing campaign
 				campaign.cid = JSE.jseFunctions.cleanString(req.body.cid);
-				campaign.paused = false;
-				campaign.disabled = 'pending'; // may need an async lookup here
 				campaign.archived = false;
 			} else {
 				const newDate = new Date().getTime();
 				const random = Math.floor((Math.random() * 9999) + 1); // setting up a firebase style push variable, timestamp+random
 				campaign.cid = String(newDate) +''+ String(random); // Campaign ID
-				campaign.paused = false; // user paused
-				campaign.disabled = 'pending'; // admin disabled (budgets etc)
 				campaign.archived = false;
 			}
 			campaign.banners = [];
@@ -98,7 +94,7 @@ router.post('/uploadcampaign/*', function (req, res) {
 					} else	if (/(adx.jsecoin.com|localhost)/.test(req.body.creatives[imgRef].src)) {
 						const fileNameSplit = req.body.creatives[imgRef].src.split('/');
 						fileName = fileNameSplit[fileNameSplit.length - 1];
-						campaign.banners.push({ fileName, size, originalFileName, paused: false, disabled: 'pending' });
+						campaign.banners.push({ fileName, size, originalFileName, paused: false, disabled: false });
 					}
 				} else {
 					// inText creatives here?
@@ -107,12 +103,59 @@ router.post('/uploadcampaign/*', function (req, res) {
 			});
 
 			//fs.writeFileSync('./campaign1.json', JSON.stringify(campaign) , 'utf-8');
-			JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+campaign.cid,campaign);
-
+			if (req.body.cid && JSE.jseFunctions.cleanString(req.body.cid) !== '0') {
+				JSE.jseDataIO.getVariable('adxCampaigns/'+goodCredentials.uid+'/'+campaign.cid, function(existingCampaign) {
+					campaign.paused = existingCampaign.paused;
+					if (campaign.url === existingCampaign.url) {
+						campaign.disabled = existingCampaign.disabled;
+					} else {
+						campaign.disabled = 'pending';
+					}
+					JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+campaign.cid,campaign);
+				});
+			} else {
+				campaign.paused = false; // user paused
+				campaign.disabled = 'pending'; // admin disabled (budgets etc)
+				JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+campaign.cid,campaign);
+			}
 			res.send('{"success":1,"notification":"Campaign has been successfully submitted"}');
 		}
 	}, function() {
 		res.status(401).send('{"fail":1,"notification":"Error advertising.js 19. Invalid Session Variable"}'); return false;
+	});
+	return false;
+});
+
+
+/**
+ * @name /advertising/togglebanner/*
+ * @description Toggle Pause/Unpause Banners
+ * @memberof module:jseRouter
+ */
+router.post('/togglebanner/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error advertising.js 135. No Session Variable Supplied"}'); return false; }
+	const session = req.body.session; // No need to cleanString because it's only used for comparison
+	const cid = JSE.jseFunctions.cleanString(req.body.cid);
+	const fileName = JSE.jseFunctions.cleanString(req.body.fileName);
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials) {
+			JSE.jseDataIO.getVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/banners', function(banners) {
+				const modifiedBanners = banners;
+				for (let i = 0; i < modifiedBanners.length; i+=1) {
+					if (modifiedBanners[i].fileName === fileName) {
+						if (modifiedBanners[i].paused) {
+							modifiedBanners[i].paused = false;
+						} else {
+							modifiedBanners[i].paused = true;
+						}
+					}
+				}
+				JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/banners', modifiedBanners);
+				res.send('{"success":1,"notification":"Banner has been successfully adjusted"}');
+			});
+		}
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error advertising.js 159. Invalid Session Variable"}'); return false;
 	});
 	return false;
 });
@@ -123,7 +166,7 @@ router.post('/uploadcampaign/*', function (req, res) {
  * @memberof module:jseRouter
  */
 router.post('/pausecampaign/*', function (req, res) {
-	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error advertising.js 118. No Session Variable Supplied"}'); return false; }
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error advertising.js 168. No Session Variable Supplied"}'); return false; }
 	const session = req.body.session; // No need to cleanString because it's only used for comparison
 	const cid = JSE.jseFunctions.cleanString(req.body.cid);
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
@@ -132,7 +175,7 @@ router.post('/pausecampaign/*', function (req, res) {
 			res.send('{"success":1,"notification":"Campaign has been successfully paused"}');
 		}
 	}, function() {
-		res.status(401).send('{"fail":1,"notification":"Error advertising.js 89. Invalid Session Variable"}'); return false;
+		res.status(401).send('{"fail":1,"notification":"Error advertising.js 178. Invalid Session Variable"}'); return false;
 	});
 	return false;
 });
@@ -159,7 +202,7 @@ router.post('/restartcampaign/*', function (req, res) {
 
 /**
  * @name /advertising/archivecampaign/*
- * @description Pause Campaign
+ * @description Archive Campaign
  * @memberof module:jseRouter
  */
 router.post('/archivecampaign/*', function (req, res) {
