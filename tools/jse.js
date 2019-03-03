@@ -284,6 +284,7 @@ function help() {
 	console.log('  badstats - find bad data in stats    		- badstats');
 	console.log('  repairstats - find bad data in stats    	- repairstats');
 	console.log('  miningmaintenance - reduce miningdb			- miningmaintenance');
+	console.log('  cleanlogins - clean up the login data    - cleanlogins');
 	console.log('  cleanup - clean up siteIDs & subIDs			- cleanup');
 	console.log('  badledger - find bad data in ledger    	- badledger');
 	console.log('  rewards - manually process rewrads   		- rewards 180914');
@@ -498,6 +499,8 @@ function checkAuthenticated() {
 			} else if (cleanKey === 'badstats')	{
 				findBadSiteStats();
 				setTimeout(function() { process.stdout.write("\n> "); }, 2000);
+			} else if (cleanKey === 'cleanlogins')	{			
+				cleanLogins(1);
 			} else if (cleanKey === 'cleanup')	{
 				cleanUp(0);
 			} else if (cleanKey === 'repairstats')	{
@@ -687,6 +690,50 @@ function cleanRewards() {
 				JSE.jseDataIO.hardDeleteVariable('rewards/'+uid+'/'+lastMonthYYMMDD); // clean up after one month?
 			}
 		});
+	});
+}
+
+function cleanNextLogin(userArray) {
+	if (userArray.length) {
+		const uid = userArray.shift();
+		console.log('Checking logins/'+uid);
+		setTimeout(function() {
+			cleanNextLogin(userArray);
+		}, 500);
+		JSE.jseDataIO.getVariable('logins/'+uid,function(logins) {
+			if (logins) {
+				const newLogins = {};
+				const oldLogins = {};
+				let count = 0;
+				let noOfLogins = Object.keys(logins).length;
+				Object.keys(logins).forEach((pushRef) => {
+					if (count > (noOfLogins - 10)) {
+						newLogins[pushRef] = logins[pushRef];
+					} else {
+						oldLogins[pushRef] = logins[pushRef];
+					}
+					count += 1;
+				});
+				JSE.jseDataIO.setVariable('logins/'+uid,newLogins);
+				//console.log('NewLogins:');
+				//console.log(JSON.stringify(newLogins));
+				//console.log('OldLogins:');
+				//console.log(JSON.stringify(oldLogins));
+			}
+			
+		});
+	} else {
+		console.log('Done cleaning all logins');
+	}
+}
+
+function cleanLogins(startNo) {
+	JSE.jseDataIO.getVariable('nextUserID',function(nextUserID) {
+		const userArray = [];
+		for (let i = startNo; i < nextUserID; i++) {
+			userArray.push(i);
+		}
+		cleanNextLogin(userArray);
 	});
 }
 
