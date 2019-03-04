@@ -83,7 +83,7 @@ const jseAds = {
 				});
 			}
 		});
-		if (!adRequest.blockedInText) {
+		if (!adRequest.blockedInText && adRequest.keywords && adRequest.keywords.length > 0) {
 			adRequest.keywords.forEach((keyword) => {
 				if (JSE.adxActiveKeywords[keyword]) {
 					const adOption = {};
