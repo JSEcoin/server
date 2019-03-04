@@ -55,12 +55,13 @@ const findActiveCampaigns = async() => {
 		JSE.jseDataIO.getVariable('adxCampaigns/', async(adxCampaigns) => {
 			if (!adxCampaigns) return false;
 			const activeCampaigns = [];
+			const activeKeywords = {};
 			const rightNow = new Date();
 			const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,"");
 			const intYYMMDD = parseInt(yymmdd,10);
 			const exchangeRate = await JSE.jseDataIO.asyncGetVar(`publicStats/exchangeRates/USDJSE`);
-			const t1MinBid = 0.05 / exchangeRate; // work out min/max bids in JSE
-			const t2MinBid = 0.005 / exchangeRate;
+			const t1MinBid = 0.01 / exchangeRate; // work out min/max bids in JSE
+			const t2MinBid = 0.001 / exchangeRate;
 			const maxBid = 10 / exchangeRate;
 			const geoGroups = {
 				NAM: ['AG','AI','AN','AW','BB','BL','BM','BS','BZ','CA','CR','CU','DM','DO','GD','GL','GP','GT','HN','HT','JM','KN','KY','LC','MF','MQ','MS','MX','NI','PA','PM','PR','SV','TC','TT','US','VC','VG','VI'],
@@ -77,6 +78,7 @@ const findActiveCampaigns = async() => {
 					if (k1 === a1.length - 1 && k2 === a2.length - 1) {
 						setTimeout(() => {
 							JSE.jseDataIO.setVariable('adxActiveCampaigns/', activeCampaigns);
+							JSE.jseDataIO.setVariable('adxActiveKeywords/', activeKeywords);
 						},5000);
 					}
 					const campaign = adxCampaigns[uid][cid];
@@ -109,12 +111,29 @@ const findActiveCampaigns = async() => {
 											}
 										});
 										let creativeCount = 0;
-										campaign.banners.forEach((banner) => {
-											if (!campaign.banners.disabled && !campaign.banners.paused) {
-												campaign.active[banner.size] = true;
-												creativeCount += 1;
-											}
-										});
+										if (campaign.banners) {
+											campaign.banners.forEach((bannerObj) => {
+												if (!bannerObj.disabled && !bannerObj.paused) {
+													campaign.active[bannerObj.size] = true;
+													creativeCount += 1;
+												}
+											});
+										}
+										if (campaign.keywords) {
+											campaign.keywords.forEach((keywordObj) => {
+												if (!keywordObj.disabled && !keywordObj.paused) {
+													if (!activeKeywords[keywordObj.keyword] || (activeKeywords[keywordObj.keyword].activeBidPrice < campaign.active.bidPrice)) {
+														activeKeywords[keywordObj.keyword] = {
+															kw: keywordObj.keyword,
+															url: campaign.url,
+															bid: campaign.active.bidPrice,
+															uid,
+															cid,
+														};
+													}
+												}
+											});
+										}
 										if (creativeCount > 0) activeCampaigns.push(campaign);
 									}
 								}

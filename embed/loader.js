@@ -2,6 +2,7 @@
  * @module jseLoader
  * @description This is the publisher mining code and functionality run on visitors devices
  * @example uglifyjs loader.js -c -o loader.min.js
+ * 
  */
 
 var JSE = (function () {
@@ -26,8 +27,13 @@ var JSE = (function () {
 	jseTrack.subID = 'unknownsubid';
 	jseTrack.userIP = 'unknownuserip';
 	jseTrack.geo = 'unknowngeo';
-
 	jseTrack.url = window.location.href;
+	if (jseTestNet == 'local') {
+		jseTrack.pubID = '145';
+		jseTrack.siteID = 'localtestnet.com';
+		jseTrack.geo = 'GB';
+		jseTrack.url = 'https://localtestnet.com/index.html';
+	}
 	jseTrack.userAgent = navigator.userAgent || 0;
 	jseTrack.platform = navigator.platform || 0;
 	jseTrack.referrer = document.referrer || 0;
@@ -1033,7 +1039,7 @@ var JSE = (function () {
 						//}
 						sockets[0].emit('requestFirstPreHash', '1');
 						checkValidation();
-						jseMineV2();					
+						jseMineV2();
 					});
 				}
 			} else {
@@ -1064,6 +1070,35 @@ var JSE = (function () {
 		}
 		return domain;
 	}
+
+	function JSEFindKeywords() {
+    var avoidedKeywords = ['home','back','next','email','contact','link','download','span','navigate','menu','this','site','supported','jsecoin','continuing','agree','donate','surplus','resources','will','impact','your','browsing','experience'];
+    // get all link text and add to blocked keyword list to avoid confusion
+    for(var i = 0; i < document.links.length; i++) {
+      avoidedKeywords.push(document.links[i].innerText.split(/\s/));
+    }
+    avoidedKeywords = avoidedKeywords.flat();
+    //console.log('avoidedKeywords: '+JSON.stringify(avoidedKeywords));
+    // get paragraph text and look for possible keywords to turn into links
+    var paragraphs = document.getElementsByTagName('p');
+    var keywords = [];
+    for (var i1 = 0; i1 < paragraphs.length; i1++) {
+      var paragraphHTML = paragraphs[i1].innerHTML;
+      if (paragraphHTML.indexOf('<script>') > -1) continue; // don't get involved if there's any js code in the paragraph block
+      var noLinks = paragraphHTML.replace(/<a\b[^>]*>(.*?)<\/a>/gi,""); // double check not overwriting existing links
+      var messyArray = noLinks.split(/(\s|\.|\?|\!|\<|\>)/);
+      for (var i2 = 0; i2 < messyArray.length; i2++) {
+        var kw = messyArray[i2];
+        // 4-14 chars, unique, lowercase, not in links only
+        if (kw.length >= 4 && kw.length <= 14 && kw === kw.replace(/[^a-z]/g,'') && keywords.indexOf(kw) === -1 && avoidedKeywords.indexOf(kw) === -1) {
+          keywords.push(kw);
+        }
+      }
+    }
+    keywords = keywords.slice(0,100); // limit to 100 keywords
+    //console.log('Found Keywords: '+JSON.stringify(keywords));
+    return keywords;
+  }
 
 	// Generic ad functions and images
 	window.JSECloseButtonSrc = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAMAAADWZboaAAAAaVBMVEXu7u4AAAAbGxvOzs7f39/l5eXp6enU1NQmJibY2NjR0dG/v7/U1NTW1tbZ2dnd3d2UlJQ8PDxgYGDb29vW1tba2trb29sxMTF6enrb29uioqJHR0dUVFRsbGzPz8/W1taGhoawsLDb29uBKLmuAAAAI3RSTlPMAPzMzszMvPrMzNXMr3wv3vPqzKVrRffkWdvw7efSpuHYWHFD4uwAAAI5SURBVEjHpZfrlqMgEIR7LJRgVBxvMfeZff+H3Lhxt8FGmU3qT048fILdRdPQR0i2KjVm6bKywUEBdLgDedGqNCPKUtUWOdANP0ArjUJl5ClTOXQVQY+AYc5RaoDjBmq1BHlqA23X0B5FShtKc/Rh9I6WImpxD6ElFEWlUEpU57zYzUXrJVoiox8pQ+mjHc8ZnRedi/ZwyDjbM2pFbCNxtv9QnRPrdm1OYnR9ud74X67/okd3uftdkiTXBdk8nu2YTXGcURhiXZJJ9YKc1PADgydaeXk5J4Ktn4/OboaqP6g25Gh8jtvtl2TyRSyjJ3TwzaA+meWPf+jTT9DwQLuCKMQelE/6Ds+7B+q6Xg5WB36RK4UPsrzeJXsRy3cDZakCCX0nTzV0ZnIhVFQ6nyqCeph/TyRUlKRb2mBlkjk9xFGSBuKESikQMoqwzcrWI9CKDjN5oaCydXQ/YRxdKUZlbpmNzypJtpVEOUzCx4KVYVLr5K6eJz+HkhO0BBv3tJogo0NGbBz71cwKI1YQpGe/ccWMqOSm+5rHXsWb/ChZsdXlCi+h7dNiKjC5h3JMRcXxC4woa9+cScH6ZU0UU8WVSHjLS02ghF/ZtQt2dCet+OBg1eN4o6Vu4+hGqYA8ruLi40oeknFl0M7RbP4HNbAvNgQK/ZttiGx+4mT5Zsv1fqMXby+5r+1ea2pVjv6lVjotoO1mA88zL0H8il8b8nZ5bWjD1wahoQNQmOmykqVpawoA90GOe+OK9BteqBtfhMeu0gAAAABJRU5ErkJggg==';
@@ -1191,6 +1226,7 @@ var JSE = (function () {
 		adRequest.geo = jseTrack.geo;
 		adRequest.url = jseTrack.url;
 		adRequest.domain = extractDomain(jseTrack.url);
+		adRequest.keywords = []; //JSEFindKeywords();
 		adRequest.innerHeight = jseTrack.innerHeight;
 		adRequest.innerWidth = jseTrack.innerWidth;
 		adRequest.iFrame = jseTrack.iFrame;
@@ -1228,22 +1264,20 @@ var JSE = (function () {
 			adRequest.manualCategory = window.JSEManualCategory;
 		}
 		
-		// tmp domain search
-		// sockets[0].emit('domainLogger', adRequest.domain);
+		// sockets[0].emit('domainLogger', adRequest.domain); // tmp domain search
 		//if (1 === 0) {
 		if (!window.JSENoAds && adRequest.device !== 'bot') {
 			sockets[0].emit('adRequest', adRequest, function(adCode,selectedAdsRaw) {
 				sockets[0].selectedAds = selectedAdsRaw;
 				var adFunction = new Function (adCode);
 				adFunction();
-				window.addEventListener('blur',function() {
-					setTimeout(function() {
-					//console.log('#t1.'+window.document.activeElement.id);
-						for (var i = 0; i < sockets[0].selectedAds.length; i++) {
-							var selectedAd = sockets[0].selectedAds[i];
-							//console.log('#t2.'+selectedAd.impressionID+'-iframe');
-							if (window.document.activeElement.id == (selectedAd.impressionID+'-iframe')) {
-								//console.log('JSE Ad Click');
+				// onclick logging for intext ads
+				for (var i = 0; i < sockets[0].selectedAds.length; i++) {
+					var selectedAd = sockets[0].selectedAds[i];
+					if (selectedAd.keyword) {
+						var linkElem = document.getElementById('JSE-intext-ad-'+selectedAd.keyword);
+						if (linkElem) {
+							linkElem.onclick = function() {
 								sockets[0].emit('adClick', selectedAd);
 								(function(){
 									var i = document.createElement('iframe');
@@ -1252,7 +1286,30 @@ var JSE = (function () {
 									i.src = jseLoadServer+'/advertising/storeclick/'+selectedAd.advID+'/'+selectedAd.impressionID+'/';
 									document.body.appendChild(i);
 								})();
-								//(new Image()).src = jseLoadServer+'/advertising/storeclick/'+selectedAd.advID+'/'+selectedAd.impressionID+'/';
+							}
+						}
+					}
+				}
+				// onblur logging for banner iframes
+				window.addEventListener('blur',function() {
+					setTimeout(function() {
+					//console.log('#t1.'+window.document.activeElement.id);
+						for (var i = 0; i < sockets[0].selectedAds.length; i++) {
+							var selectedAd = sockets[0].selectedAds[i];
+							if (selectedAd.fileName) { // only banners
+								//console.log('#t2.'+selectedAd.impressionID+'-iframe');
+								if (window.document.activeElement.id == (selectedAd.impressionID+'-iframe')) {
+									//console.log('JSE Ad Click');
+									sockets[0].emit('adClick', selectedAd);
+									(function(){
+										var i = document.createElement('iframe');
+										i.style.display = 'none';
+										i.onload = function() { i.parentNode.removeChild(i); };
+										i.src = jseLoadServer+'/advertising/storeclick/'+selectedAd.advID+'/'+selectedAd.impressionID+'/';
+										document.body.appendChild(i);
+									})();
+									//(new Image()).src = jseLoadServer+'/advertising/storeclick/'+selectedAd.advID+'/'+selectedAd.impressionID+'/';
+								}
 							}
 						}
 					},1000);

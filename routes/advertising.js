@@ -66,42 +66,52 @@ router.post('/uploadcampaign/*', function (req, res) {
 				campaign.cid = String(newDate) +''+ String(random); // Campaign ID
 				campaign.archived = false;
 			}
-			campaign.banners = [];
-			Object.keys(req.body.creatives).forEach((imgRef) => {
-				let base64Data;
-				let fileName = false;
-				const size = JSE.jseFunctions.cleanString(req.body.creatives[imgRef].size);
-				const originalFileName = JSE.jseFunctions.cleanString(req.body.creatives[imgRef].originalFileName);
-				const imgRefClean = JSE.jseFunctions.cleanString(imgRef);
-				if (size === '300x100' || size === '728x90' || size === '300x250') {
-					if (/^data:image\/png;base64,/.test(req.body.creatives[imgRef].src)) {
-						base64Data = req.body.creatives[imgRef].src.replace(/^data:image\/png;base64,/, "");
-						fileName = goodCredentials.uid+'_'+campaign.cid+'_'+imgRefClean+'.png';
-					} else if (/^data:image\/gif;base64,/.test(req.body.creatives[imgRef].src)) {
-						base64Data = req.body.creatives[imgRef].src.replace(/^data:image\/gif;base64,/, "");
-						fileName = goodCredentials.uid+'_'+campaign.cid+'_'+imgRefClean+'.gif';
-					} else if (/^data:image\/jpeg;base64,/.test(req.body.creatives[imgRef].src)) {
-						base64Data = req.body.creatives[imgRef].src.replace(/^data:image\/jpeg;base64,/, "");
-						fileName = goodCredentials.uid+'_'+campaign.cid+'_'+imgRefClean+'.jpg';
-					}
-					if (fileName) {
-						if (base64Data.length < 350000) {
-							JSE.jseDataIO.storeFile('adx',fileName,base64Data,'base64');
-							campaign.banners.push({ fileName, size, originalFileName, paused: false, disabled: 'pending' });
-						} else {
-							console.log("Error advertising.js 40. File size too large");
+			if (req.body.creatives) {
+				campaign.banners = [];
+				Object.keys(req.body.creatives).forEach((imgRef) => {
+					let base64Data;
+					let fileName = false;
+					const size = JSE.jseFunctions.cleanString(req.body.creatives[imgRef].size);
+					const originalFileName = JSE.jseFunctions.cleanString(req.body.creatives[imgRef].originalFileName);
+					const imgRefClean = JSE.jseFunctions.cleanString(imgRef);
+					if (size === '300x100' || size === '728x90' || size === '300x250') {
+						if (/^data:image\/png;base64,/.test(req.body.creatives[imgRef].src)) {
+							base64Data = req.body.creatives[imgRef].src.replace(/^data:image\/png;base64,/, "");
+							fileName = goodCredentials.uid+'_'+campaign.cid+'_'+imgRefClean+'.png';
+						} else if (/^data:image\/gif;base64,/.test(req.body.creatives[imgRef].src)) {
+							base64Data = req.body.creatives[imgRef].src.replace(/^data:image\/gif;base64,/, "");
+							fileName = goodCredentials.uid+'_'+campaign.cid+'_'+imgRefClean+'.gif';
+						} else if (/^data:image\/jpeg;base64,/.test(req.body.creatives[imgRef].src)) {
+							base64Data = req.body.creatives[imgRef].src.replace(/^data:image\/jpeg;base64,/, "");
+							fileName = goodCredentials.uid+'_'+campaign.cid+'_'+imgRefClean+'.jpg';
 						}
-					} else	if (/(adx.jsecoin.com|localhost)/.test(req.body.creatives[imgRef].src)) {
-						const fileNameSplit = req.body.creatives[imgRef].src.split('/');
-						fileName = fileNameSplit[fileNameSplit.length - 1];
-						campaign.banners.push({ fileName, size, originalFileName, paused: false, disabled: 'pending' });
+						if (fileName) {
+							if (base64Data.length < 350000) {
+								JSE.jseDataIO.storeFile('adx',fileName,base64Data,'base64');
+								campaign.banners.push({ fileName, size, originalFileName, paused: false, disabled: 'pending' });
+							} else {
+								console.log("Error advertising.js 40. File size too large");
+							}
+						} else	if (/(adx.jsecoin.com|localhost)/.test(req.body.creatives[imgRef].src)) {
+							const fileNameSplit = req.body.creatives[imgRef].src.split('/');
+							fileName = fileNameSplit[fileNameSplit.length - 1];
+							campaign.banners.push({ fileName, size, originalFileName, paused: false, disabled: 'pending' });
+						}
+					} else {
+						// inText creatives here?
+						console.log("Error advertising.js 44. Unrecognized file size detected");
 					}
-				} else {
-					// inText creatives here?
-					console.log("Error advertising.js 44. Unrecognized file size detected");
-				}
-			});
-
+				});
+			}
+			if (req.body.keywords) {
+				campaign.keywords = [];
+				const keywordArray = req.body.keywords.split(/\s/);
+				const cleanKeywordArray = keywordArray.map(x => x.toLowerCase().split(/[^a-z]/).join(''));
+				const checkedKeywordArray = cleanKeywordArray.filter(word => word.length >= 4 && word.length <= 14);
+				checkedKeywordArray.forEach((keyword) => {
+					campaign.keywords.push({ keyword, paused: false, disabled: false }); // no pending on keywords?
+				});
+			}
 			//fs.writeFileSync('./campaign1.json', JSON.stringify(campaign) , 'utf-8');
 			if (req.body.cid && JSE.jseFunctions.cleanString(req.body.cid) !== '0') {
 				JSE.jseDataIO.getVariable('adxCampaigns/'+goodCredentials.uid+'/'+campaign.cid, function(existingCampaign) {
@@ -111,14 +121,26 @@ router.post('/uploadcampaign/*', function (req, res) {
 					} else {
 						campaign.disabled = 'pending';
 					}
-					existingCampaign.banners.forEach((existingBanner) => {
-						for (let i = 0; i < campaign.banners.length; i+=1) {
-							if (campaign.banners[i].fileName === existingBanner.fileName) {
-								campaign.banners[i].disabled = existingBanner.disabled;
-								campaign.banners[i].paused = existingBanner.paused;
+					if (existingCampaign.banners) {
+						existingCampaign.banners.forEach((existingBanner) => {
+							for (let i = 0; i < campaign.banners.length; i+=1) {
+								if (campaign.banners[i].fileName === existingBanner.fileName) {
+									campaign.banners[i].disabled = existingBanner.disabled;
+									campaign.banners[i].paused = existingBanner.paused;
+								}
 							}
-						}
-					});
+						});
+					}
+					if (existingCampaign.keywords) {
+						existingCampaign.keywords.forEach((existingKeyword) => {
+							for (let i = 0; i < campaign.keywords.length; i+=1) {
+								if (campaign.keywords[i].keyword === existingKeyword.keyword) {
+									campaign.keywords[i].disabled = existingKeyword.disabled;
+									campaign.keywords[i].paused = existingKeyword.paused;
+								}
+							}
+						});
+					}
 					JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+campaign.cid,campaign);
 				});
 			} else {
@@ -136,31 +158,50 @@ router.post('/uploadcampaign/*', function (req, res) {
 
 
 /**
- * @name /advertising/togglebanner/*
- * @description Toggle Pause/Unpause Banners
+ * @name /advertising/togglecreative/*
+ * @description Toggle Pause/Unpause Banners and Keywords
  * @memberof module:jseRouter
  */
-router.post('/togglebanner/*', function (req, res) {
+router.post('/togglecreative/*', function (req, res) {
 	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error advertising.js 135. No Session Variable Supplied"}'); return false; }
 	const session = req.body.session; // No need to cleanString because it's only used for comparison
 	const cid = JSE.jseFunctions.cleanString(req.body.cid);
-	const fileName = JSE.jseFunctions.cleanString(req.body.fileName);
+	const creative = JSE.jseFunctions.cleanString(req.body.creative);
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
 		if (goodCredentials) {
-			JSE.jseDataIO.getVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/banners', function(banners) {
-				const modifiedBanners = banners;
-				for (let i = 0; i < modifiedBanners.length; i+=1) {
-					if (modifiedBanners[i].fileName === fileName) {
-						if (modifiedBanners[i].paused) {
-							modifiedBanners[i].paused = false;
-						} else {
-							modifiedBanners[i].paused = true;
+			if (creative.indexOf('.') > -1) {
+				// banner
+				JSE.jseDataIO.getVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/banners', function(banners) {
+					const modifiedBanners = banners;
+					for (let i = 0; i < modifiedBanners.length; i+=1) {
+						if (modifiedBanners[i].fileName === creative) {
+							if (modifiedBanners[i].paused) {
+								modifiedBanners[i].paused = false;
+							} else {
+								modifiedBanners[i].paused = true;
+							}
 						}
 					}
-				}
-				JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/banners', modifiedBanners);
-				res.send('{"success":1,"notification":"Banner has been successfully adjusted"}');
-			});
+					JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/banners', modifiedBanners);
+					res.send('{"success":1,"notification":"Banner has been successfully adjusted","creativeType":"banner"}');
+				});
+			} else {
+				// keyword
+				JSE.jseDataIO.getVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/keywords', function(keywords) {
+					const modifiedKeywords = keywords;
+					for (let i = 0; i < modifiedKeywords.length; i+=1) {
+						if (modifiedKeywords[i].keyword === creative) {
+							if (modifiedKeywords[i].paused) {
+								modifiedKeywords[i].paused = false;
+							} else {
+								modifiedKeywords[i].paused = true;
+							}
+						}
+					}
+					JSE.jseDataIO.setVariable('adxCampaigns/'+goodCredentials.uid+'/'+cid+'/keywords', modifiedKeywords);
+					res.send('{"success":1,"notification":"Keyword has been successfully adjusted","creativeType":"keyword"}');
+				});
+			}
 		}
 	}, function() {
 		res.status(401).send('{"fail":1,"notification":"Error advertising.js 159. Invalid Session Variable"}'); return false;

@@ -143,7 +143,8 @@ JSE.apiLimits = {}; // restrict api queries
 JSE.preHash = '0';
 JSE.minerAuthKey = '0';
 JSE.vpnData = {};
-JSE.activeCampaigns = {};
+JSE.adxActiveCampaigns = {};
+JSE.adxActiveKeywords = {};
 JSE.adxPool = {};
 JSE.adxCategories = {};
 
@@ -261,6 +262,7 @@ if (JSE.authenticatedNode === true) {
 		JSE.jseDataIO.getVariable('publicStats',function(result) { JSE.publicStats = result; });
 		JSE.jseDataIO.getVariable('dailyPublicStats',function(result) { JSE.dailyPublicStats = result; });
 		JSE.jseDataIO.getVariable('adxActiveCampaigns',function(result) { JSE.adxActiveCampaigns = result; });
+		JSE.jseDataIO.getVariable('adxActiveKeywords',function(result) { JSE.adxActiveKeywords = result; });
 		JSE.jseDataIO.getVariable('adxCategories',function(result) { JSE.adxCategories = result; });
 	}, 3000); // allow redis to authorize
 
@@ -270,6 +272,7 @@ if (JSE.authenticatedNode === true) {
 		JSE.jseDataIO.getVariable('jseSettings',function(result) { JSE.jseSettings = result; });
 		JSE.jseDataIO.pushVariable('adxPools/',JSE.adxPool,function(pushRef) { JSE.adxPool = {}; });
 		JSE.jseDataIO.getVariable('adxActiveCampaigns',function(result) { JSE.adxActiveCampaigns = result; });
+		JSE.jseDataIO.getVariable('adxActiveKeywords',function(result) { JSE.adxActiveKeywords = result; });
 	}, 300000); // every 5 mins
 }
 

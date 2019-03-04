@@ -20,6 +20,7 @@ const jseAds = {
 		adOptions['728x90'] = [];
 		adOptions['300x100'] = [];
 		adOptions['300x250'] = [];
+		adOptions.inText = [];
 		// category selection
 		let category = parseInt(adRequest.category,10);
 		if (JSE.adxCategories[adRequest.domain]) {
@@ -82,6 +83,26 @@ const jseAds = {
 				});
 			}
 		});
+		if (!adRequest.blockedInText) {
+			adRequest.keywords.forEach((keyword) => {
+				if (JSE.adxActiveKeywords[keyword]) {
+					const adOption = {};
+					adOption.keyword = JSE.adxActiveKeywords[keyword].kw;
+					adOption.url = JSE.adxActiveKeywords[keyword].url;
+					adOption.cid = JSE.adxActiveKeywords[keyword].cid;
+					adOption.bidPrice = JSE.adxActiveKeywords[keyword].bid;
+					adOption.advID = JSE.adxActiveKeywords[keyword].uid;
+					adOption.device = adRequest.device;
+					adOption.browser = adRequest.browser;
+					adOption.domain = adRequest.domain;
+					adOption.geo = adRequest.geo;
+					adOption.pubID = adRequest.pubID;
+					adOption.siteID = adRequest.siteID;
+					adOption.subID = adRequest.subID;
+					adOptions.inText.push(adOption);
+				}
+			});
+		}
 		Object.keys(adOptions).forEach((key) => {
 			adOptions[key].sort((a,b) => b.bidPrice - a.bidPrice);
 		});
@@ -97,7 +118,7 @@ const jseAds = {
 	pickAd: (adOptions,adRequest,placement,alreadySelectedAds) => {
 		let selectedAd = null;
 		if (!adOptions[placement]) return selectedAd;
-		if (alreadySelectedAds && alreadySelectedAds.length > 5) return selectedAd; // limit number of ads to 5
+		if (alreadySelectedAds && alreadySelectedAds.length > 5) return selectedAd; // limit number of banner ads to 5
 
 		function alreadSelected(cid) {
 			if (!alreadySelectedAds) return false;
@@ -229,7 +250,7 @@ const jseAds = {
 		jseAds.addProperty(`adxAdvStats/${selectedAd.advID}/${yymmdd}/${selectedAd.cid}/${impression}`,value);
 		jseAds.addProperty(`adxAdvDomains/${selectedAd.advID}/${yymmdd}/${selectedAd.cid}/${selectedAd.domain}/${impression}`,value);
 		jseAds.addProperty(`adxAdvPubIDs/${selectedAd.advID}/${yymmdd}/${selectedAd.cid}/${selectedAd.pubID}/${impression}`,value);
-		jseAds.addProperty(`adxAdvCreatives/${selectedAd.advID}/${yymmdd}/${selectedAd.cid}/${selectedAd.fileName}/${impression}`,value);
+		jseAds.addProperty(`adxAdvCreatives/${selectedAd.advID}/${yymmdd}/${selectedAd.cid}/${(selectedAd.fileName || selectedAd.keyword)}/${impression}`,value);
 		jseAds.addProperty(`adxAdvGeos/${selectedAd.advID}/${yymmdd}/${selectedAd.cid}/${selectedAd.geo}/${impression}`,value);
 		jseAds.addProperty(`adxAdvDevices/${selectedAd.advID}/${yymmdd}/${selectedAd.cid}/${selectedAd.device}/${impression}`,value);
 		jseAds.addProperty(`adxAdvBrowsers/${selectedAd.advID}/${yymmdd}/${selectedAd.cid}/${selectedAd.browser}/${impression}`,value);
@@ -240,7 +261,7 @@ const jseAds = {
 		jseAds.addProperty(`adxPubAdvIDs/${selectedAd.pubID}/${yymmdd}/${selectedAd.siteID}/${selectedAd.advID}/${impression}`,value);
 		jseAds.addProperty(`adxPubGeos/${selectedAd.pubID}/${yymmdd}/${selectedAd.siteID}/${selectedAd.geo}/${impression}`,value);
 		jseAds.addProperty(`adxPubDevices/${selectedAd.pubID}/${yymmdd}/${selectedAd.siteID}/${selectedAd.device}/${impression}`,value);
-		jseAds.addProperty(`adxPubPlacements/${selectedAd.pubID}/${yymmdd}/${selectedAd.siteID}/${selectedAd.size}/${impression}`,value);
+		jseAds.addProperty(`adxPubPlacements/${selectedAd.pubID}/${yymmdd}/${selectedAd.siteID}/${(selectedAd.size || selectedAd.keyword)}/${impression}`,value);
 
 		if (impression === 'c') {
 			JSE.jseDataIO.setVariable('adxClicks/'+yymmdd+'/'+selectedAd.impressionID, selectedAd);
@@ -300,7 +321,7 @@ const jseAds = {
 						document.body.insertBefore(elemDiv, document.body.firstChild);
 						var iframe = document.getElementById('${selectedAd.impressionID}-iframe');
 						var iframeDoc = iframe.contentWindow.document;
-						iframeDoc.write('<head></head><body><a href="${selectedAd.url}" target="_blank"><img src="https://adx.jsecoin.com/${selectedAd.fileName}" alt="${selectedAd.url}" /></a></body>');
+						iframeDoc.write('<head></head><body><a href="${selectedAd.url}" rel="nofollow" target="_blank"><img src="https://adx.jsecoin.com/${selectedAd.fileName}" alt="${selectedAd.url}" /></a></body>');
 					}
 					JSEinjectTopAd();
 					`;
@@ -343,7 +364,7 @@ const jseAds = {
 						document.body.appendChild(elemDiv);
 						var iframe = document.getElementById('${selectedAd2.impressionID}-iframe');
 						var iframeDoc = iframe.contentWindow.document;
-						iframeDoc.write('<head></head><body><a href="${selectedAd2.url}" target="_blank"><img src="https://adx.jsecoin.com/${selectedAd2.fileName}" id="${selectedAd2.impressionID}-banner" alt="${selectedAd2.url}" /></a></body>');
+						iframeDoc.write('<head></head><body><a href="${selectedAd2.url}" rel="nofollow" target="_blank"><img src="https://adx.jsecoin.com/${selectedAd2.fileName}" id="${selectedAd2.impressionID}-banner" alt="${selectedAd2.url}" /></a></body>');
 						setTimeout(function() {
 							JSERiseUp(0,'${selectedAd2.impressionID}');
 						},2000);
@@ -353,6 +374,7 @@ const jseAds = {
 				}
 			}
 		}
+
 		if (adRequest.placements) {
 			for (let i = 0; i < adRequest.placements.length; i+=1) {
 				const placement = adRequest.placements[i];
@@ -392,13 +414,64 @@ const jseAds = {
 						elemDiv.innerHTML = JSECloseButton+JSEInfoButton+'<iframe id="${selectedAd3.impressionID}-iframe" FRAMEBORDER="0" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0" TOPMARGIN="0" LEFTMARGIN="0" ALLOWTRANSPARENCY="true" WIDTH="${selectedAd3.size.split('x')[0]}" HEIGHT="${selectedAd3.size.split('x')[1]}"></iframe>';
 						var iframe = document.getElementById('${selectedAd3.impressionID}-iframe');
 						var iframeDoc = iframe.contentWindow.document;
-						iframeDoc.write('<head></head><body><a href="${selectedAd3.url}" target="_blank"><img src="https://adx.jsecoin.com/${selectedAd3.fileName}" alt="${selectedAd3.url}" /></a></body>');
+						iframeDoc.write('<head></head><body><a href="${selectedAd3.url}" rel="nofollow" target="_blank"><img src="https://adx.jsecoin.com/${selectedAd3.fileName}" alt="${selectedAd3.url}" /></a></body>');
 					}
 					JSEinjectAd${placement.placementID}();
 					`;
 				} else if (JSE.jseTestNet !== false) {
 					console.log('No additional ads found');
 				}
+			}
+		}
+
+		if (!adRequest.blockedInText) {
+			const bestInTextAd = jseAds.pickAd(adOptions,adRequest,'inText',null);
+			if (bestInTextAd) {
+				const random = Math.floor((Math.random() * 999999) + 1);
+				const ts = new Date().getTime();
+				const selectedAd = {
+					advID: bestInTextAd.advID,
+					cid: bestInTextAd.cid,
+					domain: adRequest.domain,
+					pubID: adRequest.pubID,
+					siteID: adRequest.siteID,
+					subID: adRequest.subID,
+					keyword: bestInTextAd.keyword,
+					url: bestInTextAd.url,
+					geo: adRequest.geo,
+					device: adRequest.device,
+					browser: adRequest.browser,
+					impressionTS: ts,
+					impressionID: String(ts) +''+ String(random),
+					price: JSE.jseFunctions.round(bestInTextAd.bidPrice / 1000),
+				};
+
+				// Dynamic tracking variables for outlink, repeated below {postbackID} {campaignID} {publisherID} {domain} {creative} {geo} {device} {browser}
+				selectedAd.url = selectedAd.url.split('{postbackID}').join(selectedAd.impressionID).split('{campaignID}').join(selectedAd.cid).split('{publisherID}').join(selectedAd.pubID).split('{domain}').join(selectedAd.domain).split('{creative}').join(selectedAd.fileName).split('{geo}').join(selectedAd.geo).split('{device}').join(selectedAd.device).split('{browser}').join(selectedAd.browser).split('{keyword}').join(selectedAd.keyword);
+
+				selectedAds.push(selectedAd);
+				// code limits keyword injection to one time per keyword at this line: if (inTextLinks[kw].injectedCount >= 1) continue;
+				injectCode += `
+				function JSEInjectLinks() {
+					var inTextLinks = { '${selectedAd.keyword}': { url: '${selectedAd.url}', injectedCount: 0 } }
+					var paragraphs = document.getElementsByTagName('p');
+					var keywords = [];
+					for (var i = 0; i < paragraphs.length; i++) {
+						if (paragraphs[i].innerHTML.indexOf('<script>') > -1) continue;
+						for (var kw in inTextLinks) {
+							if (!inTextLinks.hasOwnProperty(kw)) continue;
+							var link = inTextLinks[kw].url;
+							if (inTextLinks[kw].injectedCount >= 1) continue;
+							var regex = new RegExp('(\\\\s|\\\\>)'+kw+'(\\\\s|\\\\.|\\\\?|\\\\!|\\\\<)');
+							if (paragraphs[i].innerHTML.match(regex)) {
+								inTextLinks[kw].injectedCount += 1;
+								paragraphs[i].innerHTML = paragraphs[i].innerHTML.replace(regex,'$1<a href="'+link+'" title="JSE inText Advertising" id="JSE-intext-ad-'+kw+'" rel="nofollow" target="_blank">'+kw+'</a>$2');
+							}
+						}
+					}
+				}
+				JSEInjectLinks();
+				`;
 			}
 		}
 		callback(injectCode,selectedAds);

@@ -20,6 +20,6 @@ echo Sleeping 10 seconds...
 ping 127.0.0.1 -n 11 > nul
 
 echo Launching Firefox...
-start "" "C:\Program Files\Mozilla Firefox\firefox.exe" http://localhost/jsecoin/admin.html?testnet=local
+start "" "C:\Program Files\Mozilla Firefox\firefox.exe" file:///C:/shareddocs/jsecoin/admin.html?testnet=local
 start "" "C:\Program Files\Mozilla Firefox\firefox.exe" http://localhost/jsecoin/github/v1platform/testnet.html?testnet=local
-start "" "C:\Program Files\Mozilla Firefox\firefox.exe" http://localhost/jsecoin/github/server/embed/testpage.html?testnet=local
+start "" "C:\Program Files\Mozilla Firefox\firefox.exe" http://localhost/jsecoin/github/server/embed/testpage.html

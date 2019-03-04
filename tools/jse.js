@@ -499,14 +499,14 @@ function checkAuthenticated() {
 			} else if (cleanKey === 'badstats')	{
 				findBadSiteStats();
 				setTimeout(function() { process.stdout.write("\n> "); }, 2000);
-			} else if (cleanKey === 'cleanlogins')	{			
+			} else if (cleanKey === 'cleanlogins') {
 				cleanLogins(1);
-			} else if (cleanKey === 'cleanup')	{
+			} else if (cleanKey === 'cleanup') {
 				cleanUp(0);
-			} else if (cleanKey === 'repairstats')	{
+			} else if (cleanKey === 'repairstats') {
 				repairBadSiteStats();
 				setTimeout(function() { process.stdout.write("\n> "); }, 2000);
-			} else if (cleanKey === 'badledger')	{
+			} else if (cleanKey === 'badledger') {
 				findBadDataInLedger();
 				setTimeout(function() { process.stdout.write("\n> "); }, 2000);
 			} else if (keySplit[0] === 'checkip' && keySplit[1])	{
@@ -705,7 +705,7 @@ function cleanNextLogin(userArray) {
 				const newLogins = {};
 				const oldLogins = {};
 				let count = 0;
-				let noOfLogins = Object.keys(logins).length;
+				const noOfLogins = Object.keys(logins).length;
 				Object.keys(logins).forEach((pushRef) => {
 					if (count > (noOfLogins - 10)) {
 						newLogins[pushRef] = logins[pushRef];
@@ -720,7 +720,6 @@ function cleanNextLogin(userArray) {
 				//console.log('OldLogins:');
 				//console.log(JSON.stringify(oldLogins));
 			}
-			
 		});
 	} else {
 		console.log('Done cleaning all logins');
@@ -730,7 +729,7 @@ function cleanNextLogin(userArray) {
 function cleanLogins(startNo) {
 	JSE.jseDataIO.getVariable('nextUserID',function(nextUserID) {
 		const userArray = [];
-		for (let i = startNo; i < nextUserID; i++) {
+		for (let i = startNo; i < nextUserID; i+=1) {
 			userArray.push(i);
 		}
 		cleanNextLogin(userArray);
