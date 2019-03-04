@@ -20,12 +20,12 @@ Object.keys(obj).forEach(function(key) {
   if (obj[key][yymmdd]) {
     Object.keys(obj[key][yymmdd]).forEach((cid) => {
       const campaign = obj[key][yymmdd][cid];
-      console.log(key+': '+campaign.i+' / '+campaign.j)
+      console.log(key+': '+campaign.i+' / '+campaign.j);
       totalSpend += campaign.j || 0;
       totalImpressions += campaign.i || 0;
     });
   }
-  
+
   /*
   if (obj[key] && typeof obj[key]['badsitecom'] !== 'undefined') {
     console.log(JSON.stringify(obj[key]['badsitecom']));
