@@ -51,10 +51,16 @@ const jseCommands = {
 					} else if (failCheck.success) {
 						const nowTS = new Date().getTime();
 						let lastBlockTime = nowTS;
-						if (JSE.currentChain && typeof JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID)][JSE.blockID] !== 'undefined' && JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID)][JSE.blockID].startTime > 1500508800000) {
-							lastBlockTime = JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID)][JSE.blockID].startTime;
-						} else if (JSE.currentChain && typeof JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID-1)][JSE.blockID-1] !== 'undefined' && JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID-1)][JSE.blockID-1].startTime > 1500508800000) {
-							lastBlockTime = JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID-1)][JSE.blockID-1].startTime + 30000;
+						let blockID = JSE.blockID;
+						let blockRef = JSE.jseDataIO.getBlockRef(JSE.blockID);
+						if (JSE.currentChain && typeof JSE.currentChain[blockRef][blockID] !== 'undefined' && JSE.currentChain[blockRef][blockID].startTime > 1500508800000) {
+							lastBlockTime = JSE.currentChain[blockRef][blockID].startTime;
+						} else {
+							blockID -= 1;
+							blockRef = JSE.jseDataIO.getBlockRef(JSE.blockID);
+							if (JSE.currentChain && typeof JSE.currentChain[blockRef][blockID] !== 'undefined' && JSE.currentChain[blockRef][blockID].startTime > 1500508800000) {
+								lastBlockTime = JSE.currentChain[blockRef][blockID].startTime + 30000;
+							}
 						}
 						let timeTillConfirmation = (lastBlockTime + 30000) - nowTS;
 						if (timeTillConfirmation > 30000) timeTillConfirmation = 30000;
@@ -83,10 +89,16 @@ const jseCommands = {
 						JSE.jseDataIO.pushVariable('lookupExports/'+eCoin.uid,eCoin.coinCode,function(pushRef) {});
 						const nowTS = new Date().getTime();
 						let lastBlockTime = nowTS;
-						if (typeof JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID)][JSE.blockID] !== 'undefined' && JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID)][JSE.blockID].startTime > 1500508800000) {
-							lastBlockTime = JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID)][JSE.blockID].startTime;
-						} else if (typeof JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID-1)][JSE.blockID-1] !== 'undefined' && JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID-1)][JSE.blockID-1].startTime > 1500508800000) {
-							lastBlockTime = JSE.currentChain[JSE.jseDataIO.getBlockRef(JSE.blockID-1)][JSE.blockID-1].startTime + 30000;
+						let blockID = JSE.blockID;
+						let blockRef = JSE.jseDataIO.getBlockRef(JSE.blockID);
+						if (typeof JSE.currentChain[blockRef][blockID] !== 'undefined' && JSE.currentChain[blockRef][blockID].startTime > 1500508800000) {
+							lastBlockTime = JSE.currentChain[blockRef][blockID].startTime;
+						} else {
+							blockID -= 1;
+							blockRef = JSE.jseDataIO.getBlockRef(JSE.blockID);
+							if (typeof JSE.currentChain[blockRef][blockID] !== 'undefined' && JSE.currentChain[blockRef][blockID].startTime > 1500508800000) {
+								lastBlockTime = JSE.currentChain[blockRef][blockID].startTime + 30000;
+							}
 						}
 						let timeTillConfirmation = (lastBlockTime + 30000) - nowTS;
 						if (timeTillConfirmation > 30000) timeTillConfirmation = 30000;
