@@ -98,7 +98,16 @@ const findActiveCampaigns = async() => {
 							if (campaign.active.dailyBudget > todaySpend && accountBalance > campaign.active.bidPrice) {
 								campaign.active.budgetLeft = campaign.active.dailyBudget - todaySpend; // might be useful for tapering out campaigns when approaching budget
 								if (campaign.active.budgetLeft > campaign.active.bidPrice) {
-									if ((intYYMMDD > parseInt(campaign.start,10) || !campaign.start) && (intYYMMDD < parseInt(campaign.end,10) || !campaign.end)) {
+									let inDate = true;
+									if (campaign.start) {
+										const startDate = parseInt(campaign.start.substr(2).split('-').join(''),10); // "2019-03-05" > 190305
+										if (intYYMMDD < startDate) inDate = false;
+									}
+									if (campaign.end) {
+										const endDate = parseInt(campaign.end.substr(2).split('-').join(''),10);
+										if (intYYMMDD > endDate) inDate = false;
+									}
+									if (inDate) {
 										campaign.geos.forEach((geo) => {
 											if (geo.length === 3 && geoGroups[geo]) {
 												geoGroups[geo].forEach((subGeo) => {
