@@ -37,7 +37,9 @@ var JSE = (function () {
 	jseTrack.userAgent = navigator.userAgent || 0;
 	jseTrack.platform = navigator.platform || 0;
 	jseTrack.referrer = document.referrer || 0;
-
+	jseTrack.runOnce = window.JSERunOnce || false;
+	window.JSERunOnce = true;
+	if (jseTrack.runOnce !== false) return false;
 	jseTrack.language = window.navigator.language || 0;
 	if (navigator.languages) { 
 		jseTrack.languages = navigator.languages.join('') || 0;
