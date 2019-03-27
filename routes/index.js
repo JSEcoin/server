@@ -393,7 +393,7 @@ router.post('/missingtransaction/*', function (req, res) {
 			const toEmail = new helper.Email(JSE.jseSettings.adminEmail);
 			const subject = 'JSE Missing Transaction';
 			let emailContent = 'UID: '+goodCredentials.uid+"\n\n";
-			if (req.body.address) emailContent += 'Address: '+req.body.address+"\n\n";
+			if (req.body.address) emailContent += 'Address: <a href="https://etherscan.io/address/'+req.body.address+'#tokentxns">'+req.body.address+"</a>\n\n";
 			if (req.body.amount) emailContent += 'Amount: '+req.body.amount+" JSE \n\n";
 			const content = new helper.Content('text/plain', emailContent);
 			const mail = new helper.Mail(fromEmail, subject, toEmail, content);
