@@ -38,6 +38,7 @@ function sendUserData(credentials,newSessionVar,recordLogin,req,res) {
 			const jseUnique = JSE.jseFunctions.cleanString(req.body.jseUnique);
 			JSE.jseDataIO.setVariable('account/'+credentials.uid+'/jseUnique',jseUnique);
 			userObject.jseUnique = jseUnique;
+			if (JSE.jseSettings.blockedUniques && JSE.jseSettings.blockedUniques.indexOf(jseUnique) > -1) return false;
 		}
 		res.send(JSON.stringify(userObject)); // sends back full user object
 		if (recordLogin) { // only on initial login
@@ -87,6 +88,7 @@ function startLogin(credentials,req,res) {
 		let lastIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
 		if (lastIP.indexOf(',') > -1) { lastIP = lastIP.split(',')[0]; }
 		if (lastIP.indexOf(':') > -1) { lastIP = lastIP.split(':').slice(-1)[0]; }
+		if (JSE.jseSettings.blockedIPs && JSE.jseSettings.blockedIPs.indexOf(lastIP) > -1) return false;
 		//JSE.jseDataIO.setVariable('account/'+credentials.uid+'/lastip', lastIP);
 		const userAgent = JSE.jseFunctions.cleanString(String(req.body.userAgent)) || 'unknown';
 		const geoObject = geoDB.get(lastIP);

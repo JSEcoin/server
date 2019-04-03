@@ -28,6 +28,13 @@ function updateNext(i) {
 */
 
 async function runTxt() {
+	/*
+	const blockedIPs = ['192.162.245.68','95.179.169.144'];
+	JSE.jseDataIO.setVariable(`jseSettings/blockedIPs/`,blockedIPs);
+	const blockedUniques = ['WOe8wRyYXK6V'];
+	JSE.jseDataIO.setVariable(`jseSettings/blockedUniques/`,blockedUniques);
+	*/
+	
 	// ### RUN ALL FUNCTIONS HERE
 	//cleanRewards();
 	//resetDailyStatsManually();

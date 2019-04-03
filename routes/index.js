@@ -397,7 +397,7 @@ router.post('/missingtransaction/*', function (req, res) {
 			const missingAmount = JSE.jseFunctions.cleanString(req.body.amount);
 
 			let emailContent = 'UID: '+goodCredentials.uid+"\n\n";
-			if (req.body.address) emailContent += 'Address: <a href="https://etherscan.io/address/'+missingAddress+'#tokentxns">'+missingAddress+"</a>\n\n";
+			if (req.body.address) emailContent += "Address: "+missingAddress+"\n\nEtherscan: https://etherscan.io/address/"+missingAddress+"#tokentxns\n\n";
 			if (missingType) emailContent += 'Type: '+missingType+"\n\n";
 			if (missingAmount) emailContent += 'Amount: '+missingAmount+" JSE \n\n";
 			const content = new helper.Content('text/plain', emailContent);
