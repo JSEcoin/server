@@ -491,6 +491,7 @@ if (JSE.authenticatedNode) {
 	// Anything else, catch all
 	router.get('/*', function(req, res) {
 		res.status(400).send('{"fail":1,"notification":"Check the API documentation at https://developer.jsecoin.com/ and get your api key from the platform at https://platform.jsecoin.com"}');
+		return false;
 	});
 } else {
 	router.get('/*', function(req, res) {

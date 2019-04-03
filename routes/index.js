@@ -392,9 +392,14 @@ router.post('/missingtransaction/*', function (req, res) {
 			const fromEmail = new helper.Email('noreply@jsecoin.com');
 			const toEmail = new helper.Email(JSE.jseSettings.adminEmail);
 			const subject = 'JSE Missing Transaction';
+			const missingAddress = JSE.jseFunctions.cleanString(req.body.address);
+			const missingType = JSE.jseFunctions.cleanString(req.body.type);
+			const missingAmount = JSE.jseFunctions.cleanString(req.body.amount);
+
 			let emailContent = 'UID: '+goodCredentials.uid+"\n\n";
-			if (req.body.address) emailContent += 'Address: <a href="https://etherscan.io/address/'+req.body.address+'#tokentxns">'+req.body.address+"</a>\n\n";
-			if (req.body.amount) emailContent += 'Amount: '+req.body.amount+" JSE \n\n";
+			if (req.body.address) emailContent += 'Address: <a href="https://etherscan.io/address/'+missingAddress+'#tokentxns">'+missingAddress+"</a>\n\n";
+			if (missingType) emailContent += 'Type: '+missingType+"\n\n";
+			if (missingAmount) emailContent += 'Amount: '+missingAmount+" JSE \n\n";
 			const content = new helper.Content('text/plain', emailContent);
 			const mail = new helper.Mail(fromEmail, subject, toEmail, content);
 			const replyEmail = goodCredentials.email;
