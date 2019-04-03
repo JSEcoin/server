@@ -34,7 +34,7 @@ async function runTxt() {
 	const blockedUniques = ['WOe8wRyYXK6V'];
 	JSE.jseDataIO.setVariable(`jseSettings/blockedUniques/`,blockedUniques);
 	*/
-	
+
 	// ### RUN ALL FUNCTIONS HERE
 	//cleanRewards();
 	//resetDailyStatsManually();

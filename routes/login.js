@@ -45,6 +45,7 @@ function sendUserData(credentials,newSessionVar,recordLogin,req,res) {
 			JSE.jseDataIO.setVariable('account/'+credentials.uid+'/lastLogin',recordLogin);
 			JSE.jseDataIO.pushVariable('logins/'+credentials.uid, recordLogin);
 		}
+		return false;
 	});
 }
 
