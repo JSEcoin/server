@@ -23,6 +23,7 @@ const push = require('./push');
 const api = require('./api');
 const ethereum = require('./ethereum');
 const advertising = require('./advertising');
+const captcha = require('./captcha');
 
 
 jseRouter.use(function(req, res, next) {
@@ -58,5 +59,6 @@ jseRouter.use('(|/server)/v1.7', api);
 jseRouter.use('(|/server)/api', api);
 jseRouter.use('(|/server)/ethereum', ethereum);
 jseRouter.use('(|/server)/advertising', advertising);
+jseRouter.use('(|/server)/captcha', captcha);
 
 module.exports = jseRouter;
