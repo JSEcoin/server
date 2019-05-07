@@ -21,23 +21,20 @@ router.post('/testdata/*', function (req, res) {
 		res.status(400).send('{"fail":1,"notification":"Too many requests captcha.js e21"}');
 		return false;
 	}
-	const mlDataString = JSE.jseFunctions.cleanString(req.body.mlData);
-	if (mlDataString.length > 5000) {
-		res.status(400).send('{"fail":1,"notification":"String length error captcha.js e26"}');
-		return false;
-	}
-	let tmpObject = false;
+	let mlDataString = '';
 	try {
-		tmpObject = JSON.parse(mlDataString);
-	}	catch (e) {
-		res.status(400).send('{"fail":1,"notification":"Could not parse JSON data captcha.js e33"}');
+		mlDataString = JSON.stringify(req.body.mlData);
+	} catch (e) {
+		res.status(400).send('{"fail":1,"notification":"JSON formatting error captcha.js e27"}');
 		return false;
 	}
-	if (tmpObject) {
-		JSE.jseDataIO.pushVariable('adxCaptcha/tmpData', mlDataString, function(pushRef) {
-			res.send('{"success":1,"pushRef":"'+pushRef+'"}');
-		});
+	if (mlDataString.length > 5000  || mlDataString.length < 500) {
+		res.status(400).send('{"fail":1,"notification":"String length error captcha.js e31"}');
+		return false;
 	}
+	JSE.jseDataIO.pushVariable('adxCaptcha/tmpData', mlDataString, function(pushRef) {
+		res.send('{"success":1,"pushRef":"'+pushRef+'"}');
+	});
 	return false;
 });
 
