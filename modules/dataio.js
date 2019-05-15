@@ -810,11 +810,14 @@ const jseDB = {
 	 */
 	getCredentialsByPassword(email,passwordHashed,callback,failCallback) {
 		JSE.jseDataIO.lookupEmail(email,function(uid){
-			if (uid == null) { failCallback(); return false; }
+			if (uid == null) {
+				if (typeof failCallback === 'function') failCallback();
+				return false;
+			}
 			JSE.jseDataIO.getVariable('credentials/'+uid,function(credentials) {
 				if (credentials.email === email && credentials.passwordHashed === passwordHashed) {
 					callback(credentials);
-				} else {
+				} else if (typeof failCallback === 'function') {
 					failCallback(); // password doesn't match
 				}
 				return false;
@@ -834,10 +837,19 @@ const jseDB = {
 	 */
 	getCredentialsBySession(session,callback,failCallback) {
 		JSE.jseDataIO.lookupSession(session,function(uid){
-			if (uid == null) { failCallback(); return false; }
+			if (uid == null) {
+				if (typeof failCallback === 'function') failCallback();
+				return false;
+			}
 			JSE.jseDataIO.getVariable('credentials/'+uid,function(credentials) {
-				if (credentials == null) { failCallback(); return false; }
-				if (credentials.session !== session && credentials.mobileSession !== session && credentials.desktopSession !== session) { failCallback(); return false; }
+				if (credentials == null) {
+					if (typeof failCallback === 'function') failCallback();
+					return false;
+				}
+				if (credentials.session !== session && credentials.mobileSession !== session && credentials.desktopSession !== session) {
+					if (typeof failCallback === 'function') failCallback();
+					return false;
+				}
 				callback(credentials);
 				return false;
 			});
@@ -854,10 +866,19 @@ const jseDB = {
 	 */
 	getCredentialsByAPIKey(apiKey,callback,failCallback) {
 		JSE.jseDataIO.lookupAPIKey(apiKey,function(uid){
-			if (uid == null) { failCallback(); return false; }
+			if (uid == null) {
+				if (typeof failCallback === 'function') failCallback();
+				return false;
+			}
 			JSE.jseDataIO.getVariable('credentials/'+uid,function(credentials) {
-				if (credentials == null) { failCallback(); return false; }
-				if (credentials.apiKey !== apiKey) { failCallback(); return false; }
+				if (credentials == null) {
+					if (typeof failCallback === 'function') failCallback();
+					return false;
+				}
+				if (credentials.apiKey !== apiKey) {
+					if (typeof failCallback === 'function') failCallback();
+					return false;
+				}
 				callback(credentials);
 				return false;
 			});
