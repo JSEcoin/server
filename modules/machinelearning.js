@@ -526,6 +526,68 @@ const jseMachineLearning = {
 
 		jseMachineLearning.recordReferralMLData(affID,affTensor);
 	},
+
+	/**
+	 * @method <h2>testCaptcha</h2>
+	 * @description Requires tensorflow module once we have enough data
+	 */
+	testCaptcha: async (ip,c) => {
+		let rating = 0;
+		if (c.tickTime < c.loadTime - 3000) rating += 5;
+		if (c.finishTime < c.tickTime - 5000) rating += 5;
+		if (c.tickTime > c.loadTime - 1000) rating -= 30;
+		if (c.mouseUp > 20) rating += 5;
+		if (c.mouseDown > 20) rating += 5;
+		if (c.mouseLeft > 20) rating += 5;
+		if (c.mouseRight > 20) rating += 5;
+		if (c.mouseClicks >= 5 && c.mouseClicks < 100) {
+			rating += 20;
+		} else if (c.mouseClicks >= 1) {
+			rating += 5;
+		} else {
+			rating -= 20;
+		}
+		let mousePatternTest = 0;
+		let mouseX = 0;
+		let mouseY = 0;
+		c.mousePattern.forEach((mouseMove) => {
+			const mX = mouseMove.split('x')[0];
+			const mY = mouseMove.split('x')[1];
+			if (mX > mouseX -5 && mX < mouseX +5 && mY > mouseY -5 && mY < mouseY +5) {
+				mousePatternTest += 1;
+			} else {
+				mousePatternTest -= 1;
+			}
+			mouseX = mX;
+			mouseY = mY;
+		});
+		if (mousePatternTest > 20) {
+			rating += 30;
+		} else if (mousePatternTest > 0) {
+			rating += 10;
+		} else {
+			rating -= 20;
+		}
+		if (c.screenWidth > 300 && c.screenHeight > 600 && c.innerWidth < c.screenWidth && c.innerHeight < c.screenHeight) {
+			rating += 10;
+		} else {
+			rating -= 10;
+		}
+		const ipLookup = async () => {
+			return new Promise(resolve => {
+				JSE.jseFunctions.realityCheck(ip,(ipCheck) => {
+					resolve(ipCheck);
+				});
+			});
+		};
+		if (ipLookup) {
+			rating += 30;
+		} else {
+			rating -= 30;
+		}
+		const finalRating = Math.min(100,Math.max(0,rating));
+		return finalRating;
+	},
 };
 
 module.exports = jseMachineLearning;

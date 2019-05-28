@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>JSE Captcha Demo</title>
+</head>
+<body>
+  
+<h1 id="auth">Not Authorized</h1>
+
+<script>
+document.addEventListener("JSECaptchaPass", function() {
+  document.getElementById('auth').innerHTML = 'Completed';
+}, false);
+</script>
+
+<div id="JSE-captcha"></div>
+<script type="text/javascript" src="https://load.jsecoin.com/captcha/load/captcha.js"></script>
+<script>
+  document.addEventListener("JSECaptchaPass", function(e) {
+    /**
+     * Ajax/serverside call to confirm
+     * https://api.jsecoin.com/v1.7/captcha/check/auth/
+     * Should be able to send captchaID
+     */
+
+    document.getElementById('auth').innerHTML = 'Completed '+e.captchaID;
+    document.getElementById('ml-data').innerHTML = '<h5>Machine Learning Data</h5>'+JSON.stringify(e.mlData);
+  }, false);
+</script>
+
+
+<br><br><br>
+<div id="ml-data">
+
+</div>
+<br><br><br>
+<button onclick="location.reload();">Reload / Reset Page</button>
+
+
+</body>
+</html>

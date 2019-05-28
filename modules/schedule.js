@@ -57,6 +57,7 @@ function runAtMidday() {
 	console.log('runAtMidday set for '+(Math.floor(msToMidday / 60000))+' mins');
 	setTimeout(function() {
 		runSubscriptions();
+		JSE.jseDataIO.deleteVariable('adxCaptchaLog');
 		JSE.jseDataIO.deleteVariable('txToday');
 		runAtMidday(); // Then, reset again next midnight.
 	}, msToMidday);
