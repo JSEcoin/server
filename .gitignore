@@ -10,3 +10,4 @@ misc/suppression_new\.json
 misc/suppressionaddlist\.js
 modules/ethtest.js
 tools/tensorflow/*
+tools/private/*
