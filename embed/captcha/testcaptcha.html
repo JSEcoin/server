@@ -17,14 +17,14 @@ document.addEventListener("JSECaptchaPass", function() {
 </script>
 
 <div id="JSE-captcha"></div>
-<script type="text/javascript" src="https://load.jsecoin.com/captcha/load/captcha.js"></script>
+<script type="text/javascript" src="http://localhost:81/captcha/load/captcha.js"></script>
 <script>
   document.addEventListener("JSECaptchaPass", function(e) {
-    /**
-     * Ajax/serverside call to confirm
-     * https://api.jsecoin.com/v1.7/captcha/check/auth/
-     * Should be able to send captchaID
-     */
+    var xmlHttp = new XMLHttpRequest();
+    console.log('test'+e.ip);
+    xmlHttp.open( "GET", "http://localhost:81/captcha/check/"+e.ip+"/", false );
+    xmlHttp.send( null );
+    document.getElementById('xhr-data').innerHTML = xmlHttp.responseText;
 
     document.getElementById('auth').innerHTML = 'Completed '+e.captchaID;
     document.getElementById('ml-data').innerHTML = '<h5>Machine Learning Data</h5>'+JSON.stringify(e.mlData);
@@ -36,7 +36,10 @@ document.addEventListener("JSECaptchaPass", function() {
 <div id="ml-data">
 
 </div>
-<br><br><br>
+<br><br>
+<h4>XHR Result</h4>
+<div id="xhr-data">
+</div><br>
 <button onclick="location.reload();">Reload / Reset Page</button>
 
 

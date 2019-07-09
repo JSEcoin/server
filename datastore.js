@@ -2,6 +2,7 @@
  * @file datastore.js
  * @name JSE Datastore (datastore.js)
  * @example forever start -c "node --max-old-space-size=11500" datastore.js &
+ * @example forever start -c "node --max-old-space-size=10000" datastore.js -f blockChain &
  * @example node --max-old-space-size=3000 datastore.js -p 82 -t local
  * @version 1.8.2
  * @description The JSE datastore is a custom key value storage system design to efficiently handle Javascript objects via socket.io

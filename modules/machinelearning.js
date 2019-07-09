@@ -535,7 +535,7 @@ const jseMachineLearning = {
 		let rating = 0;
 		if (c.tickTime < c.loadTime - 3000) rating += 5;
 		if (c.finishTime < c.tickTime - 5000) rating += 5;
-		if (c.tickTime > c.loadTime - 1000) rating -= 30;
+		if (c.tickTime > c.loadTime - 1000) rating -= 10;
 		if (c.mouseUp > 20) rating += 5;
 		if (c.mouseDown > 20) rating += 5;
 		if (c.mouseLeft > 20) rating += 5;
@@ -565,8 +565,6 @@ const jseMachineLearning = {
 			rating += 30;
 		} else if (mousePatternTest > 0) {
 			rating += 10;
-		} else {
-			rating -= 20;
 		}
 		if (c.screenWidth > 300 && c.screenHeight > 600 && c.innerWidth < c.screenWidth && c.innerHeight < c.screenHeight) {
 			rating += 10;

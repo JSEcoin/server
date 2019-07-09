@@ -9,7 +9,7 @@ const router = express.Router();
  * @description load static captcha files
  * @memberof module:jseRouter
  */
-router.use('/load/', express.static('./../embed/captcha/'));
+router.use('/load/', express.static('./embed/captcha/'));
 
 /**
  * @name /captcha/request/*
@@ -41,7 +41,7 @@ router.post('/request/*', async (req, res) => {
 		res.status(400).send('{"fail":1,"notification":"String length error captcha.js e67"}');
 		return false;
 	}
-	let mlRating = jseMachineLearning.testCaptcha(clientIP,mlData);
+	let mlRating = await jseMachineLearning.testCaptcha(clientIP,mlData);
 	const captchaLog = await JSE.jseDataIO.asyncGetVar('adxCaptchaLog/'+clientIP+'/');
 	let captchaCount = 0;
 	let totalRating = 0;
@@ -61,10 +61,10 @@ router.post('/request/*', async (req, res) => {
 	let passBoolean = false;
 	if (mlRating > 50) passBoolean = true;
 	if (mlData.gamesCompleted > 0) {
-		res.send('{"success":1,"rating":'+mlRating+',"pass":"'+passBoolean+'","ip":"'+clientIP+'"}');
+		res.send('{"success":1,"rating":'+mlRating+',"pass":'+passBoolean+',"ip":"'+clientIP+'"}');
 	} else {
 		if (captchaCount > 3) passBoolean = false;
-		res.send('{"success":1,"rating":'+mlRating+',"pass":"'+passBoolean+'","ip":"'+clientIP+'"}');
+		res.send('{"success":1,"rating":'+mlRating+',"pass":'+passBoolean+',"ip":"'+clientIP+'"}');
 	}
 	JSE.jseDataIO.setVariable('adxCaptchaIP/'+clientIP+'/', mlRating);
 	const logEntry = {
@@ -73,6 +73,37 @@ router.post('/request/*', async (req, res) => {
 		autoPass: passBoolean,
 	};
 	JSE.jseDataIO.pushVariable('adxCaptchaLog/'+clientIP+'/', logEntry, function(pushRef) {});
+	return false;
+});
+
+/**
+ * @name /captcha/check/:ip/
+ * @description Check designed for server side usage of captcha data.
+ * @memberof module:jseRouter
+ */
+router.get('/check/:ip/', (req, res) => {
+	let clientIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
+	if (clientIP.indexOf(',') > -1) { clientIP = clientIP.split(',')[0]; }
+	if (clientIP.indexOf(':') > -1) { clientIP = clientIP.split(':').slice(-1)[0]; }
+	if (!JSE.apiLimits[clientIP]) {
+		JSE.apiLimits[clientIP] = 1;
+	} else {
+		JSE.apiLimits[clientIP] += 1;
+	}
+	if (JSE.apiLimits[clientIP] > 180) { // 1 per 10 seconds
+		res.status(400).send('{"fail":1,"notification":"Too many requests captcha.js e94"}');
+		return false;
+	}
+	const targetIP = JSE.jseFunctions.cleanString(req.params.ip);
+	JSE.jseDataIO.getVariable('adxCaptchaIP/'+targetIP+'/', function(mlRating) {
+		if (!mlRating) {
+			res.send('{"success":1,"rating":0,"pass":false,"knownIP":false, "ip":"'+targetIP+'"}');
+		} else {
+			let passBoolean = false;
+			if (mlRating && mlRating >= 50) passBoolean = true;
+			res.send('{"success":1,"rating":'+mlRating+',"pass":'+passBoolean+',"knownIP":true,"ip":"'+targetIP+'"}');
+		}
+	});
 	return false;
 });
 

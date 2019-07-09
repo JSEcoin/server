@@ -127,11 +127,22 @@ function startLogin(credentials,req,res) {
  * @param {object} res Express Result object
  */
 function passRecaptcha(credentials,req,res) {
+	let verificationUrl;
 	const secretKey = JSE.credentials.recaptchaSecretKey;
-	const verificationUrl = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + req.body['g-recaptcha-response'];
-	request(verificationUrl,function(errorRecaptcha,responseRecaptcha,bodyRecaptchaRaw) {
-		const bodyRecaptcha = JSON.parse(bodyRecaptchaRaw);
-		if (bodyRecaptcha.success && bodyRecaptcha.success === true) {
+	if (req.body['g-recaptcha-response']) {
+		verificationUrl = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + req.body['g-recaptcha-response'];
+	} else {
+		let lastIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
+		if (lastIP.indexOf(',') > -1) { lastIP = lastIP.split(',')[0]; }
+		if (lastIP.indexOf(':') > -1) { lastIP = lastIP.split(':').slice(-1)[0]; }
+		//verificationUrl = "http://localhost:81/captcha/check/"+lastIP+"/";
+		verificationUrl = "http://api.jsecoin.com/captcha/check/"+lastIP+"/";
+	}
+	request(verificationUrl,function(errorRecaptcha,responseRecaptcha,bodyCaptchaRaw) {
+		const bodyCaptcha = JSON.parse(bodyCaptchaRaw);
+		if (bodyCaptcha.success && bodyCaptcha.success === true) {
+			startLogin(credentials,req,res);
+		} else if (bodyCaptcha.pass && bodyCaptcha.pass === true) {
 			startLogin(credentials,req,res);
 		} else {
 			res.status(400).send('{"fail":1,"notification":"Recaptcha Error login.js 60, Please Try Again"}');
@@ -159,29 +170,29 @@ router.post('/*', function (req, res) {
 		const email = JSE.jseFunctions.cleanString(String(req.body.email)).toLowerCase();
 		const password = JSE.jseFunctions.limitString(String(req.body.password));
 		const passwordHashed = JSE.jseFunctions.sha256(password);
+		/*
 		if (req.body['g-recaptcha-response'] === undefined || req.body['g-recaptcha-response'] === '' || req.body['g-recaptcha-response'] === null) {
 			res.status(400).send('{"fail":1,"notification":"Recaptcha Error login.js 88, Please Try Again"}');
-		} else {
-			JSE.jseDataIO.getCredentialsByPassword(email,passwordHashed,function(credentials){
-				if (credentials.twoFactorAuth && !req.body.authCode) {
-					res.send('{"msg2fa":"Please enter your two factor authentication code"}');
-					return false;
-				} else if (credentials.twoFactorAuth && req.body.authCode) {
-					if (authenticator.verifyToken(credentials.authKey, JSE.jseFunctions.cleanString(req.body.authCode))) {
-						console.log('New 2fa login from '+credentials.email);
-						passRecaptcha(credentials,req,res);
-					} else {
-						res.status(400).send('{"fail":1,"notification":"Failed to pass 2fa authentication, please try again","resetForm":1}');
-					}
-				} else {
-					console.log('New login from '+credentials.email);
-					passRecaptcha(credentials,req,res);
-				}
+		*/
+		JSE.jseDataIO.getCredentialsByPassword(email,passwordHashed,function(credentials){
+			if (credentials.twoFactorAuth && !req.body.authCode) {
+				res.send('{"msg2fa":"Please enter your two factor authentication code"}');
 				return false;
-			},function() {
-				res.status(401).send('{"fail":1,"notification":"Login failed. Invalid email or password"}'); return false;
-			});
-		}
+			} else if (credentials.twoFactorAuth && req.body.authCode) {
+				if (authenticator.verifyToken(credentials.authKey, JSE.jseFunctions.cleanString(req.body.authCode))) {
+					console.log('New 2fa login from '+credentials.email);
+					passRecaptcha(credentials,req,res);
+				} else {
+					res.status(400).send('{"fail":1,"notification":"Failed to pass 2fa authentication, please try again","resetForm":1}');
+				}
+			} else {
+				console.log('New login from '+credentials.email);
+				passRecaptcha(credentials,req,res);
+			}
+			return false;
+		},function() {
+			res.status(401).send('{"fail":1,"notification":"Login failed. Invalid email or password"}'); return false;
+		});
 	}
 	return false;
 });
