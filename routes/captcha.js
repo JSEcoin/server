@@ -30,6 +30,7 @@ router.post('/request/*', async (req, res) => {
 		return false;
 	}
 	const mlData = req.body.mlData;
+	/*
 	let mlDataString = '';
 	try {
 		mlDataString = JSON.stringify(mlData);
@@ -37,10 +38,11 @@ router.post('/request/*', async (req, res) => {
 		res.status(400).send('{"fail":1,"notification":"JSON formatting error captcha.js e63"}');
 		return false;
 	}
-	if (mlDataString.length > 5000  || mlDataString.length < 500) {
+	if (mlDataString.length > 15000  || mlDataString.length < 500) {
 		res.status(400).send('{"fail":1,"notification":"String length error captcha.js e67"}');
 		return false;
 	}
+	*/
 	let mlRating = await jseMachineLearning.testCaptcha(clientIP,mlData);
 	const captchaLog = await JSE.jseDataIO.asyncGetVar('adxCaptchaLog/'+clientIP+'/');
 	let captchaCount = 0;
