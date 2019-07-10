@@ -152,8 +152,8 @@ JSECaptcha = (function() {
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4 && xhr.status === 200) {
-        console.log('Sent ML Data and got 200 response');
-        console.log(xhr.responseText);
+        //console.log('Sent ML Data and got 200 response');
+        //console.log(xhr.responseText);
         var res = JSON.parse(xhr.responseText);
         if (res.pass && res.pass === true) {
           passCallback(res);
