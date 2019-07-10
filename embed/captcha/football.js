@@ -106,7 +106,7 @@ function draw() {
 var update = setInterval(function(draw1) {
   draw1();
 }, 100,draw);
-draw1();
+draw();
 
 pitch.onclick = function(e) {
   self.mlData.mouseClicks += 1;
