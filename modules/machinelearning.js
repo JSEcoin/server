@@ -560,6 +560,9 @@ const jseMachineLearning = {
 		} else if (desktopRegEx.test(c.userAgent)) {
 			rating += 5;
 		}
+		const browserRegEx = new RegExp("(firefox|opera|chrome|safari|edge|msie|ucbrowser|android|fban)", 'i');
+		if (browserRegEx.test(c.userAgent)) rating += 10;
+		if (c.referrer && (String(c.referrer).indexOf('.com') > -1)) rating += 5;
 		c.mousePattern.forEach((mouseMove) => {
 			const mX = mouseMove.split('x')[0];
 			const mY = mouseMove.split('x')[1];
@@ -576,7 +579,7 @@ const jseMachineLearning = {
 		} else if (mousePatternTest > 0) {
 			rating += 10;
 		}
-		if (c.screenWidth > 300 && c.screenHeight > 600 && c.innerWidth < c.screenWidth && c.innerHeight < c.screenHeight) {
+		if (c.screenWidth > 300 && c.screenHeight > 600 && c.innerWidth <= c.screenWidth && c.innerHeight <= c.screenHeight) {
 			rating += 10;
 		} else {
 			rating -= 10;
@@ -588,10 +591,11 @@ const jseMachineLearning = {
 				});
 			});
 		};
+		//console.log(ipLookup);
 		if (ipLookup) {
 			rating += 30;
 		} else {
-			rating -= 30;
+			rating -= 20;
 		}
 		const finalRating = Math.min(100,Math.max(0,rating));
 		return finalRating;
