@@ -162,8 +162,14 @@ JSECaptcha = (function() {
         }
       }
     };
-    var data = JSON.stringify({"mlData": this.mlData});
-    xhr.send(data);
+    var cleanDataString = this.prepMLData();
+    xhr.send(cleanDataString);
+  };
+
+  this.prepMLData = function() {
+    var cleanData = this.mlData;
+    cleanData.mousePattern = cleanData.mousePattern.slice(cleanData.mousePattern.length-200,cleanData.mousePattern.length);
+    return JSON.stringify({"mlData": cleanData});
   };
 
   this.gameCompleted = function() {
