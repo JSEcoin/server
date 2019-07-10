@@ -29,6 +29,7 @@ const jseAds = {
 		if (typeof adRequest.manualCategory !== 'undefined') {
 			category = parseInt(adRequest.manualCategory,10);
 		}
+		if (!JSE.adxActiveCampaigns) return false;
 		JSE.adxActiveCampaigns.forEach((campaign) => {
 			if (!campaign.active[adRequest.geo]) return;
 			if (!campaign.devices && !campaign[adRequest.device]) return;
