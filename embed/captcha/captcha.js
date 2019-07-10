@@ -109,6 +109,7 @@ JSECaptcha = (function() {
     } else {
       document.getElementById('JSE-captcha-game-container').style.display = 'block';
       document.getElementById('JSE-captcha-text').innerHTML = 'Complete Game';
+      document.getElementById('JSE-captcha-tick').onmousedown = function() { return false; };
       this.loadRandomGame();
     }
   };
