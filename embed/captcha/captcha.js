@@ -60,7 +60,7 @@ JSECaptcha = (function() {
   #JSE-captcha-logo-image { height: 40px; }\
   #JSE-captcha-tick:hover { border: 1px solid #888; }\
   #JSE-captcha-footer { font-size: 7px; color: #888; position: absolute; bottom: 2px; left: 50px; }\
-  #JSE-captcha-game-container { display: none; background: #000; border-radius: 3px; position: absolute; top: 50px; left: 5px; height: 190px; width: 290px; overflow: hidden; }\
+  #JSE-captcha-game-container { display: none; background: #000; border-radius: 3px; position: absolute; top: 50px; left: 5px; height: 190px; width: 290px; overflow: hidden; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }\
   #JSE-captcha-game { position: relative; height: 100%; width: 100%; margin: 0; padding: 0; }';
   var s = document.createElement("style");
   s.innerHTML = css;
