@@ -135,8 +135,8 @@ function passRecaptcha(credentials,req,res) {
 		let lastIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
 		if (lastIP.indexOf(',') > -1) { lastIP = lastIP.split(',')[0]; }
 		if (lastIP.indexOf(':') > -1) { lastIP = lastIP.split(':').slice(-1)[0]; }
-		//verificationUrl = "http://localhost:81/captcha/check/"+lastIP+"/";
-		verificationUrl = "http://api.jsecoin.com/captcha/check/"+lastIP+"/";
+		verificationUrl = "https://api.jsecoin.com/captcha/check/"+lastIP+"/";
+		if (JSE.jseTestNet) verificationUrl = "http://localhost:81/captcha/check/"+lastIP+"/";
 	}
 	request(verificationUrl,function(errorRecaptcha,responseRecaptcha,bodyCaptchaRaw) {
 		const bodyCaptcha = JSON.parse(bodyCaptchaRaw);

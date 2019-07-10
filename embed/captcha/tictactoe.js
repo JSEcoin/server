@@ -4,16 +4,15 @@ document.getElementById('JSE-captcha-game').style.cursor = "url('data:image/png;
 
 document.getElementById('JSE-captcha-game').innerHTML = '<table id="JSE-board"><tr><td id="JSE-board-0""></td><td id="JSE-board-1"></td><td id="JSE-board-2"></td></tr><tr><td id="JSE-board-3"></td><td id="JSE-board-4"></td><td id="JSE-board-5"></td></tr><tr><td id="JSE-board-6"></td><td id="JSE-board-7"></td><td id="JSE-board-8"></td></tr></table>';
 
-var css = 'table { width: 100%; border-collapse: collapse; font-size: 32px; font-weight: bold; }\
-td { width: 96px; height: 58px; border: 3px solid #222; text-align: center;}\
-td::after { content: ""; display: block; }\
-td { border: 3px solid #222; }\
-td:first-of-type { border-left-color: transparent; border-top-color: transparent; }\
-td:nth-of-type(2) { border-top-color: transparent; }\
-td:nth-of-type(3) { border-right-color: transparent;\
-border-top-color: transparent; }\
-tr:nth-of-type(3) td { border-bottom-color: transparent; }\
-td:hover { background: #FFFCF2; }';
+var css = '#JSE-board { width: 100%; border-collapse: collapse; font-size: 32px; font-weight: bold; }\
+#JSE-board td { width: 96px; height: 58px; border: 3px solid #222; text-align: center;}\
+#JSE-board td::after { content: ""; display: block; }\
+#JSE-board td { border: 3px solid #222; }\
+#JSE-board td:first-of-type { border-left-color: transparent; border-top-color: transparent; }\
+#JSE-board td:nth-of-type(2) { border-top-color: transparent; }\
+#JSE-board td:nth-of-type(3) { border-right-color: transparent; border-top-color: transparent; }\
+#JSE-board tr:nth-of-type(3) td { border-bottom-color: transparent; }\
+#JSE-board td:hover { background: #FFFCF2; }';
 var s = document.createElement("style");
 s.innerHTML = css;
 document.getElementsByTagName("head")[0].appendChild(s);

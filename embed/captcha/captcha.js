@@ -5,7 +5,8 @@
  */
 JSECaptcha = (function() {
   var self = this;
-  this.captchaServer = 'http://localhost:81'; // 'https://load.jsecoin.com';
+  this.captchaServer = 'https://load.jsecoin.com';
+  //this.captchaServer = 'http://localhost:81';
   this.container = document.getElementById('JSE-captcha-container');
   this.mlData = {
     loadTime: new Date().getTime(),
@@ -196,8 +197,7 @@ JSECaptcha = (function() {
   }
 
   this.loadRandomGame = function() {
-    var games = ['asteroids.js','football.js','tictactoe.js'];
-    
+    var games = ['asteroids.js','football.js','tictactoe.js','pilot.js'];    
     var choosenGame = games[Math.floor(Math.random()*games.length)];
     loadGame(choosenGame,function(gameCode) {
       this.game = new Function(gameCode);
