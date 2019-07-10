@@ -127,33 +127,31 @@ function fadeOut(elemID) {
 }
 
 function draw () {
-  var gameBoard = document.getElementById('JSE-captcha-game');
-  gameBoard.innerHTML = '';
   plane1.style.top = plane1.yAxis+'px';
   plane1.style.left = plane1.xAxis+'px';
-  gameBoard.append(plane1);
-
   zeplin1.xAxis += 1;
   if (zeplin1.xAxis >= 270) zeplin1.xAxis = 0;
   zeplin1.style.top = zeplin1.yAxis+'px';
   zeplin1.style.left = zeplin1.xAxis+'px';
-  gameBoard.append(zeplin1);
-
   zeplin2.xAxis += 2;
   if (zeplin2.xAxis >= 270) zeplin2.xAxis = 0;
   zeplin2.style.top = zeplin2.yAxis+'px';
   zeplin2.style.left = zeplin2.xAxis+'px';
   zeplin2.rotation -= 3;
-  gameBoard.append(zeplin2);    
-
   zeplin3.xAxis += 3;
   if (zeplin3.xAxis >= 270) zeplin3.xAxis = 0;
   zeplin3.style.top = zeplin3.yAxis+'px';
   zeplin3.style.left = zeplin3.xAxis+'px';
-  gameBoard.append(zeplin3);
-
 }
 
 var update = setInterval(function(draw1) {
   draw1();
 }, 100,draw);
+
+var gameBoard = document.getElementById('JSE-captcha-game');
+gameBoard.append(plane1);
+gameBoard.append(zeplin1);
+gameBoard.append(zeplin2);   
+gameBoard.append(zeplin3);
+
+

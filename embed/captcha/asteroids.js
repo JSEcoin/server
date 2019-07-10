@@ -115,29 +115,21 @@ function fadeOut(elemID) {
 }
 
 function draw () {
-  var gameBoard = document.getElementById('JSE-captcha-game');
-  gameBoard.innerHTML = '';
   spaceShip.style.top = spaceShip.yAxis+'px';
   spaceShip.style.left = spaceShip.xAxis+'px';
   rotateThis(spaceShip,spaceShip.rotation);
-  gameBoard.append(spaceShip);
-
   asteroid1.xAxis -= 6;
   if (asteroid1.xAxis <= 0) asteroid1.xAxis = 290;
   asteroid1.style.top = asteroid1.yAxis+'px';
   asteroid1.style.left = asteroid1.xAxis+'px';
   asteroid1.rotation += 5;
   rotateThis(asteroid1,asteroid1.rotation);
-  gameBoard.append(asteroid1);
-
   asteroid2.yAxis -= 3;
   if (asteroid2.yAxis <= 0) asteroid2.yAxis = 190;
   asteroid2.style.top = asteroid2.yAxis+'px';
   asteroid2.style.left = asteroid2.xAxis+'px';
   asteroid2.rotation -= 3;
   rotateThis(asteroid2,asteroid2.rotation);
-  gameBoard.append(asteroid2);    
-
   asteroid3.xAxis -= 3;
   asteroid3.yAxis -= 3;
   if (asteroid3.xAxis <= 0 && asteroid3.yAxis <= 0) {
@@ -148,10 +140,14 @@ function draw () {
   asteroid3.style.left = asteroid3.xAxis+'px';
   asteroid3.rotation += 4;
   rotateThis(asteroid3,asteroid3.rotation);
-  gameBoard.append(asteroid3);
-
 }
 
 var update = setInterval(function(draw1) {
   draw1();
 }, 100,draw);
+
+var gameBoard = document.getElementById('JSE-captcha-game');
+gameBoard.append(spaceShip);
+gameBoard.append(asteroid1);
+gameBoard.append(asteroid2);    
+gameBoard.append(asteroid3);

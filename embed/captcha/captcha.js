@@ -204,7 +204,8 @@ JSECaptcha = (function() {
   }
 
   this.loadRandomGame = function() {
-    var games = ['asteroids.js','football.js','tictactoe.js','pilot.js'];    
+    var games = ['asteroids.js','football.js','tictactoe.js','pilot.js'];
+    //games = ['football.js'];
     var choosenGame = games[Math.floor(Math.random()*games.length)];
     loadGame(choosenGame,function(gameCode) {
       this.game = new Function(gameCode);
