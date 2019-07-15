@@ -447,6 +447,32 @@ function pushPending() {
 	});
 }
 
+/**
+ * @method <h2>enterprisePayments</h2>
+ * @description Bill enterprise payments, run every 5 mins from controller.js
+ */
+function enterprisePayments() {
+	JSE.jseDataIO.getVariable('enterprisePayments/',function(bill) {
+		if (!bill) return false;
+		const ts = new Date().getTime();
+		Object.keys(bill).forEach(function(uid) {
+			const balancePending = bill[uid];
+			if (balancePending > 0) return false; // safety check.
+			const possitiveBalancePending = balancePending / -1;
+			JSE.jseDataIO.plusX('ledger/'+uid, balancePending);
+			JSE.jseDataIO.plusX('ledger/0', possitiveBalancePending);
+			const distributionPayment = {};
+			distributionPayment.command = 'distributionTransfer';
+			distributionPayment.reference = 'Enterprise Payment: '+uid+'/'+ts;
+			distributionPayment.user1 = uid;
+			distributionPayment.value = possitiveBalancePending;
+			distributionPayment.ts = ts;
+			JSE.jseDataIO.pushBlockData(distributionPayment,function(blockData) {});
+		});
+		return false;
+	});
+}
+
 module.exports = {
-	runAtMidnight, runAtMidday, runAt5pm, cleanNulls, backupLedger, startAutoresponder, resetBlockChainFile, storeLogs, pushPending,
+	runAtMidnight, runAtMidday, runAt5pm, cleanNulls, backupLedger, startAutoresponder, resetBlockChainFile, storeLogs, pushPending, enterprisePayments,
 };

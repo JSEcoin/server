@@ -24,6 +24,7 @@ const api = require('./api');
 const ethereum = require('./ethereum');
 const advertising = require('./advertising');
 const captcha = require('./captcha');
+const enterprise = require('./enterprise');
 
 
 jseRouter.use(function(req, res, next) {
@@ -60,5 +61,6 @@ jseRouter.use('(|/server)/api', api);
 jseRouter.use('(|/server)/ethereum', ethereum);
 jseRouter.use('(|/server)/advertising', advertising);
 jseRouter.use('(|/server)/captcha', captcha);
+jseRouter.use('(|/server)/enterprise', enterprise);
 
 module.exports = jseRouter;

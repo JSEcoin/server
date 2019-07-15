@@ -68,6 +68,7 @@ JSE.jseDataIO = require('./modules/dataio.js'); // can't call initialiseApp twic
 
 setInterval(function() {
 	JSE.jseDataIO.getVariable('jseSettings',function(result) { JSE.jseSettings = result; });
+	if (JSE.jseTestNet === false) jseSchedule.enterprisePayments();
 },  300000); // every 5 mins
 
 setTimeout(function() {

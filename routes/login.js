@@ -145,7 +145,7 @@ function passRecaptcha(credentials,req,res) {
 		} else if (bodyCaptcha.pass && bodyCaptcha.pass === true) {
 			startLogin(credentials,req,res);
 		} else {
-			res.status(400).send('{"fail":1,"notification":"Recaptcha Error login.js 60, Please Try Again"}');
+			res.status(400).send('{"fail":1,"notification":"Captcha Error login.js 60, Please Try Again"}');
 		}
 	});
 }
