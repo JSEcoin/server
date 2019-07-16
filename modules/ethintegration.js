@@ -16,6 +16,7 @@
 
 const JSE = global.JSE;
 
+const request = require('request');
 const Web3 = require('web3');
 
 const web3 = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/v3/'+JSE.credentials.infuraAPIKey));
@@ -274,6 +275,15 @@ const jseEthIntegration = {
 			token.methods.balanceOf(account).call().then((weiBalance) => {
 				const jseBalance = JSE.jseFunctions.round(web3.utils.fromWei(weiBalance));
 				resolve(jseBalance);
+			});
+		});
+	},
+
+	balanceBTC: async (account) => {
+		return new Promise((resolve,reject) => {
+			const btcURL = `https://blockchain.info/q/addressbalance/${account}`;
+			request(btcURL, function (error, response, body) {
+				resolve(body);
 			});
 		});
 	},

@@ -221,6 +221,30 @@ router.post('/myexports/*', function (req, res) {
 });
 
 /**
+ * @name /enterprisepayments/*
+ * @description Return a list of payments made by ddmmyy
+ * @memberof module:jseRouter
+ */
+router.post('/enterprisepayments/*', function (req, res) {
+	if (!req.body.session) { res.status(400).send('{"fail":1,"notification":"Error 229. No Session Variable"}'); return false; }
+	const session = JSE.jseFunctions.cleanString(req.body.session);
+	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+		if (goodCredentials !== null) {
+			JSE.jseDataIO.getVariable(`enterprisePayments/made/${goodCredentials.uid}`, function(enterprisePayments) {
+				const forcedObj = enterprisePayments || {};
+				res.send(JSON.stringify(forcedObj));
+			});
+		} else {
+			res.status(401).send('{"fail":1,"notification":"Error index.js 237. Session Variable not recognized"}');
+		}
+		return false;
+	}, function() {
+		res.status(401).send('{"fail":1,"notification":"Error index.js 241. Session Variable not recognized"}');
+	});
+	return false;
+});
+
+/**
  * @name /removecoincode/*
  * @description Set coinobject.removed = true which will prevent the user from retrieving the coincode in future. Can be an unused coincode for privacy.
  * @memberof module:jseRouter

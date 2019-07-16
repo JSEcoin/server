@@ -27,7 +27,7 @@ if (JSE.authenticatedNode) {
 				JSE.jseFunctions.realityCheck(ipAddress, function(goodIPTrue) {
 					JSE.jseDataIO.getVariable('adxCaptchaIP/'+ipAddress+'/',function(humanCheck) {
 						res.status(400).send(`{"success":1,"ipCheck":${goodIPTrue},"humanCheck":${humanCheck}}`);
-						JSE.jseDataIO.plusX(`enterprisePayments/${goodCredentials.uid}`,-1);
+						JSE.jseDataIO.plusX(`enterprisePayments/due/${goodCredentials.uid}`,-1);
 					});
 				});
 				return false;
@@ -75,7 +75,7 @@ if (JSE.authenticatedNode) {
 						sideChainHash.blockID = blockData.latestBlockID;
 						JSE.jseDataIO.setVariable(`sideChainHash/${hash}/${sideChainHash.tx}`,sideChainHash);
 						res.status(400).send(`{"success":1,"tx":${sideChainHash.tx},"hash":${sideChainHash.hash},"ts":"${sideChainHash.ts}","blockID":${sideChainHash.blockID}}`);
-						JSE.jseDataIO.plusX(`enterprisePayments/${goodCredentials.uid}`,-1);
+						JSE.jseDataIO.plusX(`enterprisePayments/due/${goodCredentials.uid}`,-1);
 					});
 				});
 				return false;
@@ -110,6 +110,12 @@ if (JSE.authenticatedNode) {
 				const result = {};
 				result.success = 1;
 				result.data = sideChainHashes || [];
+				result.firstSeen = null;
+				result.lastSeen = null;
+				result.data.forEach((hashObj) => {
+					if (!result.firstSeen || result.firstSeen > hashObj.ts) result.firstSeen = hashObj.ts;
+					if (!result.lastSeen || result.lastSeen > hashObj.ts) result.lastSeen = hashObj.ts;
+				});
 				result.hashes = sideChainHashes.length || 0;
 				res.send(JSON.stringify(result));
 			});

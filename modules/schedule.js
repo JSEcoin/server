@@ -452,8 +452,10 @@ function pushPending() {
  * @description Bill enterprise payments, run every 5 mins from controller.js
  */
 function enterprisePayments() {
-	JSE.jseDataIO.getVariable('enterprisePayments/',function(bill) {
+	JSE.jseDataIO.getVariable('enterprisePayments/due/',function(bill) {
 		if (!bill) return false;
+		const rightNow = new Date();
+		const yymmdd = rightNow.toISOString().slice(2,10).replace(/-/g,"");
 		const ts = new Date().getTime();
 		Object.keys(bill).forEach(function(uid) {
 			const balancePending = bill[uid];
@@ -468,7 +470,10 @@ function enterprisePayments() {
 			distributionPayment.value = possitiveBalancePending;
 			distributionPayment.ts = ts;
 			JSE.jseDataIO.pushBlockData(distributionPayment,function(blockData) {});
+			JSE.jseDataIO.plusX('enterprisePayments/made/'+yymmdd+'/'+uid, possitiveBalancePending);
+			return false;
 		});
+		JSE.jseDataIO.deleteVariable('enterprisePayments/due/');
 		return false;
 	});
 }
