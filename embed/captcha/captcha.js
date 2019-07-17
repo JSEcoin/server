@@ -21,8 +21,10 @@ JSECaptcha = (function() {
     mouseClicks: 0,
     mouseEvents: 0,
     mousePattern: [],
-    gamesCompleted: 0
+    gamesCompleted: 0,
+    checkBox: 0
   };
+  this.JSECaptchaCompleted = false;
   mlData.url = window.location.href;
 	mlData.userAgent = navigator.userAgent || 0;
 	mlData.platform = navigator.platform || 0;
@@ -55,22 +57,35 @@ JSECaptcha = (function() {
   var css = '  #JSE-captcha-reset { all: initial; }\
   #JSE-captcha-reset * { box-sizing: content-box !important; vertical-align: top !important; }\
   #JSE-captcha-container { position: relative; background: #FFF; border: 1px solid #EEE; border-radius: 3px; width: 220px; height: 40px; font-size: 15px; font-family: Arial, sans-serif; color: #777; }\
+  #JSE-captcha-check { position: absolute; top: 1px; left: 100px; opacity: 0; }\
   #JSE-captcha-tick { text-align: center; color: #1687e9; font-size: 17px; height: 20px; width: 20px; background: #FFF; border: 2px solid #CCC; border-radius: 2px; margin: 6px 0px 0px 8px; cursor: pointer; padding-top: 3px; }\
   #JSE-captcha-text { position: absolute; top: 12px; left: 50px; font-weight: semi-bold; }\
   #JSE-captcha-logo { position: absolute; top: 5px; right: 10px; border-left: 1px solid #EEE; padding-left: 10px; }\
   #JSE-captcha-logo-image { height: 30px; }\
   #JSE-captcha-tick:hover { border: 2px solid #0F9CBE; }\
   #JSE-captcha-game-container { display: none; background: #000; border-radius: 3px; position: absolute; top: 50px; left: 5px; height: 190px; width: 290px; overflow: hidden; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }\
-  #JSE-captcha-game { position: relative; height: 100%; width: 100%; margin: 0; padding: 0; }';
+  #JSE-captcha-robot { height: 18px;  -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }\
+  #JSE-captcha-smiley { height: 18px;  -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }\
+  #JSE-captcha-game { position: relative; height: 100%; width: 100%; margin: 0; padding: 0; }\
+  .JSE-captcha-dark #JSE-captcha-container { background: #222; border: 1px solid #000; color: #CCC; }\
+  .JSE-captcha-dark #JSE-captcha-tick { background: #444; }\
+  .JSE-captcha-large #JSE-captcha-container { width: 300px; height: 55px; font-size: 18px; }\
+  .JSE-captcha-large #JSE-captcha-logo-image { height: 44px; }\
+  .JSE-captcha-large #JSE-captcha-tick { height: 30px; width: 30px; margin: 9px 0px 0px 10px; }\
+  .JSE-captcha-large #JSE-captcha-text { position: absolute; top: 18px; left: 60px; }\
+  .JSE-captcha-large #JSE-captcha-robot { height: 22px; margin-top: 3px; }\
+  .JSE-captcha-large #JSE-captcha-smiley { height: 22px; margin-top: 3px; }\
+  .JSE-captcha-large #JSE-captcha-game-container { top: 60px; }\
+  .JSE-captcha-shadow #JSE-captcha-container { box-shadow: 0px 3px 6px 0px rgba(0, 0, 0, 0.12); }';
   var s = document.createElement("style");
   s.innerHTML = css;
   document.getElementsByTagName("head")[0].appendChild(s);
 
-  document.getElementById('JSE-captcha').innerHTML = '<div id="JSE-captcha-reset"><div id="JSE-captcha-container"><div id="JSE-captcha-tick"></div><div id="JSE-captcha-text">I\'m human</div><div id="JSE-captcha-logo"><a href="https://jsecoin.com" target="_blank"><img id="JSE-captcha-logo-image" src="'+this.jseLogo+'" alt="JSEcoin"></a></div><div id="JSE-captcha-game-container"><div id="JSE-captcha-game"></div></div></div></div>';
+  document.getElementById('JSE-captcha').innerHTML = '<div id="JSE-captcha-reset"><div id="JSE-captcha-container"><input id="JSE-captcha-check" type="checkbox" /><div id="JSE-captcha-tick"></div><div id="JSE-captcha-text">I\'m human</div><div id="JSE-captcha-logo"><a href="https://jsecoin.com" target="_blank"><img id="JSE-captcha-logo-image" src="'+this.jseLogo+'" alt="JSEcoin"></a></div><div id="JSE-captcha-game-container"><div id="JSE-captcha-game"></div></div></div></div>';
 
   this.tick = function() {
     var robotFace = 'data:image/png;base64,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';
-    document.getElementById('JSE-captcha-tick').innerHTML = '<img style="height: 18px;  -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;" draggable="false" src="'+robotFace+'" />';
+    document.getElementById('JSE-captcha-tick').innerHTML = '<img id="JSE-captcha-robot" draggable="false" src="'+robotFace+'" />';
     this.mlData.tickTime = new Date().getTime();
     this.submitMLData(function(res) {
       var JSECaptchaPass = document.createEvent('Event');
@@ -79,7 +94,7 @@ JSECaptcha = (function() {
       JSECaptchaPass.rating = res.rating;
       JSECaptchaPass.pass = res.pass;
       document.dispatchEvent(JSECaptchaPass);
-      window.JSECaptchaCompleted = true;
+      self.JSECaptchaCompleted = true;
       this.shrink();
     }, function(res) {
       this.grow();
@@ -88,6 +103,10 @@ JSECaptcha = (function() {
 
   document.getElementById('JSE-captcha-tick').onmousedown = function(e) {
     self.tick();
+  }
+
+  document.getElementById('JSE-captcha-check').onchange = function(e) {
+    self.mlData.checkBox = 1;
   }
 
   this.grow = function() {
@@ -117,12 +136,22 @@ JSECaptcha = (function() {
   this.shrink = function() {
     var miniShrink = function() {
       var allDone = true;
+      var maxWidth = 220;
+      var maxHeight = 40;
+      var maxText = 64;
+      var maxTick = 44;
+      if (document.querySelector('.JSE-captcha-large') !== null) {
+        maxWidth = 300;
+        maxHeight = 55;
+        maxText = 80;
+        maxTick = 60;
+      };
       var captchaContainer = document.getElementById('JSE-captcha-container');
       if (captchaContainer.offsetHeight > 40) {
-        captchaContainer.style.height = Math.max(captchaContainer.offsetHeight-10,40)+"px";
+        captchaContainer.style.height = Math.max(captchaContainer.offsetHeight-10,maxHeight)+"px";
       }
-      if (captchaContainer.offsetWidth > 220) {
-        captchaContainer.style.width = Math.max(captchaContainer.offsetWidth-5,220)+"px";
+      if (captchaContainer.offsetWidth > maxWidth) {
+        captchaContainer.style.width = Math.max(captchaContainer.offsetWidth-5,maxWidth)+"px";
       }
       var opacity = parseFloat(window.getComputedStyle(document.getElementById('JSE-captcha-game-container')).getPropertyValue("opacity"));
       if (opacity > 0.1) {
@@ -130,7 +159,7 @@ JSECaptcha = (function() {
       } else {
         document.getElementById('JSE-captcha-game-container').style.display = 'none';
       }
-      if (captchaContainer.offsetHeight > 42 || captchaContainer.offsetWidth > 222) {
+      if (captchaContainer.offsetHeight > maxHeight+2 || captchaContainer.offsetWidth > maxWidth+2) {
         allDone = false;
       }
 
@@ -138,10 +167,10 @@ JSECaptcha = (function() {
         setTimeout(function(shrink2) { shrink2(); }, 5, miniShrink);
       } else {
         document.getElementById('JSE-captcha-text').innerHTML = 'Verified Human';
-        document.getElementById('JSE-captcha-text').style.left = '64px';
-        document.getElementById('JSE-captcha-tick').style.width = '44px';
+        document.getElementById('JSE-captcha-text').style.left = maxText+'px';
+        document.getElementById('JSE-captcha-tick').style.width = maxTick+'px';
         var wink = 'data:image/png;base64,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';
-        document.getElementById('JSE-captcha-tick').innerHTML = '<img style="height: 18px;" draggable="false" src="'+wink+'" />';
+        document.getElementById('JSE-captcha-tick').innerHTML = '<img id="JSE-captcha-smiley" draggable="false" src="'+wink+'" />';
         document.getElementById('JSE-captcha-tick').onmousedown = function() { return false; };
       }
     }
@@ -185,7 +214,7 @@ JSECaptcha = (function() {
       JSECaptchaPass.rating = res.rating;
       JSECaptchaPass.pass = res.pass;
       document.dispatchEvent(JSECaptchaPass);
-      window.JSECaptchaCompleted = true;
+      self.JSECaptchaCompleted = true;
       this.shrink();
     }, function(res) {
       loadRandomGame();
@@ -215,22 +244,21 @@ JSECaptcha = (function() {
       this.game();
     });
   }
-})();
 
-// Exports
-
-JSECaptchaComplete = function(nextFuncName) {
-  if (typeof window.JSECaptchaCompleted !== 'undefined' && window.JSECaptchaCompleted === true) {
-    window[nextFuncName]();
-  } else {
-    for (var i = 0; i < 2000; i+=800) {
-      setTimeout(function() {
-        document.getElementById('JSE-captcha-container').style.borderColor = "#CCCCCC";
-      },i);
-      setTimeout(function() {
-        document.getElementById('JSE-captcha-container').style.borderColor = "#CC0000";
-      },i+400);
+  // Exports
+  window.JSECaptchaComplete = function(nextFuncName) {
+    if (typeof self.JSECaptchaCompleted !== 'undefined' && self.JSECaptchaCompleted === true) {
+      window[nextFuncName]();
+    } else {
+      for (var i = 0; i < 2000; i+=800) {
+        setTimeout(function() {
+          document.getElementById('JSE-captcha-container').style.borderColor = "#CCCCCC";
+        },i);
+        setTimeout(function() {
+          document.getElementById('JSE-captcha-container').style.borderColor = "#CC0000";
+        },i+400);
+      }
     }
-  }
-};
+  };
 
+})();

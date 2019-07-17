@@ -574,6 +574,7 @@ const jseMachineLearning = {
 			mouseX = mX;
 			mouseY = mY;
 		});
+		if (c.checkBox && c.checkBox === 1) rating -= 90;
 		if (mousePatternTest > 20) {
 			rating += 30;
 		} else if (mousePatternTest > 0) {

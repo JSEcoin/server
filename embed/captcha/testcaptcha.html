@@ -16,7 +16,7 @@ document.addEventListener("JSECaptchaPass", function() {
 }, false);
 </script>
 
-<div id="JSE-captcha"></div>
+<div id="JSE-captcha" class="JSE-captcha-shadow"></div>
 <script type="text/javascript" src="http://localhost:81/captcha/load/captcha.js"></script>
 <script>
   document.addEventListener("JSECaptchaPass", function(e) {
@@ -33,7 +33,10 @@ document.addEventListener("JSECaptchaPass", function() {
 
 
 <br><br><br>
-<div id="ml-data">
+<button onclick="JSECaptchaComplete('testFunc');">TEST JSECaptchaComplete</button>
+
+<hr>
+<br><br><div id="ml-data">
 
 </div>
 <br><br>
@@ -41,7 +44,11 @@ document.addEventListener("JSECaptchaPass", function() {
 <div id="xhr-data">
 </div><br>
 <button onclick="location.reload();">Reload / Reset Page</button>
-
+<script>
+function testFunc() {
+  alert('Working well :)');  
+}
+</script>
 
 </body>
 </html>
