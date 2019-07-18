@@ -3,7 +3,9 @@
  * @description Module for bot detection based on client-side data passed to a machine learning engine.
  * @note change line 8 captchaServer for testnet
  */
-JSECaptcha = (function() {
+/* eslint-disable */
+
+var JSECaptcha = (function () {
   var self = this;
   this.captchaServer = 'https://load.jsecoin.com';
   //this.captchaServer = 'http://localhost:81';
@@ -101,8 +103,13 @@ JSECaptcha = (function() {
     });
   };
 
+  this.tickOnce = false;
+
   document.getElementById('JSE-captcha-tick').onmousedown = function(e) {
-    self.tick();
+    if (!self.tickOnce) {
+      self.tickOnce = true;
+      self.tick();
+    }
   }
 
   document.getElementById('JSE-captcha-check').onchange = function(e) {
