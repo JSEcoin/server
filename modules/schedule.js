@@ -467,10 +467,9 @@ function enterprisePayments() {
 			distributionPayment.command = 'distributionTransfer';
 			distributionPayment.reference = 'Enterprise Payment: '+uid+'/'+ts;
 			distributionPayment.user1 = uid;
-			distributionPayment.value = possitiveBalancePending;
 			distributionPayment.ts = ts;
 			JSE.jseDataIO.pushBlockData(distributionPayment,function(blockData) {});
-			JSE.jseDataIO.plusX('enterprisePayments/made/'+yymmdd+'/'+uid, possitiveBalancePending);
+			JSE.jseDataIO.plusX('enterprisePayments/made/'+uid+'/'+yymmdd, possitiveBalancePending);
 			return false;
 		});
 		JSE.jseDataIO.deleteVariable('enterprisePayments/due/');
