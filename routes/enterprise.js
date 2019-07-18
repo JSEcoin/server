@@ -96,7 +96,7 @@ if (JSE.authenticatedNode) {
 	 * @param {object} res Express Result object
 	 */
 	router.get('/gethash/:hash/*', (req, res) => {
-		const hash = JSE.jseFunctions.cleanString(req.params.hash);
+		const hash = JSE.jseFunctions.cleanString(req.params.hash).replace(/[^A-Fa-f0-9]/g, "");
 		let lastIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
 		if (lastIP.indexOf(',') > -1) { lastIP = lastIP.split(',')[0]; }
 		if (lastIP.indexOf(':') > -1) { lastIP = lastIP.split(':').slice(-1)[0]; }
@@ -109,10 +109,11 @@ if (JSE.authenticatedNode) {
 			JSE.jseDataIO.getVariable(`sideChainHash/${hash}/`,function(sideChainHashes) {
 				const result = {};
 				result.success = 1;
-				result.data = sideChainHashes || [];
+				result.data = sideChainHashes || {};
 				result.firstSeen = null;
 				result.lastSeen = null;
-				result.data.forEach((hashObj) => {
+				Object.keys(result.data).forEach((pushKey) => {
+					const hashObj = result.data[pushKey];
 					if (!result.firstSeen || result.firstSeen > hashObj.ts) result.firstSeen = hashObj.ts;
 					if (!result.lastSeen || result.lastSeen > hashObj.ts) result.lastSeen = hashObj.ts;
 				});
