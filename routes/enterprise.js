@@ -54,7 +54,7 @@ if (JSE.authenticatedNode) {
 		} else {
 			apiKey = JSE.jseFunctions.cleanString(req.params.apiKey);
 		}
-		const hash = JSE.jseFunctions.cleanString(req.params.hash).replace(/[^A-Fa-f0-9]/g, "");
+		const hash = JSE.jseFunctions.cleanString(req.params.hash).replace(/[^A-Fa-f0-9]/g, "").toUpperCase();
 		if (hash.length > 65 || hash.length < 63) {
 			res.status(401).send('{"fail":1,"notification":"API setHash Failed: Invalid SHA256 Hex Hash String"}');
 			return false;
@@ -96,7 +96,7 @@ if (JSE.authenticatedNode) {
 	 * @param {object} res Express Result object
 	 */
 	router.get('/gethash/:hash/*', (req, res) => {
-		const hash = JSE.jseFunctions.cleanString(req.params.hash).replace(/[^A-Fa-f0-9]/g, "");
+		const hash = JSE.jseFunctions.cleanString(req.params.hash).replace(/[^A-Fa-f0-9]/g, "").toUpperCase();
 		let lastIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
 		if (lastIP.indexOf(',') > -1) { lastIP = lastIP.split(',')[0]; }
 		if (lastIP.indexOf(':') > -1) { lastIP = lastIP.split(':').slice(-1)[0]; }
