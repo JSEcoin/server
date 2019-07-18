@@ -247,7 +247,7 @@ const jseSocketIO = {
 					}
 					const ipCount = JSE.publisherIPs[socket.realIP] || 0; // count ips could be one from unique already
 					if (socket.goodIP && socket.goodIP === true) {
-						if (ipCount <= 8 || (ipCount <= 25  && !JSE.publisherIPsValidated[socket.realIP])) { // Change to 5 & 20 as volume increases
+						if (ipCount <= 5 || (ipCount <= 20  && !JSE.publisherIPsValidated[socket.realIP])) { // Change to 5 & 20 as volume increases
 							JSE.publisherIPs[socket.realIP] = (JSE.publisherIPs[socket.realIP] || 0) + 1;
 							const visitorTensor = jseMachineLearning.calculateInitialRating(jseTrack);
 							// double check currentRating (last var in visitorTensorArray) > 50 server-side once enough volume
