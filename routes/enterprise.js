@@ -72,7 +72,7 @@ if (JSE.authenticatedNode) {
 				JSE.jseDataIO.pushBlockData(sideChainHash,function(blockData) {
 					sideChainHash.tx = blockData.tx;
 					JSE.jseDataIO.getVariable('blockID',function(latestBlockID) {
-						sideChainHash.blockID = blockData.latestBlockID;
+						sideChainHash.blockID = latestBlockID;
 						JSE.jseDataIO.setVariable(`sideChainHash/${hash}/${sideChainHash.tx}`,sideChainHash);
 						res.status(400).send(`{"success":1,"tx":${sideChainHash.tx},"hash":${sideChainHash.hash},"ts":"${sideChainHash.ts}","blockID":${sideChainHash.blockID}}`);
 						JSE.jseDataIO.plusX(`enterprisePayments/due/${goodCredentials.uid}`,-1);
@@ -95,7 +95,7 @@ if (JSE.authenticatedNode) {
 	 * @param {object} req Express Request object
 	 * @param {object} res Express Result object
 	 */
-	router.get('/gethash/:apiKey/:hash/*', (req, res) => {
+	router.get('/gethash/:hash/*', (req, res) => {
 		const hash = JSE.jseFunctions.cleanString(req.params.hash);
 		let lastIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
 		if (lastIP.indexOf(',') > -1) { lastIP = lastIP.split(',')[0]; }
