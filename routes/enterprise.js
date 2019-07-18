@@ -115,7 +115,7 @@ if (JSE.authenticatedNode) {
 				Object.keys(result.data).forEach((pushKey) => {
 					const hashObj = result.data[pushKey];
 					if (!result.firstSeen || result.firstSeen > hashObj.ts) result.firstSeen = hashObj.ts;
-					if (!result.lastSeen || result.lastSeen > hashObj.ts) result.lastSeen = hashObj.ts;
+					if (!result.lastSeen || result.lastSeen < hashObj.ts) result.lastSeen = hashObj.ts;
 				});
 				result.hashes = sideChainHashes.length || 0;
 				res.send(JSON.stringify(result));
