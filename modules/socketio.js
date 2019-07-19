@@ -253,7 +253,7 @@ const jseSocketIO = {
 							// double check currentRating (last var in visitorTensorArray) > 50 server-side once enough volume
 							jseMachineLearning.recordPublisherMLData(pubID,visitorTensor);
 							const safeKey = JSE.jseDataIO.genSafeKey(siteID);
-							JSE.getVariable('siteIDs/'+pubID+'/'+safeKey,function(siteData) {
+							JSE.jseDataIO.getVariable('siteIDs/'+pubID+'/'+safeKey,function(siteData) {
 								if (siteData && siteData.u > siteData.c / 100) { // reduce this variable over time
 									jseLottery.credit(pubID,siteID,subID,'validate');
 								}
