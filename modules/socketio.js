@@ -256,9 +256,13 @@ const jseSocketIO = {
 							jseMachineLearning.recordPublisherMLData(pubID,visitorTensor);
 							const safeKey = JSE.jseDataIO.genSafeKey(siteID);
 							const uniquesToCoinsReqRatio = 10; // reduce this variable to 1 over time
-							if (validateCache[pubID] && validateCache[pubID][safeKey] && validateCache[pubID][safeKey].cacheControl < 25 && validateCache[pubID][safeKey].u > validateCache[pubID][safeKey].c / uniquesToCoinsReqRatio) {
-								jseLottery.credit(pubID,siteID,subID,'validate');
+							if (validateCache[pubID] && validateCache[pubID][safeKey] && validateCache[pubID][safeKey].cacheControl < 100) {
 								validateCache[pubID][safeKey].cacheControl += 1;
+								if (validateCache[pubID][safeKey].u > validateCache[pubID][safeKey].c / uniquesToCoinsReqRatio) {
+									jseLottery.credit(pubID,siteID,subID,'validate');
+								} else {
+									validateCache[pubID][safeKey].cacheControl += 9; // speed up if not valid to recheck more often
+								}
 							} else {
 								JSE.jseDataIO.getVariable('siteIDs/'+pubID+'/'+safeKey,function(siteData) {
 									if (siteData) {
