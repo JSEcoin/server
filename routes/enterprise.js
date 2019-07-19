@@ -117,7 +117,11 @@ if (JSE.authenticatedNode) {
 					if (!result.firstSeen || result.firstSeen > hashObj.ts) result.firstSeen = hashObj.ts;
 					if (!result.lastSeen || result.lastSeen < hashObj.ts) result.lastSeen = hashObj.ts;
 				});
-				result.hashes = sideChainHashes.length || 0;
+				if (sideChainHashes && sideChainHashes.length) {
+					result.hashes = sideChainHashes.length;
+				} else {
+					result.hashes = 0;
+				}
 				res.send(JSON.stringify(result));
 			});
 			return false;
