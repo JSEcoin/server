@@ -22,6 +22,8 @@ const jseAds = require("./ads.js");
 
 JSE.socketConnections = {}; // incoming connections to the server, includes miners and peers
 
+const validateCache = {};
+
 const jseSocketIO = {
 
 /**
@@ -247,17 +249,28 @@ const jseSocketIO = {
 					}
 					const ipCount = JSE.publisherIPs[socket.realIP] || 0; // count ips could be one from unique already
 					if (socket.goodIP && socket.goodIP === true) {
-						if (ipCount <= 5 || (ipCount <= 20  && !JSE.publisherIPsValidated[socket.realIP])) { // Change to 5 & 20 as volume increases
+						if (ipCount <= 3 || (ipCount <= 10  && !JSE.publisherIPsValidated[socket.realIP])) { // reduce over time
 							JSE.publisherIPs[socket.realIP] = (JSE.publisherIPs[socket.realIP] || 0) + 1;
 							const visitorTensor = jseMachineLearning.calculateInitialRating(jseTrack);
 							// double check currentRating (last var in visitorTensorArray) > 50 server-side once enough volume
 							jseMachineLearning.recordPublisherMLData(pubID,visitorTensor);
 							const safeKey = JSE.jseDataIO.genSafeKey(siteID);
-							JSE.jseDataIO.getVariable('siteIDs/'+pubID+'/'+safeKey,function(siteData) {
-								if (siteData && siteData.u > siteData.c / 100) { // reduce this variable over time
-									jseLottery.credit(pubID,siteID,subID,'validate');
-								}
-							});
+							const uniquesToCoinsReqRatio = 10; // reduce this variable to 1 over time
+							if (validateCache[pubID] && validateCache[pubID][safeKey] && validateCache[pubID][safeKey].cacheControl < 25 && validateCache[pubID][safeKey].u > validateCache[pubID][safeKey].c / uniquesToCoinsReqRatio) {
+								jseLottery.credit(pubID,siteID,subID,'validate');
+								validateCache[pubID][safeKey].cacheControl += 1;
+							} else {
+								JSE.jseDataIO.getVariable('siteIDs/'+pubID+'/'+safeKey,function(siteData) {
+									if (siteData) {
+										if (siteData.u > siteData.c / uniquesToCoinsReqRatio) {
+											jseLottery.credit(pubID,siteID,subID,'validate');
+										}
+										if (!validateCache[pubID]) validateCache[pubID] = {};
+										validateCache[pubID][safeKey] = siteData;
+										validateCache[pubID][safeKey].cacheControl = 0;
+									}
+								});
+							}
 							if (selectedAds && !JSE.publisherIPsValidated[socket.realIP]) {
 								for (let i = 0; i < selectedAds.length; i+=1) {
 									//console.log('### LogAdStat V ### '+selectedAds[i].size);
