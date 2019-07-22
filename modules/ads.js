@@ -184,10 +184,43 @@ const jseAds = {
 		}
 		if (selectedAd) {
 			jseAds.logAdStat(selectedAd,'i');
-			const bidCost = JSE.jseFunctions.round(selectedAd.bidPrice / 1000);
+			const bidCost = jseAds.calcBidCost(selectedAd);
 			jseAds.logAdStat(selectedAd,'j',bidCost);
 		}
 		return selectedAd;
+	},
+
+	/**
+	 * @method <h2>calcBidCost</h2>
+	 * @description Calculate the bid cost of an ad
+	 */
+	calcBidCost: async(selectedAd) => {
+		let bidCost = JSE.jseFunctions.round(selectedAd.bidPrice / 1000);
+		const rightNow = new Date();
+		rightNow.setDate(rightNow.getDate() - 1);
+		const yesterdayYYMMDD = rightNow.toISOString().slice(2,10).replace(/-/g,""); // could be done with setInterval
+		const pubData = JSE.jseDataIO.asyncGetVar(`adxPubStats/${selectedAd.pubID}/${yesterdayYYMMDD}/`);
+		if (pubData) {
+			let i = 0;
+			let v = 0;
+			let c = 0;
+			Object.keys(pubData).forEach((siteID) => {
+				if (pubData[siteID].i) i += pubData[siteID].i;
+				if (pubData[siteID].i) v += pubData[siteID].v;
+				if (pubData[siteID].i) c += pubData[siteID].c;
+			});
+			if (i > 100) {
+				const validationRate = v/i;
+				if (validationRate < 0.05) bidCost *= 0.75;
+				if (validationRate < 0.01) bidCost *= 0.5;
+				const clickRate = c/i;
+				if (clickRate < 0.01) bidCost *= 0.75;
+				if (clickRate < 0.002) bidCost *= 0.5;
+				if (validationRate < 0.005 && clickRate < 0.001) bidCost *= 0.1;
+				bidCost = JSE.jseFunctions.round(bidCost);
+			}
+		}
+		return bidCost;
 	},
 
 	/**
