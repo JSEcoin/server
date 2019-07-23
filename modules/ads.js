@@ -196,9 +196,9 @@ const jseAds = {
 	 */
 	calcBidCost: async(selectedAd) => {
 		let bidCost = JSE.jseFunctions.round(selectedAd.bidPrice / 1000);
-		const rightNow = new Date();
-		rightNow.setDate(rightNow.getDate() - 1);
-		const yesterdayYYMMDD = rightNow.toISOString().slice(2,10).replace(/-/g,""); // could be done with setInterval
+		const yesterday = new Date();
+		yesterday.setDate(yesterday.getDate() - 1);
+		const yesterdayYYMMDD = yesterday.toISOString().slice(2,10).replace(/-/g,"");
 		const pubData = JSE.jseDataIO.asyncGetVar(`adxPubStats/${selectedAd.pubID}/${yesterdayYYMMDD}/`);
 		if (pubData) {
 			let i = 0;
@@ -206,8 +206,8 @@ const jseAds = {
 			let c = 0;
 			Object.keys(pubData).forEach((siteID) => {
 				if (pubData[siteID].i) i += pubData[siteID].i;
-				if (pubData[siteID].i) v += pubData[siteID].v;
-				if (pubData[siteID].i) c += pubData[siteID].c;
+				if (pubData[siteID].v) v += pubData[siteID].v;
+				if (pubData[siteID].c) c += pubData[siteID].c;
 			});
 			if (i > 100) {
 				const validationRate = v/i;
