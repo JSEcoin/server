@@ -190,7 +190,7 @@ const jseAds = {
 		return selectedAd;
 	},
 
-	pubQuality = {}, // cache for calcBidCost
+	pubQuality: {}, // cache for calcBidCost
 
 	/**
 	 * @method <h2>calcBidCost</h2>
