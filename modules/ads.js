@@ -184,8 +184,9 @@ const jseAds = {
 		}
 		if (selectedAd) {
 			jseAds.logAdStat(selectedAd,'i');
-			const bidCost = jseAds.calcBidCost(selectedAd);
-			jseAds.logAdStat(selectedAd,'j',bidCost);
+			jseAds.calcBidCost(selectedAd, function(bidCost) {
+				jseAds.logAdStat(selectedAd,'j',bidCost);
+			});
 		}
 		return selectedAd;
 	},
@@ -194,11 +195,11 @@ const jseAds = {
 	 * @method <h2>calcBidCost</h2>
 	 * @description Calculate the bid cost of an ad
 	 */
-	calcBidCost: async(selectedAd) => {
+	calcBidCost: async(selectedAd,callback) => {
 		let bidCost = JSE.jseFunctions.round(selectedAd.bidPrice / 1000);
 		if (JSE.pubCache[selectedAd.pubID]) {
 			bidCost = JSE.jseFunctions.round(bidCost * JSE.pubCache[selectedAd.pubID]);
-			return bidCost;
+			callback(bidCost);
 		}
 		const yesterday = new Date();
 		yesterday.setDate(yesterday.getDate() - 1);
@@ -225,7 +226,7 @@ const jseAds = {
 			}
 			bidCost = JSE.jseFunctions.round(bidCost * JSE.pubCache[selectedAd.pubID]);
 		}
-		return bidCost;
+		callback(bidCost);
 	},
 
 	/**
