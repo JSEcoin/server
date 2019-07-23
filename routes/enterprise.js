@@ -112,16 +112,13 @@ if (JSE.authenticatedNode) {
 				result.data = sideChainHashes || {};
 				result.firstSeen = null;
 				result.lastSeen = null;
+				result.hashes = 0;
 				Object.keys(result.data).forEach((pushKey) => {
 					const hashObj = result.data[pushKey];
+					result.hashes += 1;
 					if (!result.firstSeen || result.firstSeen > hashObj.ts) result.firstSeen = hashObj.ts;
 					if (!result.lastSeen || result.lastSeen < hashObj.ts) result.lastSeen = hashObj.ts;
 				});
-				if (sideChainHashes && sideChainHashes.length) {
-					result.hashes = sideChainHashes.length;
-				} else {
-					result.hashes = 0;
-				}
 				res.send(JSON.stringify(result));
 			});
 			return false;
