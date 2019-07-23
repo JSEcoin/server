@@ -136,6 +136,7 @@ JSE.pinAttempts = [];
 JSE.creditQuickLookup = {}; // dont db query on each hit,hash,unique
 JSE.recentSiteIDs = [];
 JSE.recentSubIDs = [];
+JSE.pubCache = {};
 JSE.alreadySentReset = []; // restrict reset emails to one every 30 minutes
 JSE.alreadySentWelcomes = []; // restrict resend welcome emails to 1 per 30 minutes
 JSE.alreadySentGeneral = []; // restrict support emails to 1 per 30 minutes
@@ -299,6 +300,7 @@ function fairResetLong() {
 	setTimeout(function() {
 		fairResetLong();
 		JSE.jseDataIO.getVariable('adxCategories',function(result) { JSE.adxCategories = result; });
+		JSE.pubCache = {};
 	}, 21600000); // 6 hours
 }
 fairResetLong();
