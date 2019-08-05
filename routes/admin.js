@@ -257,7 +257,11 @@ router.get('/delete/:uid/:adminpass', function(req, res) {
 	const uid = parseFloat(req.params.uid);
 	JSE.jseDataIO.setVariable('credentials/'+uid+'/suspended',now);
 	JSE.jseDataIO.setVariable('account/'+uid+'/suspended',now);
+	JSE.jseDataIO.setVariable('account/'+uid+'/name','Account Deleted');
 	JSE.jseDataIO.setVariable('account/'+uid+'/email','deleted@jsecoin.com');
+	JSE.jseDataIO.setVariable('account/'+uid+'/address','deleted');
+	const deletedPassword = JSE.jseFunctions.sha256(Math.random());
+	JSE.jseDataIO.setVariable('credentials/'+uid+'/passwordHashed',deletedPassword);
 	console.log('Admin Deleted '+uid);
 	res.send('{"success":1}');
 	return false;

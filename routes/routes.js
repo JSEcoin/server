@@ -25,6 +25,7 @@ const ethereum = require('./ethereum');
 const advertising = require('./advertising');
 const captcha = require('./captcha');
 const enterprise = require('./enterprise');
+const account = require('./account');
 
 
 jseRouter.use(function(req, res, next) {
@@ -62,5 +63,6 @@ jseRouter.use('(|/server)/ethereum', ethereum);
 jseRouter.use('(|/server)/advertising', advertising);
 jseRouter.use('(|/server)/captcha', captcha);
 jseRouter.use('(|/server)/enterprise', enterprise);
+jseRouter.use('(|/server)/account', account);
 
 module.exports = jseRouter;

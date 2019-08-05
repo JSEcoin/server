@@ -278,6 +278,7 @@ function help() {
 	console.log('  get - get and variable from datastore    - get account/145/regip');
 	console.log('  set - set a string variable              - set account/145/name Jim');
 	console.log('  setnum - set a number variable           - setnum statsToday/145/o 1');
+	console.log('  setjson - set json to object variable    - setjson testObject/ {"test":1}');
 	console.log('  true - set a number variable             - true account/145/confirmed');
 	console.log('  false - set a number variable            - false account/145/confirmed');
 	console.log('  keys - print a list of object keys       - keys test/123');
@@ -457,6 +458,12 @@ function checkAuthenticated() {
 				const setNum = parseFloat(keySplit.slice(2,99).join(' '));
 				JSE.jseDataIO.setVariableThen(keySplit[1],setNum, function() {
 					console.log('Setnum '+keySplit[1]+' to '+setNum);
+					process.stdout.write("\n> ");
+				});
+			} else if (keySplit[0] === 'setjson' && keySplit[1] && keySplit[2]) {
+				const setObj = JSON.parse(keySplit.slice(2,9999).join(' '));
+				JSE.jseDataIO.setVariableThen(keySplit[1],setObj, function() {
+					console.log('Setnum '+keySplit[1]+' to '+JSON.stringify(setObj));
 					process.stdout.write("\n> ");
 				});
 			} else if (keySplit[0] === 'true' && keySplit[1]) {

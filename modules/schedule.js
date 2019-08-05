@@ -14,8 +14,10 @@
 
 const JSE = global.JSE;
 const fs = require('fs');
+const jseMerchant = require("./../modules/merchant.js");
 const jseAPI = require("./apifunctions.js");
 const jseEmails = require("./emails.js");
+const jseEthIntegration = require("./ethintegration.js");
 
 /**
  * @method <h2>runAtMidnight</h2>
@@ -477,6 +479,48 @@ function enterprisePayments() {
 	});
 }
 
+/**
+ * @method <h2>pendingPayments</h2>
+ * @description check for incoming btc/eth transfers in pendingPayment/
+ */
+function pendingPayments() {
+	JSE.jseDataIO.getVariable('pendingPayment/',function(pendingPayment) {
+		if (!pendingPayment) return false;
+		let rateLimit = 0;
+		Object.keys(pendingPayment).forEach(function(pendingRef) {
+			console.log('pendingRef '+pendingRef);
+			pendingPayment[pendingRef].pendingRef = pendingRef; // eslint-disable-line
+			setTimeout(async (checkout) => {
+				console.log('chkout pendingRef '+checkout.pendingRef);
+				const ts = new Date().getTime();
+				let newBalance = 0;
+				if (checkout.payCurrency === 'btc') {
+					newBalance = await jseEthIntegration.balanceBTC(checkout.payAddress);
+				} else if (checkout.payCurrency === 'eth') {
+					newBalance = await jseEthIntegration.balanceETH(checkout.payAddress);
+				}
+				console.log('newBalance '+newBalance);
+				if (newBalance >= checkout.payBalance + checkout.payPrice) {
+					const successCheckout = checkout;
+					successCheckout.received = ts;
+					JSE.jseDataIO.setVariableThen(`successPayment/${successCheckout.pendingRef}/`,successCheckout,function() {
+						JSE.jseDataIO.hardDeleteVariable(`pendingPayment/${checkout.pendingRef}/`);
+					});
+					JSE.jseDataIO.getCredentialsByUID(0, function(distCredentials) {
+						jseMerchant.processPayment(distCredentials,checkout);
+					});
+				} else if (ts > checkout.ts + 7200000) { // 2hrs
+					JSE.jseDataIO.setVariableThen(`failedPayment/${checkout.pendingRef}/`,checkout,function() {
+						JSE.jseDataIO.hardDeleteVariable(`pendingPayment/${checkout.pendingRef}/`);
+					});
+				}
+			}, rateLimit, pendingPayment[pendingRef]);
+			rateLimit += 1000;
+		});
+		return false;
+	});
+}
+
 module.exports = {
-	runAtMidnight, runAtMidday, runAt5pm, cleanNulls, backupLedger, startAutoresponder, resetBlockChainFile, storeLogs, pushPending, enterprisePayments,
+	runAtMidnight, runAtMidday, runAt5pm, cleanNulls, backupLedger, startAutoresponder, resetBlockChainFile, storeLogs, pushPending, enterprisePayments, pendingPayments,
 };

@@ -11,3 +11,5 @@ misc/suppressionaddlist\.js
 modules/ethtest.js
 tools/tensorflow/*
 tools/private/*
+misc/btc-addresses\.json
+misc/eth-addresses\.json
