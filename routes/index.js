@@ -83,6 +83,16 @@ router.get('/circulatingsupply/*', function(req, res) {
 });
 
 /**
+ * @name /totalsupply/*
+ * @description Display the current total supply of ERC20 tokens - burnt tokens.
+ * @memberof module:jseRouter
+ */
+router.get('/totalsupply/*', function(req, res) {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.send('10000000000');
+});
+
+/**
  * @name /exchangerates/*
  * @description Display JSON string of JSE.publicStats.exchangeRates
  * @memberof module:jseRouter
