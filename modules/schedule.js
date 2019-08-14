@@ -506,8 +506,12 @@ function pendingPayments() {
 					JSE.jseDataIO.setVariableThen(`successPayment/${successCheckout.pendingRef}/`,successCheckout,function() {
 						JSE.jseDataIO.hardDeleteVariable(`pendingPayment/${checkout.pendingRef}/`);
 					});
-					JSE.jseDataIO.getCredentialsByUID(0, function(distCredentials) {
-						jseMerchant.processPayment(distCredentials,checkout);
+					JSE.jseDataIO.getCredentialsByUID(0, async (distCredentials) => {
+						const processedPayment = await jseMerchant.processPayment(distCredentials,checkout);
+						if (processedPayment && processedPayment.reference) {
+							console.log('Payment processed: '+processedPayment.reference);
+							JSE.jseDataIO.setVariable(`successPayment/${successCheckout.pendingRef}/reference`,processedPayment.reference);
+						}
 					});
 				} else if (ts > checkout.ts + 7200000) { // 2hrs
 					JSE.jseDataIO.setVariableThen(`failedPayment/${checkout.pendingRef}/`,checkout,function() {
