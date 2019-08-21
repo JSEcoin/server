@@ -94,7 +94,7 @@ router.post('/setuptransaction/*', async (req, res) => {
 			} else if (btcEth === 'eth') {
 				checkout.payBalance = await jseEthIntegration.balanceETH(checkout.payAddress);
 			}
-			if (!checkout.payBalance || Number.isNaN(checkout.payBalance) || !checkout.payBalance >= 0) { // safety checks
+			if (Number.isNaN(checkout.payBalance) || checkout.payBalance < 0) { // safety checks
 				res.status(400).send('{"fail":1,"notification":"Checking Payment Address Balance Failed: Try again in 5 mins"}');
 				return false;
 			}

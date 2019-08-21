@@ -283,7 +283,8 @@ const jseEthIntegration = {
 		return new Promise((resolve,reject) => {
 			const btcURL = `https://blockchain.info/q/addressbalance/${account}`;
 			request(btcURL, function (error, response, body) {
-				resolve(body);
+				const btcBalance = JSE.jseFunctions.round(body);
+				resolve(btcBalance);
 			});
 		});
 	},
