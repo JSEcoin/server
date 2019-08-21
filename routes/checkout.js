@@ -94,7 +94,10 @@ router.post('/setuptransaction/*', async (req, res) => {
 			} else if (btcEth === 'eth') {
 				checkout.payBalance = await jseEthIntegration.balanceETH(checkout.payAddress);
 			}
-			if (!checkout.payBalance || !checkout.payBalance >= 0) checkout.payBalance = 0; // safety check
+			if (!checkout.payBalance || Number.isNaN(checkout.payBalance) || !checkout.payBalance >= 0) { // safety checks
+				res.status(400).send('{"fail":1,"notification":"Checking Payment Address Balance Failed: Try again in 5 mins"}');
+				return false;
+			}
 			JSE.jseDataIO.pushVariable('pendingPayment/',checkout,function(pushRef) {
 				checkout.pendingRef = pushRef;
 				res.send(JSON.stringify(checkout));
@@ -105,6 +108,7 @@ router.post('/setuptransaction/*', async (req, res) => {
 	} else {
 		res.status(401).send('{"fail":1,"notification":"Generating Payment Address Failed: API limit reached, try again in 30 mins"}');
 	}
+	return false;
 });
 
 /**
