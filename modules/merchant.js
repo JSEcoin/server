@@ -98,7 +98,10 @@ const jseMerchant = {
 			JSE.jseDataIO.getCredentialsByUID(merchantSale.sellerUID, async function(toUser) {
 				if (checkout.encoded && checkout.hash) {
 					const hashTest = await jseMerchant.checkMerchantHash(toUser,checkout.encoded,checkout.hash);
-					if (hashTest === false) return { fail: 1, notification: "Payment Failed: Merchant Hash Does Not Match Sales Data." };
+					if (hashTest === false) {
+						resolve({ fail: 1, notification: "Payment Failed: Merchant Hash Does Not Match Sales Data." });
+						return false;
+					}
 				}
 				const returnObj = await jseMerchant.completePayment(goodCredentials,toUser,merchantSale,checkout);
 				resolve(returnObj);
