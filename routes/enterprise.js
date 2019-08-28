@@ -26,7 +26,7 @@ if (JSE.authenticatedNode) {
 				if (!(goodCredentials.apiLevel >= 1)) { res.status(400).send('{"fail":1,"notification":"API key does not have read access"}'); return false; }
 				JSE.jseFunctions.realityCheck(ipAddress, function(goodIPTrue) {
 					JSE.jseDataIO.getVariable('adxCaptchaIP/'+ipAddress+'/',function(humanCheck) {
-						res.status(400).send(`{"success":1,"ipCheck":${goodIPTrue},"humanCheck":${humanCheck}}`);
+						res.send(`{"success":1,"ipCheck":${goodIPTrue},"humanCheck":${humanCheck}}`);
 						JSE.jseDataIO.plusX(`enterprisePayments/due/${goodCredentials.uid}`,-1);
 					});
 				});
@@ -74,7 +74,7 @@ if (JSE.authenticatedNode) {
 					JSE.jseDataIO.getVariable('blockID',function(latestBlockID) {
 						sideChainHash.blockID = latestBlockID;
 						JSE.jseDataIO.setVariable(`sideChainHash/${hash}/${sideChainHash.tx}`,sideChainHash);
-						res.status(400).send(`{"success":1,"tx":${sideChainHash.tx},"hash":${sideChainHash.hash},"ts":"${sideChainHash.ts}","blockID":${sideChainHash.blockID}}`);
+						res.send(`{"success":1,"tx":${sideChainHash.tx},"hash":${sideChainHash.hash},"ts":"${sideChainHash.ts}","blockID":${sideChainHash.blockID}}`);
 						JSE.jseDataIO.plusX(`enterprisePayments/due/${goodCredentials.uid}`,-1);
 					});
 				});
