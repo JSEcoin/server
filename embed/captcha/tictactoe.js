@@ -5,14 +5,15 @@ document.getElementById('JSE-captcha-game').style.cursor = "url('data:image/png;
 document.getElementById('JSE-captcha-game').innerHTML = '<table id="JSE-board"><tr><td id="JSE-board-0""></td><td id="JSE-board-1"></td><td id="JSE-board-2"></td></tr><tr><td id="JSE-board-3"></td><td id="JSE-board-4"></td><td id="JSE-board-5"></td></tr><tr><td id="JSE-board-6"></td><td id="JSE-board-7"></td><td id="JSE-board-8"></td></tr></table>';
 
 var css = '#JSE-board { width: 100%; border-collapse: collapse; font-size: 32px; font-weight: bold; }\
-#JSE-board td { width: 96px; height: 58px; border: 3px solid #222; text-align: center;}\
+#JSE-board td { width: 96px; height: 54px; border: 3px solid #222; text-align: center;}\
 #JSE-board td::after { content: ""; display: block; }\
-#JSE-board td { border: 3px solid #222; }\
+#JSE-board td { border: 5px solid #adaa95; }\
 #JSE-board td:first-of-type { border-left-color: transparent; border-top-color: transparent; }\
 #JSE-board td:nth-of-type(2) { border-top-color: transparent; }\
 #JSE-board td:nth-of-type(3) { border-right-color: transparent; border-top-color: transparent; }\
 #JSE-board tr:nth-of-type(3) td { border-bottom-color: transparent; }\
-#JSE-board td:hover { background: #FFFCF2; }';
+#JSE-board td:hover { background: #FFFCF2; }\
+.JSE-board-xo { margin: 0px; padding: 0px; width: 50px; height: 50px; margin-top: 2px; }';
 var s = document.createElement("style");
 s.innerHTML = css;
 document.getElementsByTagName("head")[0].appendChild(s);
@@ -26,7 +27,15 @@ function layoutBoard(positions) {
       color = 'red';
     }
     var square = document.getElementById('JSE-board-'+i);
-    square.innerHTML = char;
+
+    if (char === 'O') {
+      square.innerHTML = '<img class="JSE-board-xo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAMAAACfWMssAAAAY1BMVEX///+yAACOAACyAACOAACyAACOAACyAACNAACyAACRAACMAACyAACMAACyAACLAACyAACKAACyAACKAACyAACIAACyAACQAACIAACyAACHAACyAACHAACFAACOAACvAACyAADz+WNJAAAAHXRSTlMAEBQgJzA6QExgbG9wgICQkKCgr8DM0Nja4Ofw9GTimP4AAAGWSURBVHja1ZXJkoMgEEBbY1xi4o5RgQn//5WxpsQGBoHiNu/+qldosHGruomKX+jUVTcI4vZchcH69LvFJKxMhTua1GyqI2ojnDRX4WbhYbYGvVPhhd7/epUIovJ609DsDGa3Pg8jTz2joVAGNFDF++G51heqjrtKQCOpVvQ4ywBR+9mhhmonvZ3FOj9agJWCHt5OeyaK3pzABcm8ewcy2cnlofnmEnJkgXkm4CBlp1kaAQtwUmJIvcIOPPRcrfJ5zi/xiekmxRcArLiGXmopbpgpdiaoPxlu9wABjFKsoTNaGtjYHocBQeBA6OFNYSI5RAZ6ieFFnmITJrb/UIxuTvQ4ohcgeuWilzz6WcU+5OivI/qziv4e4z/k8BOQLnpArcrPO/V7eHSgwbvJyov6GHqteljxbvapJVzPkUU/5Xg3tzo1tHpDTT/lcEdvh42lkuTIuEoOGpX0JGRsd0bCDWowePAQ0ENy5tdYDhayxectmeMLc9DCJRm51kgGLkpyoZXgI3ttprW9MJrbrXvCjj6SvrZaXzhYmK427WTDAAAAAElFTkSuQmCC" alt="O" />';
+    } else if (char === 'X') {
+      square.innerHTML = '<img class="JSE-board-xo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAMAAACfWMssAAAATlBMVEX///8zMzNEREQzMzMzMzNFRUUzMzMzMzNGRkZGRkZHR0czMzMzMzMzMzMzMzNMTEwzMzNNTU1OTk4zMzNQUFBRUVFTU1MzMzNISEhVVVXsGgvzAAAAF3RSTlMAEB8gMDxAUFdwh6CwwNDc4Ofv8Pb7/sYyFL0AAAD/SURBVHjapdS7ksJADERRYd7Ya2NsPMz//yhokwnuVnUXeyMpOJlK8Y8u81bXW5idx7IMh1+31WzyXF+yJeUzWZPaZfeIa62QwmWnhJDSJTxWSu3KPmKm1G747N0KKd24C0jXUfqOUjshpaPUTks6LbWjFE5KOi19R0nnSTpX2i7lo7Zezf3Aoekv2QtECWdLOFvC2bI5Xf/CDbl/HtJ0kKaDNN03cjekoZw74cbS6qfaWjvfRUCaDtJ0lL6j1E5I6Si105JOS+0ohZOSTkvfUdLZcqDTco7Yw1nyGCc4S14TwkmZMO50Wj4/82GBk3K7RMphKeM5zG5r3eZ03/YGGgttDz/JfhgAAAAASUVORK5CYII=" alt="O" />';
+    } else {
+      square.innerHTML = '';
+    }
+    //square.innerHTML = char;
     square.style.color = color;
     if (positions[i] === '*') {
       square.onclick = function() {

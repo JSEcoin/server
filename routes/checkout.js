@@ -1,10 +1,7 @@
 const JSE = global.JSE;
 const express = require('express');
-const jseAPI = require("./../modules/apifunctions.js");
-const helper = require('sendgrid').mail;
-const sg = require('sendgrid')(JSE.credentials.sendgridAPIKey);
-const request = require('request');
-const crypto = require('crypto');
+const jseEthIntegration = require("./../modules/ethintegration.js");
+const jseMerchant = require("./../modules/merchant.js");
 
 const router = express.Router();
 
@@ -48,39 +45,85 @@ router.post('/cancel/*', function (req, res) {
 	const session = JSE.jseFunctions.cleanString(req.body.session);
 	const reference = JSE.jseFunctions.cleanString(req.body.reference);
 	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
-		const cancelledTS = new Date().getTime();
-		JSE.jseDataIO.getVariable('merchantSales/'+reference,function(merchantSale) {
-			if (merchantSale.purchaseReference === null) {
-				res.status(400).send('{"fail":1,"notification":"Cancellation Failed: purchaseReference not found"}');
-				return false;
-			}
-			if (parseInt(merchantSale.buyerUID,10) !== goodCredentials.uid && parseInt(merchantSale.sellerUID,10) !== goodCredentials.uid) {
-				res.status(400).send('{"fail":1,"notification":"Cancellation Failed: User not associated with subscription, must be buyer or seller"}');
-				return false;
-			}
-			// code duplicated in backup.js
-			JSE.jseDataIO.setVariable('merchantSales/'+reference+'/cancelledTS', cancelledTS);
-			JSE.jseDataIO.setVariable('merchantPurchases/'+merchantSale.purchaseReference+'/cancelledTS', cancelledTS);
-			res.send('{"success":1}');
-
-			const cancelHTML = 'Subscription reference: '+merchantSale.reference+' has now been cancelled. Please log in to the platform for further details.';
-			JSE.jseDataIO.getUserByUID(merchantSale.sellerUID, function(seller) {
-				JSE.jseFunctions.sendStandardEmail(seller.email,'JSEcoin Subscription Cancellation',cancelHTML);
-			}, function() {
-				res.status(400).send('{"fail":1,"notification":"Processing Failed Error 59"}');
-				return false;
-			});
-			JSE.jseDataIO.getUserByUID(merchantSale.buyerUID, function(buyer) {
-				JSE.jseFunctions.sendStandardEmail(buyer.email,'JSEcoin Subscription Cancellation',cancelHTML);
-			}, function() {
-				res.status(400).send('{"fail":1,"notification":"Processing Failed Error 65"}');
-				return false;
-			});
-			return false;
-		});
+		const result = jseMerchant.cancel(goodCredentials,reference);
+		if (result.success) res.send(JSON.stringify(result));
+		if (result.fail) res.status(400).send(JSON.stringify(result));
 	},function() {
 		res.status(401).send('{"fail":1,"notification":"Cancellation Failed: Session credentials could not be verified."}');
 	});
+});
+
+/**
+ * @name /checkout/setuptransaction/:btceth/*
+ * @description Request a bitcoin or ethereum payment addresss and price, setup a transaction
+ * @memberof module:jseRouter
+ */
+router.post('/setuptransaction/*', async (req, res) => {
+	let lastIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
+	if (lastIP.indexOf(',') > -1) { lastIP = lastIP.split(',')[0]; }
+	if (lastIP.indexOf(':') > -1) { lastIP = lastIP.split(':').slice(-1)[0]; }
+	if (JSE.apiLimits[lastIP]) {
+		JSE.apiLimits[lastIP] += 1;
+	} else {
+		JSE.apiLimits[lastIP] = 1;
+	}
+	if (JSE.apiLimits[lastIP] < 10) {
+		const checkout = req.body;
+		const btcEth = JSE.jseFunctions.cleanString(checkout.payCurrency).toLowerCase();
+		checkout.payAddress = await jseMerchant.getNewAddress(btcEth);
+		if (checkout.currency) {
+			checkout.calculatedPrice = Math.round(checkout.singlePrice / JSE.publicStats.exchangeRates[checkout.currency.toUpperCase()+'JSE']);
+			if (checkout.currency.toLowerCase() === btcEth) {
+				checkout.payPrice = checkout.singlePrice;
+			} else {
+				checkout.payPrice = checkout.calculatedPrice * JSE.publicStats.exchangeRates[btcEth.toUpperCase()+'JSE'];
+			}
+		} else { // checkout.currency = undefined = JSE
+			checkout.calculatedPrice = checkout.singlePrice;
+			checkout.payPrice = checkout.calculatedPrice * JSE.publicStats.exchangeRates[btcEth.toUpperCase()+'JSE'];
+		}
+		let decimals = 8;
+		if (btcEth === 'eth') decimals = 16; // avoid big number issue, 100 gwei denominations
+		checkout.payPrice = JSE.jseFunctions.round(checkout.payPrice,decimals);
+		if (checkout.payPrice < 0.00000001) checkout.payPrice = 0.00000001; // min transaction
+		checkout.ts = new Date().getTime(); // overwrite to avoid malicious values
+		checkout.received = false;
+		if (checkout.payAddress && checkout.payPrice) {
+			if (btcEth === 'btc') {
+				checkout.payBalance = await jseEthIntegration.balanceBTC(checkout.payAddress);
+			} else if (btcEth === 'eth') {
+				checkout.payBalance = await jseEthIntegration.balanceETH(checkout.payAddress);
+			}
+			if (Number.isNaN(checkout.payBalance) || checkout.payBalance < 0) { // safety checks
+				res.status(400).send('{"fail":1,"notification":"Checking Payment Address Balance Failed: Try again in 5 mins"}');
+				return false;
+			}
+			JSE.jseDataIO.pushVariable('pendingPayment/',checkout,function(pushRef) {
+				checkout.pendingRef = pushRef;
+				res.send(JSON.stringify(checkout));
+			});
+		} else {
+			res.status(400).send('{"fail":1,"notification":"Generating Payment Address Failed: New address limits reached, try again in 30 mins"}');
+		}
+	} else {
+		res.status(401).send('{"fail":1,"notification":"Generating Payment Address Failed: API limit reached, try again in 30 mins"}');
+	}
+	return false;
+});
+
+/**
+ * @name /checkout/checkpending/:pendingRef/*
+ * @description Check if a btc/eth payment has gone through yet.
+ * @memberof module:jseRouter
+ */
+router.get('/checkpending/:pendingRef/*', async (req, res) => {
+	const pendingRef = JSE.jseFunctions.cleanString(req.params.pendingRef);
+	const paymentCheck = await JSE.jseDataIO.asyncGetVar(`successPayment/${pendingRef}/`);
+	if (paymentCheck && paymentCheck.received) {
+		res.send(`{"success":1,"paymentReceived":"${paymentCheck.received}","reference":"${paymentCheck.reference}"}`);
+	} else {
+		res.send(`{"success":1,"paymentReceived":false}`);
+	}
 });
 
 /**
@@ -90,7 +133,7 @@ router.post('/cancel/*', function (req, res) {
  */
 router.post('/*', function (req, res) {
 	const session = JSE.jseFunctions.cleanString(req.body.session);
-	JSE.jseDataIO.getCredentialsBySession(session,function(goodCredentials) {
+	JSE.jseDataIO.getCredentialsBySession(session, async (goodCredentials) => {
 		const pin = String(req.body.pin).split(/[^0-9]/).join('');
 		let pinAttempts = 0;
 		JSE.pinAttempts.forEach((el) => { if (el === goodCredentials.uid) pinAttempts +=1; });
@@ -105,90 +148,9 @@ router.post('/*', function (req, res) {
 		req.body.pin = null; // wipe value
 		const checkout = req.body;
 		if (goodCredentials.uid === checkout.buyer.uid) {
-			const merchantSale = {};
-			merchantSale.buyerUID = parseInt(JSE.jseFunctions.cleanString(checkout.buyer.uid),10);
-			merchantSale.buyerEmail = goodCredentials.email;
-			merchantSale.sellerUID = parseInt(JSE.jseFunctions.cleanString(checkout.uid),10);
-			merchantSale.item = JSE.jseFunctions.cleanString(checkout.item);
-			if (typeof checkout.deliveryAddress !== 'undefined') {
-				merchantSale.deliveryAddress = JSE.jseFunctions.cleanString(checkout.deliveryAddress.split(/(<|&lt;)br\s*\/*(>|&gt;)/gi).join(', ').split("\n").join(', ').split('\n').join(', ').split(',,').join(',')); // replace <br /> & \n & ,, before clean
-			} else {
-				merchantSale.deliveryAddress = 'Not Provided';
-			}
-			if (typeof checkout.rebillFrequency === 'undefined') {
-				merchantSale.type = 'single';
-				const thePrice = checkout.calculatedPrice || checkout.singlePrice;
-				merchantSale.amount = JSE.jseFunctions.round(parseFloat(JSE.jseFunctions.cleanString(thePrice)));
-			} else {
-				merchantSale.type = 'recurring';
-				if (checkout.currency) {
-					merchantSale.amount = JSE.jseFunctions.round(parseFloat(JSE.jseFunctions.cleanString(checkout.calculatedPrice)));
-					merchantSale.recurringPrice = JSE.jseFunctions.round(parseFloat(JSE.jseFunctions.cleanString(checkout.recurringPrice)));
-					merchantSale.recurringCurrency = JSE.jseFunctions.cleanString(checkout.currency);
-				} else {
-					merchantSale.amount = JSE.jseFunctions.round(parseFloat(JSE.jseFunctions.cleanString(checkout.initialPrice)));
-					merchantSale.recurringPrice = JSE.jseFunctions.round(parseFloat(JSE.jseFunctions.cleanString(checkout.recurringPrice)));
-				}
-				merchantSale.rebillFrequency = JSE.jseFunctions.cleanString(checkout.rebillFrequency);
-				merchantSale.payableDate = checkout.payableDate; // date object
-			}
-			merchantSale.completedTS = new Date().getTime();
-
-			JSE.jseDataIO.getCredentialsByUID(merchantSale.sellerUID, async function(toUser) {
-				if (checkout.encoded && checkout.hash) {
-					const hashTest = await checkMerchantHash(toUser,checkout.encoded,checkout.hash);
-					if (hashTest === false) {
-						res.status(400).send('{"fail":1,"notification":"Payment Failed: Merchant Hash Does Not Match Sales Data."}');
-						return false;
-					}
-				}
-				jseAPI.apiTransfer(goodCredentials,toUser,merchantSale.amount,merchantSale.item,false,function(jsonResult) {
-					const returnObj = JSON.parse(jsonResult);
-					if (returnObj.success === 1) {
-						JSE.jseDataIO.pushVariable('merchantSales/'+merchantSale.sellerUID, merchantSale, function(salePushRef) {
-							const merchantPurchase = {};
-							merchantPurchase.reference = merchantSale.sellerUID+'/'+salePushRef; // this can be used as a fireKey 'merchantSales/'+reference
-							merchantPurchase.amount = merchantSale.amount;
-							merchantPurchase.item = merchantSale.item;
-							merchantPurchase.sellerUID = merchantSale.sellerUID;
-							if (checkout.sAuth === toUser.apiKey.substring(0, 5)) {
-								merchantPurchase.sellerEmail = toUser.email;
-							} else {
-								merchantPurchase.sellerEmail = 'unavailable';
-							}
-							merchantPurchase.completedTS = merchantSale.completedTS;
-							merchantPurchase.type = merchantSale.type;
-							if (merchantPurchase.type === 'recurring') {
-								merchantPurchase.recurringPrice = merchantSale.recurringPrice;
-								if (merchantSale.recurringCurrency) merchantPurchase.recurringCurrency = merchantSale.recurringCurrency;
-								merchantPurchase.rebillFrequency = merchantSale.rebillFrequency;
-								merchantPurchase.payableDate = merchantSale.payableDate;
-							}
-							returnObj.reference = merchantPurchase.reference; // send back reference to be included in completion URL
-							res.send(JSON.stringify(returnObj));
-							JSE.jseDataIO.pushVariable('merchantPurchases/'+merchantSale.buyerUID, merchantPurchase, function(purchasePushRef) {
-								JSE.jseDataIO.setVariable('merchantSales/'+merchantSale.sellerUID+'/'+salePushRef+'/purchaseReference', merchantSale.buyerUID+'/'+purchasePushRef); // fireKey 'merchantPurchases/'+purchaseReference
-								JSE.jseDataIO.setVariable('merchantSales/'+merchantSale.sellerUID+'/'+salePushRef+'/reference', merchantSale.sellerUID+'/'+salePushRef); // fireKey 'merchantSales/'+reference
-								const sellerEmailHTML = 'You have received a new JSEcoin Merchant Transaction<br><br>Item: '+merchantSale.item+'<br>Amount: '+merchantSale.amount+' JSE<br>Type: '+merchantSale.type+'<br>Buyer: '+merchantSale.buyerEmail+'<br>Delivery Address: '+merchantSale.deliveryAddress+'<br><br>Thank you for using JSEcoin for your merchant payments.';
-								JSE.jseFunctions.sendStandardEmail(toUser.email,'JSEcoin Merchant Transaction',sellerEmailHTML);
-								const buyerEmailHTML = 'This is to confirm you have made a purchase via JSEcoin for the following.<br><br>Item: '+merchantSale.item+'<br>Amount: '+merchantSale.amount+' JSE<br>Type: '+merchantSale.type+'<br>Delivery Address: '+merchantSale.deliveryAddress+'<br><br>Thank you for using JSEcoin for your digital payments.';
-								JSE.jseFunctions.sendStandardEmail(merchantSale.buyerEmail,'JSEcoin Payment Confirmation',buyerEmailHTML);
-								if (typeof checkout.ipnURL !== 'undefined') {
-									const ipnURL = checkout.ipnURL.split('{reference}').join(merchantSale.sellerUID+'/'+salePushRef);
-									request(ipnURL, function (error, response, body) { }); // S2S Postback IPN URL
-								}
-							});
-							// set buyer and seller to have used merchant services so both are pulled at login
-							JSE.jseDataIO.setVariable('account/'+merchantSale.sellerUID+'/merchant', 1);
-							JSE.jseDataIO.setVariable('account/'+merchantSale.buyerUID+'/merchant', 1);
-						});
-					} else {
-						res.send(jsonResult);
-						console.log('Merchant payment failed ref. 95 checkout.js');
-					}
-				});
-				return false;
-			});
+			const result = await jseMerchant.processPayment(goodCredentials,checkout);
+			if (result.success) res.send(JSON.stringify(result));
+			if (result.fail) res.status(400).send(JSON.stringify(result));
 		} else {
 			res.status(400).send('{"fail":1,"notification":"Payment Failed: UserID does not match sessionID."}');
 		}
@@ -197,19 +159,5 @@ router.post('/*', function (req, res) {
 		res.status(401).send('{"fail":1,"notification":"Payment Failed: Session credentials could not be verified."}');
 	});
 });
-
-const checkMerchantHash = async (toUserCredentials, encodedURL, hashURL) => {
-  return new Promise(resolve => {
-		JSE.jseDataIO.getUserData(toUserCredentials, function(toUserData) {
-			const safeHashString = encodedURL+toUserData.email+toUserData.apiKey.substring(0, 10)+toUserData.regip+toUserData.registrationDate; // 10 digits public/private api sub-key mixed in with some user data to prevent brute force attack
-			const sha256hash = crypto.createHash('sha256').update(safeHashString).digest("hex");
-			if (sha256hash === hashURL) {
-				resolve(true);
-			} else {
-				resolve(false);
-			}
-		});
-  });
-};
 
 module.exports = router;
