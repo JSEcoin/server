@@ -79,7 +79,8 @@ router.get('/platformsupply/*', function(req, res) {
  */
 router.get('/circulatingsupply/*', function(req, res) {
 	res.header("Access-Control-Allow-Origin", "*");
-	res.send(String(JSE.publicStats.coins));
+	//res.send(String(JSE.publicStats.coins));
+	res.send('443479880'); // coinmarketcap
 });
 
 /**

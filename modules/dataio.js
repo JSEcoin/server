@@ -1186,12 +1186,14 @@ const jseDB = {
 	 * https://coinmarketcap.com/faq/
 	 */
 	addERC20Tokens: async() => {
+		/*
 		const coldStorageBalance = await jseEthIntegration.balanceJSE('0xc880f4143950bfb27ed021793991f35466b99201');
 		const jseFundsBalance = await jseEthIntegration.balanceJSE('0x7a1f4c1031f11571a95e4778c2b4281af88c1e28');
 		const foundersBalance = await jseEthIntegration.balanceJSE('0x9f8ed3820bae1d4bf6396b51df2dbf9cf0853161');
-		const advisorsBalance = await jseEthIntegration.balanceJSE('0x00d443438e94f73c0938bd241decaf535ccce731');
-		const coinTotal = 10000000000 - coldStorageBalance - jseFundsBalance - foundersBalance - advisorsBalance;
+		const erc20Coins = 10000000000 - coldStorageBalance - jseFundsBalance - foundersBalance;
+		*/
 		//const coinTotal = JSE.publicStats.platformCoins + erc20Coins;
+		const coinTotal = 443479880; // coinmarketcap total
 		JSE.publicStats.coins = JSE.jseFunctions.round(coinTotal);
 		JSE.jseDataIO.setVariable('publicStats/coins',JSE.publicStats.coins);
 	},
