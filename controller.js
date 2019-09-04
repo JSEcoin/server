@@ -3,7 +3,7 @@
  * @name JSE Controller (controller.js)
  * @example forever start -c "node --max-old-space-size=3000" controller.js &
  * @example node controller.js -t local -d http://localhost:82 -e http://localhost:83 -a http://localhost:84
- * @version 1.8.2
+ * @version 1.9.2
  * @description The controller carries out maintenance tasks for the JSE platform and blockchain.
  */
 
@@ -69,6 +69,7 @@ JSE.jseDataIO = require('./modules/dataio.js'); // can't call initialiseApp twic
 setInterval(function() {
 	JSE.jseDataIO.getVariable('jseSettings',function(result) { JSE.jseSettings = result; });
 	if (JSE.jseTestNet === false) jseSchedule.enterprisePayments();
+	jseSchedule.pendingPayments();
 },  300000); // every 5 mins
 
 setTimeout(function() {

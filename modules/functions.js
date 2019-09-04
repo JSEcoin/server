@@ -80,8 +80,7 @@ function randString(length) {
  * @const decimals Rounding is carried out to 8 decimal places this could potentially be changed in the future
  * @returns {number} rounded value
  */
-function round(value) {
-	const decimals = 8;
+function round(value,decimals=8) {
 	return Number(parseFloat(value).toFixed(decimals));
 }
 

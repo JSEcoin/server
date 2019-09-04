@@ -104,8 +104,8 @@ ES Lint Continuous:-
 
 **AdX**
 ```console
-@reboot cd /root && /usr/local/bin/forever -c "node --max-old-space-size=8000" start datastore.js -p 81 -f adx &
-@reboot cd /root && /usr/local/bin/forever -c "node --max-old-space-size=3000" start adx.js &
+@reboot cd /var/www && /usr/local/bin/forever -c "node --max-old-space-size=8000" start datastore.js -p 81 -f adx &
+@reboot cd /var/www && /usr/local/bin/forever -c "node --max-old-space-size=3000" start adx.js &
 ```
 
 
