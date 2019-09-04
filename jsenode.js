@@ -3,7 +3,7 @@
  * @name JSE Node (jsenode.js)
  * @example forever start -c "node --max-old-space-size=3000" jsenode.js -s load.jsecoin.com -n load4 -m 0 &
  * @example node jsenode.js -t local -s localhost -p 81 -n jimv18 -d http://localhost:82 -e http://localhost:83 -a http://localhost:84 -m 0
- * @version 1.9.1
+ * @version 1.9.2
  * @description JSE nodes run the JSEcoin network. Each node can be used as a load server or as part of the p2p chain.<br><br>
 		Command Line Options:<br>
 		-f, --fullnode, Run fullnode rather than litenode<br>
@@ -24,7 +24,7 @@
 
 const JSE = {};
 global.JSE = JSE;
-JSE.version = '1.9.1';
+JSE.version = '1.9.2';
 
 const fs = require('fs');
 const request = require('request');

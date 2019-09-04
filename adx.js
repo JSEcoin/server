@@ -3,7 +3,7 @@
  * @name JSE Ad Exchange
  * @example forever start -c "node --max-old-space-size=3000" adx.js &
  * @example "node adx.js -t local -d http://localhost:82 -e http://localhost:83 -a http://localhost:84
- * @version 1.9.01
+ * @version 1.9.2
  * @description The ad exchange controls and maintains the ad exchange campaigns
  */
 
