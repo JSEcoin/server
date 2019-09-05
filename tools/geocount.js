@@ -1,4 +1,4 @@
-/* Quick script to see how many sites we have opted in to display advertising */
+/* Quick script to see how many sites we have opted in to display advertising */ // eslint-disable-line
 
 const pubMLData = require('./../logs/cli-publisherMLData.json'); // eslint-disable-line
 

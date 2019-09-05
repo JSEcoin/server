@@ -17,6 +17,7 @@ const router = express.Router();
 router.post('/*', function (req, res) {
 	const newUser = {};
 	newUser.email = JSE.jseFunctions.cleanString(String(req.body.email)).toLowerCase();
+	/*
 	// Recaptcha
 	if (req.body['g-recaptcha-response'] === undefined || req.body['g-recaptcha-response'] === '' || req.body['g-recaptcha-response'] === null) {
     const failed = {};
@@ -27,9 +28,16 @@ router.post('/*', function (req, res) {
   }
   const secretKey = JSE.credentials.recaptchaSecretKey;
 	const verificationUrl = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + req.body['g-recaptcha-response'];
+	*/
+	let lastIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
+	if (lastIP.indexOf(',') > -1) { lastIP = lastIP.split(',')[0]; }
+	if (lastIP.indexOf(':') > -1) { lastIP = lastIP.split(':').slice(-1)[0]; }
+	let verificationUrl = "https://api.jsecoin.com/captcha/check/"+lastIP+"/";
+	if (JSE.jseTestNet) verificationUrl = "http://localhost:81/captcha/check/"+lastIP+"/";
   request(verificationUrl,function(error,response,bodyRaw) {
     const body = JSON.parse(bodyRaw);
-    if (body.success && body.success === true) {
+    //if (body.success && body.success === true) {
+		if (body.pass && body.pass === true) {
 			newUser.password = JSE.jseFunctions.limitString(String(req.body.password));
 			newUser.passwordHashed = JSE.jseFunctions.sha256(newUser.password);
 			delete newUser.password; // remove password from database;
