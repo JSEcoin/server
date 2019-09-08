@@ -52,10 +52,6 @@ function runChecks() {
 			errorMsg = 'Public Stats Data Missing';
 			sendOnceSMS(JSE.credentials.emergencyNo,errorMsg);
 		}
-		if (newPublicStats.selfMiners < 500 && (now.getHours() < 1)) { // check its not midnight when the stats are refreshing
-			errorMsg = 'Less than 500 self miners online';
-			sendOnceSMS(JSE.credentials.emergencyNo,errorMsg);
-		}
 		if (JSE.publicStats && JSE.publicStats.users && JSE.publicStats.coins) {
 			if (newPublicStats.users < JSE.publicStats.users) {
 				errorMsg = 'Registered user accounts has reduced';

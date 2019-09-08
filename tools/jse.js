@@ -51,7 +51,7 @@ async function runTxt() {
 	//JSE.jseDataIO.updatePublicStats();
 
 	/*
-	const naughtyUsers = ['1','2'];
+	const naughtyUsers = [1,2];
 	const banReason = 'reason';
 	for (var i = 0; i < naughtyUsers.length; i+=1) {
 		banUser(naughtyUsers[i],banReason);
