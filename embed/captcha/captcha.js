@@ -60,7 +60,7 @@ var JSECaptcha = (function () {
   #JSE-captcha-reset * { box-sizing: content-box !important; vertical-align: top !important; box-shadow: none; -moz-box-shadow: none; -webkit-box-shadow: none; border: none; padding: 0; margin: 0; }\
   #JSE-captcha-container { position: relative; background: #FFF; border: 1px solid #EEE; border-radius: 3px; width: 220px; height: 40px; font-size: 15px; font-family: Arial, sans-serif; color: #777; }\
   #JSE-captcha-check { position: absolute; top: 1px; left: 100px; opacity: 0; }\
-  #JSE-captcha-tick { text-align: center; color: #1687e9; font-size: 17px; height: 20px; width: 20px; background: #FFF; border: 2px solid #CCC; border-radius: 2px; margin: 6px 0px 0px 8px; cursor: pointer; padding-top: 3px !importants; }\
+  #JSE-captcha-tick { text-align: center; color: #1687e9; font-size: 17px; height: 20px; width: 20px; background: #FFF; border: 2px solid #CCC; border-radius: 2px; margin: 6px 0px 0px 8px; cursor: pointer; padding-top: 3px !important; }\
   #JSE-captcha-text { position: absolute; top: 12px; left: 50px; font-weight: semi-bold; }\
   #JSE-captcha-logo { position: absolute; top: 5px; right: 10px; border-left: 1px solid #EEE; padding-left: 10px !important; }\
   #JSE-captcha-logo-image { height: 30px; }\
