@@ -60,9 +60,9 @@ var JSECaptcha = (function () {
   #JSE-captcha-reset * { box-sizing: content-box !important; vertical-align: top !important; box-shadow: none; -moz-box-shadow: none; -webkit-box-shadow: none; border: none; padding: 0; margin: 0; }\
   #JSE-captcha-container { position: relative; background: #FFF; border: 1px solid #EEE; border-radius: 3px; width: 220px; height: 40px; font-size: 15px; font-family: Arial, sans-serif; color: #777; }\
   #JSE-captcha-check { position: absolute; top: 1px; left: 100px; opacity: 0; }\
-  #JSE-captcha-tick { text-align: center; color: #1687e9; font-size: 17px; height: 20px; width: 20px; background: #FFF; border: 2px solid #CCC; border-radius: 2px; margin: 6px 0px 0px 8px; cursor: pointer; padding-top: 3px; }\
+  #JSE-captcha-tick { text-align: center; color: #1687e9; font-size: 17px; height: 20px; width: 20px; background: #FFF; border: 2px solid #CCC; border-radius: 2px; margin: 6px 0px 0px 8px; cursor: pointer; padding-top: 3px !importants; }\
   #JSE-captcha-text { position: absolute; top: 12px; left: 50px; font-weight: semi-bold; }\
-  #JSE-captcha-logo { position: absolute; top: 5px; right: 10px; border-left: 1px solid #EEE; padding-left: 10px; }\
+  #JSE-captcha-logo { position: absolute; top: 5px; right: 10px; border-left: 1px solid #EEE; padding-left: 10px !important; }\
   #JSE-captcha-logo-image { height: 30px; }\
   #JSE-captcha-tick:hover { border: 2px solid #0F9CBE; }\
   #JSE-captcha-game-container { display: none; background: #000; border-radius: 3px; position: absolute; top: 50px; left: 5px; height: 190px; width: 290px; overflow: hidden; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }\
@@ -73,10 +73,10 @@ var JSECaptcha = (function () {
   .JSE-captcha-dark #JSE-captcha-tick { background: #444; }\
   .JSE-captcha-large #JSE-captcha-container { width: 300px; height: 55px; font-size: 18px; }\
   .JSE-captcha-large #JSE-captcha-logo-image { height: 44px; }\
-  .JSE-captcha-large #JSE-captcha-tick { height: 30px; width: 30px; margin: 9px 0px 0px 10px; }\
+  .JSE-captcha-large #JSE-captcha-tick { height: 30px; width: 30px; margin: 9px 0px 0px 10px !important; }\
   .JSE-captcha-large #JSE-captcha-text { position: absolute; top: 18px; left: 60px; }\
-  .JSE-captcha-large #JSE-captcha-robot { height: 22px; margin-top: 3px; }\
-  .JSE-captcha-large #JSE-captcha-smiley { height: 22px; margin-top: 3px; }\
+  .JSE-captcha-large #JSE-captcha-robot { height: 22px; margin-top: 3px !important; }\
+  .JSE-captcha-large #JSE-captcha-smiley { height: 22px; margin-top: 3px !important; }\
   .JSE-captcha-large #JSE-captcha-game-container { top: 60px; }\
   .JSE-captcha-shadow #JSE-captcha-container { box-shadow: 0px 3px 6px 0px rgba(0, 0, 0, 0.12); }';
   var s = document.createElement("style");

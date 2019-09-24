@@ -13,7 +13,7 @@ var css = '#JSE-board { width: 100%; border-collapse: collapse; font-size: 32px;
 #JSE-board td:nth-of-type(3) { border-right-color: transparent; border-top-color: transparent; }\
 #JSE-board tr:nth-of-type(3) td { border-bottom-color: transparent; }\
 #JSE-board td:hover { background: #FFFCF2; }\
-.JSE-board-xo { display: inline-block; margin: 0px; padding: 0px; width: 50px; height: 50px; margin-top: 2px; }';
+.JSE-board-xo { display: inline-block; margin: 0px; padding: 0px; width: 50px; height: 50px; margin-top: 2px !important; }';
 var s = document.createElement("style");
 s.innerHTML = css;
 document.getElementsByTagName("head")[0].appendChild(s);
