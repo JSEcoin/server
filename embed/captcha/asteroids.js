@@ -24,7 +24,7 @@ var handleMovement = function(e) {
   var mouseX = e.pageX - rect.left;
   var mouseY = e.pageY - rect.top;
   spaceShip.rotation = Math.atan2(mouseY - spaceShip.yAxis, mouseX - spaceShip.xAxis) * (180 / Math.PI) + 85;
-
+  if (spaceShip.rotation > 360 || spaceShip.rotation < 0) { spaceShip.rotation = 45; }
   self.mlData.mouseEvents += 1;
   if (mouseY < self.mlData.mouseY) self.mlData.mouseDown += 1;
   if (mouseY > self.mlData.mouseY) self.mlData.mouseUp += 1;

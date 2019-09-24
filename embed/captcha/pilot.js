@@ -59,7 +59,7 @@ zeplin1.onclick = function() {
   zeplin1.src = zeplinFlame;
   fadeOut(zeplin1.id);
 }
-zeplin1.xAxis = 20;
+zeplin1.xAxis = Math.round(Math.random() * 200);
 zeplin1.yAxis = 10;
 
 var zeplin2 = new Image();
@@ -78,7 +78,7 @@ zeplin2.onclick = function() {
   zeplin2.src = zeplinFlame;
   fadeOut(zeplin2.id);
 }
-zeplin2.xAxis = 130;
+zeplin2.xAxis = Math.round(Math.random() * 200);
 zeplin2.yAxis = 10;
 
 var zeplin3 = new Image();
@@ -97,7 +97,7 @@ zeplin3.onclick = function() {
   zeplin3.src = zeplinFlame;
   fadeOut(zeplin3.id);
 }
-zeplin3.xAxis = 200;
+zeplin3.xAxis = Math.round(Math.random() * 200);
 zeplin3.yAxis = 10;
 
 function planeFire() {
