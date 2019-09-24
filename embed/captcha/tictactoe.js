@@ -4,7 +4,7 @@ document.getElementById('JSE-captcha-game').style.cursor = "url('data:image/png;
 
 document.getElementById('JSE-captcha-game').innerHTML = '<table id="JSE-board"><tr><td id="JSE-board-0""></td><td id="JSE-board-1"></td><td id="JSE-board-2"></td></tr><tr><td id="JSE-board-3"></td><td id="JSE-board-4"></td><td id="JSE-board-5"></td></tr><tr><td id="JSE-board-6"></td><td id="JSE-board-7"></td><td id="JSE-board-8"></td></tr></table>';
 
-var css = '#JSE-board { width: 100%; border-collapse: collapse; font-size: 32px; font-weight: bold; }\
+var css = '#JSE-board { width: 100%; border-collapse: collapse; font-size: 32px; font-weight: bold; background: #FFF; }\
 #JSE-board td { width: 96px; height: 54px; border: 3px solid #222; text-align: center;}\
 #JSE-board td::after { content: ""; display: block; }\
 #JSE-board td { border: 5px solid #adaa95; }\
