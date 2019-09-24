@@ -255,7 +255,7 @@ const jseSocketIO = {
 							// double check currentRating (last var in visitorTensorArray) > 50 server-side once enough volume
 							jseMachineLearning.recordPublisherMLData(pubID,visitorTensor);
 							const safeKey = JSE.jseDataIO.genSafeKey(siteID);
-							const toCoinsReqRatio = 5; // reduce this variable to 1 over time
+							const toCoinsReqRatio = 4; // reduce this variable to 1 over time
 							if (validateCache[pubID] && validateCache[pubID][safeKey] && validateCache[pubID][safeKey].cacheControl < 100) {
 								validateCache[pubID][safeKey].cacheControl += 1;
 								if (validateCache[pubID][safeKey].u > validateCache[pubID][safeKey].c / toCoinsReqRatio && validateCache[pubID][safeKey].h > validateCache[pubID][safeKey].c / toCoinsReqRatio && validateCache[pubID][safeKey].a > validateCache[pubID][safeKey].c / (toCoinsReqRatio * 100)) {
