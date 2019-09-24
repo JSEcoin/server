@@ -104,7 +104,7 @@ const jseCommands = {
 						if (timeTillConfirmation > 30000) timeTillConfirmation = 30000;
 						if (timeTillConfirmation < 0) timeTillConfirmation = 29999;
 						callback('{"success":1,"coinCode":"' + eCoin.coinCode + '","notification":"Export Successful","timeTillConfirmation":'+timeTillConfirmation+'}');
-						JSE.jseFunctions.exportNotificationEmail(dataObject.user1,dataObject.withdrawalAmount);
+						JSE.jseFunctions.exportNotificationEmail(dataObject.user1,dataObject.value);
 					}
 				});
 			} else if (dataObject.command === 'withdraw') {
