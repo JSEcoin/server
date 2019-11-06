@@ -83,6 +83,10 @@ var JSECaptcha = (function () {
   s.innerHTML = css;
   document.getElementsByTagName("head")[0].appendChild(s);
 
+  if (!document.getElementById('JSE-captcha')) {
+    return false;
+  }
+  
   document.getElementById('JSE-captcha').innerHTML = '<div id="JSE-captcha-reset"><div id="JSE-captcha-container"><input id="JSE-captcha-check" type="checkbox" /><div id="JSE-captcha-tick"></div><div id="JSE-captcha-text">I\'m human</div><div id="JSE-captcha-logo"><a href="https://jsecoin.com" target="_blank"><img id="JSE-captcha-logo-image" src="'+this.jseLogo+'" alt="JSEcoin"></a></div><div id="JSE-captcha-game-container"><div id="JSE-captcha-game"></div></div></div></div>';
 
   this.tick = function() {
