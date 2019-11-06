@@ -157,6 +157,9 @@ var JSECaptcha = (function () {
         maxText = 80;
         maxTick = 60;
       };
+      if (!document.getElementById('JSE-captcha-container')) {
+        return false;
+      }
       var captchaContainer = document.getElementById('JSE-captcha-container');
       if (captchaContainer.offsetHeight > 40) {
         captchaContainer.style.height = Math.max(captchaContainer.offsetHeight-10,maxHeight)+"px";
