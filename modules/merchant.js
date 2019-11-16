@@ -119,9 +119,10 @@ const jseMerchant = {
 		return new Promise(resolve => {
 			jseAPI.apiTransfer(goodCredentials,toUser,merchantSale.amount,merchantSale.item,false,function(jsonResult) {
 				const returnObj = JSON.parse(jsonResult);
-				if (returnObj.success !== 1) {
+				if (returnObj.fail || returnObj.success !== 1) {
 					console.log('Merchant payment failed ref. 116 merchant.js');
 					resolve({ fail: 1, notification: JSON.stringify(jsonResult) });
+					return false;
 				}
 				JSE.jseDataIO.pushVariable('merchantSales/'+merchantSale.sellerUID, merchantSale, function(salePushRef) {
 					const merchantPurchase = {};
@@ -169,6 +170,7 @@ const jseMerchant = {
 					JSE.jseDataIO.setVariable('account/'+merchantSale.buyerUID+'/merchant', 1);
 					resolve(returnObj); // success
 				});
+				return false;
 			});
 		});
 	},
