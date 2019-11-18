@@ -191,7 +191,7 @@ const jseBlockChain = {
 			Object.keys(blockObj.input).forEach(function(tid) {
 				const command = blockObj.input[tid].command;
 				const user1 = blockObj.input[tid].user1;
-				if (command !== 'mining' && command !== 'distribution' && command !== 'distributionTransfer' && command !== 'summary' && command !== 'platformReward'  && command !== 'publisherReward'  && command !== 'referralReward' && user1 !== 0) {
+				if (command !== 'mining' && command !== 'distribution' && command !== 'distributionTransfer' && command !== 'sideChainHash' && command !== 'summary' && command !== 'platformReward'  && command !== 'publisherReward'  && command !== 'referralReward' && user1 !== 0) {
 					if (checkUsers.indexOf(user1) === -1) {
 						checkUsers.push(user1);
 					} else {
