@@ -167,7 +167,7 @@ var JSE = (function () {
 	function setupHit() {
 		// localStorage check
 		jseTrack.storage = 0;
-		if (localStorage) {
+		if (typeof localStorage !== 'undefined') {
 			var jseFirstVisit = localStorage.jseFirstVisit; // set jseFirstVisit to whatever is in localStorage
 			// find out if it's been validated before
 			var jseLastValidation = localStorage.jseLastValidation;
@@ -182,6 +182,8 @@ var JSE = (function () {
 			if (localStorageCounter > 1) {
 				jseTrack.storage += localStorageCounter;
 			}	
+		} else {
+			return false; // return if no localStorage
 		}
 		// Test Web GL
 		jseTrack.webGL = webGLFP();
@@ -423,7 +425,7 @@ var JSE = (function () {
 				if (validationTimeLimit > maxValidationTimeLimit) {
 					validationTimeLimit = maxValidationTimeLimit;
 				}
-				if (localStorage) {
+				if (typeof localStorage !== 'undefined') {
 					localStorage.setItem('jseLastValidation', now);
 				}
 				if (sockets[0].selectedAds && sockets[0].selectedAds.length > 1) {
