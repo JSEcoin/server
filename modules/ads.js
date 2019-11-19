@@ -204,7 +204,7 @@ const jseAds = {
 		const yesterday = new Date();
 		yesterday.setDate(yesterday.getDate() - 1);
 		const yesterdayYYMMDD = yesterday.toISOString().slice(2,10).replace(/-/g,"");
-		const pubData = JSE.jseDataIO.asyncGetVar(`adxPubStats/${selectedAd.pubID}/${yesterdayYYMMDD}/`);
+		const pubData = await JSE.jseDataIO.asyncGetVar(`adxPubStats/${selectedAd.pubID}/${yesterdayYYMMDD}/`);
 		JSE.pubCache[selectedAd.pubID] = 1;
 		if (pubData) {
 			let i = 0;
