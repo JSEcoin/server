@@ -1199,6 +1199,64 @@ const jseDB = {
 	},
 
 	/**
+	 * @method <h2>vcStats</h2>
+	 * @description Additional stats such as 7day 30 day active users
+	 */
+	vcStats: async () => {
+		const now = new Date().getTime();
+		const weekAgo = now - 604800000;
+		const monthAgo = now - 2628000000;
+		let weekActive = 0;
+		let monthActive = 0;
+		const accounts = await JSE.jseDataIO.asyncGetVar('account/');
+		Object.keys(accounts).forEach((uid) => {
+			if (accounts[uid] && accounts[uid].lastLogin && accounts[uid].lastLogin.ts) { 
+				const lastLoginTS = accounts[uid].lastLogin.ts || 0;
+				if (lastLoginTS > weekAgo) {
+					weekActive += 1;
+					console.log(accounts[uid].email);
+				}
+				if (lastLoginTS > monthAgo) monthActive += 1;
+			}
+		});
+		JSE.publicStats.weekActiveUsers = weekActive;
+		JSE.jseDataIO.setVariable('publicStats/weekActiveUsers',JSE.publicStats.weekActiveUsers);
+		JSE.publicStats.monthActiveUsers = monthActive;
+		JSE.jseDataIO.setVariable('publicStats/monthActiveUsers',JSE.publicStats.monthActiveUsers);
+		//console.log(`Week Active Members: ${weekActive} - Month Active Members: ${monthActive}`);
+		const yesterday = new Date(new Date().setDate(new Date().getDate()-1));
+		const yesterdayYYMMDD = yesterday.toISOString().slice(2,10).replace(/-/g,"");
+		const adxAdvStats = await JSE.jseDataIO.asyncGetVar('adxAdvStats/');
+		let advertisers = 0;
+		let adCampaigns = 0;
+		let adSpend = 0;
+		let adImpressions = 0;
+		let adClicks = 0;
+		Object.keys(adxAdvStats).forEach((uid) => {
+			if (adxAdvStats[uid] && adxAdvStats[uid][yesterdayYYMMDD]) {
+				advertisers += 1;
+				Object.keys(adxAdvStats[uid][yesterdayYYMMDD]).forEach((campaign) => {
+					const advCampaign = adxAdvStats[uid][yesterdayYYMMDD][campaign];
+					adCampaigns += 1;
+					if (advCampaign.j) adSpend += advCampaign.j;
+					if (advCampaign.i) adImpressions += advCampaign.i;
+					if (advCampaign.c) adClicks += advCampaign.c;
+				});
+			}
+		});
+		JSE.publicStats.advertisers = advertisers;
+		JSE.jseDataIO.setVariable('publicStats/advertisers',JSE.publicStats.advertisers);
+		JSE.publicStats.adCampaigns = adCampaigns;
+		JSE.jseDataIO.setVariable('publicStats/adCampaigns',JSE.publicStats.adCampaigns);
+		JSE.publicStats.adSpend = Math.round(adSpend);
+		JSE.jseDataIO.setVariable('publicStats/adSpend',JSE.publicStats.adSpend);
+		JSE.publicStats.adImpressions = adImpressions;
+		JSE.jseDataIO.setVariable('publicStats/adImpressions',JSE.publicStats.adImpressions);
+		JSE.publicStats.adClicks = adClicks;
+		JSE.jseDataIO.setVariable('publicStats/adClicks',JSE.publicStats.adClicks);
+	},
+
+	/**
 	 * @method <h2>updatePublicStats</h2>
 	 * @description Update the JSE.publicStats variable, this is run from the controller every 10 minutes
 	 */
@@ -1263,6 +1321,7 @@ const jseDB = {
 					}
 				});
 			});
+			JSE.jseDataIO.vcStats(); // async additional stats
 		}
 
 		if (Math.random() > 0.66 || typeof JSE.publicStats.pubs === 'undefined') { // 30 mins approx
