@@ -56,7 +56,7 @@ if (JSE.authenticatedNode) {
 		}
 		const hash = JSE.jseFunctions.cleanString(req.params.hash).replace(/[^A-Fa-f0-9]/g, "").toUpperCase();
 		if (hash.length > 65 || hash.length < 63) {
-			res.status(401).send('{"fail":1,"notification":"API setHash Failed: Invalid SHA256 Hex Hash String"}');
+			res.status(400).send('{"fail":1,"notification":"API setHash Failed: Invalid SHA256 Hex Hash String"}');
 			return false;
 		}
 		JSE.jseDataIO.getCredentialsByAPIKey(apiKey,function(goodCredentials) {
@@ -74,7 +74,7 @@ if (JSE.authenticatedNode) {
 					JSE.jseDataIO.getVariable('blockID',function(latestBlockID) {
 						sideChainHash.blockID = latestBlockID;
 						JSE.jseDataIO.setVariable(`sideChainHash/${hash}/${sideChainHash.tx}`,sideChainHash);
-						res.send(`{"success":1,"tx":${sideChainHash.tx},"hash":${sideChainHash.hash},"ts":"${sideChainHash.ts}","blockID":${sideChainHash.blockID}}`);
+						res.send(`{"success":1,"tx":"${sideChainHash.tx}","hash":"${sideChainHash.hash}","ts":"${sideChainHash.ts}","blockID":${sideChainHash.blockID}}`);
 						JSE.jseDataIO.plusX(`enterprisePayments/due/${goodCredentials.uid}`,-1);
 					});
 				});
