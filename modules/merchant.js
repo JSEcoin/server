@@ -93,6 +93,9 @@ const jseMerchant = {
 			merchantSale.rebillFrequency = JSE.jseFunctions.cleanString(checkout.rebillFrequency);
 			merchantSale.payableDate = checkout.payableDate; // date object
 		}
+		if (checkout.c1) merchantSale.c1 = JSE.jseFunctions.cleanString(checkout.c1);
+		if (checkout.c2) merchantSale.c2 = JSE.jseFunctions.cleanString(checkout.c2);
+		if (checkout.c3) merchantSale.c3 = JSE.jseFunctions.cleanString(checkout.c3);
 		merchantSale.completedTS = new Date().getTime();
 		return new Promise(resolve => {
 			JSE.jseDataIO.getCredentialsByUID(merchantSale.sellerUID, async function(toUser) {
@@ -153,12 +156,12 @@ const jseMerchant = {
 						JSE.jseFunctions.sendStandardEmail(merchantSale.buyerEmail,'JSEcoin Payment Confirmation',buyerEmailHTML);
 						if (typeof checkout.ipnURL !== 'undefined') {
 							if (checkout.ipnURL.indexOf('http') > -1) { // otherwise it's a pushref for a saved URL
-								const ipnURL = checkout.ipnURL.split('{reference}').join(merchantSale.sellerUID+'/'+salePushRef);
+								const ipnURL = checkout.ipnURL.split('{reference}').join(merchantSale.sellerUID+'/'+salePushRef).split('{item}').join(merchantSale.item).split('{price}').join(merchantSale.amount).split('{c1}').join(merchantSale.c1).split('{c2}').join(merchantSale.c2).split('{c3}').join(merchantSale.c3).split('{buyeremail}').join(merchantSale.buyerEmail);
 								request(ipnURL, function (error, response, body) { }); // S2S Postback IPN URL
 							} else {
 								JSE.jseDataIO.getVariable(`merchantURL/${merchantSale.sellerUID}/${JSE.jseFunctions.cleanString(checkout.ipnURL)}/`,function(savedIPN) {
 									if (savedIPN) {
-										const ipnURL = savedIPN.split('{reference}').join(merchantSale.sellerUID+'/'+salePushRef);
+										const ipnURL = savedIPN.split('{reference}').join(merchantSale.sellerUID+'/'+salePushRef).split('{item}').join(merchantSale.item).split('{price}').join(merchantSale.amount).split('{c1}').join(merchantSale.c1).split('{c2}').join(merchantSale.c2).split('{c3}').join(merchantSale.c3).split('{buyeremail}').join(merchantSale.buyerEmail);
 										request(ipnURL, function (error, response, body) { }); // S2S Postback IPN URL
 									}
 								});

@@ -1210,7 +1210,7 @@ const jseDB = {
 		let monthActive = 0;
 		const accounts = await JSE.jseDataIO.asyncGetVar('account/');
 		Object.keys(accounts).forEach((uid) => {
-			if (accounts[uid] && accounts[uid].lastLogin && accounts[uid].lastLogin.ts) { 
+			if (accounts[uid] && accounts[uid].lastLogin && accounts[uid].lastLogin.ts) {
 				const lastLoginTS = accounts[uid].lastLogin.ts || 0;
 				if (lastLoginTS > weekAgo) {
 					weekActive += 1;
