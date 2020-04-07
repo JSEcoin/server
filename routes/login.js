@@ -139,13 +139,17 @@ function passRecaptcha(credentials,req,res) {
 		if (JSE.jseTestNet) verificationUrl = "http://localhost:81/captcha/check/"+lastIP+"/";
 	}
 	request(verificationUrl,function(errorRecaptcha,responseRecaptcha,bodyCaptchaRaw) {
-		const bodyCaptcha = JSON.parse(bodyCaptchaRaw);
-		if (bodyCaptcha.success && bodyCaptcha.success === true) {
-			startLogin(credentials,req,res);
-		} else if (bodyCaptcha.pass && bodyCaptcha.pass === true) {
-			startLogin(credentials,req,res);
-		} else {
-			res.status(400).send('{"fail":1,"notification":"Captcha Error login.js 60, Please Try Again"}');
+		try {
+			const bodyCaptcha = JSON.parse(bodyCaptchaRaw);
+			if (bodyCaptcha.success && bodyCaptcha.success === true) {
+				startLogin(credentials,req,res);
+			} else if (bodyCaptcha.pass && bodyCaptcha.pass === true) {
+				startLogin(credentials,req,res);
+			} else {
+				res.status(400).send('{"fail":1,"notification":"Captcha Error login.js 149, Please Try Again In 60 Seconds"}');
+			}
+		} catch(ex) {
+			res.status(400).send('{"fail":1,"notification":"Captcha Error login.js 152, Please Try Again In 60 Seconds"}');
 		}
 	});
 }
