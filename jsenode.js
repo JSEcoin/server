@@ -141,6 +141,7 @@ JSE.alreadySentReset = []; // restrict reset emails to one every 30 minutes
 JSE.alreadySentWelcomes = []; // restrict resend welcome emails to 1 per 30 minutes
 JSE.alreadySentGeneral = []; // restrict support emails to 1 per 30 minutes
 JSE.apiLimits = {}; // restrict api queries
+JSE.loginLimits = {};
 JSE.preHash = '0';
 JSE.minerAuthKey = '0';
 JSE.vpnData = {};
@@ -155,6 +156,10 @@ setInterval(function() {
 	JSE.alreadySentGeneral = [];
 	JSE.apiLimits = {};
 }, 1800000); // 30mins
+
+setInterval(function() {
+	JSE.loginLimits = {};
+}, 1800000); // 120 secs
 
 JSE.jseFunctions = require('./modules/functions.js'); // round robin bug means has to be JSE
 JSE.jseDataIO = require('./modules/dataio.js'); // can't call initialiseApp twice from modules
