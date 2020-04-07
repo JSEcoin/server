@@ -157,6 +157,20 @@ function passRecaptcha(credentials,req,res) {
  */
 router.post('/*', function (req, res) {
 	if (!req.body.email && !req.body.session) { res.status(400).send('{"fail":1,"notification":"No email or session provided"}'); return false; }
+
+	let clientIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress || req.ip;
+	if (clientIP.indexOf(',') > -1) { clientIP = clientIP.split(',')[0]; }
+	if (clientIP.indexOf(':') > -1) { clientIP = clientIP.split(':').slice(-1)[0]; }
+	if (!JSE.apiLimits[clientIP]) {
+		JSE.apiLimits[clientIP] = 1;
+	} else {
+		JSE.apiLimits[clientIP] += 1;
+	}
+	if (JSE.apiLimits[clientIP] > 180) { // 1 per 10 seconds
+		res.status(400).send('{"fail":1,"notification":"Too many requests captcha.js l170"}');
+		return false;
+	}
+
 	if (req.body.session) {
 		// Log in with session variable
 		const session = JSE.jseFunctions.cleanString(String(req.body.session));
