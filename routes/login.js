@@ -148,8 +148,9 @@ function passRecaptcha(credentials,req,res) {
 			} else {
 				res.status(400).send('{"fail":1,"notification":"Captcha Error login.js 149, Please Try Again In 60 Seconds"}');
 			}
-		} catch(ex) {
+		} catch (ex) {
 			res.status(400).send('{"fail":1,"notification":"Captcha Error login.js 152, Please Try Again In 60 Seconds"}');
+			console.log(`T1. ${bodyCaptchaRaw}`);
 		}
 	});
 }
