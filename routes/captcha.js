@@ -92,7 +92,7 @@ router.get('/check/:ip/', (req, res) => {
 	} else {
 		JSE.apiLimits[clientIP] += 1;
 	}
-	if (JSE.apiLimits[clientIP] > 180) { // 1 per 10 seconds
+	if (JSE.apiLimits[clientIP] > 360) { // 1 per 5 seconds
 		res.status(400).send('{"fail":1,"notification":"Too many requests captcha.js e94"}');
 		return false;
 	}
