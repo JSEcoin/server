@@ -170,12 +170,16 @@ router.post('/*', function (req, res) {
 	} else {
 		JSE.apiLimits[clientIP] += 1;
 	}
-	if (JSE.apiLimits[clientIP] > 15) { // 1 per 120 seconds
-		res.status(400).send('{"fail":1,"notification":"Too many requests captcha.js 170"}');
+	const badIPs = ['114.106.79.121','188.6.128.101','61.186.66.48','94.175.38.253','183.166.18.124','177.125.166.92','178.48.68.53','117.70.40.251','115.207.61.44','177.42.118.112','179.108.105.89','180.241.239.128','125.87.98.109','179.181.161.161','180.248.135.75','189.115.130.179','178.93.28.124','178.93.26.242','184.82.78.239','187.58.93.194','183.141.54.56','191.6.134.6','187.59.70.51','109.184.167.44','78.43.82.255','78.248.172.136','41.60.233.97','183.150.48.111','220.198.112.67'];
+	if (badIPs.indexOf(clientIP) > -1 && JSE.apiLimits[clientIP] > 1) {
+		res.status(400).send('{"fail":1,"notification":"Too many requests captcha.js 173"}');
+		return false;
+	}
+	if (JSE.apiLimits[clientIP] > 30) { // 1 per 60 seconds
+		res.status(400).send('{"fail":1,"notification":"Too many requests captcha.js 179"}');
 		console.log(`BadIP: ${clientIP}`);
 		return false;
 	}
-
 	if (req.body.session) {
 		// Log in with session variable
 		const session = JSE.jseFunctions.cleanString(String(req.body.session));
@@ -205,7 +209,7 @@ router.post('/*', function (req, res) {
 					res.status(400).send('{"fail":1,"notification":"Failed to pass 2fa authentication, please try again","resetForm":1}');
 				}
 			} else {
-				console.log('New login from '+credentials.email);
+				console.log(`New login from ${credentials.email} @ ${clientIP}`);
 				passRecaptcha(credentials,req,res);
 			}
 			return false;
