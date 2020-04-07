@@ -218,8 +218,8 @@ app.use('/blockchain/', express.static('./../blockchain/dist/'));
 app.use('/platform/', express.static('./../platform/'));
 
 const limiter = new RateLimit({
-	windowMs: 15*60*1000, // 15 mins
-	max: 500, // limit each IP to 500 requests per windowMs
+	windowMs: 7*60*1000, // 15 mins
+	max: 1000, // limit each IP to 500 requests per windowMs
 	delayMs: 0, // disable delaying - full speed until the max limit is reached
 });
 
