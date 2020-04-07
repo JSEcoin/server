@@ -150,7 +150,6 @@ function passRecaptcha(credentials,req,res) {
 			}
 		} catch (ex) {
 			res.status(400).send('{"fail":1,"notification":"Captcha Error login.js 152, Please Try Again In 60 Seconds"}');
-			console.log(`T1. ${bodyCaptchaRaw}`);
 		}
 	});
 }
@@ -171,7 +170,7 @@ router.post('/*', function (req, res) {
 	} else {
 		JSE.apiLimits[clientIP] += 1;
 	}
-	if (JSE.apiLimits[clientIP] > 180) { // 1 per 10 seconds
+	if (JSE.apiLimits[clientIP] > 60) { // 1 per 30 seconds
 		res.status(400).send('{"fail":1,"notification":"Too many requests captcha.js l170"}');
 		return false;
 	}
