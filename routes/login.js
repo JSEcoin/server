@@ -216,6 +216,7 @@ router.post('/*', function (req, res) {
 			}
 			return false;
 		},function() {
+			JSE.loginLimits[clientIP] += 1;
 			res.status(401).send('{"fail":1,"notification":"Login failed. Invalid email or password"}'); return false;
 		});
 	}
