@@ -159,7 +159,7 @@ setInterval(function() {
 
 setInterval(function() {
 	JSE.loginLimits = {};
-}, 1800000); // 120 secs
+}, 240000); // 4mins
 
 JSE.jseFunctions = require('./modules/functions.js'); // round robin bug means has to be JSE
 JSE.jseDataIO = require('./modules/dataio.js'); // can't call initialiseApp twice from modules
