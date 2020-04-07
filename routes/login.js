@@ -170,8 +170,9 @@ router.post('/*', function (req, res) {
 	} else {
 		JSE.apiLimits[clientIP] += 1;
 	}
-	if (JSE.apiLimits[clientIP] > 60) { // 1 per 30 seconds
-		res.status(400).send('{"fail":1,"notification":"Too many requests captcha.js l170"}');
+	if (JSE.apiLimits[clientIP] > 15) { // 1 per 120 seconds
+		res.status(400).send('{"fail":1,"notification":"Too many requests captcha.js 170"}');
+		console.log(`BadIP: ${clientIP}`);
 		return false;
 	}
 
