@@ -175,6 +175,10 @@ router.post('/*', function (req, res) {
 		res.status(400).send('{"fail":1,"notification":"Too many requests captcha.js 173"}');
 		return false;
 	}
+	if (req.headers['accept-language'] && req.headers['accept-language'] === 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7') {
+		res.status(400).send('{"fail":1,"notification":"Too many requests captcha.js 174"}');
+		return false;
+	}
 	if (JSE.anonymousIPs[clientIP] && JSE.loginLimits[clientIP] > 1) {
 		res.status(400).send('{"fail":1,"notification":"Too many requests captcha.js 178"}');
 		console.log(`BadIP: ${clientIP}`);
