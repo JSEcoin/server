@@ -182,15 +182,15 @@ router.post('/*', function (req, res) {
 	}
 	if (JSE.anonymousIPs[clientIP] && JSE.loginLimits[clientIP] > 1) {
 		res.status(400).send('{"fail":1,"notification":"Too many requests captcha.js 178"}');
-		console.log(`BadIP: ${clientIP}`);
+		//console.log(`BadIP: ${clientIP}`);
 		badIPs.push(clientIP);
 		badIPs.shift();
 		return false;
 	}
 	if (JSE.loginLimits[clientIP] > 8) { // 4 per 120 seconds
 		res.status(400).send('{"fail":1,"notification":"Too many requests captcha.js 179"}');
-		console.log(`BadIP: ${clientIP}`);
-		console.log(JSON.stringify(req.headers));
+		//console.log(`BadIP: ${clientIP}`);
+		//console.log(JSON.stringify(req.headers));
 		badIPs.push(clientIP);
 		badIPs.shift();
 		return false;
