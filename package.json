@@ -41,7 +41,7 @@
     "request": "^2.88.2",
     "secure-random": "^1.1.2",
     "sendgrid": "^5.2.3",
-    "socket.io": "^2.3.0",
+    "socket.io": "^2.4.0",
     "socket.io-client": "^2.3.0",
     "twilio": "^3.39.5",
     "uglifyjs": "^2.4.11",
